@@ -1,0 +1,524 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
+using RustPlusDesk.Models;
+using RustPlusDesk.Services.Auth;
+using Supabase.Realtime;
+using static Postgrest.Constants;
+
+namespace RustPlusDesk.Services;
+
+public class DiscordBotListenerService
+{
+    private static DiscordBotListenerService? _instance;
+    public static DiscordBotListenerService Instance => _instance ??= new DiscordBotListenerService();
+
+    private readonly List<RealtimeChannel> _activeChannels = new();
+    private readonly HashSet<string> _subscribedGuildIds = new();
+    private bool _isListening;
+    private bool _isDirectMode; // Quando true, TeamFeature não pode parar a subscrição
+    private List<string> _teamSteamIds = new();
+
+    private DiscordBotListenerService() { }
+
+    public async Task UpdateSubscriptionStateAsync(bool isMaster, List<string> teamSteamIds)
+    {
+        // Modo directo activo — ignorar chamadas do TeamFeature
+        if (_isDirectMode) return;
+
+        if (!isMaster || teamSteamIds == null || teamSteamIds.Count == 0 || !SupabaseAuthManager.IsPremium)
+        {
+            if (_isListening)
+            {
+                Log($"[DiscordBotListener] Stopping subscription: isMaster={isMaster}, IsPremium={SupabaseAuthManager.IsPremium}");
+                StopListening();
+            }
+            return;
+        }
+
+        // Check if team composition changed or we weren't listening
+        var sortedNew = teamSteamIds.OrderBy(x => x).ToList();
+        var sortedOld = _teamSteamIds.OrderBy(x => x).ToList();
+        
+        if (_isListening && sortedNew.SequenceEqual(sortedOld))
+        {
+            return; // No changes in team, keep existing subscription
+        }
+
+        Log($"[DiscordBotListener] Updating subscription: isMaster={isMaster}, teamCount={teamSteamIds.Count}, IsPremium={SupabaseAuthManager.IsPremium}");
+        StopListening();
+        _teamSteamIds = sortedNew;
+        _isListening = true;
+
+        try
+        {
+            // Fetch guild IDs for all team members (including ourselves)
+            var response = await SupabaseAuthManager.Client
+                .From<DiscordBotSettingsModel>()
+                .Filter("owner_steam_id", Operator.In, _teamSteamIds)
+                .Get();
+
+            var settings = response.Models;
+            if (settings == null || settings.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var setting in settings)
+            {
+                if (string.IsNullOrEmpty(setting.GuildId)) continue;
+                await SubscribeToGuildQueueAsync(setting.GuildId);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log($"[DiscordBotListener] Error setting up subscriptions: {ex.Message}");
+        }
+    }
+
+    private async Task SubscribeToGuildQueueAsync(string guildId)
+    {
+        try
+        {
+            var channel = SupabaseAuthManager.Client.Realtime
+                .Channel($"discord_queue_{guildId}");
+
+            var options = new Supabase.Realtime.PostgresChanges.PostgresChangesOptions(
+                "public", 
+                "bot_commands_queue", 
+                Supabase.Realtime.PostgresChanges.PostgresChangesOptions.ListenType.Inserts);
+            channel.Register(options);
+
+            // Listen to inserts in the command queue for this guild
+            channel.AddPostgresChangeHandler(Supabase.Realtime.PostgresChanges.PostgresChangesOptions.ListenType.Inserts, (sender, change) =>
+            {
+                try
+                {
+                    // Use the typed Model<T>() API - requires REPLICA IDENTITY FULL on the table
+                    var record = change.Model<BotCommandsQueueModel>();
+                    if (record == null)
+                    {
+                        Log($"[DiscordBotListener] Record is null - make sure REPLICA IDENTITY FULL is set: ALTER TABLE public.bot_commands_queue REPLICA IDENTITY FULL;");
+                        return;
+                    }
+                    Log($"[DiscordBotListener] Received command: id={record.Id}, type={record.CommandType}, status={record.Status}");
+                    _ = ProcessIncomingCommandAsync(record);
+                }
+                catch (Exception ex)
+                {
+                    Log($"[DiscordBotListener] Error in change handler: {ex.Message}");
+                }
+            });
+
+            await channel.Subscribe();
+            _activeChannels.Add(channel);
+            lock (_subscribedGuildIds) { _subscribedGuildIds.Add(guildId); }
+            Log($"[DiscordBotListener] Subscribed to command queue for Guild: {guildId}");
+        }
+        catch (Exception ex)
+        {
+            Log($"[DiscordBotListener] Failed to subscribe to Guild {guildId}: {ex.Message}");
+        }
+    }
+
+    private async Task ProcessIncomingCommandAsync(BotCommandsQueueModel record)
+    {
+        try
+        {
+            var id = record.Id;
+            var guildId = record.GuildId;
+            var commandType = record.CommandType;
+            var status = record.Status;
+
+            if (status != "pending" || string.IsNullOrEmpty(id) || string.IsNullOrEmpty(guildId)) return;
+
+            // Comandos para o bot Node.js — a app não processa
+            if (commandType != null && (commandType.StartsWith("notify_") || commandType == "send_teamchat" || commandType == "map_screenshot"))
+            {
+                Log($"[DiscordBotListener] Skipping bot-only command: {commandType}");
+                return;
+            }
+
+            // Filter locally to ensure we only process commands for guilds we are subscribed to
+            lock (_subscribedGuildIds)
+            {
+                if (!_subscribedGuildIds.Contains(guildId)) return;
+            }
+
+            // Try to acquire the command lock by changing status to 'processing'
+            var updateResponse = await SupabaseAuthManager.Client
+                .From<BotCommandsQueueModel>()
+                .Filter("id", Operator.Equals, id)
+                .Filter("status", Operator.Equals, "pending")
+                .Set(x => x.Status, "processing")
+                .Update();
+
+            if (updateResponse.Models == null || updateResponse.Models.Count == 0)
+            {
+                // Lock acquisition failed (another client picked it up)
+                return;
+            }
+
+            Log($"[DiscordBotListener] Acquired lock for command {id} ({commandType})");
+
+            // Execute command & prepare response
+            var reply = await ExecuteCommandActionAsync(commandType, record);
+
+            // Update database with final response (ResponsePayload is JSONB, serialize via JObject)
+            var replyJson = Newtonsoft.Json.Linq.JObject.FromObject(reply);
+            await SupabaseAuthManager.Client
+                .From<BotCommandsQueueModel>()
+                .Filter("id", Operator.Equals, id)
+                .Set(x => x.Status, reply.Success ? "completed" : "failed")
+                .Set(x => x.ResponsePayload, replyJson)
+                .Update();
+
+            Log($"[DiscordBotListener] Command {id} completed with status: {(reply.Success ? "completed" : "failed")}");
+        }
+        catch (Exception ex)
+        {
+            Log($"[DiscordBotListener] Error processing command: {ex.Message}");
+        }
+    }
+
+    private class CommandResult
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = "";
+    }
+
+    private Task<CommandResult> ExecuteCommandActionAsync(string? commandType, BotCommandsQueueModel record)
+    {
+        // IMPORTANT: All WPF ViewModel property access MUST happen on the UI thread.
+        // Dispatcher.InvokeAsync posts the entire async operation to the UI message queue.
+        return System.Windows.Application.Current.Dispatcher.InvokeAsync(async () =>
+        {
+            var result = new CommandResult { Success = false };
+            try
+            {
+                var mainWindow = System.Windows.Application.Current.MainWindow as RustPlusDesk.Views.MainWindow;
+                if (mainWindow?.DataContext is not RustPlusDesk.ViewModels.MainViewModel vm)
+                {
+                    result.Message = "Desktop client is initializing or not fully loaded.";
+                    return result;
+                }
+
+                switch (commandType?.ToLowerInvariant())
+                {
+                    case "time":
+                        result.Success = true;
+                        var timeStr = vm.ServerTime;
+                        if (!string.IsNullOrWhiteSpace(vm.TimeUntilNextPhase))
+                            timeStr += $" ({vm.TimeUntilNextPhase})";
+                        result.Message = $"🕒 Current Server Time: {timeStr}";
+                        break;
+
+                    case "pop":
+                        result.Success = true;
+                        var popStr = $"Players: {vm.ServerPlayers}";
+                        if (vm.ServerQueue != "0" && vm.ServerQueue != "-")
+                            popStr += $" (Queue: {vm.ServerQueue})";
+                        result.Message = $"👥 Server Population: {popStr}";
+                        break;
+
+                    case "toggle_switch":
+                        {
+                            string deviceNameOrId = "";
+                            var deviceToken = record.Payload?["device"];
+                            var entityIdToken = record.Payload?["entity_id"];
+
+                            if (deviceToken != null && !string.IsNullOrEmpty(deviceToken.ToObject<string>()))
+                                deviceNameOrId = deviceToken.ToObject<string>()!;
+                            else if (entityIdToken != null)
+                                deviceNameOrId = entityIdToken.ToString();
+
+                            if (string.IsNullOrEmpty(deviceNameOrId))
+                            {
+                                result.Message = "❌ Invalid command payload: missing device name or ID.";
+                            }
+                            else
+                            {
+                                var (success, msg) = await mainWindow.ToggleSmartSwitchFromDiscordAsync(deviceNameOrId);
+                                result.Success = success;
+                                result.Message = msg;
+                            }
+                        }
+                        break;
+
+                    case "heli":
+                        result.Success = true;
+                        result.Message = mainWindow.GetHeliStatusForDiscord();
+                        break;
+
+                    case "cargo":
+                        result.Success = true;
+                        result.Message = mainWindow.GetCargoStatusForDiscord();
+                        break;
+
+                    case "oilrig":
+                        result.Success = true;
+                        result.Message = mainWindow.GetOilRigStatusForDiscord();
+                        break;
+
+                    case "deepsea":
+                        result.Success = true;
+                        result.Message = mainWindow.GetDeepSeaStatusForDiscord();
+                        break;
+
+                    case "vendor":
+                        result.Success = true;
+                        result.Message = mainWindow.GetVendorStatusForDiscord();
+                        break;
+
+                    case "upkeep":
+                        result.Success = true;
+                        result.Message = mainWindow.GetUpkeepDetailsForDiscord();
+                        break;
+
+                    case "commands":
+                        result.Success = true;
+                        result.Message = mainWindow.GetDiscordCommandListForDiscord();
+                        break;
+
+                    case "devicelist":
+                        result.Success = true;
+                        result.Message = mainWindow.GetSmartSwitchListForDiscord();
+                        break;
+
+                    case "map":
+                        result.Success = true;
+                        result.Message = "⌛ Die Map wird gerendert... bitte warten.";
+                        // Start upload asynchronously so it doesn't block
+                        _ = Task.Run(async () =>
+                        {
+                            var base64 = await mainWindow.GetCurrentMapScreenshotBase64Async();
+                            await mainWindow.UploadMapScreenshotToDiscordAsync(base64, 
+                                record.Payload?["interaction_token"]?.ToString(),
+                                record.Payload?["application_id"]?.ToString(), null);
+                        });
+                        break;
+
+                    case "mapfull":
+                        result.Success = true;
+                        result.Message = "⌛ Die gesamte Map wird gerendert... bitte warten.";
+                        _ = Task.Run(async () =>
+                        {
+                            var base64 = await mainWindow.GetFullMapScreenshotBase64Async();
+                            await mainWindow.UploadMapScreenshotToDiscordAsync(base64, 
+                                record.Payload?["interaction_token"]?.ToString(),
+                                record.Payload?["application_id"]?.ToString(), null);
+                        });
+                        break;
+
+                    case "map_screenshot":
+                        // Queued by BtnSendMapToDiscord — image is in payload, bot picks it up via polling
+                        // The app just marks it completed; the bot Node.js handles sending to Discord
+                        result.Success = true;
+                        result.Message = "Map screenshot queued for bot delivery.";
+                        break;
+
+                    default:
+                        result.Message = $"Unknown or unsupported command: {commandType}";
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Message = $"Error executing command: {ex.Message}";
+            }
+            return result;
+        }).Task.Unwrap();
+    }
+
+    private static Task<RustPlusDesk.Views.MainWindow?> GetMainWindowAsync()
+    {
+        var tcs = new TaskCompletionSource<RustPlusDesk.Views.MainWindow?>();
+        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+        {
+            tcs.SetResult(System.Windows.Application.Current.MainWindow as RustPlusDesk.Views.MainWindow);
+        });
+        return tcs.Task;
+    }
+
+    public void StopListening()
+    {
+        if (!_isListening) return;
+
+        foreach (var channel in _activeChannels)
+        {
+            try { channel.Unsubscribe(); }
+            catch { }
+        }
+
+        _activeChannels.Clear();
+        lock (_subscribedGuildIds) { _subscribedGuildIds.Clear(); }
+        _teamSteamIds.Clear();
+        _isListening = false;
+        Log("[DiscordBotListener] Stopped listening to Discord queues.");
+    }
+
+    /// <summary>
+    /// Subscreve directamente ao bot_commands_queue usando o Steam ID do utilizador.
+    /// Não depende do TeamFeature — funciona sempre que a app está conectada ao Supabase.
+    /// </summary>
+    public async Task StartDirectAsync(string steamId)
+    {
+        if (string.IsNullOrEmpty(steamId) || SupabaseAuthManager.Client == null) return;
+        if (_isListening) return; // Already listening
+
+        try
+        {
+            // Find guild_id for this steam_id
+            var settingsRes = await SupabaseAuthManager.Client
+                .From<DiscordBotSettingsModel>()
+                .Filter("owner_steam_id", Postgrest.Constants.Operator.Equals, steamId)
+                .Get();
+
+            var settings = settingsRes.Models;
+            if (settings == null || settings.Count == 0)
+            {
+                Log($"[DiscordBotListener] No Discord bot settings found for Steam ID {steamId}. Bot not configured yet.");
+                return;
+            }
+
+            _teamSteamIds = new List<string> { steamId };
+            _isListening = true;
+            _isDirectMode = true; // Proteger de StopListening do TeamFeature
+
+            foreach (var setting in settings)
+            {
+                if (!string.IsNullOrEmpty(setting.GuildId))
+                    await SubscribeToGuildQueueAsync(setting.GuildId);
+            }
+
+            Log($"[DiscordBotListener] Direct subscription started for Steam ID {steamId} ({settings.Count} guild(s)).");
+        }
+        catch (Exception ex)
+        {
+            Log($"[DiscordBotListener] StartDirectAsync error: {ex.Message}");
+        }
+    }
+
+    public async Task SendNotificationAsync(string notificationType, string message)
+    {
+        if (!_isListening || _teamSteamIds.Count == 0) return;
+
+        await SendNotificationToOwnersAsync(notificationType, message, _teamSteamIds);
+    }
+
+    public async Task SendRaidNotificationAsync(string serverKey, string ownerSteamId, string message)
+    {
+        Log(
+            $"[DiscordBotListener] Raid notification requested: serverKey='{serverKey}', "
+            + $"ownerSteamId='{ownerSteamId}', isListening={_isListening}, "
+            + $"teamCount={_teamSteamIds.Count}, IsPremium={SupabaseAuthManager.IsPremium}.");
+
+        if (_isListening && _teamSteamIds.Count > 0)
+        {
+            await SendNotificationToOwnersAsync("raid", message, _teamSteamIds);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(serverKey)
+            || string.IsNullOrWhiteSpace(ownerSteamId)
+            || ownerSteamId == "0")
+        {
+            Log("[DiscordBotListener] Raid fallback skipped: server key or owner Steam ID is missing.");
+            return;
+        }
+
+        var hasActiveMaster = await SupabaseAuthManager
+            .HasActiveTeamFeatureMasterForMemberAsync(serverKey, ownerSteamId);
+        if (hasActiveMaster)
+        {
+            Log($"[DiscordBotListener] Raid notification skipped: another active team master found for {serverKey}.");
+            return;
+        }
+
+        Log($"[DiscordBotListener] Sending raid notification via local fallback for {serverKey}.");
+        await SendNotificationToOwnersAsync("raid", message, new List<string> { ownerSteamId });
+    }
+
+    private static async Task SendNotificationToOwnersAsync(
+        string notificationType,
+        string message,
+        List<string> ownerSteamIds)
+    {
+        if (ownerSteamIds.Count == 0)
+        {
+            Log($"[DiscordBotListener] {notificationType} notification skipped: no owner Steam IDs.");
+            return;
+        }
+
+        try
+        {
+            // Get guild IDs directly from discord_bot_settings — no premium check needed
+            var settingsRes = await SupabaseAuthManager.Client
+                .From<DiscordBotSettingsModel>()
+                .Filter("owner_steam_id", Operator.In, ownerSteamIds)
+                .Get();
+
+            var guildIds = settingsRes.Models?
+                .Select(s => s.GuildId)
+                .Where(id => !string.IsNullOrEmpty(id))
+                .Distinct()
+                .ToList();
+
+            if (guildIds == null || guildIds.Count == 0)
+            {
+                Log(
+                    $"[DiscordBotListener] {notificationType} notification skipped: " +
+                    $"no Discord bot settings found for [{string.Join(", ", ownerSteamIds)}].");
+                return;
+            }
+
+            // Insert notification into bot_commands_queue — bot Node.js picks it up and sends to Discord
+            int sent = 0;
+            foreach (var guildId in guildIds)
+            {
+                var payload = Newtonsoft.Json.Linq.JObject.FromObject(new
+                {
+                    notification_type = notificationType,
+                    message = message,
+                });
+
+                await SupabaseAuthManager.Client
+                    .From<RustPlusDesk.Models.BotCommandsQueueModel>()
+                    .Insert(new RustPlusDesk.Models.BotCommandsQueueModel
+                    {
+                        GuildId = guildId,
+                        CommandType = $"notify_{notificationType}",
+                        Payload = payload,
+                        Status = "pending",
+                    });
+                sent++;
+            }
+
+            Log($"[DiscordBotListener] Queued {notificationType} notification for {sent} guild(s).");
+        }
+        catch (Exception ex)
+        {
+            Log($"[DiscordBotListener] Failed to send notification: {ex.Message}");
+        }
+    }
+
+    private static bool IsPremiumBotOwner(UserProfileModel profile)
+    {
+        // Bot Node.js gere notificações — todas as notificações desbloqueadas
+        return true;
+    }
+
+    private static void Log(string message)
+    {
+        Console.WriteLine(message);
+        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+        {
+            if (System.Windows.Application.Current.MainWindow is RustPlusDesk.Views.MainWindow win)
+            {
+                win.AppendLog(message);
+            }
+        });
+    }
+}

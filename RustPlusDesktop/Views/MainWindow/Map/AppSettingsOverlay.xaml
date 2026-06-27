@@ -1,0 +1,571 @@
+<UserControl x:Class="RustPlusDesk.Views.AppSettingsOverlay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:conv="clr-namespace:RustPlusDesk.Converters"
+             xmlns:p="clr-namespace:RustPlusDesk.Properties"
+             mc:Ignorable="d" 
+             Background="{DynamicResource Surface}"
+             Foreground="{DynamicResource TextPrimary}">
+
+    <Grid ClipToBounds="True">
+        <Grid.Resources>
+            <conv:NotNullToBoolConverter x:Key="LocalNotNull" />
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="36" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{DynamicResource SurfaceAlt}" BorderBrush="{DynamicResource CardBorder}" BorderThickness="0,0,0,1" Padding="12,0">
+            <Grid>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <ui:SymbolIcon Symbol="Settings24" Margin="0,0,8,0" Foreground="{DynamicResource Accent}" VerticalAlignment="Center" FontSize="14"/>
+                    <TextBlock Text="{DynamicResource Settings}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" />
+                </StackPanel>
+                <Button x:Name="BtnCloseSettings" Content="&#x2715;" Style="{StaticResource GhostButton}" Width="26" Height="26" Padding="0" FontSize="12" Foreground="{DynamicResource TextSubtle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="BtnCloseSettings_Click" />
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="12">
+                <!-- General Section -->
+                <TextBlock Text="{DynamicResource General}" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
+                <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{DynamicResource Language}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}"/>
+                            <ComboBox Grid.Column="1" x:Name="CmbLanguage" Width="150" 
+                                      SelectedValuePath="Code"
+                                      SelectionChanged="CmbLanguage_SelectionChanged">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <ui:SymbolIcon Symbol="Settings24" Width="20" Height="15" Margin="0,0,8,0" FontSize="14" Foreground="{DynamicResource TextSubtle}">
+                                                <ui:SymbolIcon.Style>
+                                                    <Style TargetType="ui:SymbolIcon">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding ImagePath}" Value="{x:Null}">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ui:SymbolIcon.Style>
+                                            </ui:SymbolIcon>
+                                            <Image Source="{Binding ImagePath}" Width="20" Height="15" Margin="0,0,8,0" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality">
+                                                <Image.Style>
+                                                    <Style TargetType="Image">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding ImagePath}" Value="{x:Null}">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Image.Style>
+                                            </Image>
+                                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </Grid>
+                        
+                        <CheckBox x:Name="ChkAutoStart" 
+                                  Content="{DynamicResource LaunchWithWindows}" 
+                                  Margin="0,0,0,10" 
+                                  Style="{StaticResource DotCheckBox}"
+                                  Checked="OnSettingChanged" Unchecked="OnSettingChanged"/>
+
+                        <CheckBox x:Name="ChkStartMinimized" 
+                                  Content="{DynamicResource StartMinimizedAlways}" 
+                                  Margin="0,0,0,10" 
+                                  Style="{StaticResource DotCheckBox}"
+                                  Checked="OnSettingChanged" Unchecked="OnSettingChanged"/>
+
+                        <CheckBox x:Name="ChkAutoConnect" 
+                                  Content="{DynamicResource AutoConnectLastServer}" 
+                                  Style="{StaticResource DotCheckBox}"
+                                  Checked="OnSettingChanged" Unchecked="OnSettingChanged"
+                                  ToolTip="{DynamicResource AutoConnectToolTip}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Behavior Section -->
+                <TextBlock Text="{DynamicResource Behavior}" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
+                <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <CheckBox x:Name="ChkCloseToTray" 
+                                  Content="{DynamicResource MinimizeToTray}" 
+                                  Margin="0,0,0,10" 
+                                  Style="{StaticResource DotCheckBox}"
+                                  Checked="OnSettingChanged" Unchecked="OnSettingChanged"/>
+
+                        <CheckBox x:Name="ChkStreamerMode" 
+                                  Content="{DynamicResource EnableStreamerMode}" 
+                                  Margin="0,0,0,10" 
+                                  Style="{StaticResource DotCheckBox}"
+                                  Checked="OnSettingChanged" Unchecked="OnSettingChanged"
+                                  ToolTip="{DynamicResource StreamerModeToolTip}"/>
+
+                        <CheckBox x:Name="ChkBackgroundTracking" 
+                                  Content="{DynamicResource BackgroundTracking}" 
+                                  Margin="0,0,0,10" 
+                                  Style="{StaticResource DotCheckBox}"
+                                  Checked="OnSettingChanged" Unchecked="OnSettingChanged"
+                                  ToolTip="{DynamicResource BackgroundTrackingToolTip}"/>
+
+                        <CheckBox x:Name="ChkHideConsole" 
+                                  Content="{DynamicResource HideSystemConsole}" 
+                                  Margin="0,0,0,10" 
+                                  Style="{StaticResource DotCheckBox}"
+                                  Checked="OnSettingChanged" Unchecked="OnSettingChanged"
+                                  ToolTip="{DynamicResource HideConsoleToolTip}"/>
+                        <CheckBox x:Name="ChkCloudSync" 
+                                  Content="{DynamicResource CloudSync}" 
+                                  Style="{StaticResource DotCheckBox}"
+                                  Checked="OnSettingChanged" Unchecked="OnSettingChanged"
+                                  ToolTip="{DynamicResource CloudSyncDesc}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Offline Death Section -->
+                <TextBlock Text="{DynamicResource OfflineDeathNotifications}" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
+                <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <!-- Enable Offline Death alerts -->
+                        <CheckBox x:Name="ChkOfflineDeathAlerts" 
+                                  Content="{DynamicResource EnableOfflineDeathAlerts}" 
+                                  Margin="0,0,0,10" 
+                                  Style="{StaticResource DotCheckBox}"
+                                  Checked="OnSettingChanged" Unchecked="OnSettingChanged"/>
+
+                        <!-- Custom sound selector -->
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{DynamicResource AlertSound}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}"/>
+                            
+                            <ui:Button Grid.Column="1" x:Name="BtnSelectOfflineDeathSound" 
+                                       Content="{DynamicResource SelectEllipsis}" Icon="{ui:SymbolIcon Symbol=Folder24}" 
+                                       Margin="8,0,0,0" Height="28" Click="BtnSelectOfflineDeathSound_Click"/>
+                            <ui:Button Grid.Column="2" x:Name="BtnResetOfflineDeathSound" 
+                                       Content="{DynamicResource Reset}" Icon="{ui:SymbolIcon Symbol=ArrowReset24}" 
+                                       Margin="8,0,0,0" Height="28" Click="BtnResetOfflineDeathSound_Click"/>
+                        </Grid>
+
+                        <TextBlock x:Name="TxtOfflineDeathSoundPath" FontSize="11" Foreground="{DynamicResource TextSubtle}" Margin="0,0,0,8" TextWrapping="Wrap" />
+
+                        <!-- Loop Alert Sound toggle -->
+                        <CheckBox x:Name="ChkOfflineDeathSoundLoop" 
+                                  Content="{DynamicResource LoopAlertSound}" 
+                                  Margin="0,0,0,10" 
+                                  Style="{StaticResource DotCheckBox}"
+                                  Checked="OnSettingChanged" Unchecked="OnSettingChanged"/>
+
+                        <!-- Button to open offline deaths log popup -->
+                        <ui:Button x:Name="BtnOpenOfflineDeathsLog" 
+                                   Content="{DynamicResource OpenOfflineDeathsLog}" Icon="{ui:SymbolIcon Symbol=List24}" 
+                                   HorizontalAlignment="Stretch" Height="36" Click="BtnOpenOfflineDeathsLog_Click"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Notification Center Section -->
+                <TextBlock Text="{DynamicResource NotificationCenterSettings}" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
+                <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <!-- Enable Toast Notifications -->
+                        <CheckBox x:Name="ChkNotificationsToast" 
+                                  Content="{DynamicResource ShowToastNotifications}" 
+                                  Margin="0,0,0,10" 
+                                  Style="{StaticResource DotCheckBox}"
+                                  Checked="OnSettingChanged" Unchecked="OnSettingChanged"/>
+
+                        <!-- Enable Notification Sounds -->
+                        <CheckBox x:Name="ChkNotificationsSounds" 
+                                  Content="{DynamicResource PlaySoundAlerts}" 
+                                  Margin="0,0,0,10" 
+                                  Style="{StaticResource DotCheckBox}"
+                                  Checked="OnSettingChanged" Unchecked="OnSettingChanged"/>
+
+                        <!-- Notification Retention Period -->
+                        <Grid Margin="0,4,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{DynamicResource NotificationRetentionPeriod}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" Margin="4,0,10,0" FontSize="12"/>
+                            <Slider Grid.Column="1" x:Name="SliderNotificationsRetention" 
+                                    Minimum="1" Maximum="90" Value="30" 
+                                    TickFrequency="1" IsSnapToTickEnabled="True"
+                                    ValueChanged="OnSettingChanged"
+                                    VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" x:Name="TxtRetentionDays"
+                                       VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{DynamicResource TextPrimary}" FontSize="12" Width="60"/>
+                        </Grid>
+
+                        <!-- Muted Servers -->
+                        <TextBlock Text="{DynamicResource MutedServers}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSubtle}" Margin="4,6,0,4"/>
+                        <Border BorderBrush="{DynamicResource CardBorder}" BorderThickness="1" CornerRadius="6" Background="#141E2D" MinHeight="60" MaxHeight="120" Margin="4,0,4,0">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel x:Name="PnlMutedServers" Margin="6" />
+                            </ScrollViewer>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Map Section -->
+                <TextBlock Text="{DynamicResource MapSettings}" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
+                <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <CheckBox x:Name="ChkAutoLoadShops" 
+                                  Content="{DynamicResource AutoLoadShops}" 
+                                  Margin="0,0,0,10"
+                                  Style="{StaticResource DotCheckBox}"
+                                  Checked="OnSettingChanged" Unchecked="OnSettingChanged"
+                                  ToolTip="{DynamicResource AutoLoadShopsToolTip}"/>
+                        
+                        <!-- Monument Style Dropdown -->
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{DynamicResource MonumentStyle}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}"/>
+                            <ComboBox Grid.Column="1" x:Name="CmbMonumentDisplayMode" Width="200" 
+                                      SelectionChanged="OnSettingChanged">
+                                <ComboBoxItem Content="{DynamicResource MonumentStyleIcons}" Tag="0"/>
+                                <ComboBoxItem Content="{DynamicResource MonumentStyleText}" Tag="1"/>
+                            </ComboBox>
+                        </Grid>
+
+
+                        <!-- Monument Text Scale Slider -->
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{DynamicResource MonumentScale}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" Margin="4,0,10,0" FontSize="12"/>
+                            <Slider Grid.Column="1" x:Name="SliderMonumentScale" 
+                                    Minimum="0.5" Maximum="3.0" Value="1.0" 
+                                    ValueChanged="OnSettingChanged"
+                                    VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Text="{Binding Value, ElementName=SliderMonumentScale, StringFormat={}{0:0.00}x}" 
+                                       VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{DynamicResource TextPrimary}" FontSize="12" Width="40"/>
+                        </Grid>
+
+                        <!-- Monument Opacity Slider -->
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{DynamicResource MonumentOpacity}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" Margin="4,0,10,0" FontSize="12"/>
+                            <Slider Grid.Column="1" x:Name="SliderMonumentOpacity" 
+                                    Minimum="0.1" Maximum="1.0" Value="1.0" 
+                                    ValueChanged="OnSettingChanged"
+                                    VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Text="{Binding Value, ElementName=SliderMonumentOpacity, StringFormat={}{0:0%}}" 
+                                       VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{DynamicResource TextPrimary}" FontSize="12" Width="40"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Team Markers Section -->
+                <TextBlock Text="{DynamicResource TeamMarkersSettings}" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
+                <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <!-- Profile Markers -->
+                        <CheckBox x:Name="ChkShowProfileMarkers"
+                                  Margin="0,0,0,10"
+                                  Style="{StaticResource DotCheckBox}"
+                                  Checked="OnMarkerSettingChanged" Unchecked="OnMarkerSettingChanged">
+                            <StackPanel Orientation="Horizontal">
+                                <Viewbox Width="16" Height="16" Margin="0,0,8,0" Stretch="Uniform">
+                                    <Grid Width="40" Height="40">
+                                        <Ellipse Width="38" Height="38" Fill="LimeGreen" Stroke="Black" StrokeThickness="2" />
+                                    </Grid>
+                                </Viewbox>
+                                <TextBlock VerticalAlignment="Center" Text="{DynamicResource Profile}" />
+                            </StackPanel>
+                        </CheckBox>
+
+                        <!-- Player Direction Arrows -->
+                        <CheckBox x:Name="ChkShowPlayerArrows"
+                                  Margin="0,0,0,10"
+                                  Style="{StaticResource DotCheckBox}"
+                                  Checked="OnMarkerSettingChanged" Unchecked="OnMarkerSettingChanged">
+                            <StackPanel Orientation="Horizontal">
+                                <Viewbox Width="16" Height="16" Margin="0,0,8,0" Stretch="Uniform">
+                                    <Grid Width="40" Height="40">
+                                        <Path Data="M 20,4 L 32,32 L 8,32 Z" Fill="LimeGreen" Stroke="Black" StrokeThickness="2" />
+                                    </Grid>
+                                </Viewbox>
+                                <TextBlock VerticalAlignment="Center" Text="{DynamicResource PlayerDirectionArrow}" />
+                            </StackPanel>
+                        </CheckBox>
+
+                        <!-- Death Markers -->
+                        <CheckBox x:Name="ChkShowDeathMarkers"
+                                  Margin="0,0,0,10"
+                                  Style="{StaticResource DotCheckBox}"
+                                  Checked="OnMarkerSettingChanged" Unchecked="OnMarkerSettingChanged">
+                            <StackPanel Orientation="Horizontal">
+                                <Viewbox Width="14" Height="18" Margin="0,0,8,0" Stretch="Uniform">
+                                    <Grid Width="40" Height="56">
+                                        <Path Data="M20,0 C31,0 40,9 40,20 C40,33 20,56 20,56 C20,56 0,33 0,20 C0,9 9,0 20,0 Z" Fill="IndianRed" Stroke="Black" StrokeThickness="2" Stretch="Fill" />
+                                    </Grid>
+                                </Viewbox>
+                                <TextBlock VerticalAlignment="Center" Text="{DynamicResource Death}" />
+                            </StackPanel>
+                        </CheckBox>
+
+                        <!-- Streamer Mode -->
+                        <CheckBox x:Name="ChkStreamerModeMarkers"
+                                  Margin="0,0,0,10"
+                                  Style="{StaticResource DotCheckBox}"
+                                  Checked="OnMarkerSettingChanged" Unchecked="OnMarkerSettingChanged">
+                            <TextBlock Text="{DynamicResource StreamerMode}" />
+                        </CheckBox>
+
+                        <!-- Player Icon Scale -->
+                        <Grid Margin="0,4,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{DynamicResource ScaleLabel}" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource TextPrimary}" FontSize="12" />
+                            <Slider Grid.Column="1" x:Name="SliderPlayerIconScaleOverlay"
+                                    Minimum="0.5" Maximum="1.5" Value="1.0"
+                                    TickFrequency="0.05" IsSnapToTickEnabled="True"
+                                    ValueChanged="OnMarkerSettingChanged"
+                                    VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Text="{Binding Value, ElementName=SliderPlayerIconScaleOverlay, StringFormat={}{0:P0}}"
+                                       VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{DynamicResource TextPrimary}" FontSize="12" Width="40" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Discord Settings Section -->
+                <TextBlock Text="Discord Settings" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
+
+                <!-- Invite Bot Button -->
+                <ui:Button x:Name="BtnDiscordConnect"
+                           HorizontalAlignment="Stretch"
+                           Height="36"
+                           Margin="0,0,0,6"
+                           Click="BtnDiscordConnect_Click">
+                    <ui:Button.Icon>
+                        <ui:ImageIcon Source="pack://application:,,,/Assets/icons/discord.png"/>
+                    </ui:Button.Icon>
+                    <TextBlock Text="Invite Bot to Discord Server"/>
+                </ui:Button>
+
+                <!-- Connection Status -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                    <Ellipse x:Name="DotBotStatus"
+                             Width="8" Height="8"
+                             Margin="0,0,6,0"
+                             VerticalAlignment="Center"
+                             Fill="#888888"/>
+                    <TextBlock x:Name="TxtAuthStatus"
+                               FontSize="11"
+                               Foreground="#888888"
+                               VerticalAlignment="Center"
+                               TextWrapping="Wrap"
+                               Text="Not connected - Please invite Discord Bot to your server and do /setup &lt;steamid64&gt;"/>
+                </StackPanel>
+
+                <!-- Channel Notifications -->
+                <Border x:Name="BrdSupporterSettings" Style="{StaticResource Card}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <Expander Header="Discord Integrations" Margin="-4,0,0,10" Background="Transparent" BorderBrush="Transparent" Foreground="{DynamicResource TextPrimary}" Padding="0">
+                            <StackPanel Margin="0,8,0,0">
+
+                                <!-- Raid -->
+                                <TextBlock Text="Raid Alerts" Foreground="{DynamicResource TextSubtle}" FontSize="11" Margin="0,4,0,2" />
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="TxtChannelRaid" Grid.Column="0" VerticalAlignment="Center" FontSize="11"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                               Text="—" TextTrimming="CharacterEllipsis"/>
+                                    <CheckBox x:Name="ChkRaidTTS"    Grid.Column="1" Content="TTS"   Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
+                                    <CheckBox x:Name="ChkRaidAudio"  Grid.Column="2" Content="Sound" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
+                                </Grid>
+
+                                <!-- Events -->
+                                <TextBlock Text="Events" Foreground="{DynamicResource TextSubtle}" FontSize="11" Margin="0,4,0,2" />
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="TxtChannelEvents" Grid.Column="0" VerticalAlignment="Center" FontSize="11"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                               Text="—" TextTrimming="CharacterEllipsis"/>
+                                    <CheckBox x:Name="ChkEventsTTS"   Grid.Column="1" Content="TTS"   Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
+                                    <CheckBox x:Name="ChkEventsAudio" Grid.Column="2" Content="Sound" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
+                                </Grid>
+
+                                <!-- Team Chat -->
+                                <TextBlock Text="Team Chat" Foreground="{DynamicResource TextSubtle}" FontSize="11" Margin="0,4,0,2" />
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="TxtChannelChat" Grid.Column="0" VerticalAlignment="Center" FontSize="11"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                               Text="—" TextTrimming="CharacterEllipsis"/>
+                                    <CheckBox x:Name="ChkChatTTS"   Grid.Column="1" Content="TTS"   Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
+                                    <CheckBox x:Name="ChkChatAudio" Grid.Column="2" Content="Sound" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
+                                </Grid>
+
+
+
+
+
+
+                            </StackPanel>
+                        </Expander>
+                    </StackPanel>
+                </Border>
+
+                <!-- Chat Section -->
+                <TextBlock Text="{DynamicResource Chat}" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
+                <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <ui:Button x:Name="BtnModifyChatAlerts"
+                                   Grid.Column="0"
+                                   Content="{DynamicResource ModifyChatAlerts}" 
+                                   Icon="{ui:SymbolIcon Symbol=Alert24}"
+                                   HorizontalAlignment="Stretch"
+                                   Height="36"
+                                   Margin="0,0,6,0"
+                                   Click="BtnModifyChatAlerts_Click"/>
+                        <ui:Button x:Name="BtnChatCommands"
+                                   Grid.Column="1"
+                                   Content="{DynamicResource ChatCommands}" 
+                                   Icon="{ui:SymbolIcon Symbol=Chat24}"
+                                   HorizontalAlignment="Stretch"
+                                   Height="36"
+                                   Margin="6,0,0,0"
+                                   Click="BtnChatCommands_Click"/>
+                    </Grid>
+                </Border>
+
+                <!-- Maintenance Section -->
+                <TextBlock Text="{DynamicResource MaintenanceTitle}" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
+                <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="{DynamicResource MaintenanceDesc}" 
+                                   Foreground="{DynamicResource TextSubtle}" 
+                                   FontSize="11" 
+                                   Margin="0,0,0,12" 
+                                   TextWrapping="Wrap"/>
+                        
+                        <ui:Button x:Name="BtnShowResetDialog"
+                                   Content="{DynamicResource ResetAppData}" 
+                                   Appearance="Caution"
+                                   Icon="{ui:SymbolIcon Symbol=ArrowReset24}"
+                                   HorizontalAlignment="Stretch"
+                                   Height="36"
+                                   Margin="0,0,0,8"
+                                   Click="BtnShowResetDialog_Click"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <ui:Button x:Name="BtnBackupData"
+                                       Grid.Column="0"
+                                       Content="{DynamicResource BackupData}"
+                                       Appearance="Secondary"
+                                       Icon="{ui:SymbolIcon Symbol=ArrowUpload24}"
+                                       HorizontalAlignment="Stretch"
+                                       Height="36"
+                                       Margin="0,0,4,0"
+                                       Click="BtnBackupData_Click"/>
+                            <ui:Button x:Name="BtnRestoreData"
+                                       Grid.Column="1"
+                                       Content="{DynamicResource RestoreData}"
+                                       Appearance="Secondary"
+                                       Icon="{ui:SymbolIcon Symbol=ArrowDownload24}"
+                                       HorizontalAlignment="Stretch"
+                                       Height="36"
+                                       Margin="4,0,0,0"
+                                       Click="BtnRestoreData_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- 3D Map Section -->
+                <TextBlock Text="{DynamicResource ThreeDMapSectionTitle}" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
+                <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <!-- Delete 3D Map Data button -->
+                        <ui:Button Appearance="Danger" HorizontalAlignment="Left" Padding="12,6" Click="BtnDelete3DMapData_Click" Icon="{ui:SymbolIcon Symbol=Delete24}" Content="{DynamicResource Settings3dMapDeleteData}" ToolTip="{DynamicResource Delete3DMapDataTooltip}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Credits Section -->
+                <TextBlock Text="{DynamicResource CreditsTitle}" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
+                <Border Style="{StaticResource Card}" Margin="0,0,0,8"
+                        Background="{DynamicResource SurfaceAlt}"
+                        BorderBrush="{DynamicResource CardBorder}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="14,12">
+                    <StackPanel>
+                        <!-- rustmaps.com credit -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <ui:SymbolIcon Symbol="Heart24" FontSize="15" Margin="0,0,8,0"
+                                          Foreground="#E05070" VerticalAlignment="Center"/>
+                            <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" FontSize="12">
+                                <Run Text="{DynamicResource CreditsIconsPrefix}" Foreground="{DynamicResource TextSubtle}"/>
+                                <Hyperlink NavigateUri="https://rustmaps.com" RequestNavigate="Hyperlink_RequestNavigate"
+                                           Foreground="{DynamicResource Accent}">
+                                    <Run Text="rustmaps.com"/>
+                                </Hyperlink>
+                                <Run Text="{DynamicResource CreditsIconsSuffix}" Foreground="{DynamicResource TextSubtle}"/>
+                            </TextBlock>
+                        </StackPanel>
+                        <!-- legal note -->
+                        <TextBlock Text="{DynamicResource CreditsIconsNote}"
+                                   Foreground="{DynamicResource TextSubtle}"
+                                   FontSize="11"
+                                   FontStyle="Italic"
+                                   TextWrapping="Wrap"
+                                   Opacity="0.7"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

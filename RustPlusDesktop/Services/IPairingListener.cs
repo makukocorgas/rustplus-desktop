@@ -1,0 +1,28 @@
+using RustPlusDesk.Models;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace RustPlusDesk.Services;
+
+public interface IPairingListener
+{
+    event EventHandler<PairingPayload>? Paired;
+
+    // Status
+    event EventHandler? Listening;
+    event EventHandler? RegistrationCompleted;
+    event EventHandler? Stopped;
+    event EventHandler<string>? Failed;
+
+    // NEU: Alarm-Popups
+    event EventHandler<AlarmNotification>? AlarmReceived;
+    event EventHandler<TeamChatMessage>? ChatReceived;
+    event EventHandler<OfflineDeathNotification>? OfflineDeathReceived;
+    bool IsRunning { get; }
+    bool IsConfigured { get; }
+    Task StartAsync(CancellationToken ct = default);
+    Task StopAsync();
+    // NEU: optional – Standard fällt auf normalen Start zurück
+    Task StartAsyncUsingEdge(CancellationToken ct = default) => StartAsync(ct);
+}

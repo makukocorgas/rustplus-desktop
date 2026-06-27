@@ -1,0 +1,2630 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppTitle" xml:space="preserve">
+    <value>RUST+ DESKTOP</value>
+  </data>
+  <data name="SteamAccount" xml:space="preserve">
+    <value>حساب ستيم</value>
+  </data>
+  <data name="NotLoggedIn" xml:space="preserve">
+    <value>لم يتم تسجيل الدخول</value>
+  </data>
+  <data name="CheckForUpdates" xml:space="preserve">
+    <value>التحقق من وجود تحديثات</value>
+  </data>
+  <data name="Downloading" xml:space="preserve">
+    <value>جاري التحميل...</value>
+  </data>
+  <data name="JoinDiscord" xml:space="preserve">
+    <value>انضم إلى سيرفر ديسكورد</value>
+  </data>
+  <data name="PatchNotes" xml:space="preserve">
+    <value>ملاحظات التحديث</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>الإعدادات</value>
+  </data>
+  <data name="PairedServers" xml:space="preserve">
+    <value>السيرفرات المقترنة</value>
+  </data>
+  <data name="NoServersPaired" xml:space="preserve">
+    <value>لا توجد سيرفرات مقترنة بعد</value>
+  </data>
+  <data name="PairingMaintenance" xml:space="preserve">
+    <value>الاقتران والصيانة</value>
+  </data>
+  <data name="PairingIdle" xml:space="preserve">
+    <value>الاقتران: غير نشط حالياً</value>
+  </data>
+  <data name="RightClickOptions" xml:space="preserve">
+    <value>انقر بزر الماوس الأيمن للخيارات</value>
+  </data>
+  <data name="TrackingActive" xml:space="preserve">
+    <value>جاري التتبع</value>
+  </data>
+  <data name="LastPull" xml:space="preserve">
+    <value>آخر تحديث للبيانات: {0}</value>
+  </data>
+  <data name="Donate" xml:space="preserve">
+    <value>دعم المشروع</value>
+  </data>
+  <data name="SupportDeveloper" xml:space="preserve">
+    <value>دعم المطور</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>إعادة ضبط</value>
+  </data>
+  <data name="ResetWebSocket" xml:space="preserve">
+    <value>إعادة تعيين اتصال WebSocket</value>
+  </data>
+  <data name="Players" xml:space="preserve">
+    <value>اللاعبون:</value>
+  </data>
+  <data name="ShowOnlinePlayers" xml:space="preserve">
+    <value>إظهار تبويب اللاعبين المتصلين (أونلاين)</value>
+  </data>
+  <data name="Queue" xml:space="preserve">
+    <value>طابور الانتظار:</value>
+  </data>
+  <data name="DevicesTab" xml:space="preserve">
+    <value>الأجهزة الذكية</value>
+  </data>
+  <data name="Hotkeys" xml:space="preserve">
+    <value>مفاتيح الاختصار</value>
+  </data>
+  <data name="ImportDevices" xml:space="preserve">
+    <value>استيراد الأجهزة من أعضاء الفريق</value>
+  </data>
+  <data name="ExportDevices" xml:space="preserve">
+    <value>تصدير الأجهزة إلى أعضاء الفريق</value>
+  </data>
+  <data name="Refresh" xml:space="preserve">
+    <value>تحديث</value>
+  </data>
+  <data name="Decline" xml:space="preserve">
+    <value>رفض</value>
+  </data>
+  <data name="UploadConsentTitle" xml:space="preserve">
+    <value>الموافقة على رفع البيانات</value>
+  </data>
+  <data name="UploadConsentText" xml:space="preserve">
+    <value>بالنقر فوق "قبول"، سيتم رفع بيانات الأجهزة الذكية (وربما رسومات الخريطة) الخاصة بهذا السيرفر إلى خادم المطور. يتيح ذلك لأعضاء الفريق تنزيلها ومزامنتها معًا. يتم إرسال معرف ستيم (Steam ID) الخاص بك فقط لتحديد زملائك في الفريق. يمكن فقط للاعبين المصرح لهم في خزانة الأدوات (TC) التحكم في الأجهزة.
+
+ملاحظة: سيتم تحسين طريقة النقل هذه في المستقبل. إذا لم يتمكن أعضاء فريقك من تنزيل البيانات، يُرجى محاولة مسح رسومات الخريطة وإعادة رفعها مجدداً.</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>حذف</value>
+  </data>
+  <data name="DeleteMissingOnly" xml:space="preserve">
+    <value>يمكنك فقط حذف الأجهزة المفقودة</value>
+  </data>
+  <data name="RenameDevice" xml:space="preserve">
+    <value>إعادة تسمية الجهاز</value>
+  </data>
+  <data name="Online" xml:space="preserve">
+    <value>متصل</value>
+  </data>
+  <data name="Offline" xml:space="preserve">
+    <value>غير متصل</value>
+  </data>
+  <data name="Connect" xml:space="preserve">
+    <value>الاتصال بالسيرفر</value>
+  </data>
+  <data name="FullConnect" xml:space="preserve">
+    <value>الاتصال الكامل بالسيرفر</value>
+  </data>
+  <data name="LoadMapTeam" xml:space="preserve">
+    <value>تحميل الخريطة والفريق</value>
+  </data>
+  <data name="Disconnect" xml:space="preserve">
+    <value>قطع الاتصال</value>
+  </data>
+  <data name="ServerDetails" xml:space="preserve">
+    <value>تفاصيل السيرفر</value>
+  </data>
+  <data name="Listen" xml:space="preserve">
+    <value>الاستماع للإشعارات</value>
+  </data>
+  <data name="Stop" xml:space="preserve">
+    <value>إيقاف الاستماع</value>
+  </data>
+  <data name="TryPairingEdge" xml:space="preserve">
+    <value>تجرية الاقتران عبر متصفح Edge</value>
+  </data>
+  <data name="ResetPairingConfig" xml:space="preserve">
+    <value>إعادة تعيين الاقتران (حذف الإعدادات)</value>
+  </data>
+  <data name="ResetListenPairing" xml:space="preserve">
+    <value>إعادة التعيين + الاستماع (إعادة الإقتران)</value>
+  </data>
+  <data name="ResetListenEdge" xml:space="preserve">
+    <value>إعادة التعيين + الاستماع عبر متصفح Edge</value>
+  </data>
+  <data name="RelinkBattlemetrics" xml:space="preserve">
+    <value>إعادة ربط معرف Battlemetrics…</value>
+  </data>
+  <data name="DeleteServer" xml:space="preserve">
+    <value>حذف السيرفر…</value>
+  </data>
+  <data name="PleaseWait" xml:space="preserve">
+    <value>الرجاء الانتظار...</value>
+  </data>
+  <data name="ToggleServerArea" xml:space="preserve">
+    <value>تبديل منطقة السيرفر</value>
+  </data>
+  <data name="StreamerMode" xml:space="preserve">
+    <value>وضع الستريمر (البث)</value>
+  </data>
+  <data name="ScaleLabel" xml:space="preserve">
+    <value>الحجم:</value>
+  </data>
+  <data name="EnableStreamerMode" xml:space="preserve">
+    <value>تفعيل وضع الستريمر (إخفاء/اختصار الأسماء)</value>
+  </data>
+  <data name="StreamerModeToolTip" xml:space="preserve">
+    <value>يخفي ويختصر أسماء ومعرفات ستيم لحماية الخصوصية أثناء البث المباشر. كما يخفي وحدة التحكم وقائمة السيرفرات تلقائيًا.</value>
+  </data>
+  <data name="NoPositionAvailable" xml:space="preserve">
+    <value>الموقع غير متاح (اللاعب غير متصل أو مجهول المكان).</value>
+  </data>
+  <data name="SaveGroup" xml:space="preserve">
+    <value>حفظ المجموعة</value>
+  </data>
+  <data name="EnterGroupName" xml:space="preserve">
+    <value>الرجاء إدخال اسم المجموعة.</value>
+  </data>
+  <data name="MessageNotSentError" xml:space="preserve">
+    <value>تعذر إرسال الرسالة. يرجى المحاولة مرة أخرى (تأكد من أنك عضو في فريق!).</value>
+  </data>
+  <data name="ErrorPrefix" xml:space="preserve">
+    <value>الخطأ: </value>
+  </data>
+  <data name="AssignGroup" xml:space="preserve">
+    <value>تعيين في مجموعة</value>
+  </data>
+  <data name="GroupSettingsTitle" xml:space="preserve">
+    <value>إعدادات المجموعة: {0}</value>
+  </data>
+  <data name="GroupName" xml:space="preserve">
+    <value>اسم المجموعة</value>
+  </data>
+  <data name="EnterGroupNamePlaceholder" xml:space="preserve">
+    <value>أدخل اسم المجموعة...</value>
+  </data>
+  <data name="GroupColor" xml:space="preserve">
+    <value>لون المجموعة</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>حفظ التغييرات</value>
+  </data>
+  <data name="PlayerAnalyticsTitle" xml:space="preserve">
+    <value>تحليلات وتوقعات نشاط اللاعبين</value>
+  </data>
+  <data name="PlayersTitle" xml:space="preserve">
+    <value>اللاعبون</value>
+  </data>
+  <data name="StreamerModeMiniMapOverhaul" xml:space="preserve">
+    <value>تحديث وضع الستريمر وإصلاحات الخريطة المصغرة</value>
+  </data>
+  <data name="StreamerModeTitle" xml:space="preserve">
+    <value>وضع الستريمر</value>
+  </data>
+  <data name="PlayerMarkerScalingTitle" xml:space="preserve">
+    <value>حجم علامة اللاعب على الخريطة</value>
+  </data>
+  <data name="MiniMapPolishTitle" xml:space="preserve">
+    <value>تحسين وتلميع الخريطة المصغرة</value>
+  </data>
+  <data name="ActionRequiredTitle" xml:space="preserve">
+    <value>الإجراء المطلوب:</value>
+  </data>
+  <data name="BattleMetricsRemovalTitle" xml:space="preserve">
+    <value>تمت إزالة تتبع BattleMetrics</value>
+  </data>
+  <data name="PlayerTrackingOverhaulTitle" xml:space="preserve">
+    <value>إعادة هيكلة نظام تتبع اللاعبين</value>
+  </data>
+  <data name="HowPlayerTrackingWorks" xml:space="preserve">
+    <value>آلية عمل نظام تعقب اللاعبين</value>
+  </data>
+  <data name="AddPlayersToStartTracking" xml:space="preserve">
+    <value>أضف لاعبين إلى قائمة المراقبة لبدء التتبع</value>
+  </data>
+  <data name="TrackingActiveStatus" xml:space="preserve">
+    <value>التتبع: نشط</value>
+  </data>
+  <data name="TrackingIdleStatus" xml:space="preserve">
+    <value>التتبع: غير نشط حالياً</value>
+  </data>
+  <data name="FilterPlayers" xml:space="preserve">
+    <value>تصفية اللاعبين...</value>
+  </data>
+  <data name="ConnectToLoadPlayers" xml:space="preserve">
+    <value>اتصل بالسيرفر لتحميل قائمة اللاعبين</value>
+  </data>
+  <data name="FetchingPlayersSteam" xml:space="preserve">
+    <value>جاري جلب قائمة اللاعبين عبر ستيم...</value>
+  </data>
+  <data name="TrackID" xml:space="preserve">
+    <value>معرف التتبع (Track ID)</value>
+  </data>
+  <data name="ManualTrackNamePlaceholder" xml:space="preserve">
+    <value>اسم المسار اليدوي...</value>
+  </data>
+  <data name="NoDevices" xml:space="preserve">
+    <value>لا توجد أجهزة مضافة.</value>
+  </data>
+  <data name="NoTokenRegistered" xml:space="preserve">
+    <value>لا يوجد رمز (Token) مسجل</value>
+  </data>
+  <data name="TokenExpired" xml:space="preserve">
+    <value>انتهت صلاحية الرمز المميز (Token)!</value>
+  </data>
+  <data name="ExpiresInDays" xml:space="preserve">
+    <value>تنتهي الصلاحية خلال {0} يوم</value>
+  </data>
+  <data name="UntilNight" xml:space="preserve">
+    <value>متبقي {0} حتى حلول الليل</value>
+  </data>
+  <data name="UntilDay" xml:space="preserve">
+    <value>متبقي {0} حتى حلول النهار</value>
+  </data>
+  <data name="FollowMe" xml:space="preserve">
+    <value>لحاق الكاميرا بي</value>
+  </data>
+  <data name="FollowPlayer" xml:space="preserve">
+    <value>تتبع اللاعب {0}</value>
+  </data>
+  <data name="PairingListening" xml:space="preserve">
+    <value>الاقتران: جاري الاستماع للاتصال…</value>
+  </data>
+  <data name="PairingStopped" xml:space="preserve">
+    <value>الاقتران: متوقف</value>
+  </data>
+  <data name="PairingFailed" xml:space="preserve">
+    <value>الاقتران: فشل</value>
+  </data>
+  <data name="AlarmActivated" xml:space="preserve">
+    <value>تم إطلاق الإنذار!</value>
+  </data>
+  <data name="Server" xml:space="preserve">
+    <value>السيرفر</value>
+  </data>
+  <data name="SmartAlarm" xml:space="preserve">
+    <value>المنبه الذكي</value>
+  </data>
+  <data name="UnableToReadLink" xml:space="preserve">
+    <value>تعذر قراءة رابط RustPlus-Link: {0}
+الصيغة الصحيحة: Rustplus://IP:PORT</value>
+  </data>
+  <data name="DeletePairingConfigHeader" xml:space="preserve">
+    <value>إعادة تعيين الاقتران</value>
+  </data>
+  <data name="DeletePairingConfigBody" xml:space="preserve">
+    <value>هل تريد حذف إعدادات الاقتران الحالية؟ ستضطر إلى إقران التطبيق مجدداً عند تشغيله في المرة القادمة.</value>
+  </data>
+  <data name="ResetListenHeader" xml:space="preserve">
+    <value>إعادة التعيين + الاستماع</value>
+  </data>
+  <data name="ResetListenBody" xml:space="preserve">
+    <value>هل تريد حذف إعدادات الاقتران الحالية والبدء في إعادة الاستماع/الإقران فوراً؟</value>
+  </data>
+  <data name="ResetListenEdgeHeader" xml:space="preserve">
+    <value>إعادة التعيين + الاستماع عبر متصفح Edge</value>
+  </data>
+  <data name="ResetListenEdgeBody" xml:space="preserve">
+    <value>هل تريد حذف إعدادات الاقتران والبدء في الاستماع الفوري باستخدام متصفح Edge؟</value>
+  </data>
+  <data name="UpdateQueryFailed" xml:space="preserve">
+    <value>تعذر التحقق من وجود إصدار جديد. يرجى المحاولة مرة أخرى أو فتح صفحة التحديثات يدوياً.</value>
+  </data>
+  <data name="UpdateUpToDate" xml:space="preserve">
+    <value>أنت تستخدم أحدث إصدار بالفعل!</value>
+  </data>
+  <data name="UpdateAvailableHeader" xml:space="preserve">
+    <value>يتوفر تحديث جديد</value>
+  </data>
+  <data name="UpdateAvailableBody" xml:space="preserve">
+    <value>إصدار جديد متاح حالياً: {0}
+هل تود فتح صفحة التحميل؟</value>
+  </data>
+  <data name="DownloadAndInstallBody" xml:space="preserve">
+    <value>إصدار جديد متاح حالياً: {0}
+هل تريد تحميله وتثبيته الآن؟</value>
+  </data>
+  <data name="DownloadFailed" xml:space="preserve">
+    <value>فشل تحميل التحديث</value>
+  </data>
+  <data name="UpdateCheckFailed" xml:space="preserve">
+    <value>فشل التحقق من وجود تحديثات.
+{0}</value>
+  </data>
+  <data name="ViewProfile" xml:space="preserve">
+    <value>عرض الملف الشخصي</value>
+  </data>
+  <data name="ChangeGroup" xml:space="preserve">
+    <value>تغيير المجموعة</value>
+  </data>
+  <data name="Rename" xml:space="preserve">
+    <value>إعادة تسمية</value>
+  </data>
+  <data name="RemoveTracked" xml:space="preserve">
+    <value>إلغاء التتبع</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>عرض</value>
+  </data>
+  <data name="MoreOptions" xml:space="preserve">
+    <value>المزيد من الخيارات</value>
+  </data>
+  <data name="RelinkBattlemetricsId" xml:space="preserve">
+    <value>إعادة ربط معرف Battlemetrics…</value>
+  </data>
+  <data name="DeleteServerEllipsis" xml:space="preserve">
+    <value>حذف السيرفر…</value>
+  </data>
+  <data name="RightClickRename" xml:space="preserve">
+    <value>انقر بزر الماوس الأيمن لإعادة التسمية</value>
+  </data>
+  <data name="Toggle" xml:space="preserve">
+    <value>تبديل الحالة (تشغيل/إيقاف)</value>
+  </data>
+  <data name="PopupWindow" xml:space="preserve">
+    <value>نافذة منبثقة</value>
+  </data>
+  <data name="InAppAlert" xml:space="preserve">
+    <value>تنبيه داخل التطبيق</value>
+  </data>
+  <data name="AudioAlert" xml:space="preserve">
+    <value>تنبيه صوتي</value>
+  </data>
+  <data name="CustomAudioFile" xml:space="preserve">
+    <value>ملف صوتي مخصص...</value>
+  </data>
+  <data name="ResetToDefault" xml:space="preserve">
+    <value>استعادة الوضع الافتراضي</value>
+  </data>
+  <data name="Snapshot" xml:space="preserve">
+    <value>لقطة شاشة: </value>
+  </data>
+  <data name="ItemsUpkeep" xml:space="preserve">
+    <value> العناصر، الصيانة ==</value>
+  </data>
+  <data name="NoDevicesFound" xml:space="preserve">
+    <value>لم يتم العثور على أجهزة ذكية</value>
+  </data>
+  <data name="PairDeviceToSee" xml:space="preserve">
+    <value>قم بإقران جهاز ذكي أو مفتاح تشغيل أو منبه ليظهر هنا</value>
+  </data>
+  <data name="TeamTab" xml:space="preserve">
+    <value>الفريق</value>
+  </data>
+  <data name="CenterOnMap" xml:space="preserve">
+    <value>توسيط الكاميرا على الخريطة</value>
+  </data>
+  <data name="FollowOnMap" xml:space="preserve">
+    <value>تتبع التحركات على الخريطة</value>
+  </data>
+  <data name="OpenSteamProfile" xml:space="preserve">
+    <value>فتح حساب ستيم</value>
+  </data>
+  <data name="PromoteToLeader" xml:space="preserve">
+    <value>ترقية إلى قائد فريق</value>
+  </data>
+  <data name="KickFromTeam" xml:space="preserve">
+    <value>طرد من الفريق</value>
+  </data>
+  <data name="ProfileMarkers" xml:space="preserve">
+    <value>علامات الملف الشخصي</value>
+  </data>
+  <data name="DeathMarkers" xml:space="preserve">
+    <value>علامات أماكن الموت</value>
+  </data>
+  <data name="CamerasTab" xml:space="preserve">
+    <value>الكاميرات</value>
+  </data>
+  <data name="AddCamera" xml:space="preserve">
+    <value>إضافة كاميرا</value>
+  </data>
+  <data name="NoCamerasFound" xml:space="preserve">
+    <value>لم يتم العثور على كاميرات مضافة</value>
+  </data>
+  <data name="PairCameraToSee" xml:space="preserve">
+    <value>قم بإقران كاميرا لمشاهدة البث المباشر هنا</value>
+  </data>
+  <data name="PlayersTab" xml:space="preserve">
+    <value>اللاعبون</value>
+  </data>
+  <data name="HowToTrack" xml:space="preserve">
+    <value>شرح التتبع</value>
+  </data>
+  <data name="LearnHowTrackingWorks" xml:space="preserve">
+    <value>تعرّف على آلية عمل تتبع اللاعبين</value>
+  </data>
+  <data name="OnlineTab" xml:space="preserve">
+    <value>المتصلون</value>
+  </data>
+  <data name="OnlinePlayers" xml:space="preserve">
+    <value>اللاعبين المتصلين حالياً</value>
+  </data>
+  <data name="SearchBM" xml:space="preserve">
+    <value>بحث BattleMetrics</value>
+  </data>
+  <data name="SearchServerBM" xml:space="preserve">
+    <value>البحث عن السيرفر الحالي في BattleMetrics</value>
+  </data>
+  <data name="Popout" xml:space="preserve">
+    <value>انبثاق للخارج</value>
+  </data>
+  <data name="OpenPlayersSeparateWindow" xml:space="preserve">
+    <value>فتح قائمة اللاعبين في نافذة منفصلة</value>
+  </data>
+  <data name="Track" xml:space="preserve">
+    <value>تتبع</value>
+  </data>
+  <data name="ManualTrackPlaceholder" xml:space="preserve">
+    <value>اسم اللاعب أو معرف ستيم (Steam ID)...</value>
+  </data>
+  <data name="FilterPlayersPlaceholder" xml:space="preserve">
+    <value>تصفية البحث عن اللاعبين...</value>
+  </data>
+  <data name="LoadingPlayers" xml:space="preserve">
+    <value>جاري تحميل قائمة اللاعبين...</value>
+  </data>
+  <data name="TrackedTab" xml:space="preserve">
+    <value>المُتعقَّبون</value>
+  </data>
+  <data name="TrackedPlayers" xml:space="preserve">
+    <value>اللاعبون تحت التتبع</value>
+  </data>
+  <data name="ManageGroups" xml:space="preserve">
+    <value>إدارة المجموعات</value>
+  </data>
+  <data name="ViewFullAnalysisReport" xml:space="preserve">
+    <value>عرض تقرير التحليلات الكامل</value>
+  </data>
+  <data name="ReadyToExploreMap" xml:space="preserve">
+    <value>هل أنت مستعد لاستكشاف الخريطة؟</value>
+  </data>
+  <data name="ConnectToLoadMap" xml:space="preserve">
+    <value>اتصل بالسيرفر المحدد لتحميل الخريطة وبيانات الفريق المباشرة.</value>
+  </data>
+  <data name="ReadyToDominate" xml:space="preserve">
+    <value>هل أنت مستعد للسيطرة على سيرفر Rust؟</value>
+  </data>
+  <data name="PairAccountBenefits" xml:space="preserve">
+    <value>قم بإقران حسابك لبدء تتبع اللاعبين، وتلقي تنبيهات غارات الأعداء (Raid Alerts)، والتحكم بأجهزتك الذكية فوراً.</value>
+  </data>
+  <data name="LoginPairAccount" xml:space="preserve">
+    <value>تسجيل الدخول وإقران الحساب</value>
+  </data>
+  <data name="RequiresSteamLogin" xml:space="preserve">
+    <value>يتطلب تسجيل الدخول بحساب ستيم (Steam) في متصفحك الافتراضي.</value>
+  </data>
+  <data name="DeleteServerHeader" xml:space="preserve">
+    <value>حذف السيرفر؟</value>
+  </data>
+  <data name="DeleteServerConfirm" xml:space="preserve">
+    <value>هل أنت متأكد من رغبتك في حذف هذا السيرفر؟ لا يمكن التراجع عن هذا الإجراء.</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>إلغاء</value>
+  </data>
+  <data name="DeleteAction" xml:space="preserve">
+    <value>حذف</value>
+  </data>
+  <data name="AutoHideAfter3s" xml:space="preserve">
+    <value>إخفاء تلقائي بعد 3 ثوانٍ</value>
+  </data>
+  <data name="MapFilters" xml:space="preserve">
+    <value>فلاتر الخريطة</value>
+  </data>
+  <data name="Grid" xml:space="preserve">
+    <value>الإحداثيات (الشبكة)</value>
+  </data>
+  <data name="Monuments" xml:space="preserve">
+    <value>المعالم (Monuments)</value>
+  </data>
+  <data name="Shops" xml:space="preserve">
+    <value>المتاجر / الشوب</value>
+  </data>
+  <data name="ChatAlerts" xml:space="preserve">
+    <value>تنبيهات شات اللعبة</value>
+  </data>
+  <data name="Alerts" xml:space="preserve">
+    <value>التنبيهات</value>
+  </data>
+  <data name="Configure" xml:space="preserve">
+    <value>تهيئة الإعدادات</value>
+  </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>تحديد الكل</value>
+  </data>
+  <data name="DeselectAll" xml:space="preserve">
+    <value>إلغاء تحديد الكل</value>
+  </data>
+  <data name="Events" xml:space="preserve">
+    <value>الأحداث والفعاليات (Events)</value>
+  </data>
+  <data name="CargoShip" xml:space="preserve">
+    <value>سفينة الشحن (Cargo)</value>
+  </data>
+  <data name="CargoSpawn" xml:space="preserve">
+    <value>رسبن / ظهر</value>
+  </data>
+  <data name="CargoDock" xml:space="preserve">
+    <value>رست في الميناء</value>
+  </data>
+  <data name="CargoEgress" xml:space="preserve">
+    <value>مغادرة الكارجو (تحذير قبل 5 دقائق)</value>
+  </data>
+  <data name="CargoArrival" xml:space="preserve">
+    <value>تحذير وصول الكارجو (5 دقائق قبل الرسو)</value>
+  </data>
+  <data name="Heli" xml:space="preserve">
+    <value>مروحية الدورية (الهيلي)</value>
+  </data>
+  <data name="Chinook" xml:space="preserve">
+    <value>مروحية شينوك (CH47)</value>
+  </data>
+  <data name="Vendor" xml:space="preserve">
+    <value>البائع المتجول</value>
+  </data>
+  <data name="OilRig" xml:space="preserve">
+    <value>منصة النفط (أويل ريج)</value>
+  </data>
+  <data name="DeepSea" xml:space="preserve">
+    <value>حدث أعماق البحار</value>
+  </data>
+  <data name="SmartAlerts" xml:space="preserve">
+    <value>التنبيهات الذكية</value>
+  </data>
+  <data name="PlayerOnline" xml:space="preserve">
+    <value>حالة دخول اللاعب (أونلاين)</value>
+  </data>
+  <data name="PlayerOffline" xml:space="preserve">
+    <value>حالة خروج اللاعب (أوفلاين)</value>
+  </data>
+  <data name="AnnounceTracking" xml:space="preserve">
+    <value>إشعارات حالة التتبع</value>
+  </data>
+  <data name="PlayerDeathSelf" xml:space="preserve">
+    <value>موتك الشخصي</value>
+  </data>
+  <data name="PlayerDeathTeam" xml:space="preserve">
+    <value>موت أحد أعضاء الفريق</value>
+  </data>
+  <data name="PlayerRespawnSelf" xml:space="preserve">
+    <value>إعادة رسبنتك (الظهور)</value>
+  </data>
+  <data name="PlayerRespawnTeam" xml:space="preserve">
+    <value>إعادة رسبنة عضو الفريق</value>
+  </data>
+  <data name="NewShops" xml:space="preserve">
+    <value>متاجر جديدة مضافة</value>
+  </data>
+  <data name="SuspiciousShops" xml:space="preserve">
+    <value>المتاجر المشبوهة (شوب فخ)</value>
+  </data>
+  <data name="TradeAlerts" xml:space="preserve">
+    <value>تنبيهات البيع والشراء</value>
+  </data>
+  <data name="CrosshairStyle" xml:space="preserve">
+    <value>نمط علامة التصويب (Crosshair)</value>
+  </data>
+  <data name="GreenDot" xml:space="preserve">
+    <value>نقطة خضراء</value>
+  </data>
+  <data name="MiniGreen" xml:space="preserve">
+    <value>نقطة خضراء صغيرة</value>
+  </data>
+  <data name="OpenCrosshairRG" xml:space="preserve">
+    <value>علامة تصويب مفتوحة (أحمر/أخضر)</value>
+  </data>
+  <data name="ThinRedCircle" xml:space="preserve">
+    <value>دائرة حمراء رقيقة</value>
+  </data>
+  <data name="SquareDot" xml:space="preserve">
+    <value>مربع مع نقطة في المنتصف</value>
+  </data>
+  <data name="MagentaDot" xml:space="preserve">
+    <value>نقطة أرجوانية</value>
+  </data>
+  <data name="MagentaOpenCross" xml:space="preserve">
+    <value>علامة تصويب مفتوحة أرجوانية</value>
+  </data>
+  <data name="RangeLineTicks" xml:space="preserve">
+    <value>خط تحديد المدى (مع علامات تدريج)</value>
+  </data>
+  <data name="DrawCrosshair" xml:space="preserve">
+    <value>تفعيل علامة التصويب...</value>
+  </data>
+  <data name="ChooseMonitor" xml:space="preserve">
+    <value>اختر الشاشة المختصة</value>
+  </data>
+  <data name="DrawOverlay" xml:space="preserve">
+    <value>رسم تراكب فوق الشاشة (Overlay)</value>
+  </data>
+  <data name="DrawToolTip" xml:space="preserve">
+    <value>رسم حر (انقر بزر الماوس الأيمن لتغيير: الحجم/اللّون)</value>
+  </data>
+  <data name="PlaceTextToolTip" xml:space="preserve">
+    <value>إضافة نص (انقر بزر الماوس الأيمن لتغيير: اللون/الحجم)</value>
+  </data>
+  <data name="PlaceIconToolTip" xml:space="preserve">
+    <value>إضافة أيقونة (انقر بزر الماوس الأيمن لاختيار نوع الأيقونة)</value>
+  </data>
+  <data name="EraserToolTip" xml:space="preserve">
+    <value>الممحاة (انقر نقراً أو استمر بالضغط للمسح)</value>
+  </data>
+  <data name="DeleteOverlayToolTip" xml:space="preserve">
+    <value>حذف جميع الرسومات الخاصة بك</value>
+  </data>
+  <data name="UploadOverlayToolTip" xml:space="preserve">
+    <value>مشاركة/رفع الرسومات والتراكب الخاص بك</value>
+  </data>
+  <data name="ProfitTrades" xml:space="preserve">
+    <value>الصفقات المربحة</value>
+  </data>
+  <data name="ArbitrageOpportunities" xml:space="preserve">
+    <value>فرص المقايضة السريعة المربحة | شراء رخيص ← بيع غالٍ.</value>
+  </data>
+  <data name="BuyXForY" xml:space="preserve">
+    <value>اشترِ X مقابل Y</value>
+  </data>
+  <data name="Analyze" xml:space="preserve">
+    <value>تحليل</value>
+  </data>
+  <data name="IWantToGet" xml:space="preserve">
+    <value>المادة المطلوبة</value>
+  </data>
+  <data name="ICanPayWith" xml:space="preserve">
+    <value>المادة المعروضة للدفع</value>
+  </data>
+  <data name="TeamChat" xml:space="preserve">
+    <value>شات الفريق</value>
+  </data>
+  <data name="Send" xml:space="preserve">
+    <value>إرسال</value>
+  </data>
+  <data name="FcmCredentials" xml:space="preserve">
+    <value>بيانات اعتماد FCM</value>
+  </data>
+  <data name="RightClickConfigure" xml:space="preserve">
+    <value>انقر بزر الماوس الأيمن للإعداد</value>
+  </data>
+  <data name="ResetMap" xml:space="preserve">
+    <value>إعادة تعيين الخريطة</value>
+  </data>
+  <data name="ResetMapToolTip" xml:space="preserve">
+    <value>إعادة ضبط زوم الخريطة وموقعها للوضع الأصلي</value>
+  </data>
+  <data name="MiniMap" xml:space="preserve">
+    <value>خريطة مصغرة</value>
+  </data>
+  <data name="CrosshairToolTip" xml:space="preserve">
+    <value>تشغيل/إيقاف علامة التصويب (انقر بالزر الأيمن للخيارات)</value>
+  </data>
+  <data name="TrackPlayer" xml:space="preserve">
+    <value>تتبع اللاعبين</value>
+  </data>
+  <data name="CloseBMBrowser" xml:space="preserve">
+    <value>إغلاق متصفح BattleMetrics</value>
+  </data>
+  <data name="ShopSearchTitle" xml:space="preserve">
+    <value>البحث في المتاجر</value>
+  </data>
+  <data name="CloseSearch" xml:space="preserve">
+    <value>إغلاق البحث</value>
+  </data>
+  <data name="ActivateShopsFirst" xml:space="preserve">
+    <value>يرجى تفعيل خيار المتاجر أولاً</value>
+  </data>
+  <data name="ActivateShopPolling" xml:space="preserve">
+    <value>تفعيل تتبع تحديثات المتاجر</value>
+  </data>
+  <data name="TeamChatTitle" xml:space="preserve">
+    <value>محادثة الفريق</value>
+  </data>
+  <data name="CloseChat" xml:space="preserve">
+    <value>إغلاق المحادثة</value>
+  </data>
+  <data name="ChatCommandsSettings" xml:space="preserve">
+    <value>إعدادات أوامر الشات</value>
+  </data>
+  <data name="ChatCommands" xml:space="preserve">
+    <value>أوامر الشات</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>رجوع</value>
+  </data>
+  <data name="Forward" xml:space="preserve">
+    <value>تقديم للأمام</value>
+  </data>
+  <data name="OpenInExternalBrowser" xml:space="preserve">
+    <value>فتح في متصفح خارجي</value>
+  </data>
+  <data name="SearchBMPlaceholder" xml:space="preserve">
+    <value>بحث في ميزات الـ BM...</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>بحث</value>
+  </data>
+  <data name="SelectAServer" xml:space="preserve">
+    <value>اختر سيرفر</value>
+  </data>
+  <data name="StatusDisconnected" xml:space="preserve">
+    <value>غير متصل</value>
+  </data>
+  <data name="StatusConnecting" xml:space="preserve">
+    <value>جاري الاتصال...</value>
+  </data>
+  <data name="StatusInitializing" xml:space="preserve">
+    <value>جاري التهيئة والتحميل...</value>
+  </data>
+  <data name="StatusDevicesActive" xml:space="preserve">
+    <value>الأجهزة الذكية نشطة</value>
+  </data>
+  <data name="StatusFullyConnected" xml:space="preserve">
+    <value>متصل بالكامل</value>
+  </data>
+  <data name="StatusUnknown" xml:space="preserve">
+    <value>الحالة مجهولة</value>
+  </data>
+  <data name="MayTakeAMoment" xml:space="preserve">
+    <value>قد يستغرق هذا الأمر بعض الوقت...</value>
+  </data>
+  <data name="AppSettingsTitle" xml:space="preserve">
+    <value>إعدادات التطبيق</value>
+  </data>
+  <data name="General" xml:space="preserve">
+    <value>إعدادات عامة</value>
+  </data>
+  <data name="LaunchWithWindows" xml:space="preserve">
+    <value>التشغيل التلقائي مع نظام ويندوز (مصغراً)</value>
+  </data>
+  <data name="StartMinimizedAlways" xml:space="preserve">
+    <value>بدء التشغيل بوضع التصغير دائماً</value>
+  </data>
+  <data name="AutoConnectLastServer" xml:space="preserve">
+    <value>اتصال تلقائي بآخر سيرفر عند تشغيل التطبيق</value>
+  </data>
+  <data name="AutoConnectToolTip" xml:space="preserve">
+    <value>إعادة الاتصال تلقائيًا بآخر سيرفر كنت متصلاً به وتحميل الخريطة فورياً.</value>
+  </data>
+  <data name="Behavior" xml:space="preserve">
+    <value>سلوك التطبيق</value>
+  </data>
+  <data name="MinimizeToTray" xml:space="preserve">
+    <value>التصغير إلى شريط المهام (Tray) عند إغلاق النافذة</value>
+  </data>
+  <data name="BackgroundTracking" xml:space="preserve">
+    <value>تفعيل تتبع اللاعبين في الخلفية</value>
+  </data>
+  <data name="BackgroundTrackingToolTip" xml:space="preserve">
+    <value>يضمن استمرار تتبع تحركات اللاعبين عبر BattleMetrics حتى عند تصغير التطبيق.</value>
+  </data>
+  <data name="HideSystemConsole" xml:space="preserve">
+    <value>إخفاء نافذة الأوامر البرمجية للنظام (لوحة الكونسول)</value>
+  </data>
+  <data name="HideConsoleToolTip" xml:space="preserve">
+    <value>يخفي لوحة الأوامر البرمجية والسجلات السفلية لتوفير مساحة أكبر لعرض الخريطة.</value>
+  </data>
+  <data name="MapSettings" xml:space="preserve">
+    <value>إعدادات الخريطة</value>
+  </data>
+  <data name="AutoLoadShops" xml:space="preserve">
+    <value>تحميل المتاجر (الشوب) تلقائيًا عند الاتصال بالسيرفر</value>
+  </data>
+  <data name="AutoLoadShopsToolTip" xml:space="preserve">
+    <value>البدء في جلب بيانات أسعار المتاجر وتحديث تنبيهاتها فور الاتصال بالسيرفر.</value>
+  </data>
+  <data name="UseMonumentNames" xml:space="preserve">
+    <value>عرض أسماء المعالم كنصوص بدلاً من الرموز والأيقونات</value>
+  </data>
+  <data name="UseMonumentNamesToolTip" xml:space="preserve">
+    <value>عند تفعيل هذا الخيار، سيتم عرض أسماء معالم الخريطة (Monuments) كنصوص مكتوبة بخط عريض بدلاً من الرموز التصويرية.</value>
+  </data>
+  <data name="MonumentStyle" xml:space="preserve">
+    <value>نمط معالم الخريطة:</value>
+  </data>
+  <data name="MonumentScale" xml:space="preserve">
+    <value>مقياس حجم المعالم:</value>
+  </data>
+  <data name="MonumentOpacity" xml:space="preserve">
+    <value>شفافية معالم الخريطة:</value>
+  </data>
+  <data name="MonumentStyleIcons" xml:space="preserve">
+    <value>أيقونات مقدمة من rustmaps.com</value>
+  </data>
+  <data name="MonumentStyleText" xml:space="preserve">
+    <value>الأسماء الأصلية للمعالم (نصي)</value>
+  </data>
+  <data name="CreditsTitle" xml:space="preserve">
+    <value>حقوق العمل والتقدير</value>
+  </data>
+  <data name="CreditsIconsPrefix" xml:space="preserve">
+    <value>أيقونات معالم الخريطة مأخوذة من </value>
+  </data>
+  <data name="CreditsIconsSuffix" xml:space="preserve">
+    <value> - مستخدمة بإذن رسمي.</value>
+  </data>
+  <data name="CreditsIconsNote" xml:space="preserve">
+    <value>جميع أيقونات المعالم والرسومات التوضيحية ذات الصلة هي ملك حصري لموقع rustmaps.com. شكراً لكم على دعم مجتمع Rust!</value>
+  </data>
+  <data name="Chat" xml:space="preserve">
+    <value>الشات</value>
+  </data>
+  <data name="ModifyChatAlerts" xml:space="preserve">
+    <value>تعديل تنبيهات الشات</value>
+  </data>
+  <data name="ManageSteamAccountInfo" xml:space="preserve">
+    <value>يمكنك إدارة حساب ستيم (Steam) المرتبط بك من خلال النافذة الرئيسية.</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>إغلاق</value>
+  </data>
+  <data name="IncomingAlarms" xml:space="preserve">
+    <value>الإنذارات الواردة</value>
+  </data>
+  <data name="Wipe" xml:space="preserve">
+    <value>الوايب / تصفير السيرفر</value>
+  </data>
+  <data name="PlayersOnly" xml:space="preserve">
+    <value>اللاعبون فقط</value>
+  </data>
+  <data name="PlayersHeader" xml:space="preserve">
+    <value>اللاعبون</value>
+  </data>
+  <data name="IWantToGetToolTip" xml:space="preserve">
+    <value>المادة التي تريد الحصول عليها لشراء شي ما (مثل: النفط الخام)</value>
+  </data>
+  <data name="ICanPayWithToolTip" xml:space="preserve">
+    <value>المادة التي تريد الدفع بها (مثل: السكراب/الخردة)</value>
+  </data>
+  <data name="DeleteServerConfirmFormatted" xml:space="preserve">
+    <value>هل تريد بالتأكيد حذف السيرفر "{0}"؟ لا يمكن التراجع عن هذا الإجراء مطلقاً.</value>
+  </data>
+  <data name="PairingError" xml:space="preserve">
+    <value>الاقتران: خطأ في الاتصال</value>
+  </data>
+  <data name="PairingStarting" xml:space="preserve">
+    <value>الاقتران: جاري البدء...</value>
+  </data>
+  <data name="StartingPairingListener" xml:space="preserve">
+    <value>جاري تشغيل مستمع الاقتران (Listener)...</value>
+  </data>
+  <data name="LoggedIn" xml:space="preserve">
+    <value>تم تسجيل الدخول بنجاح</value>
+  </data>
+  <data name="Stock" xml:space="preserve">
+    <value>المخزون المتوفر</value>
+  </data>
+  <data name="Price" xml:space="preserve">
+    <value>السعر</value>
+  </data>
+  <data name="On" xml:space="preserve">
+    <value>تشغيل</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>إيقاف</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>نشط</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>غير نشط</value>
+  </data>
+  <data name="Group" xml:space="preserve">
+    <value>المجموعة</value>
+  </data>
+  <data name="ImportDevicesTitle" xml:space="preserve">
+    <value>Rust+ Desktop - استيراد الأجهزة الذكية</value>
+  </data>
+  <data name="ImportDevicesHeader" xml:space="preserve">
+    <value>استيراد الأجهزة</value>
+  </data>
+  <data name="ImportDevicesSelectPrompt" xml:space="preserve">
+    <value>حدد الأجهزة الذكية التي ترغب في استيرادها لهذا السيرفر.</value>
+  </data>
+  <data name="CheckDeviceStatus" xml:space="preserve">
+    <value>فحص حالة الجهاز</value>
+  </data>
+  <data name="ImportSelected" xml:space="preserve">
+    <value>استيراد الأجهزة المحددة</value>
+  </data>
+  <data name="BmShortcuts" xml:space="preserve">
+    <value>اختصارات BattleMetrics</value>
+  </data>
+  <data name="PairingConfigDeleted" xml:space="preserve">
+    <value>الاقتران: تم مسح ملف الإعدادات</value>
+  </data>
+  <data name="TrayIconDefault" xml:space="preserve">
+    <value>برنامج Rust+ Desktop</value>
+  </data>
+  <data name="TrayIconTracking" xml:space="preserve">
+    <value>Rust+ Desktop (جاري تتبع {0})</value>
+  </data>
+  <data name="RenameGroup" xml:space="preserve">
+    <value>إعادة تسمية المجموعة</value>
+  </data>
+  <data name="NewNameForGroup" xml:space="preserve">
+    <value>اسم جديد للمجموعة:</value>
+  </data>
+  <data name="NewNameForDevice" xml:space="preserve">
+    <value>اسم جديد للجهاز رقم #{0}:</value>
+  </data>
+  <data name="EnterBattlemetricsIdFor" xml:space="preserve">
+    <value>أدخل معرف سيرفر Battlemetrics لـ "{0}":</value>
+  </data>
+  <data name="TrayTrackingStatus" xml:space="preserve">
+    <value>التتبع: {0}</value>
+  </data>
+  <data name="TrayLastUpdate" xml:space="preserve">
+    <value>آخر تحديث: {0}</value>
+  </data>
+  <data name="OpenRustPlusDesk" xml:space="preserve">
+    <value>فتح واجهة Rust+ Desktop</value>
+  </data>
+  <data name="Exit" xml:space="preserve">
+    <value>إغلاق وتسكير البرنامج</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>الوصف</value>
+  </data>
+  <data name="Camera" xml:space="preserve">
+    <value>كاميرا</value>
+  </data>
+  <data name="Alarms" xml:space="preserve">
+    <value>الإنذارات</value>
+  </data>
+  <data name="Identifier" xml:space="preserve">
+    <value>المعرّف الإلكتروني:</value>
+  </data>
+  <data name="FPS" xml:space="preserve">
+    <value>معدل الإطارات (FPS):</value>
+  </data>
+  <data name="CameraFPSNote" xml:space="preserve">
+    <value>ملاحظة: ينصح بضبط جودة الكاميرا على 2 إطار في الثانية (2 FPS). رفع معدل الإطارات عن ذلك قد يؤدي لقطع اتصالك تلقائياً من قِبل السيرفر لحمايته.</value>
+  </data>
+  <data name="Pixel" xml:space="preserve">
+    <value>بكسل</value>
+  </data>
+  <data name="Pen" xml:space="preserve">
+    <value>قلم الرسم</value>
+  </data>
+  <data name="Line" xml:space="preserve">
+    <value>خط مستقيم</value>
+  </data>
+  <data name="Square" xml:space="preserve">
+    <value>مربع</value>
+  </data>
+  <data name="Circle" xml:space="preserve">
+    <value>دائرة</value>
+  </data>
+  <data name="Thickness" xml:space="preserve">
+    <value>سُمك الخط:</value>
+  </data>
+  <data name="Opacity" xml:space="preserve">
+    <value>مستوى التعتيم:</value>
+  </data>
+  <data name="UploadPNG" xml:space="preserve">
+    <value>رفع صورة PNG</value>
+  </data>
+  <data name="Clear" xml:space="preserve">
+    <value>مسح الكل</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>حفظ</value>
+  </data>
+  <data name="AssignGlobalHotkeys" xml:space="preserve">
+    <value>تعيين مفاتيح اختصار عامة من لوحة المفاتيح للمفاتيح الذكية. يمكن لعدة أجهزة مشاركة نفس زر الاختصار (سيتم تشغيلها بالتناوب تتابعيًا عند الضغط).</value>
+  </data>
+  <data name="Device" xml:space="preserve">
+    <value>الجهاز</value>
+  </data>
+  <data name="EntityId" xml:space="preserve">
+    <value>معرّف الكيان الأساسي (Entity ID)</value>
+  </data>
+  <data name="Hotkey" xml:space="preserve">
+    <value>زر الاختصار</value>
+  </data>
+  <data name="Set" xml:space="preserve">
+    <value>تعيين</value>
+  </data>
+  <data name="CloseDeactivate" xml:space="preserve">
+    <value>إغلاق وتعطيل الأمر</value>
+  </data>
+  <data name="CloseActivate" xml:space="preserve">
+    <value>إغلاق وتفعيل الأمر</value>
+  </data>
+  <data name="UpkeepMinimapTrackingUpdate" xml:space="preserve">
+    <value>تحديثات نظام الصيانة والخريطة المصغرة والتتبع</value>
+  </data>
+  <data name="FeatureSummaryAdjustments" xml:space="preserve">
+    <value>ملخص الميزات والتعديلات</value>
+  </data>
+  <data name="DontShowAgain" xml:space="preserve">
+    <value>لا تظهر هذه الرسالة مجدداً</value>
+  </data>
+  <data name="AwesomeLetsGo" xml:space="preserve">
+    <value>رائع، هيا بنا!</value>
+  </data>
+  <data name="MiniMapSettings" xml:space="preserve">
+    <value>إعدادات الخريطة المصغرة</value>
+  </data>
+  <data name="Shape" xml:space="preserve">
+    <value>الشكل الهندسي</value>
+  </data>
+  <data name="Rectangle" xml:space="preserve">
+    <value>مستطيل</value>
+  </data>
+  <data name="OpacityLabel" xml:space="preserve">
+    <value>مستوى الشفافية: {0}%</value>
+  </data>
+  <data name="SizeLabel" xml:space="preserve">
+    <value>الحجم: {0}% (استخدم زر SHIFT + عجلة الماوس للتحكم)</value>
+  </data>
+  <data name="ShowServerTime" xml:space="preserve">
+    <value>عرض توقيت السيرفر</value>
+  </data>
+  <data name="ServerInformation" xml:space="preserve">
+    <value>معلومات السيرفر الحالي</value>
+  </data>
+  <data name="NoDescriptionAvailable" xml:space="preserve">
+    <value>لا يوجد وصف متاح لهذا السيرفر.</value>
+  </data>
+  <data name="CurrentVersion" xml:space="preserve">
+    <value>الإصدار الحالي للبرنامج: {0}</value>
+  </data>
+  <data name="PatchNotesHeader" xml:space="preserve">
+    <value>ملاحظات التحديثات وتاريخ الإصدار</value>
+  </data>
+  <data name="EnableChatCommands" xml:space="preserve">
+    <value>تمكين استخدام أوامر الشات</value>
+  </data>
+  <data name="Prefix" xml:space="preserve">
+    <value>البادئة للأوامر (مثل ! أو /)</value>
+  </data>
+  <data name="StandardCommands" xml:space="preserve">
+    <value>الأوامر القياسية والأساسية</value>
+  </data>
+  <data name="Population" xml:space="preserve">
+    <value>عدد اللاعبين الحاليين:</value>
+  </data>
+  <data name="Time" xml:space="preserve">
+    <value>الوقت داخل اللعبة:</value>
+  </data>
+  <data name="Promote" xml:space="preserve">
+    <value>ترقية العضو:</value>
+  </data>
+  <data name="DeepSeaCommand" xml:space="preserve">
+    <value>أمر حدث أعماق البحار:</value>
+  </data>
+  <data name="CargoShipCommand" xml:space="preserve">
+    <value>أمر سفينة الشحن الكارجو:</value>
+  </data>
+  <data name="OilRigCommand" xml:space="preserve">
+    <value>أمر منصة النفط أويل ريج:</value>
+  </data>
+  <data name="PatrolHeliCommand" xml:space="preserve">
+    <value>أمر مروحية الدورية الهيلي:</value>
+  </data>
+  <data name="TravellingVendorCommand" xml:space="preserve">
+    <value>أمر البائع المتنقل:</value>
+  </data>
+  <data name="UpkeepDetails" xml:space="preserve">
+    <value>تفاصيل مدة الصيانة (الأب كيب):</value>
+  </data>
+  <data name="CommandDelay" xml:space="preserve">
+    <value>المهلة الزمنية بين الأوامر (Cooldown):</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>اللغة</value>
+  </data>
+  <data name="SelectLanguage" xml:space="preserve">
+    <value>اختر اللغة المناسبة</value>
+  </data>
+  <data name="RestartRequired" xml:space="preserve">
+    <value>تغيير لغة التطبيق يتطلب إعادة تشغيل البرنامج بالكامل لتطبيق التعديلات بنجاح.</value>
+  </data>
+  <data name="SmartSwitches" xml:space="preserve">
+    <value>مفاتيح التبديل الذكية (Smart Switches)</value>
+  </data>
+  <data name="UpkeepTcMonitors" xml:space="preserve">
+    <value>أجهزة مراقبة خزانة الأدوات (TC Upkeep)</value>
+  </data>
+  <data name="NoTcMonitorsFound" xml:space="preserve">
+    <value>لم يتم العثور على أجهزة مراقبة للخزانة (TC) متصلة.</value>
+  </data>
+  <data name="SaveAndClose" xml:space="preserve">
+    <value>الحفظ وإغلاق النافذة</value>
+  </data>
+  <data name="ChatMessagePlaceholder" xml:space="preserve">
+    <value>اكتب رسالتك هنا...</value>
+  </data>
+  <data name="ChatErrorPlaceholder" xml:space="preserve">
+    <value>ستظهر رسالة الخطأ هنا</value>
+  </data>
+  <data name="HeliEventName" xml:space="preserve">
+    <value>مروحية الدورية (الهيلي)</value>
+  </data>
+  <data name="HeliActiveRunningFor" xml:space="preserve">
+    <value>مروحية الدورية نشطة حالياً - متواجدة منذ {0}</value>
+  </data>
+  <data name="ConnectedMidEventSpawnUnknown" xml:space="preserve">
+    <value>تم الاتصال في منتصف الفعالية - وقت ظهور الحدث (الرسبن) مجهول</value>
+  </data>
+  <data name="HeliActiveSpawnUnknown" xml:space="preserve">
+    <value>مروحية الدورية متواجدة في الأجواء (وقت الرسبن غير معروف)</value>
+  </data>
+  <data name="HeliShotDownAgo" xml:space="preserve">
+    <value>تم إسقاط مروحية الدورية قبل {0} من هذه الجلسة</value>
+  </data>
+  <data name="HeliLeftMapAgo" xml:space="preserve">
+    <value>غادرت مروحية الدورية أجواء الخريطة قبل {0} من هذه الجلسة</value>
+  </data>
+  <data name="CargoDockedDepartsIn" xml:space="preserve">
+    <value>الرسو في الميناء: {0} - ستغادر خلال {1} تقريباً</value>
+  </data>
+  <data name="HarborFallback" xml:space="preserve">
+    <value>الميناء (Harbor)</value>
+  </data>
+  <data name="CargoAlreadyDockedOnConnect" xml:space="preserve">
+    <value>السفينة راسية بالفعل بالميناء عند دخولك - توقيت المغادرة مجهول</value>
+  </data>
+  <data name="CargoDockedDurationNotLearned" xml:space="preserve">
+    <value>السفينة راسية في {0} (لم يتم تحديد مدة الرسو بدقة بعد)</value>
+  </data>
+  <data name="CargoTimeRemainingOnMap" xml:space="preserve">
+    <value>الوقت المتبقي للسفينة على الخريطة (منذ رسبنتها)</value>
+  </data>
+  <data name="CargoConnectedMidRouteTimeUnknown" xml:space="preserve">
+    <value>تم الاتصال بالخادم وهي في منتصف مسارها - الوقت المتبقي مجهول</value>
+  </data>
+  <data name="CargoConnectedMidRouteTimeUnknownFormatted" xml:space="preserve">
+    <value>تم الاتصال بالخادم وهي في منتصف مسارها - الوقت مجهول (طول المسار الإجمالي {0}م تقريباً)</value>
+  </data>
+  <data name="CargoDespawnedAgo" xml:space="preserve">
+    <value>اختفت سفينة الشحن وغادرت الخريطة (ديسبن) منذ {0}د و {1}ث في هذه الجلسة</value>
+  </data>
+  <data name="VendorActiveRunningFor" xml:space="preserve">
+    <value>البائع المتنقل نشط - متواجد في المسار منذ {0}</value>
+  </data>
+  <data name="VendorActiveSpawnUnknown" xml:space="preserve">
+    <value>البائع المتنقل متواجد (وقت الظهور مجهول)</value>
+  </data>
+  <data name="VendorDespawnedAgo" xml:space="preserve">
+    <value>اختفى البائع المتنقل (ديسبن) قبل {0} من هذه الجلسة</value>
+  </data>
+  <data name="DeepSeaActiveRunningFor" xml:space="preserve">
+    <value>حدث أعماق البحار نشط حالياً - بدأ منذ {0}</value>
+  </data>
+  <data name="DeepSeaActiveSpawnUnknown" xml:space="preserve">
+    <value>حدث أعماق البحار نشط حالياً (وقت بداية الحدث غير معروف)</value>
+  </data>
+  <data name="DeepSeaEndedAgo" xml:space="preserve">
+    <value>انتهى حدث أعماق البحار منذ {0} من هذه الجلسة</value>
+  </data>
+  <data name="TimerHoursMinutes" xml:space="preserve">
+    <value>{0} ساعة و {1:D2} دقيقة</value>
+  </data>
+  <data name="TimerMinutesSeconds" xml:space="preserve">
+    <value>{0} دقيقة و {1:D2} ثانية</value>
+  </data>
+  <data name="AgoHoursMinutes" xml:space="preserve">
+    <value>منذ {0} ساعة و {1} دقيقة</value>
+  </data>
+  <data name="AgoMinutes" xml:space="preserve">
+    <value>منذ {0} دقيقة</value>
+  </data>
+  <data name="DurationMinutesSeconds" xml:space="preserve">
+    <value>المدة: {0} دقيقة و {1} ثانية</value>
+  </data>
+  <data name="DurationSeconds" xml:space="preserve">
+    <value>{0} ثانية</value>
+  </data>
+  <data name="ChatCmdPopResponse" xml:space="preserve">
+    <value>يتواجد حالياً {0} لاعب على الإنترنت في السيرفر. {1}</value>
+  </data>
+  <data name="ChatCmdPopQueue" xml:space="preserve">
+    <value> وطابور الانتظار: {0} لاعبين.</value>
+  </data>
+  <data name="ChatCmdTimeResponse" xml:space="preserve">
+    <value>التوقيت الحالي داخل اللعبة هو: {0}.</value>
+  </data>
+  <data name="ChatCmdPromoteResponse" xml:space="preserve">
+    <value>تمت ترقية اللاعب {0} ليصبح قائد الفريق.</value>
+  </data>
+  <data name="ChatCmdDeepSeaActive" xml:space="preserve">
+    <value>حدث أعماق البحار نشط حالياً! ومستمر لـ {0}.</value>
+  </data>
+  <data name="ChatCmdDeepSeaActiveMidEvent" xml:space="preserve">
+    <value>حدث أعماق البحار نشط حالياً (تم الاتصال بالخادم بعد بدء الحدث - وقت رسبن الحدث الأصلي مجهول).</value>
+  </data>
+  <data name="ChatCmdDeepSeaEndedMinutesAgo" xml:space="preserve">
+    <value>انتهى حدث أعماق البحار منذ {0} دقيقة في هذه الجلسة الحالية.</value>
+  </data>
+  <data name="ChatCmdDeepSeaStatusUnknown" xml:space="preserve">
+    <value>حالة حدث أعماق البحار غير معروفة (لم يتم رصد الفعالية في هذه الجلسة الحالية بعد).</value>
+  </data>
+  <data name="ChatCmdCargoNotActive" xml:space="preserve">
+    <value>سفينة الشحن (الكارجو) غير متواجدة حالياً.</value>
+  </data>
+  <data name="ChatCmdCargoDockedDeparts" xml:space="preserve">
+    <value>سفينة الشحن راسية حالياً في {0}. وستغادر خلال {1} دقيقة تقريباً.</value>
+  </data>
+  <data name="ChatCmdCargoDockedPreparingDepart" xml:space="preserve">
+    <value>سفينة الشحن راسية في {0} وتستعد للمغادرة والتحرك الآن.</value>
+  </data>
+  <data name="ChatCmdCargoDockedUnknown" xml:space="preserve">
+    <value>رست سفينة الشحن في {0} (توقيت مغادرتها مجهول حالياً).</value>
+  </data>
+  <data name="ChatCmdCargoActiveLeaves" xml:space="preserve">
+    <value>سفينة الشحن متحركة ونشطة على الخريطة. ستغادر الخريطة تماماً خلال {0} دقيقة تقريباً.</value>
+  </data>
+  <data name="ChatCmdCargoActivePreparingLeave" xml:space="preserve">
+    <value>سفينة الشحن نشطة في البحر وتستعد لمغادرة الخريطة قريباً.</value>
+  </data>
+  <data name="ChatCmdCargoActiveDurationNotLearned" xml:space="preserve">
+    <value>سفينة الشحن متواجدة حالياً (توقيت ومسار التحرك الكامل لم يتم تحليله بدقة بعد في هذا السيرفر).</value>
+  </data>
+  <data name="ChatCmdCargoActiveMidRoute" xml:space="preserve">
+    <value>سفينة الشحن متواجدة (تم الاتصال بالسيرفر بعد رسبنتها بالفعل - الوقت المتبقي لها غير معروف).</value>
+  </data>
+  <data name="ChatCmdCargoDespawnedMinutesAgo" xml:space="preserve">
+    <value>سفينة الشحن غير نشطة؛ حيث غادرت واختفت (ديسبن) منذ {0} دقيقة في هذه الجلسة.</value>
+  </data>
+  <data name="ChatCmdOilRigCrateIn" xml:space="preserve">
+    <value>[{0}] الصندوق يفتح في غضون {1}د {2}ث</value>
+  </data>
+  <data name="ChatCmdOilRigLastCalledAgo" xml:space="preserve">
+    <value>[{0}] آخر استدعاء للحدث كان قبل {1} دقيقة</value>
+  </data>
+  <data name="ChatCmdOilRigNotCalled" xml:space="preserve">
+    <value>[{0}] لم يتم استدعاء هذا الحدث في هذه الجلسة بعد</value>
+  </data>
+  <data name="ChatCmdHeliActive" xml:space="preserve">
+    <value>مروحية الدورية (الهيلي) نشطة في الأجواء حالياً! ومستمرة منذ {0}.</value>
+  </data>
+  <data name="ChatCmdHeliActiveMidEvent" xml:space="preserve">
+    <value>مروحية الدورية نشطة حالياً في السيرفر (تم الاتصال بالخادم أثناء تواجدها - توقيت رسبنتها مجهول).</value>
+  </data>
+  <data name="ChatCmdHeliNotActiveAgo" xml:space="preserve">
+    <value>مروحية الدورية غير متواجدة حالياً. آخر ظهور لها كان {0} بسبب: {1} قبل هذه الدورة.</value>
+  </data>
+  <data name="ChatCmdHeliReasonShotDown" xml:space="preserve">
+    <value>تم إسقاطها وتفجيرها</value>
+  </data>
+  <data name="ChatCmdHeliReasonLeftMap" xml:space="preserve">
+    <value>غادرت حدود الخريطة</value>
+  </data>
+  <data name="ChatCmdHeliStatusUnknown" xml:space="preserve">
+    <value>حالة مروحية الدورية مجهولة (لم تظهر في الأجواء خلال الجلسة الحالية).</value>
+  </data>
+  <data name="ChatCmdVendorActive" xml:space="preserve">
+    <value>البائع المتنقل نشط في السيرفر! ويتحرك منذ {0}.</value>
+  </data>
+  <data name="ChatCmdVendorActiveMidEvent" xml:space="preserve">
+    <value>البائع المتنقل نشط حالياً (تم الاتصال بالسيرفر أثناء تواجده - وقت رسبنته مجهول).</value>
+  </data>
+  <data name="ChatCmdVendorDespawnedAgo" xml:space="preserve">
+    <value>البائع المتنقل غير متواجد حالياً؛ حيث اختفى (ديسبن) منذ {0} دقيقة في هذه الجلسة.</value>
+  </data>
+  <data name="ChatCmdVendorStatusUnknown" xml:space="preserve">
+    <value>حالة البائع المتنقل مجهولة (لم يتم رصده في هذه الجلسة الحالية بعد).</value>
+  </data>
+  <data name="ChatCmdUpkeepNoTcMapped" xml:space="preserve">
+    <value>لم يتم ربط أو تعيين أي خزانات أدوات (TC) لتلقي أوامر تفاصيل الصيانة.</value>
+  </data>
+  <data name="ChatCmdUpkeepTcEmptyExpired" xml:space="preserve">
+    <value>حالة الصيانة في الخزانة {0}: فارغة تماماً أو منتهية الصلاحية (البيت يتدمر!).</value>
+  </data>
+  <data name="ChatCmdUpkeepNeed24h" xml:space="preserve">
+    <value> الموارد المطلوبة لكل 24 ساعة هي: {0}.</value>
+  </data>
+  <data name="ChatCmdUpkeepTcTime" xml:space="preserve">
+    <value>وقت الأب كيب المتبقي في الخزانة {0} هو: {1}.</value>
+  </data>
+  <data name="ChatCmdUpkeepDays" xml:space="preserve">
+    <value>{0} أيام</value>
+  </data>
+  <data name="ChatCmdUpkeepHours" xml:space="preserve">
+    <value>{0} ساعات</value>
+  </data>
+  <data name="ChatCmdUpkeepMinutes" xml:space="preserve">
+    <value>{0} دقائق</value>
+  </data>
+  <data name="ChatCmdUpkeepEmptyExpiredShort" xml:space="preserve">
+    <value>[{0}] :: الخزانة فارغة/منتهية الصلاحية</value>
+  </data>
+  <data name="ChatCmdUpkeepTimeShort" xml:space="preserve">
+    <value>[{0}] :: متبقي {1} يوم، و {2} ساعة</value>
+  </data>
+  <data name="ChatCmdUpkeepHeader" xml:space="preserve">
+    <value>وقت الصيانة (الأب كيب): {0}</value>
+  </data>
+  <data name="ChatCmdUpkeepNotPaired" xml:space="preserve">
+    <value>أجهزة مراقبة خزانات الأدوات المرتبطة غير متوفرة أو لم يتم إقرانها بنجاح.</value>
+  </data>
+  <data name="ChatCmdUpkeepNotPairedSingle" xml:space="preserve">
+    <value>جهاز مراقبة خزانة الأدوات المطلوب غير متوفر أو لم يتم إقرانه بالتطبيق.</value>
+  </data>
+  <data name="ChatCmdSwitchToggled" xml:space="preserve">
+    <value>تم تحويل حالة المفتاح الذكي {0} إلى الوضع: {1}.</value>
+  </data>
+  <data name="ChatCmdSwitchStateOn" xml:space="preserve">
+    <value>قيد التشغيل (On)</value>
+  </data>
+  <data name="ChatCmdSwitchStateOff" xml:space="preserve">
+    <value>إيقاف التشغيل (Off)</value>
+  </data>
+  <data name="ChatCmdSwitchNotPaired" xml:space="preserve">
+    <value>المفتاح الذكي المرتبط بهذا الأمر غير موجود أو غير مقترن بالتطبيق حالياً.</value>
+  </data>
+  <data name="MaterialWood" xml:space="preserve">
+    <value>خشب</value>
+  </data>
+  <data name="MaterialStone" xml:space="preserve">
+    <value>حجر</value>
+  </data>
+  <data name="MaterialMetal" xml:space="preserve">
+    <value>حديد (معدن)</value>
+  </data>
+  <data name="MaterialHQM" xml:space="preserve">
+    <value>معدن عالي الجودة (HQM)</value>
+  </data>
+  <data name="SmallOilRig" xml:space="preserve">
+    <value>منصة النفط الصغيرة (سيرمل أويل)</value>
+  </data>
+  <data name="LargeOilRig" xml:space="preserve">
+    <value>منصة النفط الكبيرة (لارج أويل)</value>
+  </data>
+  <data name="ShopWord" xml:space="preserve">
+    <value>المتجر (الشوب)</value>
+  </data>
+  <data name="EventCargoShip" xml:space="preserve">
+    <value>سفينة الشحن (كارجو)</value>
+  </data>
+  <data name="EventTravellingVendor" xml:space="preserve">
+    <value>البائع المتنقل</value>
+  </data>
+  <data name="EventCH47" xml:space="preserve">
+    <value>مروحية الشينوك (CH47)</value>
+  </data>
+  <data name="EventPatrolHelicopter" xml:space="preserve">
+    <value>مروحية الدورية (الهيلي)</value>
+  </data>
+  <data name="EventOilrigCrate" xml:space="preserve">
+    <value>صندوق منصة النفط المشفر</value>
+  </data>
+  <data name="EventExplosion" xml:space="preserve">
+    <value>انفجار</value>
+  </data>
+  <data name="EventBuildingBlocked" xml:space="preserve">
+    <value>منطقة بناء محظورة (بلد بلوك)</value>
+  </data>
+  <data name="EventGeneric" xml:space="preserve">
+    <value>حدث عام</value>
+  </data>
+  <data name="AlertOilRigTriggered" xml:space="preserve">
+    <value>حدث [{0}] تم تفعيله وبدأ الآن! سيفتح الصندوق المشفر في غضون {1}.</value>
+  </data>
+  <data name="AlertAlarmTriggered" xml:space="preserve">
+    <value>تنبيه إنذار: تم إطلاق إنذار الجهاز {0}!</value>
+  </data>
+  <data name="AlertCrateUnlocksIn10Min" xml:space="preserve">
+    <value>[{0}] الصندوق المشفر سيفتح بعد 10 دقائق!</value>
+  </data>
+  <data name="AlertCrateUnlocksIn5Min" xml:space="preserve">
+    <value>[{0}] الصندوق المشفر سيفتح بعد 5 دقائق!</value>
+  </data>
+  <data name="AlertDeepSeaUp" xml:space="preserve">
+    <value>بدء حدث أعماق البحار في المحيط</value>
+  </data>
+  <data name="AlertNewShop" xml:space="preserve">
+    <value>متجر جديد مضاف {0} في الإحداثية [{1}]: {2}</value>
+  </data>
+  <data name="AlertSuspiciousShop" xml:space="preserve">
+    <value>متجر مشبوه رُصد {0} في الإحداثية [{1}] متاح منذ {2}ث، ويقوم ببيع: {3}</value>
+  </data>
+  <data name="AlertCargoSpawned" xml:space="preserve">
+    <value>ظهرت سفينة الشحن (الكارجو) في البحر عند الإحداثية {0}</value>
+  </data>
+  <data name="CargoFarOutAtSea" xml:space="preserve">
+    <value>بعيد جداً في عرض البحر (بالقرب من {0})</value>
+  </data>
+  <data name="AlertCargoDocked" xml:space="preserve">
+    <value>سفينة الشحن رست الآن في الميناء: {0} ({1})</value>
+  </data>
+  <data name="AlertCargoExpectedDock" xml:space="preserve">
+    <value>من المتوقع رسو سفينة الشحن في ميناء {0} ({1}) خلال 5 دقائق تقريباً.</value>
+  </data>
+  <data name="AlertCargoDeparting" xml:space="preserve">
+    <value>سفينة الشحن تستعد للمغادرة من ميناء {0} خلال 5 دقائق ({1})</value>
+  </data>
+  <data name="AlertHeliCrashFalseAlarm" xml:space="preserve">
+    <value>تم رصد سقوط وهمي بسبب تعليق (لاغ) من السيرفر - المروحية لا تزال متواجدة عند الإحداثية {0}</value>
+  </data>
+  <data name="AlertEventSpawned" xml:space="preserve">
+    <value>ظهر حدث {0} (رسبن) عند الموقع {1}</value>
+  </data>
+  <data name="AlertHeliShotDown" xml:space="preserve">
+    <value>تم إسقاط وتدمير مروحية الدورية (الهيلي) عند الموقع {0}</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>مجهول</value>
+  </data>
+  <data name="AlertPlayerOnlineWithPos" xml:space="preserve">
+    <value>اللاعب {0} دخل السيرفر (أونلاين) عند الإحداثية {1}</value>
+  </data>
+  <data name="AlertPlayerOffline" xml:space="preserve">
+    <value>اللاعب {0} خرج من السيرفر (أوفلاين)</value>
+  </data>
+  <data name="AlertPlayerDied" xml:space="preserve">
+    <value>مات اللاعب {0} عند الإحداثية {1}</value>
+  </data>
+  <data name="AlertPlayerRespawned" xml:space="preserve">
+    <value>أعاد اللاعب {0} رسبنته عند الإحداثية {1}</value>
+  </data>
+  <data name="AlertTrackingOnline" xml:space="preserve">
+    <value>[تتبُّع] اللاعب {0}{1} متصل الآن (أونلاين)</value>
+  </data>
+  <data name="AlertTrackingOffline" xml:space="preserve">
+    <value>[تتبُّع] اللاعب {0}{1} غادر السيرفر الآن (أوفلاين)</value>
+  </data>
+  <data name="AlertTrackingRenamed" xml:space="preserve">
+    <value>[تتبع] اللاعب المُراقب {0}{1} قام بتغيير اسمه إلى {2}!</value>
+  </data>
+  <data name="AlertShopSells" xml:space="preserve">
+    <value>يبيع</value>
+  </data>
+  <data name="AlertShopBuys" xml:space="preserve">
+    <value>يشتري</value>
+  </data>
+  <data name="AlertShopLabelFallback" xml:space="preserve">
+    <value>المتجر</value>
+  </data>
+  <data name="AlertShopMatch" xml:space="preserve">
+    <value>{0} [{1}] {2} عدد x{3} {4} (المخزون المتوفر {5}) مقابل {6} {7}</value>
+  </data>
+  <data name="ListCommandsCommand" xml:space="preserve">
+    <value>عرض قائمة أوامر شات اللعبة</value>
+  </data>
+  <data name="ChatCmdListHeader" xml:space="preserve">
+    <value>الأوامر المتاحة: {0}</value>
+  </data>
+  <data name="Update530Title" xml:space="preserve">
+    <value>تحديث واجهة المستخدم واللغات ونظام التخزين</value>
+  </data>
+  <data name="FeatureLanguage" xml:space="preserve">
+    <value>تنبيهات مخصصة</value>
+  </data>
+  <data name="FeatureLanguageDesc" xml:space="preserve">
+    <value> - !timer [name],[minutes]</value>
+  </data>
+  <data name="FeatureChatCommands" xml:space="preserve">
+    <value>خريطة مصغرة</value>
+  </data>
+  <data name="FeatureChatCommandsDesc" xml:space="preserve">
+    <value> - يعمل عند التصغير</value>
+  </data>
+  <data name="FeatureSettings" xml:space="preserve">
+    <value>إصلاح المتجر</value>
+  </data>
+  <data name="FeatureSettingsDesc" xml:space="preserve">
+    <value> - واجهة مستخدم جديدة للمتجر</value>
+  </data>
+  <data name="YourBaseIsUnderAttack" xml:space="preserve">
+    <value>قاعدتك تتعرض للهجوم والغزو الآن (Raid Alert)!</value>
+  </data>
+  <data name="PleaseConnectFirst" xml:space="preserve">
+    <value>يُرجى الاتصال بأحد السيرفرات أولاً للاستمرار.</value>
+  </data>
+  <data name="NotConnectedError" xml:space="preserve">
+    <value>أنت غير متصل بأي سيرفر حالياً.</value>
+  </data>
+  <data name="ChatNotAvailable" xml:space="preserve">
+    <value>محادثات الشات غير متاحة حالياً.</value>
+  </data>
+  <data name="PleaseSelectServerFirst" xml:space="preserve">
+    <value>يُرجى تحديد واختيار سيرفر أولاً.</value>
+  </data>
+  <data name="SnackbarTitleConnection" xml:space="preserve">
+    <value>الاتصال بالسيرفر</value>
+  </data>
+  <data name="SnackbarTitleChat" xml:space="preserve">
+    <value>الشات والمحادثات</value>
+  </data>
+  <data name="HowToTrackPlayersTitle" xml:space="preserve">
+    <value>شرح كيفية تتبع تحركات اللاعبين</value>
+  </data>
+  <data name="NativeUDPTrackingSubtitle" xml:space="preserve">
+    <value>نظام تتبع الـ UDP الأصلي</value>
+  </data>
+  <data name="TrackingGuideEnglishOnlyNotice" xml:space="preserve">
+    <value>دليل تتبع اللاعبين متاح حالياً باللغة الإنجليزية فقط نظراً لكونه يخضع لبعض التغييرات الهيكلية في المستقبل القريب. نشكركم على حسن صبركم.</value>
+  </data>
+  <data name="HowToTrackCloseHint" xml:space="preserve">
+    <value>يمكنك إغلاق هذه النافذة في أي وقت - وبإمكانك إعادة فتحها مجدداً عبر الضغط على أيقونة الاستفهام ❓ (كيفية التتبع).</value>
+  </data>
+  <data name="MaintenanceTitle" xml:space="preserve">
+    <value>الصيانة الدورية للبيانات</value>
+  </data>
+  <data name="MaintenanceDesc" xml:space="preserve">
+    <value>مسح إعدادات التطبيق بالكامل، أو إداراة ملفات تعريف السيرفرات والرسومات المخصصة، أو أخذ نسخ احتياطية واستعادتها.</value>
+  </data>
+  <data name="ResetAppData" xml:space="preserve">
+    <value>إعادة تعيين بيانات التطبيق بالكامل...</value>
+  </data>
+  <data name="BackupData" xml:space="preserve">
+    <value>إنشاء نسخة احتياطية للبيانات...</value>
+  </data>
+  <data name="RestoreData" xml:space="preserve">
+    <value>استعادة البيانات من نسخة سابقة...</value>
+  </data>
+  <data name="ResetDataTitle" xml:space="preserve">
+    <value>إعادة ضبط بيانات التطبيق</value>
+  </data>
+  <data name="ResetDataDesc" xml:space="preserve">
+    <value>حدد المكونات التي ترغب في تصفيرها ومسحها من هذا الجهاز. يرجى العلم بأن جميع الخيارات المحددة ستُحذف نهائياً ولن يمكن استرجاعها.</value>
+  </data>
+  <data name="ResetOptionConnection" xml:space="preserve">
+    <value>بيانات اتصال السيرفر النشط حالياً (قطع الاتصال الفوري)</value>
+  </data>
+  <data name="ResetOptionProfiles" xml:space="preserve">
+    <value>ملفات تعريف السيرفرات المحفوظة (حذف السيرفرات المقترنة وإعداداتها)</value>
+  </data>
+  <data name="ResetOptionSteam" xml:space="preserve">
+    <value>بيانات اعتماد حساب ستيم (تسجيل الخروج من الحساب)</value>
+  </data>
+  <data name="ResetOptionPairing" xml:space="preserve">
+    <value>إعدادات اقتران الأجهزة الذكية (إعادة تعيين رموز التسجيل التلقائي)</value>
+  </data>
+  <data name="ResetOptionCrosshairs" xml:space="preserve">
+    <value>علامات التصويب المخصصة (مسح فوري للتكوينات المضافة)</value>
+  </data>
+  <data name="ResetOptionCache" xml:space="preserve">
+    <value>الملفات المؤقتة المحلية والرسومات (مسح الخرائط التخزينية والخطوط المرسومة)</value>
+  </data>
+  <data name="ResetDataWarning" xml:space="preserve">
+    <value>تنبيه: هذا الإجراء نهائي ودائم ولا يمكن التراجع عنه بأي شكل من الأشكال.</value>
+  </data>
+  <data name="ConfirmReset" xml:space="preserve">
+    <value>تأكيد إعادة التعيين والتصفير</value>
+  </data>
+  <data name="BackupPasswordTitle" xml:space="preserve">
+    <value>كلمة مرور ملف النسخة الاحتياطية</value>
+  </data>
+  <data name="BackupProtectionTitle" xml:space="preserve">
+    <value>حماية النسخة الاحتياطية وتشفيرها</value>
+  </data>
+  <data name="BackupProtectionDesc" xml:space="preserve">
+    <value>أدخل كلمة مرور قوية لتشفير ملف النسخة الاحتياطية وتأمينه. إذا تركت هذا الحقل فارغاً، فسيتم إنشاء النسخة الاحتياطية بدون تشفير لحمايتها.</value>
+  </data>
+  <data name="RestoreBackupTitle" xml:space="preserve">
+    <value>استعادة نسخة احتياطية</value>
+  </data>
+  <data name="RestoreBackupDesc" xml:space="preserve">
+    <value>هذا الملف المحفوظ محمي بكلمة مرور مشفرة. يُرجى إدخال كلمة المرور الصحيحة لفك التشفير وبدء الاستعادة:</value>
+  </data>
+  <data name="Encrypt" xml:space="preserve">
+    <value>تشفير البيانات</value>
+  </data>
+  <data name="Decrypt" xml:space="preserve">
+    <value>فك التشفير عن الملف</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>موافق</value>
+  </data>
+  <data name="BackupApplicationDataTitle" xml:space="preserve">
+    <value>نسخ بيانات التطبيق احتياطياً</value>
+  </data>
+  <data name="BackupSuccessLog" xml:space="preserve">
+    <value>[النظام] تم إنشاء ملف النسخة الاحتياطية وتأمينه بنجاح في المسار التالي: {0}</value>
+  </data>
+  <data name="BackupSuccessMessage" xml:space="preserve">
+    <value>تم إنشاء النسخة الاحتياطية للبيانات بنجاح وتأمينها!</value>
+  </data>
+  <data name="BackupSuccessTitle" xml:space="preserve">
+    <value>اكتمل إنشاء النسخة الاحتياطية</value>
+  </data>
+  <data name="BackupErrorLog" xml:space="preserve">
+    <value>[النظام] فشل إجراء النسخ الاحتياطي؛ خطأ: {0}</value>
+  </data>
+  <data name="BackupErrorMessage" xml:space="preserve">
+    <value>حدث خطأ غير متوقع أثناء محاولة إنشاء النسخة الاحتياطية: {0}</value>
+  </data>
+  <data name="BackupFailedTitle" xml:space="preserve">
+    <value>فشلت عملية النسخ الاحتياطي</value>
+  </data>
+  <data name="RestoreConfirmMessage" xml:space="preserve">
+    <value>تنبيه: ستؤدي عملية استعادة البيانات السابقة إلى استبدال وحذف ملفات السيرفرات الحالية، وعلامات التصويب المخصصة، وتراكبات الرسم الحالية، وإعدادات الخريطة المصغرة بالكامل. هل أنت متأكد من رغبتك في المتابعة؟</value>
+  </data>
+  <data name="RestoreConfirmTitle" xml:space="preserve">
+    <value>تأكيد استعادة النسخة الاحتياطية</value>
+  </data>
+  <data name="RestoreApplicationDataTitle" xml:space="preserve">
+    <value>استعادة بيانات تطبيق Rust+</value>
+  </data>
+  <data name="RestoreSuccessMessage" xml:space="preserve">
+    <value>تمت استعادة كافة بيانات التطبيق السابقة بنجاح وتطبيقها كإعدادات افتراضية!</value>
+  </data>
+  <data name="RestoreSuccessTitle" xml:space="preserve">
+    <value>اكتملت عملية استعادة البيانات</value>
+  </data>
+  <data name="RestorePasswordErrorLog" xml:space="preserve">
+    <value>[النظام] فشل فك التشفير والاستعادة: تم إدخال كلمة مرور غير مطابقة أو خاطئة.</value>
+  </data>
+  <data name="RestorePasswordErrorMessage" xml:space="preserve">
+    <value>فشلت عملية فك التشفير عن الملف؛ كلمة المرور المدخلة غير صالحة أو أن ملف النسخة الاحتياطية تالف بالكامل.</value>
+  </data>
+  <data name="RestoreFailedTitle" xml:space="preserve">
+    <value>فشلت عملية استعادة البيانات</value>
+  </data>
+  <data name="RestoreErrorLog" xml:space="preserve">
+    <value>[النظام] حدث خطأ أثناء إجراء الاستعادة للملفات: {0}</value>
+  </data>
+  <data name="RestoreErrorMessage" xml:space="preserve">
+    <value>خطأ في استعادة النسخة الاحتياطية المدخلة: {0}</value>
+  </data>
+  <data name="InvalidBackupFormat" xml:space="preserve">
+    <value>صيغة وتنسيق ملف النسخة الاحتياطية غير مدعوم، أو أن توقيع الملف البرمجي مفقود.</value>
+  </data>
+  <data name="WipeLogStart" xml:space="preserve">
+    <value>[تصفير] بدء إجراءات عملية إعادة الضبط الانتقائي الشاملة للبيانات...</value>
+  </data>
+  <data name="WipeLogConnStart" xml:space="preserve">
+    <value>[تصفير] جاري قطع الاتصال النشط مع السيرفر وتصفير بيانات الجلسة الحالية...</value>
+  </data>
+  <data name="WipeLogConnEnd" xml:space="preserve">
+    <value>[تصفير] اكتملت عملية إعادة ضبط وتصفير الاتصال بنجاح.</value>
+  </data>
+  <data name="WipeLogProfilesStart" xml:space="preserve">
+    <value>[تصفير] جاري مسح كافة ملفات تعريف السيرفرات المحفوظة للتطبيق...</value>
+  </data>
+  <data name="WipeLogProfilesEnd" xml:space="preserve">
+    <value>[تصفير] تم مسح وحذف ملفات تعريف السيرفرات المحفوظة بالكامل.</value>
+  </data>
+  <data name="WipeLogSteamStart" xml:space="preserve">
+    <value>[تصفير] جاري إزالة بيانات اعتماد حساب ستيم (Steam) المسجلة بالتطبيق...</value>
+  </data>
+  <data name="WipeLogSteamEnd" xml:space="preserve">
+    <value>[تصفير] تم مسح وإزالة بيانات اعتماد حساب ستيم بنجاح.</value>
+  </data>
+  <data name="WipeLogPairingStart" xml:space="preserve">
+    <value>[تصفير] جاري مسح وحذف تكوينات إقران الأجهزة الذكية المخزنة...</value>
+  </data>
+  <data name="WipeLogPairingEnd" xml:space="preserve">
+    <value>[تصفير] تم حذف وإزالة تكوينات إقران الأجهزة تماماً.</value>
+  </data>
+  <data name="WipeLogCrosshairsStart" xml:space="preserve">
+    <value>[تصفير] جاري مسح وإزالة كافة علامات التصويب المخصصة (Crosshairs)...</value>
+  </data>
+  <data name="WipeLogCrosshairsError" xml:space="preserve">
+    <value>[تصفير] حدث خطأ غير متوقع أثناء محاولة تصفير علامات التصويب المخصصة: {0}</value>
+  </data>
+  <data name="WipeLogCrosshairsEnd" xml:space="preserve">
+    <value>[تصفير] تم تصفير ومسح علامات التصويب المخصصة بنجاح من الذاكرة.</value>
+  </data>
+  <data name="WipeLogCacheStart" xml:space="preserve">
+    <value>[تصفير] جاري مسح مجلدات الملفات المؤقتة المحلية ورسومات تراكب الشاشة التخزينية...</value>
+  </data>
+  <data name="WipeLogCacheError" xml:space="preserve">
+    <value>[تصفير] حدث خطأ برمي أثناء محاولة تنظيف مجلد الملفات المؤقتة (Cache): {0}</value>
+  </data>
+  <data name="WipeLogCacheEnd" xml:space="preserve">
+    <value>[تصفير] تم إفراغ وتنظيف مجلدات الذاكرة المؤقتة التخزينية بنجاح.</value>
+  </data>
+  <data name="WipeLogPairingRestart" xml:space="preserve">
+    <value>[تصفير] جاري إعادة تسجيل بيانات نظام المستمع وإشعارات الـ FCM المتزامنة بالبرنامج...</value>
+  </data>
+  <data name="WipeLogComplete" xml:space="preserve">
+    <value>[تصفير] اكتملت عملية إعادة الضبط الانتقائي والتصفير بنجاح تام وبدون مشاكل.</value>
+  </data>
+  <data name="DeleteDeathMarker" xml:space="preserve">
+    <value>مسح علامات الموت</value>
+  </data>
+  <data name="RenameDeathMarker" xml:space="preserve">
+    <value>إعادة تسمية علامة الموت</value>
+  </data>
+  <data name="PlayerDirectionArrow" xml:space="preserve">
+    <value>اتجاه</value>
+  </data>
+  <data name="Profile" xml:space="preserve">
+    <value>الملف الشخصي</value>
+  </data>
+  <data name="Death" xml:space="preserve">
+    <value>موت</value>
+  </data>
+  <data name="Markers" xml:space="preserve">
+    <value>علامات:</value>
+  </data>
+  <data name="WipeDeathMarkers" xml:space="preserve">
+    <value>مسح الكل</value>
+  </data>
+  <data name="Accept" xml:space="preserve">
+    <value>قبول</value>
+  </data>
+  <data name="CustomTimerCategory" xml:space="preserve">
+    <value>مؤقت مخصص</value>
+  </data>
+  <data name="TimerCreated" xml:space="preserve">
+    <value>Timer {0} created for {1}h {2}m {3}s</value>
+  </data>
+  <data name="HoverCustomTimer" xml:space="preserve">
+    <value>مؤقت مخصص</value>
+  </data>
+  <data name="ActiveTimersCategory" xml:space="preserve">
+    <value>المؤقتات النشطة</value>
+  </data>
+  <data name="AddTimer" xml:space="preserve">
+    <value>إضافة مؤقت</value>
+  </data>
+  <data name="TimerName" xml:space="preserve">
+    <value>الاسم</value>
+  </data>
+  <data name="TimerCreateCmdLabel" xml:space="preserve">
+    <value>أمر:</value>
+  </data>
+  <data name="CheckTimerStatusInfo" xml:space="preserve">
+    <value>استخدم الأمر للتحقق.</value>
+  </data>
+  <data name="ChatCmdTimerMaxReached" xml:space="preserve">
+    <value>الحد الأقصى 5 مؤقتات.</value>
+  </data>
+  <data name="TimerDurationRequired" xml:space="preserve">
+    <value>الرجاء إدخال مدة المؤقت (ساعات أو دقائق أو ثوانٍ).</value>
+  </data>
+  <data name="TimerNameMustStartWithLetter" xml:space="preserve">
+    <value>يجب أن يبدأ اسم المؤقت بحرف.</value>
+  </data>
+  <data name="FeatureAudioLoopTitle" xml:space="preserve">
+    <value>علامة الموت</value>
+  </data>
+  <data name="FeatureAudioLoopDesc" xml:space="preserve">
+    <value> - علامات مخصصة للفريق</value>
+  </data>
+  <data name="FeatureTimerAlerts" xml:space="preserve">
+    <value>تنبيهات المؤقت</value>
+  </data>
+  <data name="FeatureTimerAlertsDesc" xml:space="preserve">
+    <value> - 60,30,10,3 م قبل النهاية</value>
+  </data>
+  <data name="TranslationConsentTitle" xml:space="preserve">
+    <value>موافقة الترجمة</value>
+  </data>
+  <data name="TranslationConsentText" xml:space="preserve">
+    <value>بالنقر فوق قبول، سيتم إرسال محتويات ملاحظات التصحيح إلى خدمة ترجمة Google (الولايات المتحدة الأمريكية) للترجمة. هل تقبل؟</value>
+  </data>
+  <data name="TranslationApiLinkText" xml:space="preserve">
+    <value>شروط واجهة برمجة تطبيقات Google Translate</value>
+  </data>
+  <data name="MigrationAlertCheckTitle" xml:space="preserve">
+    <value>يرجى الملاحظة</value>
+  </data>
+  <data name="MigrationAlertCheckDesc" xml:space="preserve">
+    <value>تحقق من إعدادات تنبيهات الدردشة للمؤقتات المخصصة الجديدة. يتم الآن دائمًا حفظ علامات الموت محليًا. يتم الآن أيضًا تحديث الخريطة المصغرة أثناء التصغير.</value>
+  </data>
+  <data name="TranslateViaGoogle" xml:space="preserve">
+    <value>ترجمة عبر جوجل</value>
+  </data>
+  <data name="PremiumFeatures" xml:space="preserve">
+    <value>مزايا الداعم (Supporter)</value>
+  </data>
+  <data name="PremiumInfoDevicesDesc" xml:space="preserve">
+    <value>يتوفر أكثر من 10 أجهزة محليًا أو عبر الاستيراد. مزامنة السحابة المجانية تحتفظ بأول 10 أجهزة؛ يمكن للداعمين مزامنة عدد غير محدود من الأجهزة.</value>
+  </data>
+  <data name="PremiumInfoMapDesc" xml:space="preserve">
+    <value>هذا التراكب أكبر من حد المزامنة السحابية المجاني. يحصل الداعمون على حجم تراكبات أكبر 10 مرات، ومزيد من علامات الخريطة ولقطات الشاشة.</value>
+  </data>
+  <data name="PrivacyDisclaimerTitle" xml:space="preserve">
+    <value>الخصوصية والمزامنة السحابية</value>
+  </data>
+  <data name="PrivacyDisclaimerDesc" xml:space="preserve">
+    <value>لتمكين المزامنة الحية لتراكبات الخرائط والأجهزة الذكية، يجب إرسال البيانات إلى سحابتنا الآمنة. نجمع أيضًا بيانات استخدام مجهولة.</value>
+  </data>
+  <data name="AcceptCloud" xml:space="preserve">
+    <value>قبول وتمكين السحابة</value>
+  </data>
+  <data name="DeclineCloud" xml:space="preserve">
+    <value>رفض السحابة</value>
+  </data>
+  <data name="ConnectDiscord" xml:space="preserve">
+    <value>ربط ديسكورد لمزايا الداعمين</value>
+  </data>
+  <data name="DisconnectDiscord" xml:space="preserve">
+    <value>قطع اتصال ديسكورد</value>
+  </data>
+  <data name="DiscordConnecting" xml:space="preserve">
+    <value>جاري الاتصال...</value>
+  </data>
+  <data name="CloudSync" xml:space="preserve">
+    <value>المزامنة السحابية والتحميل المباشر</value>
+  </data>
+  <data name="CloudSyncDesc" xml:space="preserve">
+    <value>قم بالتحميل المباشر ومزامنة الأجهزة الذكية وتراكبات الخرائط بأمان في السحابة.</value>
+  </data>
+  <data name="SupporterSettingsHeader" xml:space="preserve">
+    <value>إعدادات الداعم</value>
+  </data>
+  <data name="SupporterDescription" xml:space="preserve">
+    <value>هذه الميزات متاحة حصريًا للداعمين والمطورين لدينا عبر تسجيل الدخول إلى ديسكورد.</value>
+  </data>
+  <data name="AdvancedDiscordIntegration" xml:space="preserve">
+    <value>تكامل ديسكورد المتقدم (ويب هوك، تنبيهات صوتية)</value>
+  </data>
+  <data name="TelegramIntegration" xml:space="preserve">
+    <value>تكامل تنبيهات تيليجرام</value>
+  </data>
+  <data name="PremiumStopSync">
+    <value>إيقاف المزامنة</value>
+  </data>
+  <data name="PremiumStayFree">
+    <value>ابق مجانًا</value>
+  </data>
+  <data name="PremiumSupportNow">
+    <value>ادعم الآن</value>
+  </data>
+  <data name="CloudTooltipOverlaySyncedFormat" xml:space="preserve">
+    <value>تمت مزامنة التراكب {0} كيلوبايت {1}</value>
+  </data>
+  <data name="CloudTooltipDeviceFreeLimit" xml:space="preserve">
+    <value>10 أجهزة كحد أقصى في الخطة المجانية</value>
+  </data>
+  <data name="CloudTooltipDeviceSyncedFormat" xml:space="preserve">
+    <value>تمت مزامنة {0} أجهزة {1}</value>
+  </data>
+  <data name="CloudTooltipOverlayTooBigFormat" xml:space="preserve">
+    <value>حجم التراكب كبير جدًا للمزامنة ({0} كيلوبايت)</value>
+  </data>
+  <data name="CloudTooltipActivate" xml:space="preserve">
+    <value>تفعيل مزامنة السحابة</value>
+  </data>
+  <data name="CloudTooltipActive" xml:space="preserve">
+    <value>مزامنة السحابة مفعّلة</value>
+  </data>
+  <data name="CloudAccountTitle" xml:space="preserve">
+    <value>حساب السحابة</value>
+  </data>
+  <data name="EmailLoginWindowTitle" xml:space="preserve">
+    <value>تسجيل الدخول إلى حساب السحابة</value>
+  </data>
+  <data name="EmailSignInTab" xml:space="preserve">
+    <value>تسجيل الدخول</value>
+  </data>
+  <data name="EmailSignUpTab" xml:space="preserve">
+    <value>إنشاء حساب</value>
+  </data>
+  <data name="EmailAddressLabel" xml:space="preserve">
+    <value>عنوان البريد الإلكتروني</value>
+  </data>
+  <data name="PasswordLabel" xml:space="preserve">
+    <value>كلمة المرور</value>
+  </data>
+  <data name="PasswordMinCharsLabel" xml:space="preserve">
+    <value>كلمة المرور (6 أحرف على الأقل)</value>
+  </data>
+  <data name="ConfirmPasswordLabel" xml:space="preserve">
+    <value>تأكيد كلمة المرور</value>
+  </data>
+  <data name="EmailSignInButton" xml:space="preserve">
+    <value>تسجيل الدخول</value>
+  </data>
+  <data name="EmailCreateAccountButton" xml:space="preserve">
+    <value>إنشاء حساب</value>
+  </data>
+  <data name="EmailConfirmationSentTitle" xml:space="preserve">
+    <value>تم إرسال رسالة التأكيد!</value>
+  </data>
+  <data name="EmailConfirmationSentMessage" xml:space="preserve">
+    <value>اضغط على الرابط في بريدك الإلكتروني. يتحقق التطبيق تلقائيًا كل بضع ثوان...</value>
+  </data>
+  <data name="EmailWaitingForConfirmation" xml:space="preserve">
+    <value>في انتظار التأكيد...</value>
+  </data>
+  <data name="EmailWaitingForConfirmationFormat" xml:space="preserve">
+    <value>في انتظار التأكيد... ({0}ث)</value>
+  </data>
+  <data name="EmailProblemsPrefix" xml:space="preserve">
+    <value>هل توجد مشكلة؟ </value>
+  </data>
+  <data name="EmailOpenInBrowser" xml:space="preserve">
+    <value>فتح في المتصفح</value>
+  </data>
+  <data name="EmailPasswordRequiredError" xml:space="preserve">
+    <value>يرجى إدخال البريد الإلكتروني وكلمة المرور.</value>
+  </data>
+  <data name="EmailRequiredError" xml:space="preserve">
+    <value>يرجى إدخال عنوان بريد إلكتروني.</value>
+  </data>
+  <data name="EmailPasswordTooShortError" xml:space="preserve">
+    <value>يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.</value>
+  </data>
+  <data name="EmailPasswordsDoNotMatchError" xml:space="preserve">
+    <value>كلمتا المرور غير متطابقتين.</value>
+  </data>
+  <data name="EmailSigningInStatus" xml:space="preserve">
+    <value>جارٍ تسجيل الدخول...</value>
+  </data>
+  <data name="EmailSignedInSuccess" xml:space="preserve">
+    <value>تم تسجيل الدخول بنجاح!</value>
+  </data>
+  <data name="EmailSignInFailed" xml:space="preserve">
+    <value>فشل تسجيل الدخول.</value>
+  </data>
+  <data name="EmailRegistrationRunningStatus" xml:space="preserve">
+    <value>جارٍ التسجيل...</value>
+  </data>
+  <data name="EmailRegistrationFailed" xml:space="preserve">
+    <value>فشل التسجيل.</value>
+  </data>
+  <data name="EmailConfirmationTimeout" xml:space="preserve">
+    <value>انتهت المهلة: لم يتم تأكيد البريد الإلكتروني خلال 5 دقائق. يمكنك تسجيل الدخول لاحقًا.</value>
+  </data>
+  <data name="EmailInvalidCredentialsError" xml:space="preserve">
+    <value>بيانات الدخول غير صالحة. تحقق من البريد الإلكتروني وكلمة المرور.</value>
+  </data>
+  <data name="EmailInvalidCredentialsShortError" xml:space="preserve">
+    <value>بيانات الدخول غير صالحة.</value>
+  </data>
+  <data name="EmailNotConfirmedError" xml:space="preserve">
+    <value>لم يتم تأكيد عنوان البريد الإلكتروني بعد. اضغط على رابط التأكيد في صندوق الوارد.</value>
+  </data>
+  <data name="EmailAlreadyRegisteredError" xml:space="preserve">
+    <value>عنوان البريد الإلكتروني هذا مسجل بالفعل. يرجى تسجيل الدخول.</value>
+  </data>
+  <data name="AuthDiscordDisconnectButton" xml:space="preserve">
+    <value>قطع اتصال Discord</value>
+  </data>
+  <data name="AuthDiscordConnectedFormat" xml:space="preserve">
+    <value>Discord متصل - الفئة: {0}</value>
+  </data>
+  <data name="AuthEmailConnectedFormat" xml:space="preserve">
+    <value>البريد الإلكتروني متصل: {0} - الفئة: {1}</value>
+  </data>
+  <data name="AuthNotConnectedStatus" xml:space="preserve">
+    <value>غير متصل - سجّل الدخول لاستخدام المزامنة السحابية والنسخ الاحتياطية</value>
+  </data>
+  <data name="AuthDisconnectingStatus" xml:space="preserve">
+    <value>جارٍ قطع الاتصال...</value>
+  </data>
+  <data name="AuthConnectingStatus" xml:space="preserve">
+    <value>جارٍ الاتصال...</value>
+  </data>
+  <data name="EmailAccountButton" xml:space="preserve">
+    <value>البريد الإلكتروني / الحساب</value>
+  </data>
+  <data name="EmailLogoutConfirmMessage" xml:space="preserve">
+    <value>هل تريد تسجيل الخروج من حساب البريد الإلكتروني؟</value>
+  </data>
+  <data name="CloudLoginPromptTitle" xml:space="preserve">
+    <value>المزامنة السحابية</value>
+  </data>
+  <data name="CloudLoginPromptHeading" xml:space="preserve">
+    <value>يلزم حساب للمزامنة السحابية</value>
+  </data>
+  <data name="CloudLoginPromptDescription" xml:space="preserve">
+    <value>تتطلب خدمات السحابة مثل المزامنة وتخزين النسخ الاحتياطية حسابًا مجانيًا. اختر البريد الإلكتروني أو Discord لمتابعة مزامنة الأجهزة والتراكبات والنسخ الاحتياطية.</value>
+  </data>
+  <data name="CloudLoginPromptEmailButton" xml:space="preserve">
+    <value>المزامنة عبر البريد الإلكتروني</value>
+  </data>
+  <data name="CloudLoginPromptDiscordButton" xml:space="preserve">
+    <value>المزامنة عبر Discord</value>
+  </data>
+  <data name="CloudLoginPromptNoThanksButton" xml:space="preserve">
+    <value>لا شكرًا</value>
+  </data>
+  <data name="CloudTooltipSyncLimitReached" xml:space="preserve">
+    <value>تم الوصول إلى حد المزامنة</value>
+  </data>
+  <data name="CloudTooltipBaseLimit" xml:space="preserve">
+    <value>تم الوصول إلى حد القواعد (مجاني: قاعدتان كحد أقصى، Premium: 10 قواعد كحد أقصى)</value>
+  </data>
+  <data name="BaseAddScreenshot" xml:space="preserve">
+    <value>إضافة لقطة شاشة</value>
+  </data>
+  <data name="BaseScreenshotDragDrop" xml:space="preserve">
+    <value>اسحب صورة وأفلتها هنا</value>
+  </data>
+  <data name="BaseScreenshotPasteHint" xml:space="preserve">
+    <value>أو اضغط CTRL+V للصق لقطة شاشة</value>
+  </data>
+  <data name="BaseScreenshotNoClipboardImage" xml:space="preserve">
+    <value>لم يتم العثور على صورة في الحافظة.</value>
+  </data>
+  <data name="BaseScreenshotPasteErrorTitle" xml:space="preserve">
+    <value>خطأ في اللصق</value>
+  </data>
+  <data name="BaseScreenshotPasteFailedFormat" xml:space="preserve">
+    <value>فشل لصق الصورة: {0}</value>
+  </data>
+  <data name="BaseScreenshotLoadFailedFormat" xml:space="preserve">
+    <value>فشل تحميل ملف الصورة: {0}</value>
+  </data>
+  <data name="BaseScreenshotCompressionErrorTitle" xml:space="preserve">
+    <value>خطأ في الضغط</value>
+  </data>
+  <data name="BaseScreenshotCompressFailedFormat" xml:space="preserve">
+    <value>حدث خطأ أثناء ضغط الصورة: {0}</value>
+  </data>
+  <data name="BaseScreenshotImageInfoFormat" xml:space="preserve">
+    <value>الدقة: {0}x{1} | الحجم: {2} كيلوبايت (الجودة 25%)</value>
+  </data>
+  <data name="BaseNoteWindowTitle" xml:space="preserve">
+    <value>تعديل ملاحظة القاعدة</value>
+  </data>
+  <data name="BaseNoteTitle" xml:space="preserve">
+    <value>ملاحظة القاعدة</value>
+  </data>
+  <data name="BaseAddNote" xml:space="preserve">
+    <value>إضافة ملاحظة</value>
+  </data>
+  <data name="BaseEditNote" xml:space="preserve">
+    <value>تعديل الملاحظة</value>
+  </data>
+  <data name="BaseDeleteNote" xml:space="preserve">
+    <value>حذف الملاحظة</value>
+  </data>
+  <data name="BaseDeleteScreenshotFormat" xml:space="preserve">
+    <value>حذف لقطة الشاشة {0}</value>
+  </data>
+  <data name="BaseAddScreenshotLockedFormat" xml:space="preserve">
+    <value>إضافة لقطة الشاشة {0} (يتطلب Premium)</value>
+  </data>
+  <data name="BaseNoNotesYet" xml:space="preserve">
+    <value>لم تتم إضافة أي ملاحظات بعد.</value>
+  </data>
+  <data name="BaseNoScreenshotsYet" xml:space="preserve">
+    <value>لم تتم إضافة أي لقطات شاشة بعد</value>
+  </data>
+  <data name="ChatFeatureMasterOnlineTitle" xml:space="preserve">
+    <value>Chat Master متصل</value>
+  </data>
+  <data name="ChatFeatureMasterBlockedMessage" xml:space="preserve">
+    <value>{0} يتحكم في تنبيهات الدردشة وأوامر الدردشة لهذا الفريق.</value>
+  </data>
+  <data name="ChatFeatureMasterBlockedShort" xml:space="preserve">
+    <value>Chat Master {0} متصل. تم إيقاف تنبيهات الدردشة وأوامر الدردشة على هذا الجهاز.</value>
+  </data>
+  <data name="ChatFeatureMasterAssignedTitle" xml:space="preserve">
+    <value>أنت Chat Master</value>
+  </data>
+  <data name="ChatFeatureMasterAssignedMessage" xml:space="preserve">
+    <value>هذا الجهاز يتحكم الآن في تنبيهات الدردشة وأوامر الدردشة لفريقك.</value>
+  </data>
+  <data name="ChatFeatureMasterAccept" xml:space="preserve">
+    <value>قبول</value>
+  </data>
+  <data name="ChatFeatureMasterDeny" xml:space="preserve">
+    <value>رفض</value>
+  </data>
+  <data name="Update600Title" xml:space="preserve">
+    <value>تحديث v6.0.0</value>
+  </data>
+  <data name="CompareCloudFeatures" xml:space="preserve">
+    <value>مقارنة ميزات السحابة</value>
+  </data>
+  <data name="CloudFeaturesTitle" xml:space="preserve">
+    <value>مقارنة ميزات السحابة</value>
+  </data>
+  <data name="CloudFeaturesMainHeader" xml:space="preserve">
+    <value>مرحبًا بك في السحابة</value>
+  </data>
+  <data name="CloudFeaturesSubHeader" xml:space="preserve">
+    <value>اختر المستوى الأنسب لاحتياجاتك.</value>
+  </data>
+  <data name="TierNoAccountTitle" xml:space="preserve">
+    <value>بدون حساب</value>
+  </data>
+  <data name="TierNoAccountDesc" xml:space="preserve">
+    <value>تبقى بياناتك محلية 100%. الأفضل للاعبين الفرديين.</value>
+  </data>
+  <data name="FeatNoCloudSync" xml:space="preserve">
+    <value>لا توجد مزامنة سحابية أو نسخ احتياطي</value>
+  </data>
+  <data name="FeatNoDeviceSharing" xml:space="preserve">
+    <value>لا توجد مشاركة للأجهزة</value>
+  </data>
+  <data name="FeatNoPortal" xml:space="preserve">
+    <value>لا يوجد وصول إلى البوابة الإلكترونية</value>
+  </data>
+  <data name="TierFreeAccountTitle" xml:space="preserve">
+    <value>حساب سحابي مجاني</value>
+  </data>
+  <data name="TierFreeAccountDesc" xml:space="preserve">
+    <value>ميزات السحابة الأساسية للبدء بالمشاركة.</value>
+  </data>
+  <data name="FeatBasicDiscord" xml:space="preserve">
+    <value>تنبيهات Webhook الأساسية لـ Discord</value>
+  </data>
+  <data name="FeatDeviceSharingFree" xml:space="preserve">
+    <value>شارك ما يصل إلى 10 أجهزة</value>
+  </data>
+  <data name="FeatMapSharingFree" xml:space="preserve">
+    <value>مشاركة الخريطة (300 كيلوبايت، قاعدتان، لقطة شاشة واحدة)</value>
+  </data>
+  <data name="FeatSupporterHelper" xml:space="preserve">
+    <value>بمثابة مساعد للداعم (Supporter)</value>
+  </data>
+  <data name="FeatPortalAccess" xml:space="preserve">
+    <value>الوصول إلى البوابة الإلكترونية السحابية</value>
+  </data>
+  <data name="TierSupporterTitle" xml:space="preserve">
+    <value>سحابة الداعم (Supporter)</value>
+  </data>
+  <data name="TierSupporterDesc" xml:space="preserve">
+    <value>تجربة Rust+ المطلقة للعشائر والمستخدمين المتقدمين.</value>
+  </data>
+  <data name="FeatMapSharingPro" xml:space="preserve">
+    <value>مشاركة الخريطة الاحترافية (3 ميجابايت، 10 قواعد، 5 لقطات شاشة)</value>
+  </data>
+  <data name="FeatChatMaster" xml:space="preserve">
+    <value>نظام Chat Master</value>
+  </data>
+  <data name="FeatAdvDiscord" xml:space="preserve">
+    <value>روبوت Discord متقدم ثنائي الاتجاه</value>
+  </data>
+  <data name="FeatBetaAccess" xml:space="preserve">
+    <value>الوصول المبكر للنسخة التجريبية عبر Discord</value>
+  </data>
+  <data name="BecomeSupporterTitle" xml:space="preserve">
+    <value>كن داعمًا</value>
+  </data>
+  <data name="SupportViaPatreon" xml:space="preserve">
+    <value>ادعمنا على </value>
+  </data>
+  <data name="SupportViaPatreonDesc" xml:space="preserve">
+    <value> - اربط Patreon بـ Discord للكشف التلقائي عن الدور.</value>
+  </data>
+  <data name="SupportViaSE" xml:space="preserve">
+    <value>بقشيش عبر </value>
+  </data>
+  <data name="SupportViaSEDesc" xml:space="preserve">
+    <value> - تواصل مع Jawad أو Pronwan في Discord للتعيين اليدوي للدور.</value>
+  </data>
+  <data name="OpenCloudWebPortal" xml:space="preserve">
+    <value>افتح البوابة الإلكترونية السحابية</value>
+  </data>
+  <data name="ConnectionFailedRustPlusUnreachable" xml:space="preserve">
+    <value>فشل الاتصال: لا يمكن الوصول إلى Rust+.</value>
+  </data>
+  <data name="ConnectionFailedRustPlusUnreachableComment" xml:space="preserve">
+    <value>إما أن جدار الحماية الخاص بك يمنع الاتصال أو أن واجهة برمجة تطبيقات Rust+ على الخادم لا تعمل بشكل صحيح.</value>
+  </data>
+  <data name="WordYou" xml:space="preserve">
+    <value>أنت</value>
+  </data>
+  <data name="StateOn" xml:space="preserve">
+    <value>تشغيل</value>
+  </data>
+  <data name="StateOff" xml:space="preserve">
+    <value>إيقاف</value>
+  </data>
+  <data name="HotkeyTriggerToggled" xml:space="preserve">
+    <value>[Hotkey] {0}: تم التبديل إلى {1} (بواسطة {2})</value>
+  </data>
+  <data name="OfflineDeathTitle" xml:space="preserve">
+    <value>موت خارج اللعبة</value>
+  </data>
+  <data name="OfflineDeathMessage" xml:space="preserve">
+    <value>تم قتلك بواسطة {0} في {1}.</value>
+  </data>
+  <data name="StopSound" xml:space="preserve">
+    <value>إيقاف الصوت</value>
+  </data>
+  <data name="OfflineDeathNotifications" xml:space="preserve">
+    <value>إشعارات الموت خارج اللعبة</value>
+  </data>
+  <data name="EnableOfflineDeathAlerts" xml:space="preserve">
+    <value>تمكين تنبيهات الموت خارج اللعبة</value>
+  </data>
+  <data name="AlertSound" xml:space="preserve">
+    <value>صوت التنبيه</value>
+  </data>
+  <data name="DefaultSoundLabel" xml:space="preserve">
+    <value>افتراضي: death.mp3</value>
+  </data>
+  <data name="SelectEllipsis" xml:space="preserve">
+    <value>اختيار...</value>
+  </data>
+  <data name="LoopAlertSound" xml:space="preserve">
+    <value>تكرار صوت التنبيه</value>
+  </data>
+  <data name="SendToDiscordRaidAlerts" xml:space="preserve">
+    <value>إرسال إلى تنبيهات مداهمة ديسكورد (Supporter)</value>
+  </data>
+  <data name="OpenOfflineDeathsLog" xml:space="preserve">
+    <value>فتح سجل الموت خارج اللعبة</value>
+  </data>
+  <data name="OfflineDeathLogTitle" xml:space="preserve">
+    <value>سجل الموت خارج اللعبة</value>
+  </data>
+  <data name="ClearLog" xml:space="preserve">
+    <value>مسح السجل</value>
+  </data>
+  <data name="NoOfflineDeathsRecorded" xml:space="preserve">
+    <value>لم يتم تسجيل أي وفيات خارج اللعبة.</value>
+  </data>
+  <data name="KilledBy" xml:space="preserve">
+    <value>قتل بواسطة</value>
+  </data>
+  <data name="CustomAlertsTitle" xml:space="preserve">
+    <value>تخصيص تنبيهات الدردشة</value>
+  </data>
+  <data name="CustomAlertsHeader" xml:space="preserve">
+    <value>تخصيص قوالب تنبيهات الدردشة</value>
+  </data>
+  <data name="CustomAlertsDesc" xml:space="preserve">
+    <value>هنا يمكنك تعديل قوالب تنبيهات الدردشة التلقائية. سيتم استبدال المتغيرات (مثل {0}، {1}) تلقائيًا.</value>
+  </data>
+  <data name="VariablesLabel" xml:space="preserve">
+    <value>المتغيرات: {0}</value>
+  </data>
+  <data name="SaveSuccess" xml:space="preserve">
+    <value>تم حفظ قالب '{0}' بنجاح.</value>
+  </data>
+  <data name="ResetSuccess" xml:space="preserve">
+    <value>تمت إعادة تعيين قالب '{0}' إلى الافتراضي.</value>
+  </data>
+  <data name="SaveSuccessTitle" xml:space="preserve">
+    <value>تم الحفظ بنجاح</value>
+  </data>
+  <data name="ResetSuccessTitle" xml:space="preserve">
+    <value>إعادة تعيين</value>
+  </data>
+  <data name="AlertOilRigTriggeredName" xml:space="preserve">
+    <value>Oil Rig Triggered</value>
+  </data>
+  <data name="AlertOilRigTriggeredDesc" xml:space="preserve">
+    <value>Sent when the Oil Rig event starts.</value>
+  </data>
+  <data name="AlertOilRigTriggeredVars" xml:space="preserve">
+    <value>{0}: Rig Name, {1}: Time to open</value>
+  </data>
+  <data name="AlertCrateUnlocksIn10MinName" xml:space="preserve">
+    <value>Crate Unlocks (10m)</value>
+  </data>
+  <data name="AlertCrateUnlocksIn10MinDesc" xml:space="preserve">
+    <value>Warning sent 10 minutes before crate unlocks.</value>
+  </data>
+  <data name="AlertCrateUnlocksIn10MinVars" xml:space="preserve">
+    <value>{0}: Rig Name</value>
+  </data>
+  <data name="AlertCrateUnlocksIn5MinName" xml:space="preserve">
+    <value>Crate Unlocks (5m)</value>
+  </data>
+  <data name="AlertCrateUnlocksIn5MinDesc" xml:space="preserve">
+    <value>Warning sent 5 minutes before crate unlocks.</value>
+  </data>
+  <data name="AlertCrateUnlocksIn5MinVars" xml:space="preserve">
+    <value>{0}: Rig Name</value>
+  </data>
+  <data name="AlertAlarmTriggeredName" xml:space="preserve">
+    <value>Smart Alarm Triggered</value>
+  </data>
+  <data name="AlertAlarmTriggeredDesc" xml:space="preserve">
+    <value>Sent when a Smart Alarm is triggered.</value>
+  </data>
+  <data name="AlertAlarmTriggeredVars" xml:space="preserve">
+    <value>{0}: Alarm Name</value>
+  </data>
+  <data name="AlertDeepSeaUpName" xml:space="preserve">
+    <value>Deep Sea Event Active</value>
+  </data>
+  <data name="AlertDeepSeaUpDesc" xml:space="preserve">
+    <value>Sent when the Deep Sea event is active.</value>
+  </data>
+  <data name="AlertDeepSeaUpVars" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="AlertNewShopName" xml:space="preserve">
+    <value>New Vending Machine</value>
+  </data>
+  <data name="AlertNewShopDesc" xml:space="preserve">
+    <value>Sent when a new vending machine is detected.</value>
+  </data>
+  <data name="AlertNewShopVars" xml:space="preserve">
+    <value>{0}: Shop Name, {1}: Grid, {2}: Offers</value>
+  </data>
+  <data name="AlertSuspiciousShopName" xml:space="preserve">
+    <value>Suspicious Shop</value>
+  </data>
+  <data name="AlertSuspiciousShopDesc" xml:space="preserve">
+    <value>Sent when a vending machine was online for a very short time.</value>
+  </data>
+  <data name="AlertSuspiciousShopVars" xml:space="preserve">
+    <value>{0}: Shop Name, {1}: Grid, {2}: Online time (s), {3}: Offers</value>
+  </data>
+  <data name="AlertShopMatchName" xml:space="preserve">
+    <value>Vending Machine Item Match</value>
+  </data>
+  <data name="AlertShopMatchDesc" xml:space="preserve">
+    <value>Sent when a vending machine sells an item on your watchlist.</value>
+  </data>
+  <data name="AlertShopMatchVars" xml:space="preserve">
+    <value>{0}: Shop Name, {1}: Grid, {2}: Item, {3}: Cost Qty, {4}: Cost Item, {5}: Stock, {6}: Sell Qty, {7}: Sell Item</value>
+  </data>
+  <data name="AlertCargoSpawnedName" xml:space="preserve">
+    <value>Cargo Ship Spawned</value>
+  </data>
+  <data name="AlertCargoSpawnedDesc" xml:space="preserve">
+    <value>Sent when the Cargo Ship spawns.</value>
+  </data>
+  <data name="AlertCargoSpawnedVars" xml:space="preserve">
+    <value>{0}: Location / Description</value>
+  </data>
+  <data name="AlertCargoDockedName" xml:space="preserve">
+    <value>Cargo Ship Docked</value>
+  </data>
+  <data name="AlertCargoDockedDesc" xml:space="preserve">
+    <value>Sent when the Cargo Ship docks at a harbor.</value>
+  </data>
+  <data name="AlertCargoDockedVars" xml:space="preserve">
+    <value>{0}: Harbor Name, {1}: Grid</value>
+  </data>
+  <data name="AlertCargoExpectedDockName" xml:space="preserve">
+    <value>Cargo Ship Approaching</value>
+  </data>
+  <data name="AlertCargoExpectedDockDesc" xml:space="preserve">
+    <value>Sent when the Cargo Ship is expected to dock in 5 minutes.</value>
+  </data>
+  <data name="AlertCargoExpectedDockVars" xml:space="preserve">
+    <value>{0}: Harbor Name, {1}: Grid</value>
+  </data>
+  <data name="AlertCargoDepartingName" xml:space="preserve">
+    <value>Cargo Ship Departing</value>
+  </data>
+  <data name="AlertCargoDepartingDesc" xml:space="preserve">
+    <value>Sent 5 minutes before the Cargo Ship departs.</value>
+  </data>
+  <data name="AlertCargoDepartingVars" xml:space="preserve">
+    <value>{0}: Harbor Name, {1}: Grid</value>
+  </data>
+  <data name="AlertEventSpawnedName" xml:space="preserve">
+    <value>Event Spawned</value>
+  </data>
+  <data name="AlertEventSpawnedDesc" xml:space="preserve">
+    <value>Sent when general events (like Heli) spawn.</value>
+  </data>
+  <data name="AlertEventSpawnedVars" xml:space="preserve">
+    <value>{0}: Event Name, {1}: Grid</value>
+  </data>
+  <data name="AlertHeliCrashFalseAlarmName" xml:space="preserve">
+    <value>Heli Crash False Alarm</value>
+  </data>
+  <data name="AlertHeliCrashFalseAlarmDesc" xml:space="preserve">
+    <value>Sent when a detected Heli crash was actually server lag.</value>
+  </data>
+  <data name="AlertHeliCrashFalseAlarmVars" xml:space="preserve">
+    <value>{0}: Grid</value>
+  </data>
+  <data name="AlertHeliShotDownName" xml:space="preserve">
+    <value>Patrol Heli Shot Down</value>
+  </data>
+  <data name="AlertHeliShotDownDesc" xml:space="preserve">
+    <value>Sent when the Patrol Heli is shot down.</value>
+  </data>
+  <data name="AlertHeliShotDownVars" xml:space="preserve">
+    <value>{0}: Grid</value>
+  </data>
+  <data name="AlertPlayerOnlineWithPosName" xml:space="preserve">
+    <value>Player Online</value>
+  </data>
+  <data name="AlertPlayerOnlineWithPosDesc" xml:space="preserve">
+    <value>Sent when a tracked team member comes online.</value>
+  </data>
+  <data name="AlertPlayerOnlineWithPosVars" xml:space="preserve">
+    <value>{0}: Player Name, {1}: Grid/Position</value>
+  </data>
+  <data name="AlertPlayerOfflineName" xml:space="preserve">
+    <value>Player Offline</value>
+  </data>
+  <data name="AlertPlayerOfflineDesc" xml:space="preserve">
+    <value>Sent when a tracked team member goes offline.</value>
+  </data>
+  <data name="AlertPlayerOfflineVars" xml:space="preserve">
+    <value>{0}: Player Name</value>
+  </data>
+  <data name="AlertPlayerDiedName" xml:space="preserve">
+    <value>Player Died</value>
+  </data>
+  <data name="AlertPlayerDiedDesc" xml:space="preserve">
+    <value>Sent when a tracked team member dies.</value>
+  </data>
+  <data name="AlertPlayerDiedVars" xml:space="preserve">
+    <value>{0}: Player Name, {1}: Grid/Position</value>
+  </data>
+  <data name="AlertPlayerRespawnedName" xml:space="preserve">
+    <value>Player Respawned</value>
+  </data>
+  <data name="AlertPlayerRespawnedDesc" xml:space="preserve">
+    <value>Sent when a tracked team member respawns.</value>
+  </data>
+  <data name="AlertPlayerRespawnedVars" xml:space="preserve">
+    <value>{0}: Player Name, {1}: Grid/Position</value>
+  </data>
+  <data name="AlertTrackingOnlineName" xml:space="preserve">
+    <value>Tracking Online</value>
+  </data>
+  <data name="AlertTrackingOnlineDesc" xml:space="preserve">
+    <value>Sent when a tracked player goes online.</value>
+  </data>
+  <data name="AlertTrackingOnlineVars" xml:space="preserve">
+    <value>{0}: Player Name, {1}: Group Info</value>
+  </data>
+  <data name="AlertTrackingOfflineName" xml:space="preserve">
+    <value>Tracking Offline</value>
+  </data>
+  <data name="AlertTrackingOfflineDesc" xml:space="preserve">
+    <value>Sent when a tracked player goes offline.</value>
+  </data>
+  <data name="AlertTrackingOfflineVars" xml:space="preserve">
+    <value>{0}: Player Name, {1}: Group Info</value>
+  </data>
+  <data name="AlertTrackingRenamedName" xml:space="preserve">
+    <value>Tracking Renamed</value>
+  </data>
+  <data name="AlertTrackingRenamedDesc" xml:space="preserve">
+    <value>Sent when a tracked player changes their name.</value>
+  </data>
+  <data name="AlertTrackingRenamedVars" xml:space="preserve">
+    <value>{0}: Old Name, {1}: Group Info, {2}: New Name</value>
+  </data>
+  <data name="CustomizeChatAlertsToolTip" xml:space="preserve">
+    <value>تخصيص تنبيهات الدردشة</value>
+  </data>
+  <data name="AfkCommand" xml:space="preserve">
+    <value>اللاعبين AFK</value>
+  </data>
+  <data name="ChatCmdNoOneAfk" xml:space="preserve">
+    <value>لا أحد AFK.</value>
+  </data>
+  <data name="AlertPlayerAfkName" xml:space="preserve">
+    <value>اللاعب AFK</value>
+  </data>
+  <data name="AlertPlayerAfkDesc" xml:space="preserve">
+    <value>يتم إرساله عندما يكون أحد أعضاء الفريق AFK لفترة طويلة.</value>
+  </data>
+  <data name="AlertPlayerAfkVars" xml:space="preserve">
+    <value>{0}: اسم اللاعب، {1}: الوقت</value>
+  </data>
+  <data name="ChangeDeviceIconSubtitle" xml:space="preserve">
+    <value>ابحث عن أيقونة عنصر لهذا الجهاز وحددها.</value>
+  </data>
+  <data name="ChangeDeviceIconTitle" xml:space="preserve">
+    <value>تغيير أيقونة الجهاز</value>
+  </data>
+  <data name="ChangeRuleIconSubtitle" xml:space="preserve">
+    <value>ابحث عن أيقونة عنصر لهذه القاعدة وحددها.</value>
+  </data>
+  <data name="ChangeRuleIconTitle" xml:space="preserve">
+    <value>تغيير أيقونة القاعدة</value>
+  </data>
+  <data name="ResetToDefaultIcon" xml:space="preserve">
+    <value>إعادة التعيين إلى الأيقونة الافتراضية</value>
+  </data>
+  <data name="Rule" xml:space="preserve">
+    <value>قاعدة</value>
+  </data>
+  <data name="SearchIconsPlaceholder" xml:space="preserve">
+    <value>البحث في الأيقونات (مثل: برج، مفتاح)...</value>
+  </data>
+  <data name="NotificationRetentionDays" xml:space="preserve">
+    <value>{0} يومًا</value>
+  </data>
+  <data name="Settings3dMapDeleteData" xml:space="preserve">
+    <value>حذف جميع بيانات الخريطة ثلاثية الأبعاد</value>
+  </data>
+  <data name="RecyclingCalculatorTitle" xml:space="preserve">
+    <value>حاسبة إعادة التدوير للمكونات الخاصة بك والمزيد. شاهد الفرق بين المنطقة الآمنة وإعادة التدوير العادية على الفور.</value>
+  </data>
+  <data name="PatchNotesNewVersionTitle" xml:space="preserve">
+    <value>الإصدار 7.0 - التغييرات الرئيسية</value>
+  </data>
+  <data name="PatchNotesNewVersionText" xml:space="preserve">
+    <value>• خريطة 3D مع مواقع اللاعبين الحية وعلامات الموت
+• تم بناء الخريطة من ملف الخريطة المحلي، وتحصل على معلومات إضافية مثل مناطق حظر البناء، الجبال الجليدية، الكهوف وتعرضها على الخريطة 2D
+• دمج منشئ البصمة للقاعدة 3D
+• محرك منطقي محسن
+• تظهر الآن علامات الفريق داخل اللعبة على الخريطة 2D
+• أيقونات مخصصة للأجهزة الذكية</value>
+  </data>
+  <data name="ThreeDMapSectionTitle" xml:space="preserve">
+    <value>إعدادات الخريطة 3D</value>
+  </data>
+  <data name="Delete3DMapDataTooltip" xml:space="preserve">
+    <value>يحذف جميع بيانات الخريطة ثلاثية الأبعاد التي تم تنزيلها والبيانات المخبأة لتحرير مساحة على القرص</value>
+  </data>
+  <data name="Update700Title" xml:space="preserve">
+    <value>تحديث Rust+ Desktop v7.0.0</value>
+  </data>
+  <data name="Update700Title1" xml:space="preserve">
+    <value>تحسينات الخريطة ثنائية الأبعاد</value>
+  </data>
+  <data name="Update700Desc1" xml:space="preserve">
+    <value>تمت إضافة دعم لعلامات الكهوف وأنقاض الغابة.</value>
+  </data>
+  <data name="Update700Title2" xml:space="preserve">
+    <value>تكامل الخريطة ثلاثية الأبعاد</value>
+  </data>
+  <data name="Update700Desc2" xml:space="preserve">
+    <value>بناء وعرض نماذج خرائط ثلاثية الأبعاد التفاعلية تلقائيًا.</value>
+  </data>
+  <data name="Update700Title3" xml:space="preserve">
+    <value>حاسبة إعادة التدوير</value>
+  </data>
+  <data name="Update700Desc3" xml:space="preserve">
+    <value>حاسبة إعادة التدوير لمكوناتك. شاهد الفرق بين إعادة التدوير في المنطقة الآمنة والمنتظم على الفور.</value>
+  </data>
+  <data name="Update700Title4" xml:space="preserve">
+    <value>الإعدادات والتنظيف</value>
+  </data>
+  <data name="Update700Desc4" xml:space="preserve">
+    <value>احذف بسهولة ذاكرة التخزين المؤقت للخرائط ثلاثية الأبعاد لتحرير مساحة.</value>
+  </data>
+  <data name="Update700DontShowAgain" xml:space="preserve">
+    <value>لا تظهر هذا مرة أخرى</value>
+  </data>
+  <data name="GenericClose" xml:space="preserve">
+    <value>إغلاق</value>
+  </data>
+</root>
