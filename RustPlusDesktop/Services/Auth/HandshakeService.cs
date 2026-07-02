@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using RustPlusDesk.Services.Data;
 
@@ -31,9 +32,16 @@ namespace RustPlusDesk.Services.Auth
 
         private class HandshakeResponse
         {
+            [JsonPropertyName("token")]
             public string? Token { get; set; }
+
+            [JsonPropertyName("recovery_code")]
             public string? RecoveryCode { get; set; }
+
+            [JsonPropertyName("new_recovery_code")]
             public string? NewRecoveryCode { get; set; }
+
+            [JsonPropertyName("error")]
             public string? Error { get; set; }
         }
 

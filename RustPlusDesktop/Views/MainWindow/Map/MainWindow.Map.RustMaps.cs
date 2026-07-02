@@ -9,6 +9,7 @@ using Microsoft.Web.WebView2.Core;
 using System.Text.Json.Nodes;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using RustPlusDesk.Services;
@@ -25,6 +26,8 @@ namespace RustPlusDesk.Views
         private bool _isRustMapsSearching;
         private bool _isMap3DPreparing;
         private bool _isMap3DActive;
+        private bool _isHeatmapFetching = false;
+        private CancellationTokenSource? _heatmapFetchCts;
         private WebView2? _map3DWebView;
         private string? _currentMapFolderPath;
         private EventHandler<CoreWebView2WebResourceRequestedEventArgs>? _map3DResourceRequestHandler;
@@ -61,26 +64,19 @@ namespace RustPlusDesk.Views
                 BtnOpenRustMaps.IsEnabled = false;
             }
 
-            bool canUseLocal3DMap = (SupabaseAuthManager.IsDiscordAuthenticated || SupabaseAuthManager.IsEmailAuthenticated)
-                && profile.IsFullConnected
-                && ImgMap.Source != null;
-            BtnOpen3DMap.Visibility = canUseLocal3DMap ? Visibility.Visible : Visibility.Collapsed;
-            BtnOpen3DMap.IsEnabled = canUseLocal3DMap && !_isMap3DPreparing;
-            TxtOpen3DMap.Text = _isMap3DPreparing ? "Preparing..." : _isMap3DActive ? "2D Map" : "3D Map";
-            IconOpen3DMap.Symbol = _isMap3DActive ? Wpf.Ui.Controls.SymbolRegular.Map20 : Wpf.Ui.Controls.SymbolRegular.Cube20;
+            // 3D Map button escondido — parser corre automaticamente em background
+            BtnOpen3DMap.Visibility = Visibility.Collapsed;
 
             string folderPath = Map3DLocalBuildService.GetPreparedFolderPath(profile, profile.RustMapsMapId);
-            bool mapDataExists = System.IO.File.Exists(System.IO.Path.Combine(folderPath, "map_data.json"));
-            BtnToggleHeatmap.Visibility = mapDataExists ? Visibility.Visible : Visibility.Collapsed;
+            bool mapDataExists = RustMapsHeatmapService.HasCachedHeatmaps(folderPath);
+            bool canFetchHeatmap = !string.IsNullOrEmpty(profile.RustMapsMapId);
+            BtnToggleHeatmap.Visibility = (mapDataExists || canFetchHeatmap) ? Visibility.Visible : Visibility.Collapsed;
+            BtnToggleHeatmap.IsEnabled = !_isHeatmapFetching && !_isMap3DPreparing;
 
-            if (RustPlusDesk.Services.Auth.SupabaseAuthManager.IsPremium)
-            {
+            if (SupabaseAuthManager.IsPremium)
                 BtnSendMapToDiscord.Visibility = Visibility.Visible;
-            }
             else
-            {
                 BtnSendMapToDiscord.Visibility = Visibility.Collapsed;
-            }
         }
 
         public async Task SearchRustMapsAsync(bool forceRefetch = false)
@@ -98,15 +94,14 @@ namespace RustPlusDesk.Views
                 return;
             }
 
-            // 1. If we already have a Map ID and are NOT forcing a refetch, show UI immediately. Local 3D wipe detection is handled by the saved map texture hash.
             if (!forceRefetch && !string.IsNullOrEmpty(profile.RustMapsMapId))
             {
                 _isRustMapsSearching = false;
                 UpdateRustMapsUi();
-return;
+                _ = RunMapParserInBackgroundAsync();
+                return;
             }
 
-            // 2. Perform a full fetch/refetch (show searching state)
             _isRustMapsSearching = true;
             UpdateRustMapsUi();
 
@@ -117,9 +112,7 @@ return;
                 {
                     DateTime? lastWipe = null;
                     if (DateTime.TryParse(match.lastWipeUtc, null, System.Globalization.DateTimeStyles.AdjustToUniversal, out DateTime lw))
-                    {
                         lastWipe = lw;
-                    }
 
                     profile.RustMapsMapId = match.mapId;
                     profile.RustMapsWipeTime = lastWipe;
@@ -127,6 +120,7 @@ return;
                     _vm.Save();
 
                     AppendLog($"[RustMaps] Resolved map {match.mapId} for {profile.Name}.");
+                    _ = RunMapParserInBackgroundAsync();
                 }
                 else
                 {
@@ -134,7 +128,6 @@ return;
                     profile.RustMapsWipeTime = null;
                     profile.RustMapsFetchTime = null;
                     _vm.Save();
-
                     AppendLog($"[RustMaps] Map not found on RustMaps for {profile.Name}.");
                 }
             }
@@ -149,6 +142,109 @@ return;
             }
         }
 
+        private async Task RunMapParserInBackgroundAsync()
+        {
+            var profile = _vm.Selected;
+            if (profile == null || string.IsNullOrEmpty(profile.RustMapsMapId)) return;
+
+            string folderPath = Map3DLocalBuildService.GetPreparedFolderPath(profile, profile.RustMapsMapId);
+
+            // Já temos heatmaps em cache — não correr o parser de novo,
+            // mas gerar extra monuments se ainda não existirem
+            if (RustMapsHeatmapService.HasCachedHeatmaps(folderPath))
+            {
+                string extraMonPath = Path.Combine(folderPath, ExtraMonumentsFileName);
+                if (!File.Exists(extraMonPath))
+                    Dispatcher.InvokeAsync(() => GenerateAndLoadExtraMonumentsForCurrentMap(folderPath));
+                return;
+            }
+
+            _isMap3DPreparing = true;
+            Dispatcher.InvokeAsync(() => UpdateRustMapsUi());
+
+            try
+            {
+                AppendLog("[MapParser] A procurar ficheiro .map e gerar heatmaps...");
+
+                var texture = Dispatcher.Invoke(() => ImgMap.Source as BitmapSource);
+                var references = (_monData ?? new List<(double X, double Y, string Name)>())
+                    .Where(m => !string.IsNullOrWhiteSpace(m.Name))
+                    .Take(12)
+                    .Select(m => new Map3DReferenceMonument(m.X, m.Y, m.Name))
+                    .ToList();
+
+                var result = await Map3DLocalBuildService.PrepareAsync(
+                    profile, texture, profile.RustMapsMapId, references, _worldSizeS);
+
+                if (result.ParserReady)
+                {
+                    AppendLog("[MapParser] ✅ Heatmaps gerados — clica em 🗺️ Heatmap para ver.");
+                    Dispatcher.InvokeAsync(() => GenerateAndLoadExtraMonumentsForCurrentMap(result.FolderPath));
+                }
+                else if (result.NeedsManualMapSelection)
+                {
+                    AppendLog("[MapParser] ⚠️ Ficheiro .map não encontrado automaticamente. Usa o botão 3D Map para seleccionar manualmente.");
+                    // Mostrar o botão 3D temporariamente para permitir selecção manual
+                    Dispatcher.InvokeAsync(() => BtnOpen3DMap.Visibility = Visibility.Visible);
+                }
+                else
+                {
+                    AppendLog($"[MapParser] {result.StatusMessage}");
+                }
+            }
+            catch (Exception ex)
+            {
+                AppendLog($"[MapParser] Erro: {ex.Message}");
+            }
+            finally
+            {
+                _isMap3DPreparing = false;
+                Dispatcher.InvokeAsync(() => UpdateRustMapsUi());
+            }
+        }
+
+        private async Task FetchHeatmapsForCurrentProfileAsync(bool forceRefresh = false)
+        {
+            var profile = _vm.Selected;
+            if (profile == null || string.IsNullOrEmpty(profile.RustMapsMapId)) return;
+
+            string folderPath = Map3DLocalBuildService.GetPreparedFolderPath(profile, profile.RustMapsMapId);
+
+            if (!forceRefresh && RustMapsHeatmapService.HasCachedHeatmaps(folderPath))
+            {
+                AppendLog("[Heatmap] Dados já em cache.");
+                UpdateRustMapsUi();
+                return;
+            }
+
+            _heatmapFetchCts?.Cancel();
+            _heatmapFetchCts = new CancellationTokenSource();
+            var ct = _heatmapFetchCts.Token;
+
+            _isHeatmapFetching = true;
+            UpdateRustMapsUi();
+
+            try
+            {
+                int worldSize = _worldSizeS > 0 ? (int)_worldSizeS : 4000;
+                var progress = new Progress<string>(msg => Dispatcher.InvokeAsync(() => AppendLog(msg)));
+                var result = await RustMapsHeatmapService.FetchAndGenerateAsync(
+                    profile.RustMapsMapId, folderPath, worldSize, progress, ct);
+
+                if (result.Success)
+                    AppendLog("[Heatmap] Heatmaps prontos — clica em 🗺️ Heatmap para ver.");
+                else
+                    AppendLog($"[Heatmap] Falhou: {result.Error}");
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex) { AppendLog($"[Heatmap] Erro: {ex.Message}"); }
+            finally
+            {
+                _isHeatmapFetching = false;
+                Dispatcher.InvokeAsync(() => UpdateRustMapsUi());
+            }
+        }
+
         private async Task<RustMapsMatch?> FetchRustMapsServerMatchAsync(string host, int companionPort)
         {
             if (string.IsNullOrEmpty(host)) return null;
@@ -159,7 +255,6 @@ return;
 
             int gamePort = companionPort - 67;
 
-            // 1. Try exact query (IP + standard Game Port offset)
             if (gamePort > 0)
             {
                 var url = $"https://api.rustmaps.com/internal/v1/servers/search?input={Uri.EscapeDataString($"{host}:{gamePort}")}&onlyServersWithPlayers=true";
@@ -171,20 +266,15 @@ return;
                 if (match != null) return match;
             }
 
-            // 2. Fallback: Search with IP only and find the closest match
             var fallbackUrl = $"https://api.rustmaps.com/internal/v1/servers/search?input={Uri.EscapeDataString(host)}&onlyServersWithPlayers=true";
             var matches = await QueryRustMapsApiListAsync(client, fallbackUrl);
             if (matches != null && matches.Count > 0)
-            {
                 return matches.OrderBy(m => Math.Abs(m.gamePort - gamePort)).First();
-            }
 
             fallbackUrl = $"https://api.rustmaps.com/internal/v1/servers/search?input={Uri.EscapeDataString(host)}";
             matches = await QueryRustMapsApiListAsync(client, fallbackUrl);
             if (matches != null && matches.Count > 0)
-            {
                 return matches.OrderBy(m => Math.Abs(m.gamePort - gamePort)).First();
-            }
 
             return null;
         }
@@ -201,11 +291,11 @@ return;
                     {
                         return new RustMapsMatch
                         {
-                            name = el.TryGetProperty("name", out var n) ? n.GetString() : null,
-                            mapId = el.TryGetProperty("mapId", out var m) ? m.GetString() : null,
-                            ip = el.TryGetProperty("ip", out var ip) ? ip.GetString() : null,
-                            gamePort = el.TryGetProperty("gamePort", out var gp) ? gp.GetInt32() : 0,
-                            lastWipeUtc = el.TryGetProperty("lastWipeUtc", out var w) ? w.GetString() : null
+                            name       = el.TryGetProperty("name",       out var n)  ? n.GetString()  : null,
+                            mapId      = el.TryGetProperty("mapId",      out var m)  ? m.GetString()  : null,
+                            ip         = el.TryGetProperty("ip",         out var ip) ? ip.GetString() : null,
+                            gamePort   = el.TryGetProperty("gamePort",   out var gp) ? gp.GetInt32()  : 0,
+                            lastWipeUtc= el.TryGetProperty("lastWipeUtc",out var w)  ? w.GetString()  : null
                         };
                     }
                 }
@@ -227,11 +317,11 @@ return;
                     {
                         list.Add(new RustMapsMatch
                         {
-                            name = el.TryGetProperty("name", out var n) ? n.GetString() : null,
-                            mapId = el.TryGetProperty("mapId", out var m) ? m.GetString() : null,
-                            ip = el.TryGetProperty("ip", out var ip) ? ip.GetString() : null,
-                            gamePort = el.TryGetProperty("gamePort", out var gp) ? gp.GetInt32() : 0,
-                            lastWipeUtc = el.TryGetProperty("lastWipeUtc", out var w) ? w.GetString() : null
+                            name       = el.TryGetProperty("name",       out var n)  ? n.GetString()  : null,
+                            mapId      = el.TryGetProperty("mapId",      out var m)  ? m.GetString()  : null,
+                            ip         = el.TryGetProperty("ip",         out var ip) ? ip.GetString() : null,
+                            gamePort   = el.TryGetProperty("gamePort",   out var gp) ? gp.GetInt32()  : 0,
+                            lastWipeUtc= el.TryGetProperty("lastWipeUtc",out var w)  ? w.GetString()  : null
                         });
                     }
                 }
@@ -261,7 +351,6 @@ return;
             }
         }
 
-
         private async void BtnOpen3DMap_Click(object sender, RoutedEventArgs e)
         {
             if (_isMap3DActive)
@@ -271,15 +360,9 @@ return;
             }
 
             var profile = _vm.Selected;
-            if (profile == null || !profile.IsFullConnected || ImgMap.Source == null)
+            if (profile == null || ImgMap.Source == null)
             {
-                AppendLog("[3D Map] Fully connect to a server and load its 2D map before building a local 3D map.");
-                return;
-            }
-
-            if (!SupabaseAuthManager.IsDiscordAuthenticated && !SupabaseAuthManager.IsEmailAuthenticated)
-            {
-                AppendLog("[3D Map] Account or Discord login required before local 3D map import.");
+                AppendLog("[3D Map] Connect to a server and load its 2D map first.");
                 return;
             }
 
@@ -291,11 +374,8 @@ return;
                     AppendLog("[3D Map] Local map import canceled.");
                     return;
                 }
-
                 if (dialog.Remember)
-                {
                     Map3DConsentService.RememberConsent();
-                }
             }
 
             _isMap3DPreparing = true;
@@ -313,7 +393,7 @@ return;
                 var result = await Map3DLocalBuildService.PrepareAsync(profile, texture, profile.RustMapsMapId, references, _worldSizeS);
                 if (result.NeedsManualMapSelection)
                 {
-                    AppendLog($"[3D Map] Automatic map detection failed ({result.AttemptCount}/{result.CandidateCount} candidates tried). Asking for the map file manually.");
+                    AppendLog($"[3D Map] Automatic map detection failed. Asking for the map file manually.");
                     var picker = new Microsoft.Win32.OpenFileDialog
                     {
                         Title = "Select Rust .map file",
@@ -322,18 +402,16 @@ return;
                         CheckFileExists = true,
                         Multiselect = false
                     };
-
                     if (picker.ShowDialog(this) == true)
-                    {
                         result = await Map3DLocalBuildService.PrepareAsync(profile, texture, profile.RustMapsMapId, references, _worldSizeS, picker.FileName);
-                    }
                 }
 
-                AppendLog($"[3D Map] {result.StatusMessage} Folder: {result.FolderPath}");
+                AppendLog($"[3D Map] {result.StatusMessage}");
                 if (result.ParserReady)
                 {
-                    AppendLog($"[3D Map] Parser output ready for viewer. Map file: {result.MapFilePath}");
-                    await OpenMap3DViewAsync(result);
+                    AppendLog($"[3D Map] Parser output ready. Map file: {result.MapFilePath}");
+                    // Após selecção manual, esconder o botão novamente
+                    BtnOpen3DMap.Visibility = Visibility.Collapsed;
                 }
             }
             catch (Exception ex)
@@ -346,6 +424,7 @@ return;
                 UpdateRustMapsUi();
             }
         }
+
         private async Task OpenMap3DViewAsync(Map3DLocalBuildResult result)
         {
             _currentMapFolderPath = result.FolderPath;
@@ -368,8 +447,7 @@ return;
 
             string webViewDataFolder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "RustPlusDesk",
-                "WebView2");
+                "RustPlusDesk", "WebView2");
             Directory.CreateDirectory(webViewDataFolder);
             var webViewEnvironment = await CoreWebView2Environment.CreateAsync(userDataFolder: webViewDataFolder);
             await _map3DWebView.EnsureCoreWebView2Async(webViewEnvironment);
@@ -378,7 +456,6 @@ return;
             _map3DWebView.CoreWebView2.AddWebResourceRequestedFilter($"https://{host}/*", CoreWebView2WebResourceContext.All);
             _map3DWebView.CoreWebView2.WebResourceRequested += _map3DResourceRequestHandler;
             _map3DWebView.CoreWebView2.Navigate(url);
-
             _isMap3DActive = true;
             UpdateRustMapsUi();
         }
@@ -405,7 +482,6 @@ return;
                 _map3DWebView.Dispose();
                 _map3DWebView = null;
             }
-
             Map3DHost.Visibility = Visibility.Collapsed;
             Map3DHost.Margin = new Thickness(0);
             ImgMap.Visibility = Visibility.Visible;
@@ -417,18 +493,15 @@ return;
         {
             string? message = null;
             try { message = e.TryGetWebMessageAsString(); } catch { }
-            
             if (message == null)
             {
                 try { message = e.WebMessageAsJson; } catch { }
             }
-            
             if (string.Equals(message, "close3d", StringComparison.OrdinalIgnoreCase))
             {
                 Dispatcher.Invoke(CloseMap3DView);
                 return;
             }
-
             if (!string.IsNullOrEmpty(message))
             {
                 try
@@ -439,7 +512,8 @@ return;
                         if (!string.IsNullOrEmpty(_currentMapFolderPath))
                         {
                             var dataNode = doc.RootElement.GetProperty("data");
-                            var dataString = dataNode.ValueKind == System.Text.Json.JsonValueKind.String ? dataNode.GetString() : dataNode.GetRawText();
+                            var dataString = dataNode.ValueKind == System.Text.Json.JsonValueKind.String
+                                ? dataNode.GetString() : dataNode.GetRawText();
                             string path = Path.Combine(_currentMapFolderPath, "map_buildings.json");
                             await File.WriteAllTextAsync(path, dataString ?? "[]");
                         }
@@ -448,6 +522,7 @@ return;
                 catch { }
             }
         }
+
         private async Task<string> PrepareMap3DViewerRuntimeAsync(Map3DLocalBuildResult result)
         {
             string runtimeRoot = Path.Combine(RustPlusDesk.Services.Data.DataManager.AppDir, "Map3DViewer");
@@ -462,7 +537,8 @@ return;
             CopyFileIfExists(Path.Combine(result.FolderPath, "map_texture.png"), Path.Combine(currentDir, "map_texture.png"));
             CopyFileIfExists(Path.Combine(result.FolderPath, "map_buildings.json"), Path.Combine(currentDir, "map_buildings.json"));
             CopyFileIfExists(Path.Combine(result.FolderPath, "building_blocked.json"), Path.Combine(currentDir, "building_blocked.json"));
-            await WriteViewerMapDataAsync(Path.Combine(result.FolderPath, "map_data.json"), Path.Combine(currentDir, "map_data_viewer.json"), _worldRectPx, ImgMap.Width, ImgMap.Height);
+            await WriteViewerMapDataAsync(Path.Combine(result.FolderPath, "map_data.json"),
+                Path.Combine(currentDir, "map_data_viewer.json"), _worldRectPx, ImgMap.Width, ImgMap.Height);
             return runtimeRoot;
         }
 
@@ -487,31 +563,22 @@ return;
                         args.Response = CreateMap3DResponse(bytes, GetMap3DContentType(diskPath));
                         return;
                     }
-
                     if (isMapRuntimeFile) return;
                 }
 
                 string resourceName = "Map3DViewer/" + relativePath.Replace(Path.DirectorySeparatorChar, '/');
                 byte[]? resourceBytes = ReadEmbeddedResourceBytes(resourceName);
                 if (resourceBytes != null)
-                {
                     args.Response = CreateMap3DResponse(resourceBytes, GetMap3DContentType(resourceName));
-                }
             }
-            catch
-            {
-                // Let WebView2 surface a normal load failure for unexpected request errors.
-            }
+            catch { }
         }
 
         private CoreWebView2WebResourceResponse CreateMap3DResponse(byte[] bytes, string contentType)
         {
             var stream = new MemoryStream(bytes);
             return _map3DWebView!.CoreWebView2.Environment.CreateWebResourceResponse(
-                stream,
-                200,
-                "OK",
-                $"Content-Type: {contentType}\r\nCache-Control: no-cache");
+                stream, 200, "OK", $"Content-Type: {contentType}\r\nCache-Control: no-cache");
         }
 
         private static byte[]? ReadEmbeddedResourceBytes(string logicalName)
@@ -519,9 +586,7 @@ return;
             var assembly = Assembly.GetExecutingAssembly();
             string? manifestName = logicalName;
             if (assembly.GetManifestResourceInfo(manifestName) == null)
-            {
                 Map3DResourceNameMap.Value.TryGetValue(NormalizeMap3DResourceName(logicalName), out manifestName);
-            }
 
             if (manifestName == null) return null;
             using Stream? stream = assembly.GetManifestResourceStream(manifestName);
@@ -531,30 +596,25 @@ return;
             return ms.ToArray();
         }
 
-        private static string NormalizeMap3DResourceName(string name)
-        {
-            return name.Replace('\\', '/');
-        }
+        private static string NormalizeMap3DResourceName(string name) => name.Replace('\\', '/');
 
-        private static string GetMap3DContentType(string path)
-        {
-            return Path.GetExtension(path).ToLowerInvariant() switch
+        private static string GetMap3DContentType(string path) =>
+            Path.GetExtension(path).ToLowerInvariant() switch
             {
                 ".html" => "text/html; charset=utf-8",
-                ".js" => "application/javascript; charset=utf-8",
-                ".css" => "text/css; charset=utf-8",
+                ".js"   => "application/javascript; charset=utf-8",
+                ".css"  => "text/css; charset=utf-8",
                 ".json" => "application/json; charset=utf-8",
-                ".png" => "image/png",
+                ".png"  => "image/png",
                 ".jpg" or ".jpeg" => "image/jpeg",
                 ".webp" => "image/webp",
                 ".wasm" => "application/wasm",
-                ".obj" => "text/plain; charset=utf-8",
-                ".mtl" => "text/plain; charset=utf-8",
-                ".glb" => "model/gltf-binary",
+                ".obj"  => "text/plain; charset=utf-8",
+                ".mtl"  => "text/plain; charset=utf-8",
+                ".glb"  => "model/gltf-binary",
                 ".gltf" => "model/gltf+json",
-                _ => "application/octet-stream"
+                _       => "application/octet-stream"
             };
-        }
 
         private static string? ResolveIconsSourceRoot()
         {
@@ -566,24 +626,9 @@ return;
                 Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "RustPlusDesktop", "RustPlusDesktop", "Assets", "icons")),
                 Path.Combine(baseDir, "Assets", "icons")
             };
-
             return candidates.FirstOrDefault(path =>
                 Directory.Exists(path) &&
                 (File.Exists(Path.Combine(path, "airfield.png")) || File.Exists(Path.Combine(path, "trainyard.png"))));
-        }
-        private static string ResolveMap3DViewerSourceRoot()
-        {
-            string baseDir = AppContext.BaseDirectory;
-            string[] candidates =
-            {
-                Path.Combine(baseDir, "MapParser"),
-                Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "MapParser")),
-                Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "MapParser"))
-            };
-
-            string? found = candidates.FirstOrDefault(p => File.Exists(Path.Combine(p, "index.html")) && File.Exists(Path.Combine(p, "app.js")));
-            if (found == null) throw new FileNotFoundException("3D map viewer files were not found.");
-            return found;
         }
 
         private static async Task WriteViewerMapDataAsync(string sourcePath, string targetPath, Rect worldRectPx, double imageWidth, double imageHeight)
@@ -605,7 +650,8 @@ return;
                 };
                 node["mapTextureUvZoom"] = 1.0;
             }
-            await File.WriteAllTextAsync(targetPath, node.ToJsonString(new JsonSerializerOptions { WriteIndented = false })).ConfigureAwait(false);
+            await File.WriteAllTextAsync(targetPath,
+                node.ToJsonString(new JsonSerializerOptions { WriteIndented = false })).ConfigureAwait(false);
         }
 
         private string ImageSourceToBase64(ImageSource source)
@@ -618,8 +664,7 @@ return;
                     var encoder = new PngBitmapEncoder();
                     encoder.Frames.Add(BitmapFrame.Create(bmp));
                     encoder.Save(ms);
-                    var bytes = ms.ToArray();
-                    return "data:image/png;base64," + Convert.ToBase64String(bytes);
+                    return "data:image/png;base64," + Convert.ToBase64String(ms.ToArray());
                 }
                 catch { }
             }
@@ -629,17 +674,14 @@ return;
         private async void SyncLiveMarkersTo3DMap()
         {
             if (!_isMap3DActive || _map3DWebView?.CoreWebView2 == null) return;
-
             try
             {
                 var playersList = new List<object>();
                 string mySteamIdStr = TrackingService.SteamId64;
                 ulong mySteamId = 0;
                 ulong.TryParse(mySteamIdStr, out mySteamId);
-                
                 string myAvatarB64 = "";
 
-                // Add Team Members
                 foreach (var kv in _dynEls.ToList())
                 {
                     if (kv.Value is FrameworkElement el && el.Tag is PlayerMarkerTag tag)
@@ -649,66 +691,27 @@ return;
                         var vm = TeamMembers.FirstOrDefault(t => t.SteamId == sid);
                         var name = vm?.Name ?? "player";
                         var avatarUrl = vm?.Avatar != null ? ImageSourceToBase64(vm.Avatar) : "";
-                        
                         if (sid == mySteamId && !string.IsNullOrEmpty(avatarUrl))
-                        {
                             myAvatarB64 = avatarUrl;
-                        }
 
-                        bool online = false;
-                        bool dead = false;
-                        if (_lastPresence.TryGetValue(sid, out var p))
-                        {
-                            online = p.Item1;
-                            dead = p.Item2;
-                        }
+                        bool online = false, dead = false;
+                        if (_lastPresence.TryGetValue(sid, out var p)) { online = p.Item1; dead = p.Item2; }
 
-                        // Determine position. C# side receives world coordinates which MapParser uses as x/y
                         double x = 0, y = 0;
-                        if (_lastPlayersBySid.TryGetValue(sid, out var pos))
-                        {
-                            x = pos.x;
-                            y = pos.y;
-                        }
+                        if (_lastPlayersBySid.TryGetValue(sid, out var pos)) { x = pos.x; y = pos.y; }
 
-                        playersList.Add(new
-                        {
-                            sid,
-                            name,
-                            avatar = avatarUrl,
-                            x,
-                            y,
-                            online,
-                            dead,
-                            isSelf = (sid == mySteamId)
-                        });
+                        playersList.Add(new { sid, name, avatar = avatarUrl, x, y, online, dead, isSelf = (sid == mySteamId) });
                     }
                 }
 
                 var deathsList = new List<object>();
-                
-                // Add Death Markers
                 if (_vm?.Selected?.DeathMarkers != null)
                 {
                     foreach (var m in _vm.Selected.DeathMarkers)
-                    {
-                        deathsList.Add(new
-                        {
-                            name = m.CustomName ?? "Death",
-                            x = m.X,
-                            y = m.Y,
-                            avatar = myAvatarB64,
-                            isSelf = true
-                        });
-                    }
+                        deathsList.Add(new { name = m.CustomName ?? "Death", x = m.X, y = m.Y, avatar = myAvatarB64, isSelf = true });
                 }
 
-                var data = new
-                {
-                    players = playersList,
-                    deaths = deathsList
-                };
-
+                var data = new { players = playersList, deaths = deathsList };
                 string json = JsonSerializer.Serialize(data);
                 string script = $"if (window.updateLiveMarkers) window.updateLiveMarkers({json}.players, {json}.deaths);";
                 await _map3DWebView.CoreWebView2.ExecuteScriptAsync(script);
@@ -740,6 +743,7 @@ return;
                 File.Copy(sourceFile, target, overwrite: true);
             }
         }
+
         private async void BtnRefetchRustMaps_Click(object sender, RoutedEventArgs e)
         {
             await SearchRustMapsAsync(forceRefetch: true);
@@ -767,12 +771,7 @@ return;
                 {
                     try
                     {
-                        var data = new
-                        {
-                            type = "SHOW_HEATMAP",
-                            category = heatmapType
-                        };
-
+                        var data = new { type = "SHOW_HEATMAP", category = heatmapType };
                         string json = JsonSerializer.Serialize(data);
                         await _map3DWebView.CoreWebView2.ExecuteScriptAsync($"if (window.handleHeatmapRequest) window.handleHeatmapRequest({json});");
                     }
@@ -783,6 +782,17 @@ return;
                 }
                 else
                 {
+                    // 2D mode — fetch automático se não há dados
+                    var profile = _vm.Selected;
+                    if (profile != null && !string.IsNullOrEmpty(profile.RustMapsMapId))
+                    {
+                        string folder = Map3DLocalBuildService.GetPreparedFolderPath(profile, profile.RustMapsMapId);
+                        if (!RustMapsHeatmapService.HasCachedHeatmaps(folder))
+                        {
+                            AppendLog("[Heatmap] A gerar heatmaps pela primeira vez...");
+                            await RunMapParserInBackgroundAsync();
+                        }
+                    }
                     await DrawHeatmapOn2DMapAsync(heatmapType);
                 }
             }
@@ -797,7 +807,7 @@ return;
             string dataPath = System.IO.Path.Combine(folderPath, "map_data.json");
             if (!System.IO.File.Exists(dataPath))
             {
-                AppendLog("[Heatmap] No map data found for 2D map. Try building 3D Map first.");
+                AppendLog("[Heatmap] No map data found. Refresh RustMaps to generate heatmaps.");
                 return;
             }
 
@@ -805,7 +815,7 @@ return;
             {
                 using var fs = new System.IO.FileStream(dataPath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite);
                 using var doc = await System.Text.Json.JsonDocument.ParseAsync(fs);
-                
+
                 if (doc.RootElement.TryGetProperty("heatmaps", out var heatmapsEl) &&
                     heatmapsEl.TryGetProperty(category, out var b64El))
                 {
@@ -813,20 +823,18 @@ return;
                     if (string.IsNullOrEmpty(b64)) return;
 
                     byte[] rawData = Convert.FromBase64String(b64);
-                    int width = 512;
-                    int height = 512;
+                    int width = 512, height = 512;
                     if (rawData.Length != width * height) return;
 
                     int[] pixels = new int[width * height];
                     float[] blurred = new float[width * height];
-                    int radius = 3; // 7x7 blur
+                    int radius = 3;
 
                     for (int y = 0; y < height; y++)
                     {
                         for (int x = 0; x < width; x++)
                         {
-                            float sum = 0;
-                            int count = 0;
+                            float sum = 0; int count = 0;
                             for (int dy = -radius; dy <= radius; dy++)
                             {
                                 int ny = y + dy;
@@ -848,45 +856,32 @@ return;
                         for (int x = 0; x < width; x++)
                         {
                             int destI = y * width + x;
-                            float original = rawData[destI];
-                            float val = Math.Max(blurred[destI], original);
-
-                            if (val <= 2)
-                            {
-                                pixels[destI] = 0;
-                                continue;
-                            }
+                            float val = Math.Max(blurred[destI], rawData[destI]);
+                            if (val <= 2) { pixels[destI] = 0; continue; }
 
                             float t = Math.Min(1.0f, val / 255f);
                             byte a = (byte)(t * 180 + 75);
                             byte r = (byte)Math.Min(255, 255 * (t * 2));
                             byte g = (byte)Math.Min(255, 255 * (2 - t * 2));
                             byte b = 0;
-
-                            // Pre-multiply alpha for Pbgra32
                             r = (byte)((r * a) / 255);
                             g = (byte)((g * a) / 255);
                             b = (byte)((b * a) / 255);
-
                             pixels[destI] = (a << 24) | (r << 16) | (g << 8) | b;
                         }
                     }
 
-                    // Apply the scale and margin
-                    var ptTopLeft = WorldToImagePx(0, _worldSizeS);
+                    var ptTopLeft  = WorldToImagePx(0, _worldSizeS);
                     var ptBotRight = WorldToImagePx(_worldSizeS, 0);
                     if (ptBotRight.X > ptTopLeft.X && ptBotRight.Y > ptTopLeft.Y)
                     {
-                        ImgHeatmap.Width = ptBotRight.X - ptTopLeft.X;
+                        ImgHeatmap.Width  = ptBotRight.X - ptTopLeft.X;
                         ImgHeatmap.Height = ptBotRight.Y - ptTopLeft.Y;
                         ImgHeatmap.Margin = new Thickness(ptTopLeft.X, ptTopLeft.Y, 0, 0);
                     }
 
-                    var writeableBmp = new System.Windows.Media.Imaging.WriteableBitmap(
-                        width, height, 96, 96, System.Windows.Media.PixelFormats.Pbgra32, null);
-
+                    var writeableBmp = new WriteableBitmap(width, height, 96, 96, PixelFormats.Pbgra32, null);
                     writeableBmp.WritePixels(new System.Windows.Int32Rect(0, 0, width, height), pixels, width * 4, 0);
-
                     ImgHeatmap.Source = writeableBmp;
                 }
                 else
@@ -902,10 +897,10 @@ return;
 
         private sealed class RustMapsMatch
         {
-            public string? name { get; set; }
-            public string? mapId { get; set; }
-            public string? ip { get; set; }
-            public int gamePort { get; set; }
+            public string? name       { get; set; }
+            public string? mapId      { get; set; }
+            public string? ip         { get; set; }
+            public int     gamePort   { get; set; }
             public string? lastWipeUtc { get; set; }
         }
     }

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using RustPlusDesk.Models;
@@ -134,8 +136,7 @@ public class DiscordBotListenerService
 
             if (status != "pending" || string.IsNullOrEmpty(id) || string.IsNullOrEmpty(guildId)) return;
 
-            // Comandos para o bot Node.js — a app não processa
-            if (commandType != null && (commandType.StartsWith("notify_") || commandType == "send_teamchat" || commandType == "map_screenshot"))
+            if (commandType != null && (commandType.StartsWith("notify_") || commandType == "map_screenshot"))
             {
                 Log($"[DiscordBotListener] Skipping bot-only command: {commandType}");
                 return;
@@ -312,17 +313,26 @@ public class DiscordBotListenerService
                         });
                         break;
 
-                    case "map_screenshot":
-                        // Queued by BtnSendMapToDiscord — image is in payload, bot picks it up via polling
-                        // The app just marks it completed; the bot Node.js handles sending to Discord
-                        result.Success = true;
-                        result.Message = "Map screenshot queued for bot delivery.";
-                        break;
+                    case "send_teamchat":
+                    {
+                        var msgText = record.Payload?["message"]?.ToString();
+                        var author  = record.Payload?["author"]?.ToString() ?? "Discord";
 
-                    default:
-                        result.Message = $"Unknown or unsupported command: {commandType}";
+                        if (string.IsNullOrEmpty(msgText))
+                        {
+                            result.Success = false;
+                            result.Message = "Empty teamchat message.";
+                            break;
+                        }
+
+                        var formatted = $"[Discord] {author}: {msgText}";
+                        await mainWindow.SendTeamChatFromDiscordAsync(formatted);
+
+                        result.Success = true;
+                        result.Message = $"Sent to in-game chat: {formatted}";
                         break;
-                }
+                    }
+                }    
             }
             catch (Exception ex)
             {
@@ -401,11 +411,13 @@ public class DiscordBotListenerService
         }
     }
 
-    public async Task SendNotificationAsync(string notificationType, string message)
+    public async Task SendNotificationAsync(string notificationType, string message, string? serverName = null)
     {
         if (!_isListening || _teamSteamIds.Count == 0) return;
 
-        await SendNotificationToOwnersAsync(notificationType, message, _teamSteamIds);
+        var srv = serverName ?? TrackingService.LastServer.name;
+        var fullMessage = string.IsNullOrWhiteSpace(srv) ? message : $"{message}\n**{srv}**";
+        await SendNotificationToOwnersAsync(notificationType, fullMessage, _teamSteamIds);
     }
 
     public async Task SendRaidNotificationAsync(string serverKey, string ownerSteamId, string message)
@@ -441,6 +453,8 @@ public class DiscordBotListenerService
         await SendNotificationToOwnersAsync("raid", message, new List<string> { ownerSteamId });
     }
 
+    private static readonly HttpClient _notifyHttpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
+
     private static async Task SendNotificationToOwnersAsync(
         string notificationType,
         string message,
@@ -474,33 +488,70 @@ public class DiscordBotListenerService
                 return;
             }
 
-            // Insert notification into bot_commands_queue — bot Node.js picks it up and sends to Discord
+            // Enviar directamente para a Edge Function /notify — sem passar pela
+            // bot_commands_queue, porque o bot Node.js não escuta notify_*.
+            // (notify_* fica reservado para a app, nunca é processado pelo bot.)
+            bool tts = notificationType == "raid";
             int sent = 0;
+
             foreach (var guildId in guildIds)
             {
-                var payload = Newtonsoft.Json.Linq.JObject.FromObject(new
-                {
-                    notification_type = notificationType,
-                    message = message,
-                });
-
-                await SupabaseAuthManager.Client
-                    .From<RustPlusDesk.Models.BotCommandsQueueModel>()
-                    .Insert(new RustPlusDesk.Models.BotCommandsQueueModel
-                    {
-                        GuildId = guildId,
-                        CommandType = $"notify_{notificationType}",
-                        Payload = payload,
-                        Status = "pending",
-                    });
-                sent++;
+                bool ok = await SendNotifyHttpAsync(guildId, notificationType, message, tts);
+                if (ok) sent++;
             }
 
-            Log($"[DiscordBotListener] Queued {notificationType} notification for {sent} guild(s).");
+            Log($"[DiscordBotListener] Sent {notificationType} notification to {sent}/{guildIds.Count} guild(s).");
         }
         catch (Exception ex)
         {
             Log($"[DiscordBotListener] Failed to send notification: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// POST directo para a Edge Function discord-bot-interactions/notify.
+    /// Substitui o caminho antigo via bot_commands_queue (notify_*), que
+    /// ficava preso em "pending" porque o bot Node.js não escuta esse tipo
+    /// de comando — só processa map_screenshot e respostas de interactions.
+    /// </summary>
+    private static async Task<bool> SendNotifyHttpAsync(string guildId, string notificationType, string message, bool tts)
+    {
+        try
+        {
+            var url = $"{RustPlusDesk.Services.Data.DataManager.SUPABASE_URL.TrimEnd('/')}/functions/v1/discord-bot-interactions/notify";
+            var request = new HttpRequestMessage(HttpMethod.Post, url);
+            request.Headers.Add("apikey", RustPlusDesk.Services.Data.DataManager.SUPABASE_ANON_KEY);
+            request.Headers.Add("X-Client-Version", RustPlusDesk.Helpers.VersionHelper.GetClientVersion());
+
+            var token = SupabaseAuthManager.Client?.Auth?.CurrentSession?.AccessToken;
+            if (!string.IsNullOrEmpty(token))
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var payload = new
+            {
+                guild_id = guildId,
+                content = message,
+                notification_type = notificationType,
+                tts = tts,
+            };
+
+            request.Content = new StringContent(
+                JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+            var response = await _notifyHttpClient.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                var err = await response.Content.ReadAsStringAsync();
+                Log($"[DiscordBotListener] /notify failed for guild {guildId}: {response.StatusCode} — {err}");
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Log($"[DiscordBotListener] /notify exception for guild {guildId}: {ex.Message}");
+            return false;
         }
     }
 

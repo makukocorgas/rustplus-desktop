@@ -75,14 +75,16 @@ public class TrackingSettings
     public int MapMonumentDisplayMode { get; set; } = 0;
     public double MapMonumentScale { get; set; } = 1.0;
     public double MapMonumentOpacity { get; set; } = 1.0;
+    public List<string> HiddenExtraMonumentTypes { get; set; } = new();
     public bool BackgroundTrackingEnabled { get; set; } = true;
     public bool CloseToTrayEnabled { get; set; } = false;
     public bool StartMinimizedEnabled { get; set; } = false;
     public bool AutoConnectEnabled { get; set; } = false;
     public bool AutoStartEnabled { get; set; } = false;
     public bool AutoLoadShops { get; set; } = true;
-    public bool HideConsole { get; set; } = false;
+    public bool HideConsole { get; set; } = true;
     public double SidebarWidth { get; set; } = 600;
+    public bool SidebarPinned { get; set; } = true;
     public string SteamId64 { get; set; } = string.Empty;
     public bool AnnounceCargo { get; set; } = false;
     public bool AnnounceHeli { get; set; } = false;
@@ -115,8 +117,6 @@ public class TrackingSettings
     public bool AnnounceSpawnsMaster { get; set; } = false;
     public bool ChatMasterOfferSoundEnabled { get; set; } = true;
     public bool SaveAlertSelection { get; set; } = true;
-    public string LastSeenVersion { get; set; } = "";
-    public bool SuppressVersion7Notice { get; set; } = false;
     public DateTime? FcmIssuedAt { get; set; }
     public DateTime? FcmExpiresAt { get; set; }
     public bool AnnounceTracking { get; set; } = false;
@@ -527,6 +527,11 @@ public static class TrackingService
         get => _settings.SidebarWidth;
         set { _settings.SidebarWidth = value; SaveDB(); }
     }
+    public static bool SidebarPinned
+    {
+        get => _settings.SidebarPinned;
+        set { _settings.SidebarPinned = value; SaveDB(); }
+    }
 
     public static string SteamId64
     {
@@ -778,16 +783,29 @@ public static class TrackingService
         get => _settings.MapMonumentOpacity;
         set { _settings.MapMonumentOpacity = value; SaveDB(); }
     }
-    public static string LastSeenVersion
+    public static IReadOnlyList<string> HiddenExtraMonumentTypes
+        => _settings.HiddenExtraMonumentTypes;
+
+    public static bool IsExtraMonumentTypeHidden(string name)
+        => _settings.HiddenExtraMonumentTypes.Contains(name, StringComparer.OrdinalIgnoreCase);
+
+    public static void SetExtraMonumentTypeHidden(string name, bool hidden)
     {
-        get => _settings.LastSeenVersion;
-        set { _settings.LastSeenVersion = value; SaveDB(); }
+        bool changed;
+        if (hidden)
+        {
+            if (!_settings.HiddenExtraMonumentTypes.Contains(name, StringComparer.OrdinalIgnoreCase))
+            {
+                _settings.HiddenExtraMonumentTypes.Add(name);
+                changed = true;
+            }
+            else changed = false;
+        }
+        else
+            changed = _settings.HiddenExtraMonumentTypes.RemoveAll(n => string.Equals(n, name, StringComparison.OrdinalIgnoreCase)) > 0;
+        if (changed) SaveDB();
     }
-    public static bool SuppressVersion7Notice
-    {
-        get => _settings.SuppressVersion7Notice;
-        set { _settings.SuppressVersion7Notice = value; SaveDB(); }
-    }
+
     public static int GetLearnedCargoFullLife(string host)
     {
         if (_settings.LearnedCargoFullLifeMinutes.TryGetValue(host, out var d)) return d;
@@ -1229,16 +1247,23 @@ public static class TrackingService
                     foreach (var serverObj in dataArr.EnumerateArray())
                     {
                         var attr = serverObj.GetProperty("attributes");
-                        var foundIp = attr.TryGetProperty("ip", out var ipEl) ? ipEl.GetString() : "";
-                        var foundPort = attr.TryGetProperty("port", out var portEl) ? portEl.GetInt32() : 0;
-                        var foundName = attr.TryGetProperty("name", out var nameEl) ? nameEl.GetString() ?? "" : "";
+                        var foundIp   = attr.TryGetProperty("ip",        out var ipEl)    ? ipEl.GetString()    : "";
+                        var foundPort = attr.TryGetProperty("port",      out var portEl)  ? portEl.GetInt32()   : 0;
+                        var foundPortQ= attr.TryGetProperty("portQuery", out var portQEl) ? portQEl.GetInt32()  : 0;
+                        var foundName = attr.TryGetProperty("name",      out var nameEl)  ? nameEl.GetString() ?? "" : "";
 
                         if (foundIp == _lastServerHost)
                         {
-                            // Multiple servers on same IP — match by port first, then name
-                            if (foundPort == _lastServerPort ||
-                                string.IsNullOrEmpty(_lastServerName) ||
-                                foundName.Contains(_lastServerName, StringComparison.OrdinalIgnoreCase))
+                            // BM stores the game port; Rust+ uses the companion app port
+                            // (typically gamePort + 67, e.g. 28015 → 28082).
+                            // Accept ±100 tolerance to bridge that offset.
+                            bool portMatch = foundPort == _lastServerPort
+                                || (foundPortQ > 0 && foundPortQ == _lastServerPort)
+                                || Math.Abs(foundPort - _lastServerPort) <= 100;
+                            bool nameMatch = !string.IsNullOrEmpty(_lastServerName)
+                                && foundName.Contains(_lastServerName, StringComparison.OrdinalIgnoreCase);
+
+                            if (portMatch || nameMatch || string.IsNullOrEmpty(_lastServerName))
                             {
                                 _foundServerId = serverObj.GetProperty("id").GetString();
                                 Log($"[BM] Found server by IP: {_foundServerId} ({foundName})");

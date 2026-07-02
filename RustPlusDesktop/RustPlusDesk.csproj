@@ -19,12 +19,12 @@
 
 	<PropertyGroup>
 		<!-- Produkt-/Paketversion (für Vergleich & Anzeige) -->
-		<Version>7.2.0</Version>
+		<Version>8.0.0</Version>
 		<Title>Rust+ Desk</Title>
-		<Authors>Pronwan</Authors>
-		<AssemblyVersion>7.2.0</AssemblyVersion>
-		<FileVersion>7.2.0</FileVersion>
-		<InformationalVersion>7.2.0</InformationalVersion>
+		<Authors>makukocorgas</Authors>
+		<AssemblyVersion>8.0.0</AssemblyVersion>
+		<FileVersion>8.0.0</FileVersion>
+		<InformationalVersion>8.0.0</InformationalVersion>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 		
 		<!-- (optional, hübsch im Datei-Eigenschaften-Dialog) -->
@@ -90,13 +90,19 @@
 	  <None Remove="Assets\icons\fishingvillagelarge.png" />
 	  <None Remove="Assets\icons\gasstation.png" />
 	  <None Remove="Assets\icons\godrock.png" />
+	  <None Remove="Assets\icons\godrock_large.png" />
+	  <None Remove="Assets\icons\godrock_medium.png" />
+	  <None Remove="Assets\icons\godrock_small.png" />
 	  <None Remove="Assets\icons\harbour.png" />
 	  <None Remove="Assets\icons\harbour2.png" />
 	  <None Remove="Assets\icons\hqmquarry.png" />
 	  <None Remove="Assets\icons\iceberg.png" />
 	  <None Remove="Assets\icons\ice_lake.png" />
 	  <None Remove="Assets\icons\jungle.png" />
+	  <None Remove="Assets\icons\jungle_swamp.png" />
+	  <None Remove="Assets\icons\jungle_ziggurat.png" />
 	  <None Remove="Assets\icons\junkyard.png" />
+	  <None Remove="Assets\icons\Lakes.png" />
 	  <None Remove="Assets\icons\largeoilrig.png" />
 	  <None Remove="Assets\icons\launchsite.png" />
 	  <None Remove="Assets\icons\lighthouse.png" />
@@ -132,6 +138,7 @@
 	  <None Remove="Assets\icons\miningoutpost.png" />
 	  <None Remove="Assets\icons\miningoutpost2.png" />
 	  <None Remove="Assets\icons\missilesilo.png" />
+	  <None Remove="Assets\icons\Oases.png" />
 	  <None Remove="Assets\icons\oilrig.png" />
 	  <None Remove="Assets\icons\outpost.png" />
 	  <None Remove="Assets\icons\patrol.png" />
@@ -158,6 +165,7 @@
 	  <None Remove="Assets\icons\text.png" />
 	  <None Remove="Assets\icons\traintunnel.png" />
 	  <None Remove="Assets\icons\traintunnel2.png" />
+	  <None Remove="Assets\icons\Tunnel_Entrance.png" />
 	  <None Remove="Assets\icons\trainyard.png" />
 	  <None Remove="Assets\icons\trash.png" />
 	  <None Remove="Assets\icons\underwater.png" />
@@ -172,71 +180,9 @@
 
 	  <None Remove="Assets\icons\discord.png" />
 	  <None Remove="Assets\icq-message.wav" />
-	  <None Remove="Assets\Images\5.3.0\LoopAudio_StopLogic.png" />
-	  <None Remove="Assets\Images\5.5.0\Account-needed.png" />
-	  <None Remove="Assets\Images\5.5.0\Advanced-Discord-Settings.png" />
-	  <None Remove="Assets\Images\5.5.0\Advanced-Discord.png" />
-
-	  <None Remove="Assets\Images\5.5.0\App-customTimer.png" />
-	  <None Remove="Assets\Images\5.5.0\APP-new-shop-system.png" />
-	  <None Remove="Assets\Images\5.5.0\Basic-Discord.png" />
-	  <None Remove="Assets\Images\5.5.0\Chat_Master-Slave.png" />
-	  <None Remove="Assets\Images\5.5.0\Chat_Master1.png" />
-	  <None Remove="Assets\Images\5.5.0\Cloud-Backend.png" />
-	  <None Remove="Assets\Images\5.5.0\Cloud-Base-Screenshots.png" />
-	  <None Remove="Assets\Images\5.5.0\Device-Cloud-Sync.png" />
-	  <None Remove="Assets\Images\5.5.0\discord-no-permission.png" />
-	  <None Remove="Assets\Images\5.5.0\New-Custom-Death-Markers.png" />
-	  <None Remove="Assets\Images\5.5.0\r+desktop-icon-bot.png" />
-	  <None Remove="Assets\Images\6.0 Cloud Patch\afk.png" />
-	  <None Remove="Assets\Images\6.0 Cloud Patch\camera_move.png" />
-	  <None Remove="Assets\Images\6.0 Cloud Patch\Chat-Command-Customization.png" />
-	  <None Remove="Assets\Images\6.0 Cloud Patch\Chat-Command-Delay.png" />
-	  <None Remove="Assets\Images\6.0 Cloud Patch\death-notifications.png" />
-	  <None Remove="Assets\Images\6.0 Cloud Patch\death-snackbar.png" />
-	  <None Remove="Assets\Images\6.0 Cloud Patch\devices-icons.png" />
-	  <None Remove="Assets\Images\6.0 Cloud Patch\MapFetchDiscord.png" />
-	  <None Remove="Assets\Images\6.0 Cloud Patch\Thumbnail_RustPlus6_V6.jpg" />
-	  <None Remove="Assets\Images\6.0 Cloud Patch\window-size.png" />
-	  <None Remove="Assets\Images\6.0 Cloud Patch\WPF_devicelist.png" />
-	  <None Remove="Assets\Images\6.3.1\Logic-Engine.png" />
-	  <None Remove="Assets\Images\6.3.1\LogicEngine-Button_and_subscriber_dock.png" />
-	  <None Remove="Assets\Images\7.0\3D-Base-Footprint.png" />
-	  <None Remove="Assets\Images\7.0\custom-icons-smart.png" />
-	  <None Remove="Assets\Images\7.0\heatmap-3D.png" />
-	  <None Remove="Assets\Images\7.0\heatmap.png" />
-	  <None Remove="Assets\Images\7.0\Ingame-Waypoints-on-map.png" />
-	  <None Remove="Assets\Images\7.0\Live-Following-3D.png" />
-	  <None Remove="Assets\Images\7.0\Logic-Engine.png" />
-	  <None Remove="Assets\Images\7.0\No-Build-Zones-3D.png" />
-	  <None Remove="Assets\Images\7.0\Recycling-Calculator.png" />
-	  <None Remove="Assets\Images\RustPlus_V5_Thumbnail.jpg" />
 	  <None Remove="Assets\rustplus-desktop-icon.ico" />
 	  <None Remove="Assets\Data\rust_items.json" />
-	  <None Remove="Assets\Screenshots\3.0_1.png" />
-	  <None Remove="Assets\Screenshots\3.0_2.png" />
-	  <None Remove="Assets\Screenshots\3.0_3.png" />
-	  <None Remove="Assets\Screenshots\3.0_4.png" />
-	  <None Remove="Assets\Screenshots\3.0_5.png" />
-	  <None Remove="Assets\Screenshots\3.0_6.png" />
-	  <None Remove="Assets\Screenshots\3.1.0.png" />
-	  <None Remove="Assets\Screenshots\3.2.0.png" />
-	  <None Remove="Assets\Screenshots\3.3.0_1.png" />
-	  <None Remove="Assets\Screenshots\3.3.0_2.png" />
-	  <None Remove="Assets\Screenshots\3_5A.png" />
-	  <None Remove="Assets\Screenshots\3_5B.png" />
-	  <None Remove="Assets\Screenshots\4.5.0.png" />
-	  <None Remove="Assets\Screenshots\5.2.png" />
-	  <None Remove="Assets\Screenshots\Cargo_docked_countdown.png" />
-	  <None Remove="Assets\Screenshots\Cargo_notification_settings.png" />
-	  <None Remove="Assets\Screenshots\Cargo_remaining-on-map.png" />
-	  <None Remove="Assets\Screenshots\Tracking1.jpg" />
-	  <None Remove="Assets\Screenshots\Tracking2.jpg" />
-	  <None Remove="Assets\Screenshots\Tracking3.jpg" />
-	  <None Remove="Assets\Screenshots\Tracking4.jpg" />
-	  <None Remove="Assets\Screenshots\Tracking5.jpg" />
-	  <None Remove="Assets\Screenshots\v4_map_overhaul.png" />
-	  <None Remove="Assets\Screenshots\v4_shop_hover.png" />
+
 	  <None Remove="Assets\TitleScreen-rust-plus-desktop.png" />
 	</ItemGroup>
 	<ItemGroup>
@@ -252,6 +198,9 @@
 	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 	  </Resource>
 	  <Resource Include="Assets\icons\godrock.png" />
+	  <Resource Include="Assets\icons\godrock_large.png" />
+	  <Resource Include="Assets\icons\godrock_medium.png" />
+	  <Resource Include="Assets\icons\godrock_small.png" />
 	  <Resource Include="Assets\icons\iceberg.png" />
 	  <Resource Include="Assets\icons\ice_lake.png" />
 	  <Resource Include="Assets\icons\pen.png">
@@ -311,6 +260,15 @@
     <PackageReference Include="supabase-csharp" Version="0.16.2" />
     <PackageReference Include="WPF-UI" Version="3.0.5" />
   </ItemGroup>
+
+  <ItemGroup>
+  <EmbeddedResource Include="Map3DParser\MapParser.exe">
+    <LogicalName>Map3DParser/MapParser.exe</LogicalName>
+  </EmbeddedResource>
+  <EmbeddedResource Include="Map3DParser\prefabs_map.json">
+    <LogicalName>Map3DParser/prefabs_map.json</LogicalName>
+  </EmbeddedResource>
+</ItemGroup>
 
   <ItemGroup Condition="Exists('..\MapParser\index.html')">
     <EmbeddedResource Include="..\MapParser\index.html">
@@ -391,7 +349,10 @@
     <Resource Include="Assets\icons\harbour2.png" />
     <Resource Include="Assets\icons\hqmquarry.png" />
     <Resource Include="Assets\icons\jungle.png" />
+    <Resource Include="Assets\icons\jungle_swamp.png" />
+    <Resource Include="Assets\icons\jungle_ziggurat.png" />
     <Resource Include="Assets\icons\junkyard.png" />
+    <Resource Include="Assets\icons\Lakes.png" />
     <Resource Include="Assets\icons\largeoilrig.png" />
     <Resource Include="Assets\icons\launchsite.png" />
     <Resource Include="Assets\icons\lighthouse.png" />
@@ -412,6 +373,7 @@
     <Resource Include="Assets\icons\miningoutpost.png" />
     <Resource Include="Assets\icons\miningoutpost2.png" />
     <Resource Include="Assets\icons\missilesilo.png" />
+    <Resource Include="Assets\icons\Oases.png" />
     <Resource Include="Assets\icons\oilrig.png" />
     <Resource Include="Assets\icons\outpost.png" />
     <Resource Include="Assets\icons\patrol.png" />
@@ -430,6 +392,7 @@
     <Resource Include="Assets\icons\swamp.png" />
     <Resource Include="Assets\icons\traintunnel.png" />
     <Resource Include="Assets\icons\traintunnel2.png" />
+    <Resource Include="Assets\icons\Tunnel_Entrance.png" />
     <Resource Include="Assets\icons\assets_markers_train.png" />
     <Resource Include="Assets\icons\trainyard.png" />
     <Resource Include="Assets\icons\underwater.png" />
@@ -446,80 +409,8 @@
     <EmbeddedResource Include="Assets\Data\Recycling-Data.json" />
     <Resource Include="Assets\icons\discord.png" />
     <Resource Include="Assets\icq-message.wav" />
-    <Resource Include="Assets\Images\5.3.0\LoopAudio_StopLogic.png" />
-    <Resource Include="Assets\Images\5.5.0\Account-needed.png" />
-    <Resource Include="Assets\Images\5.5.0\Advanced-Discord-Settings.png" />
-    <Resource Include="Assets\Images\5.5.0\Advanced-Discord.png" />
-
-    <Resource Include="Assets\Images\5.5.0\App-customTimer.png" />
-    <Resource Include="Assets\Images\5.5.0\APP-new-shop-system.png" />
-    <Resource Include="Assets\Images\5.5.0\Basic-Discord.png" />
-    <Resource Include="Assets\Images\5.5.0\Chat_Master-Slave.png" />
-    <Resource Include="Assets\Images\5.5.0\Chat_Master1.png" />
-    <Resource Include="Assets\Images\5.5.0\Cloud-Backend.png" />
-    <Resource Include="Assets\Images\5.5.0\Cloud-Base-Screenshots.png" />
-    <Resource Include="Assets\Images\5.5.0\Device-Cloud-Sync.png" />
-    <Resource Include="Assets\Images\5.5.0\discord-no-permission.png" />
-    <Resource Include="Assets\Images\5.5.0\New-Custom-Death-Markers.png" />
-    <Resource Include="Assets\Images\5.5.0\r+desktop-icon-bot.png" />
-    <Resource Include="Assets\Images\6.0 Cloud Patch\afk.png" />
-    <Resource Include="Assets\Images\6.0 Cloud Patch\camera_move.png" />
-    <Resource Include="Assets\Images\6.0 Cloud Patch\Chat-Command-Customization.png" />
-    <Resource Include="Assets\Images\6.0 Cloud Patch\Chat-Command-Delay.png" />
-    <Resource Include="Assets\Images\6.0 Cloud Patch\devices-icons.png" />
-    <Resource Include="Assets\Images\6.0 Cloud Patch\MapFetchDiscord.png" />
-    <Resource Include="Assets\Images\6.0 Cloud Patch\Thumbnail_RustPlus6_V6.jpg" />
-    <Resource Include="Assets\Images\6.0 Cloud Patch\window-size.png" />
-    <Resource Include="Assets\Images\6.0 Cloud Patch\WPF_devicelist.png" />
-    <Resource Include="Assets\Images\6.3.1\Logic-Engine.png" />
-    <Resource Include="Assets\Images\6.3.1\LogicEngine-Button_and_subscriber_dock.png" />
-    <Resource Include="Assets\Images\7.0\3D-Base-Footprint.png" />
-    <Resource Include="Assets\Images\7.0\custom-icons-smart.png" />
-    <Resource Include="Assets\Images\7.0\heatmap-3D.png" />
-    <Resource Include="Assets\Images\7.0\heatmap.png" />
-    <Resource Include="Assets\Images\7.0\Ingame-Waypoints-on-map.png" />
-    <Resource Include="Assets\Images\7.0\Live-Following-3D.png" />
-    <Resource Include="Assets\Images\7.0\Logic-Engine.png" />
-    <Resource Include="Assets\Images\7.0\No-Build-Zones-3D.png" />
-    <Resource Include="Assets\Images\7.0\Recycling-Calculator.png" />
-    <Resource Include="Assets\Images\RustPlus_V5_Thumbnail.jpg" />
     <Resource Include="Assets\rustplus-desktop-icon.ico" />
-    <Resource Include="Assets\Screenshots\3.0_1.png" />
-    <Resource Include="Assets\Screenshots\3.0_2.png" />
-    <Resource Include="Assets\Screenshots\3.0_3.png" />
-    <Resource Include="Assets\Screenshots\3.0_4.png" />
-    <Resource Include="Assets\Screenshots\3.0_5.png" />
-    <Resource Include="Assets\Screenshots\3.0_6.png" />
-    <Resource Include="Assets\Screenshots\3.1.0.png" />
-    <Resource Include="Assets\Screenshots\3.2.0.png" />
-    <Resource Include="Assets\Screenshots\3.3.0_1.png" />
-    <Resource Include="Assets\Screenshots\3.3.0_2.png" />
-    <Resource Include="Assets\Screenshots\3_5A.png" />
-    <Resource Include="Assets\Screenshots\3_5B.png" />
-    <Resource Include="Assets\Screenshots\4.5.0.png" />
-    <Resource Include="Assets\Screenshots\5.2.png" />
-    <Resource Include="Assets\Screenshots\Cargo_docked_countdown.png" />
-    <Resource Include="Assets\Screenshots\Cargo_notification_settings.png" />
-    <Resource Include="Assets\Screenshots\Cargo_remaining-on-map.png" />
-    <Resource Include="Assets\Screenshots\Tracking1.jpg" />
-    <Resource Include="Assets\Screenshots\Tracking2.jpg" />
-    <Resource Include="Assets\Screenshots\Tracking3.jpg" />
-    <Resource Include="Assets\Screenshots\Tracking4.jpg" />
-    <Resource Include="Assets\Screenshots\Tracking5.jpg" />
-    <Resource Include="Assets\Screenshots\v4_map_overhaul.png" />
-    <Resource Include="Assets\Screenshots\v4_shop_hover.png" />
-    <Resource Include="Assets\Screenshots\v4_5.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Assets\Screenshots\4.4_1.png" />
-    <Resource Include="Assets\Screenshots\beta-5.1_1.png" />
-    <Resource Include="Assets\Screenshots\beta-5.1_2.png" />
-    <Resource Include="Assets\Screenshots\beta-5.1_3.png" />
-    <Resource Include="Assets\Screenshots\beta-5.1_4.png" />
-    <Resource Include="Assets\Screenshots\beta-5.1_5.png" />
-    <Resource Include="Assets\Screenshots\beta-5.1_6.png" />
-    <Resource Include="Assets\Screenshots\beta-5.1_7.png" />
-    <Resource Include="Assets\Screenshots\Notifications.png" />
+
     <Resource Include="Assets\Flags\*.png" />
     <Resource Include="Assets\icons\map-markers\assets_markers_iconmap_dollar.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
@@ -590,19 +481,14 @@
     <Resource Include="Assets\icons\map-markers\assets_markers_tunnel.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Assets\Images\6.0 Cloud Patch\death-notifications.png" />
-    <Resource Include="Assets\Images\6.0 Cloud Patch\death-snackbar.png" />
+
     <Resource Include="Assets\TitleScreen-rust-plus-desktop.png" />
     <Resource Include="Assets\icons\map-markers\Heatmap.png" />
     <Resource Include="Assets\icons\map-markers\junk.png" />
     <Resource Include="Assets\icons\map-markers\ore.png" />
     <Resource Include="Assets\Data\rust_items.json" />
     <Resource Include="Assets\Data\monument_bounds.json" />
-    <Resource Include="Assets\Images\5.3.0\ChatCommandsUI-1.png" />
-    <Resource Include="Assets\Images\5.3.0\ChatCommandsUI-2.png" />
-    <Resource Include="Assets\Images\5.3.0\NewLanguageSelector.png" />
-    <Resource Include="Assets\Images\5.3.0\NewSettingOverlayOnLeftPanel.png" />
-    <Resource Include="Assets\Images\5.3.0\newTeamChatUI.png" />
+
   </ItemGroup>
 
   <ItemGroup>
@@ -617,7 +503,6 @@
       <TargetPath>Properties\%(Filename)%(Extension)</TargetPath>
     </EmbeddedResource>
   </ItemGroup>
-
 
 	
 	<PropertyGroup>

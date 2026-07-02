@@ -1232,11 +1232,6 @@ private bool _overlayToolsVisible = false;
                     : _lastOverlayCloudTooltip ?? CloudText("CloudTooltipActive", "Cloud-Sync active");
         }
 
-        if (BtnPremiumInfoDevices != null)
-            BtnPremiumInfoDevices.Visibility = Visibility.Collapsed;
-
-        if (BtnPremiumInfoMap != null)
-            BtnPremiumInfoMap.Visibility = Visibility.Collapsed;
     }
 
     private bool IsFreeDeviceSyncLimitExceeded()
@@ -1430,10 +1425,13 @@ private bool _overlayToolsVisible = false;
 
     private void ShowPremiumLimitDialog(string message)
     {
-        var dlg = new Views.Windows.PremiumInfoWindow(message) { Owner = this };
-        dlg.ShowDialog();
+        var result = MessageBox.Show(
+            message + "\n\nClick Yes to disable Cloud Sync, or No to keep it active.",
+            "Cloud Sync Limit",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Information);
 
-        if (dlg.Result == Views.Windows.PremiumInfoResult.StopSync)
+        if (result == MessageBoxResult.Yes)
         {
             TrackingService.CloudSyncEnabled = false;
             TrackingService.UploadConsentGiven = false;

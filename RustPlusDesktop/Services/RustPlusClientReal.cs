@@ -982,18 +982,24 @@ rp.on("connected", async () => {
     // Sicherheitsnetz
     timer = setTimeout(() => { console.error("TIMEOUT"); try { rp.disconnect(); } catch {} }, Math.max(1000, tmo));
   } catch (e) {
-    console.error("ERR:" + (e && e.message ? e.message : String(e)));
+    console.error("ERR:" + _serr(e));
     try { rp.disconnect(); } catch {}
   }
 });
 
-rp.on("error", (e) => {
-  try {
-    const msg = (e && (e.message || e.code)) ? `${e.message||e.code}` : JSON.stringify(e);
-    console.error("ERR:" + msg);
-  } catch { console.error("ERR:unknown"); }
-});
+rp.on("error", (e) => { console.error("ERR:" + _serr(e)); });
 rp.connect();
+
+function _serr(e) {
+  if (!e) return "null";
+  if (typeof e === "string") return e;
+  if (e instanceof Error) return e.message || String(e);
+  if (e.response && e.response.error) return "server: " + JSON.stringify(e.response.error);
+  try {
+    const s = JSON.stringify(e, Object.getOwnPropertyNames(e));
+    return (s && s !== "{}") ? s : "[object, keys=" + Object.keys(e).join(",") + "]";
+  } catch { return "[unserializable]"; }
+}
 """;
 
         var rustplusPkgDir = Path.Combine(pkgRoot, "node_modules", "@liamcottle", "rustplus.js");
@@ -1897,17 +1903,23 @@ rp.on("connected", async () => {
     });
     process.stdin.resume();
   } catch (e) {
-    console.error("ERR:" + (e && e.message ? e.message : String(e)));
+    console.error("ERR:" + _serr(e));
     process.exit(1);
   }
 });
-rp.on("error", (e) => {
-  try {
-    const msg = (e && (e.message || e.code)) ? `${e.message||e.code}` : JSON.stringify(e);
-    console.error("ERR:" + msg);
-  } catch { console.error("ERR:unknown"); }
-});
+rp.on("error", (e) => { console.error("ERR:" + _serr(e)); });
 rp.connect();
+
+function _serr(e) {
+  if (!e) return "null";
+  if (typeof e === "string") return e;
+  if (e instanceof Error) return e.message || String(e);
+  if (e.response && e.response.error) return "server: " + JSON.stringify(e.response.error);
+  try {
+    const s = JSON.stringify(e, Object.getOwnPropertyNames(e));
+    return (s && s !== "{}") ? s : "[object, keys=" + Object.keys(e).join(",") + "]";
+  } catch { return "[unserializable]"; }
+}
 """;
 
         var rustplusPkgDir = Path.Combine(pkgRoot, "node_modules", "@liamcottle", "rustplus.js");

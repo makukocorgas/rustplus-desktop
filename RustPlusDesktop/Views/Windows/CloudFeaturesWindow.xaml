@@ -119,12 +119,12 @@
                         <TextBlock Text="{DynamicResource BecomeSupporterTitle}" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource Accent}" Margin="0,0,0,5"/>
                         <TextBlock TextWrapping="Wrap" Margin="0,0,0,5">
                             <Run Text="{DynamicResource SupportViaPatreon}"/>
-                            <Hyperlink NavigateUri="https://www.patreon.com/cw/Pronwan/membership" RequestNavigate="Hyperlink_RequestNavigate">Patreon</Hyperlink>
+                            <Hyperlink NavigateUri="https://www.patreon.com/cw/makukocorgas/membership" RequestNavigate="Hyperlink_RequestNavigate">Patreon</Hyperlink>
                             <Run Text="{DynamicResource SupportViaPatreonDesc}"/>
                         </TextBlock>
                         <TextBlock TextWrapping="Wrap">
                             <Run Text="{DynamicResource SupportViaSE}"/>
-                            <Hyperlink NavigateUri="https://streamelements.com/pronwan/tip" RequestNavigate="Hyperlink_RequestNavigate">Stream Elements</Hyperlink>
+                            <Hyperlink NavigateUri="https://streamelements.com/makukocorgas/tip" RequestNavigate="Hyperlink_RequestNavigate">Stream Elements</Hyperlink>
                             <Run Text="{DynamicResource SupportViaSEDesc}"/>
                         </TextBlock>
                     </StackPanel>

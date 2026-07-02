@@ -4,7 +4,7 @@
 ; =============================================
 
 #define MyAppName      "RustPlusDesk"
-#define MyAppVersion   "7.1.0"
+#define MyAppVersion   "8.0.0"
 #define MyAppPublisher "makukocorgas" 
 #define MyAppURL       "https://github.com/makukocorgas/rustplus-desktop"
 #define MyAppExeName   "RustPlusDesk.exe"

@@ -390,7 +390,12 @@ public partial class MainWindow
                     var msg = AlertTemplateService.GetFormattedAlert("AlertCargoSpawned", locStr);
                     _ = SendTeamChatSafeAsync(msg, false, true);
                     _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDEA2 **Event:** {msg}");
-                    
+                    if (RustPlusDesk.Services.TrackingService.NotificationsToastEnabled)
+                    {
+                        var notif = new RustPlusDesk.Models.RustPlusNotification(type: "Event", title: "\uD83D\uDEA2 Cargo Ship", message: msg,
+                            serverIp: _vm?.Selected?.Host ?? "", serverPort: _vm?.Selected?.Port ?? 0, serverName: _vm?.Selected?.Name ?? "");
+                        RustPlusDesk.Services.NotificationCenterService.AddNotification(notif);
+                    }
                     if (state.SeenAtEdge)
                         AppendLog($"[cargo] Spawn detected at edge (dist: {distFromCenter:F0}, threshold: {half * 0.85:F0})");
                 }
@@ -490,6 +495,12 @@ public partial class MainWindow
                 var msg = AlertTemplateService.GetFormattedAlert("AlertCargoDocked", state.HarborName, grid);
                 _ = SendTeamChatSafeAsync(msg, false, true);
                 _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDEA2 **Event Update:** {msg}");
+                if (RustPlusDesk.Services.TrackingService.NotificationsToastEnabled)
+                {
+                    var notif = new RustPlusDesk.Models.RustPlusNotification(type: "Event", title: "\uD83D\uDEA2 Cargo Docked", message: msg,
+                        serverIp: _vm?.Selected?.Host ?? "", serverPort: _vm?.Selected?.Port ?? 0, serverName: _vm?.Selected?.Name ?? "");
+                    RustPlusDesk.Services.NotificationCenterService.AddNotification(notif);
+                }
                 state.AnnouncedDock = true;
             }
         }
@@ -515,6 +526,12 @@ public partial class MainWindow
                             var msg = AlertTemplateService.GetFormattedAlert("AlertCargoExpectedDock", Beautify(h.Name!), grid);
                             _ = SendTeamChatSafeAsync(msg, false, true);
                             _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDEA2 **Event Update:** {msg}");
+                            if (RustPlusDesk.Services.TrackingService.NotificationsToastEnabled)
+                            {
+                                var notif = new RustPlusDesk.Models.RustPlusNotification(type: "Event", title: "\uD83D\uDEA2 Cargo Approaching", message: msg,
+                                    serverIp: _vm?.Selected?.Host ?? "", serverPort: _vm?.Selected?.Port ?? 0, serverName: _vm?.Selected?.Name ?? "");
+                                RustPlusDesk.Services.NotificationCenterService.AddNotification(notif);
+                            }
                             state.AnnouncedArrivalWarning = true;
                             state.ArrivalWarnedAt = DateTime.UtcNow; // Record for accuracy validation
                             break;
@@ -543,6 +560,12 @@ public partial class MainWindow
                     var msg = AlertTemplateService.GetFormattedAlert("AlertCargoDeparting", state.HarborName, grid);
                     _ = SendTeamChatSafeAsync(msg, false, true);
                     _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDEA2 **Event Update:** {msg}");
+                    if (RustPlusDesk.Services.TrackingService.NotificationsToastEnabled)
+                    {
+                        var notif = new RustPlusDesk.Models.RustPlusNotification(type: "Event", title: "\uD83D\uDEA2 Cargo Departing", message: msg,
+                            serverIp: _vm?.Selected?.Host ?? "", serverPort: _vm?.Selected?.Port ?? 0, serverName: _vm?.Selected?.Name ?? "");
+                        RustPlusDesk.Services.NotificationCenterService.AddNotification(notif);
+                    }
                     state.AnnouncedEgressWarning = true;
                 }
             }
@@ -1285,7 +1308,7 @@ public partial class MainWindow
                     {
                         var msg = AlertTemplateService.GetFormattedAlert("AlertHeliCrashFalseAlarm", GetGridLabel(m.X, m.Y));
                         _ = SendTeamChatSafeAsync(msg, false, true);
-                        _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDEA2 **Event Update:** {msg}");
+                        _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDE81 **Event Update:** {msg}");
                     }
                     AppendLog($"[HeliCrash] False alarm retracted â€” Heli {key} reappeared at {GetGridLabel(m.X, m.Y)}");
                 }
@@ -1413,7 +1436,8 @@ public partial class MainWindow
                             6 => TrackingService.AnnounceVendor,
                             9 => false,   // Oil Rig handled by MonumentWatcher (sends its own triggered message)
                             150 => false, // Virtual markers for Oil Rig handled by MonumentWatcher
-                            _ => true 
+                            7 => false,   // Player Tool Cupboard zones — not game events; real locked crates are remapped to type 6
+                            _ => true
                         };
 
                         if (_announceSpawns && shouldAnnounce && _firstMarkerPollDone && !_firstPollDyn)
@@ -1422,7 +1446,7 @@ public partial class MainWindow
                             var kind = EventKindText(m.Type);
                             var msg = AlertTemplateService.GetFormattedAlert("AlertEventSpawned", kind, grid);
                             _ = SendTeamChatSafeAsync(msg, false, true);
-                            _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDEA2 **Event:** {msg}");
+                            _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"{EventKindEmoji(m.Type)} **Event:** {msg}");
 
                             // Toast notification
                             if (RustPlusDesk.Services.TrackingService.NotificationsToastEnabled)
@@ -1703,7 +1727,7 @@ public partial class MainWindow
                         {
                             var msg = AlertTemplateService.GetFormattedAlert("AlertHeliShotDown", crashGrid);
                             _ = SendTeamChatSafeAsync(msg, false, true);
-                            _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDEA2 **Event Update:** {msg}");
+                            _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDE81 **Event Update:** {msg}");
                         }
                         AppendLog($"[HeliCrash] Crash detected at {crashGrid} (last real pos {cx:F0},{cy:F0})");
                     }

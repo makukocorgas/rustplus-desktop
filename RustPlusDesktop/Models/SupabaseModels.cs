@@ -231,11 +231,6 @@ namespace RustPlusDesk.Models
         [JsonPropertyName("information_id")]
         public string? InformationId { get; set; }
 
-        [Column("servers_id")]
-        [JsonProperty("servers_id")]
-        [JsonPropertyName("servers_id")]
-        public string? ServersId { get; set; }
-
         [Column("settings_id")]
         [JsonProperty("settings_id")]
         [JsonPropertyName("settings_id")]
@@ -255,21 +250,6 @@ namespace RustPlusDesk.Models
         [JsonProperty("teamchat_id")]
         [JsonPropertyName("teamchat_id")]
         public string? TeamchatId { get; set; }
-
-        [Column("switches_id")]
-        [JsonProperty("switches_id")]
-        [JsonPropertyName("switches_id")]
-        public string? SwitchesId { get; set; }
-
-        [Column("storagemonitors_id")]
-        [JsonProperty("storagemonitors_id")]
-        [JsonPropertyName("storagemonitors_id")]
-        public string? StoragemonitorsId { get; set; }
-
-        [Column("activity_id")]
-        [JsonProperty("activity_id")]
-        [JsonPropertyName("activity_id")]
-        public string? ActivityId { get; set; }
 
         [Column("trackers_id")]
         [JsonProperty("trackers_id")]

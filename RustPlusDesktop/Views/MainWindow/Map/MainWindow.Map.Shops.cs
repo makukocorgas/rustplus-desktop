@@ -53,7 +53,13 @@ public partial class MainWindow
                     {
                         var msg = AlertTemplateService.GetAlertTemplate("AlertDeepSeaUp");
                         _ = SendTeamChatSafeAsync(msg, false, true);
-                        _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDEA2 **Event:** {msg}");
+                        _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83C\uDF0A **Event:** {msg}");
+                        if (RustPlusDesk.Services.TrackingService.NotificationsToastEnabled)
+                        {
+                            var notif = new RustPlusDesk.Models.RustPlusNotification(type: "Event", title: "\uD83C\uDF0A Deep Sea", message: msg,
+                                serverIp: _vm?.Selected?.Host ?? "", serverPort: _vm?.Selected?.Port ?? 0, serverName: _vm?.Selected?.Name ?? "");
+                            RustPlusDesk.Services.NotificationCenterService.AddNotification(notif);
+                        }
                     }
                     AppendLog($"[DEEPSEA] Spawn detected at {deepSeaShop.X:F0},{deepSeaShop.Y:F0} (Direction: {dir})");
                 }

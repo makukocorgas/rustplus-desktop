@@ -138,6 +138,16 @@ public partial class MainWindow
         catch { /* ignore background errors */ }
     }
 
+    /// <summary>
+    /// Envia uma mensagem vinda do Discord (#teamchat) para o chat da
+    /// equipa in-game. skipDiscordChatForwarding=true evita reenviar
+    /// a mensagem de volta para o Discord (loop infinito).
+    /// </summary>
+    public async Task SendTeamChatFromDiscordAsync(string message)
+    {
+        await SendTeamChatSafeAsync(message, bypassChatAlertMasterBlock: true, skipDiscordChatForwarding: true);
+    }
+
     private async Task<bool> SendTeamChatReliableAsync(string text)
     {
         if (_rust is not RustPlusClientReal real) return false;

@@ -77,16 +77,6 @@ namespace RustPlusDesk.Views.Windows
         private void BtnEmail_Click(object sender, RoutedEventArgs e)
         {
             Close();
-            var emailWin = new EmailLoginWindow { Owner = _owner };
-            if (emailWin.ShowDialog() == true && emailWin.LoginSuccessful)
-            {
-                _owner?.AppendLog("[Cloud] Email login successful via Cloud prompt.");
-                _owner?.UpdateCloudSyncUI();
-                if (_owner?.AppSettingsPanel != null)
-                {
-                    _owner.AppSettingsPanel.LoadSettings();
-                }
-            }
         }
 
         private void BtnSkip_Click(object sender, RoutedEventArgs e) => Close();

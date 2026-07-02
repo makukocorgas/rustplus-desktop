@@ -12,6 +12,9 @@ public partial class MainWindow
 {
     private const string ExtraMonumentsFileName = "map_extra_monuments.json";
 
+    private readonly HashSet<string> _extraMonumentNames = new(StringComparer.OrdinalIgnoreCase);
+    private List<ExtraMonument>? _lastExtraMonuments;
+
     private void GenerateAndLoadExtraMonumentsForCurrentMap(string? folderPath)
     {
         if (string.IsNullOrWhiteSpace(folderPath)) return;
@@ -38,11 +41,38 @@ public partial class MainWindow
                     string c = ReadString(el, "c").ToLowerInvariant();
                     string i = ReadString(el, "i").ToLowerInvariant();
                     if (c == "iceberg") AddPrefab(el, "Iceberg");
+                    else if (c == "oasis") AddPrefab(el, "Oasis");
+                    else if (c == "lake") AddPrefab(el, "Lake");
                     else if (c == "tunnel-entrance") AddPrefab(el, "Tunnel Entrance");
                     else if (i.StartsWith("water_well", StringComparison.OrdinalIgnoreCase)) AddPrefab(el, "Water Well");
                     else if (i.StartsWith("ice_lake", StringComparison.OrdinalIgnoreCase)) AddPrefab(el, "Ice Lake");
                     else if (i.StartsWith("jungle_ruins", StringComparison.OrdinalIgnoreCase)) AddPrefab(el, "Jungle Ruins");
+                    else if (i.StartsWith("ue_jungle_swamp", StringComparison.OrdinalIgnoreCase)) AddPrefab(el, "Jungle Swamp");
                     else if (i.StartsWith("cave_", StringComparison.OrdinalIgnoreCase)) AddPrefab(el, "Cave");
+                    else if (i.Contains("ziggurat")) { /* already returned by API as "Jungle Ziggurat" */ }
+                }
+            }
+
+            // Fallback: scan map_resolved.json for extra monuments missed by map_data.json
+            string resolvedPath = Path.Combine(folderPath, "map_resolved.json");
+            if (File.Exists(resolvedPath))
+            {
+                using var resolvedDoc = JsonDocument.Parse(File.ReadAllText(resolvedPath));
+                if (resolvedDoc.RootElement.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var el in resolvedDoc.RootElement.EnumerateArray())
+                    {
+                        string c = ReadString(el, "c").ToLowerInvariant();
+                        string i = ReadString(el, "i").ToLowerInvariant();
+                        if (c == "oasis") AddPrefab(el, "Oasis");
+                        else if (c == "iceberg") AddPrefab(el, "Iceberg");
+                        else if (c == "lake") AddPrefab(el, "Lake");
+                        else if (i.StartsWith("water_well", StringComparison.OrdinalIgnoreCase)) AddPrefab(el, "Water Well");
+                        else if (i.StartsWith("ice_lake", StringComparison.OrdinalIgnoreCase)) AddPrefab(el, "Ice Lake");
+                        else if (i.StartsWith("jungle_ruins", StringComparison.OrdinalIgnoreCase)) AddPrefab(el, "Jungle Ruins");
+                        else if (i.StartsWith("ue_jungle_swamp", StringComparison.OrdinalIgnoreCase)) AddPrefab(el, "Jungle Swamp");
+                        else if (i.StartsWith("cave_", StringComparison.OrdinalIgnoreCase)) AddPrefab(el, "Cave");
+                    }
                 }
             }
 
@@ -53,7 +83,7 @@ public partial class MainWindow
                     string kind = ReadString(el, "kind");
                     if (!kind.Contains("God Rock", StringComparison.OrdinalIgnoreCase) && !kind.Contains("Anvil Rock", StringComparison.OrdinalIgnoreCase)) continue;
                     if (!TryReadPoint(el, out double x, out double y)) continue;
-                    string name = kind.Contains("Anvil", StringComparison.OrdinalIgnoreCase) ? "Anvil Rock" : "God Rock";
+                    string name = NormalizeRockClusterExtraMonumentName(kind, ReadString(el, "size"));
                     extras.Add(new ExtraMonument { X = x + half, Y = y + half, Name = name });
                 }
             }
@@ -67,7 +97,7 @@ public partial class MainWindow
 
             string outPath = Path.Combine(folderPath, ExtraMonumentsFileName);
             File.WriteAllText(outPath, JsonSerializer.Serialize(filtered, new JsonSerializerOptions { WriteIndented = true }));
-            MergeExtraMonuments(filtered);
+            StoreAndMergeExtraMonuments(filtered);
             BuildMonumentOverlays();
         }
         catch (Exception ex)
@@ -85,20 +115,57 @@ public partial class MainWindow
             string path = Path.Combine(folder, ExtraMonumentsFileName);
             if (!File.Exists(path)) return;
             var extras = JsonSerializer.Deserialize<List<ExtraMonument>>(File.ReadAllText(path), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            if (extras != null) MergeExtraMonuments(extras);
+            if (extras != null) StoreAndMergeExtraMonuments(extras);
         }
         catch { }
+    }
+
+    /// <summary>
+    /// Stores the full extra monument list for later re-filtering and merges the visible subset into _monData.
+    /// Tracks the distinct type names so the settings panel can enumerate them.
+    /// </summary>
+    private void StoreAndMergeExtraMonuments(List<ExtraMonument> extras)
+    {
+        _lastExtraMonuments = extras;
+        _extraMonumentNames.Clear();
+        foreach (var e in extras)
+            _extraMonumentNames.Add(e.Name);
+
+        MergeExtraMonuments(extras);
     }
 
     private void MergeExtraMonuments(IEnumerable<ExtraMonument> extras)
     {
         foreach (var extra in extras)
         {
-            if (_monData.Any(m => string.Equals(m.Name, extra.Name, StringComparison.OrdinalIgnoreCase) && Math.Sqrt((m.X - extra.X) * (m.X - extra.X) + (m.Y - extra.Y) * (m.Y - extra.Y)) < 35))
+            if (TrackingService.IsExtraMonumentTypeHidden(extra.Name)) continue;
+
+            if (_monData.Any(m => string.Equals(m.Name, extra.Name, StringComparison.OrdinalIgnoreCase) &&
+                                  Math.Sqrt((m.X - extra.X) * (m.X - extra.X) + (m.Y - extra.Y) * (m.Y - extra.Y)) < 35))
                 continue;
             _monData.Add((extra.X, extra.Y, extra.Name));
         }
     }
+
+    /// <summary>
+    /// Re-applies the current extra monument type filter to _monData and rebuilds the map overlays.
+    /// Call this after the user changes the hidden-types setting.
+    /// </summary>
+    internal void RebuildExtraMonumentOverlay()
+    {
+        if (_lastExtraMonuments == null) return;
+
+        _monData.RemoveAll(m => _extraMonumentNames.Contains(m.Name));
+        MergeExtraMonuments(_lastExtraMonuments);
+        BuildMonumentOverlays();
+    }
+
+    /// <summary>
+    /// Returns the sorted distinct type names present in the extra monuments for the current map.
+    /// Returns an empty list if no extra monuments have been loaded yet.
+    /// </summary>
+    internal IReadOnlyList<string> GetKnownExtraMonumentTypes()
+        => _extraMonumentNames.OrderBy(n => n).ToList();
 
     private static bool TryReadPoint(JsonElement el, out double x, out double y)
     {
@@ -111,6 +178,18 @@ public partial class MainWindow
 
     private static string ReadString(JsonElement el, string name)
         => el.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() ?? "" : "";
+
+    private static string NormalizeRockClusterExtraMonumentName(string kind, string size)
+    {
+        if (kind.Contains("Anvil", StringComparison.OrdinalIgnoreCase)) return "Anvil Rock";
+        if (kind.Contains("Small God Rock", StringComparison.OrdinalIgnoreCase) ||
+            size.Equals("small", StringComparison.OrdinalIgnoreCase)) return "Small God Rock";
+        if (kind.Contains("Medium God Rock", StringComparison.OrdinalIgnoreCase) ||
+            size.Equals("medium", StringComparison.OrdinalIgnoreCase)) return "Medium God Rock";
+        if (kind.Contains("Large God Rock", StringComparison.OrdinalIgnoreCase) ||
+            size.Equals("large", StringComparison.OrdinalIgnoreCase)) return "Large God Rock";
+        return "God Rock";
+    }
 
     private sealed class ExtraMonument
     {
