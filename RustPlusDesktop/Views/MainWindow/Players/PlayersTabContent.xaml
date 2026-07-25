@@ -4,11 +4,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <TabControl
+        x:Name="RootTabControl"
         Margin="0,10,0,0"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
         Background="Transparent"
-        BorderThickness="0">
+        BorderThickness="0"
+        SelectionChanged="RootTabControl_SelectionChanged">
         <TabControl.Template>
             <ControlTemplate TargetType="{x:Type TabControl}">
                 <Grid>
@@ -76,8 +78,9 @@
                             Padding="10,4"
                             Appearance="Primary"
                             Click="BtnSearchBM_Click"
+                            PreviewMouseRightButtonDown="BtnSearchBM_PreviewMouseRightButtonDown"
                             Content="Search BM"
-                            ToolTip="Abrir este servidor no BattleMetrics" />
+                            ToolTip="Abrir este servidor no BattleMetrics (botão direito: definir ID manualmente)" />
                         <ui:Button
                             Grid.Column="2"
                             Padding="8,4"
@@ -286,6 +289,161 @@
                         Click="BtnViewAllAnalysis_Click"
                         Content="{DynamicResource ViewFullAnalysisReport}"
                         Icon="DataHistogram24" />
+                </Grid>
+            </Border>
+        </TabItem>
+        <TabItem Style="{StaticResource PrettyTabItem}">
+            <TabItem.Header>
+                <StackPanel Orientation="Horizontal">
+                    <ui:SymbolIcon Symbol="History24" Margin="0,0,6,0" VerticalAlignment="Center" FontSize="14" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}" />
+                    <TextBlock VerticalAlignment="Center" Text="Roster" />
+                </StackPanel>
+            </TabItem.Header>
+            <Border
+                Padding="12"
+                Background="{DynamicResource ControlFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                TextElement.FontFamily="Segoe UI Variable Display, Segoe UI">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontSize="16"
+                            FontWeight="Bold"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            Text="Server Roster" />
+                        <ui:Button
+                            Grid.Column="1"
+                            Padding="8,4"
+                            Appearance="Secondary"
+                            Click="BtnRefreshRoster_Click"
+                            Content="{DynamicResource Refresh}"
+                            Icon="{ui:SymbolIcon Symbol=ArrowClockwise24}" />
+                    </Grid>
+                    <TextBlock
+                        Grid.Row="1"
+                        Margin="0,0,0,8"
+                        FontSize="11"
+                        Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                        Text="Every player ever seen on this server, including offline. Search by name to find someone who isn't online right now."
+                        TextWrapping="Wrap" />
+                    <ui:TextBox
+                        x:Name="TxtRosterFilter"
+                        x:FieldModifier="public"
+                        Grid.Row="2"
+                        Margin="0,0,0,8"
+                        PlaceholderText="Search players (online or offline)..."
+                        TextChanged="TxtRosterFilter_TextChanged" />
+                    <Grid
+                        x:Name="PnlRosterStatus"
+                        x:FieldModifier="public"
+                        Grid.Row="3"
+                        Margin="20"
+                        VerticalAlignment="Center"
+                        Visibility="Collapsed"
+                        Background="Transparent">
+                        <StackPanel>
+                            <ui:ProgressRing
+                                x:Name="PbRosterLoading"
+                                x:FieldModifier="public"
+                                Width="32"
+                                Height="32"
+                                Margin="0,0,0,12"
+                                IsIndeterminate="True" />
+                            <TextBlock
+                                x:Name="TxtRosterStatus"
+                                x:FieldModifier="public"
+                                HorizontalAlignment="Center"
+                                FontSize="12"
+                                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                Text="Loading roster..."
+                                TextAlignment="Center"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Grid>
+                    <ListBox
+                        x:Name="ListRosterPlayers"
+                        x:FieldModifier="public"
+                        Grid.Row="3"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                        <Ellipse
+                                            x:Name="StatusDot"
+                                            Width="8"
+                                            Height="8"
+                                            Margin="0,0,8,0"
+                                            VerticalAlignment="Center"
+                                            Fill="{DynamicResource TextFillColorTertiaryBrush}" />
+                                        <TextBlock
+                                            MaxWidth="160"
+                                            VerticalAlignment="Center"
+                                            FontSize="13"
+                                            FontWeight="SemiBold"
+                                            Text="{Binding Name}"
+                                            TextTrimming="CharacterEllipsis"
+                                            ToolTip="{Binding Name}" />
+                                    </StackPanel>
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Margin="0,0,8,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="11"
+                                        Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                        Text="{Binding LastSeenStr}" />
+                                    <ui:Button
+                                        x:Name="BtnAction"
+                                        Grid.Column="3"
+                                        Width="60"
+                                        Margin="0"
+                                        Padding="6,2"
+                                        Appearance="Secondary"
+                                        Click="BtnTrackRosterPlayer_Click"
+                                        Content="{DynamicResource Track}"
+                                        FontSize="11"
+                                        Tag="{Binding}" />
+                                </Grid>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsOnline}" Value="True">
+                                        <Setter TargetName="StatusDot" Property="Fill" Value="{DynamicResource SystemAccentColorPrimaryBrush}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsTracked}" Value="True">
+                                        <Setter TargetName="StatusDot" Property="Fill" Value="#FFD166" />
+                                        <Setter TargetName="BtnAction" Property="Content" Value="Details" />
+                                        <Setter TargetName="BtnAction" Property="Appearance" Value="Primary" />
+                                    </DataTrigger>
+                                    <Trigger Property="IsMouseOver" Value="False">
+                                        <Setter TargetName="BtnAction" Property="Opacity" Value="0.6" />
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="BtnAction" Property="Opacity" Value="1" />
+                                    </Trigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </Grid>
             </Border>
         </TabItem>

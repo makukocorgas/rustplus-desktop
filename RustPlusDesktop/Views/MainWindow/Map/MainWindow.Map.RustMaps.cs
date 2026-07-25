@@ -79,7 +79,7 @@ namespace RustPlusDesk.Views
                 BtnSendMapToDiscord.Visibility = Visibility.Collapsed;
         }
 
-        public async Task SearchRustMapsAsync(bool forceRefetch = false)
+        public async Task SearchRustMapsAsync(bool forceRefetch = false, DateTime? knownWipeTime = null)
         {
             var profile = _vm.Selected;
             if (profile == null)
@@ -94,7 +94,12 @@ namespace RustPlusDesk.Views
                 return;
             }
 
-            if (!forceRefetch && !string.IsNullOrEmpty(profile.RustMapsMapId))
+            var currentWipeTime = knownWipeTime ?? await RefreshProfileWipeTimeAsync(profile);
+
+            // 1. If we already have a Map ID for this wipe and are NOT forcing a refetch, show UI immediately.
+            if (!forceRefetch &&
+                !string.IsNullOrEmpty(profile.RustMapsMapId) &&
+                !IsNewerWipe(currentWipeTime, profile.RustMapsWipeTime))
             {
                 _isRustMapsSearching = false;
                 UpdateRustMapsUi();
@@ -156,6 +161,16 @@ namespace RustPlusDesk.Views
                 string extraMonPath = Path.Combine(folderPath, ExtraMonumentsFileName);
                 if (!File.Exists(extraMonPath))
                     Dispatcher.InvokeAsync(() => GenerateAndLoadExtraMonumentsForCurrentMap(folderPath));
+
+                string buildingBlockedPath = Path.Combine(folderPath, "building_blocked.json");
+                if (!File.Exists(buildingBlockedPath) && File.Exists(Path.Combine(folderPath, "map_data.json")))
+                {
+                    Dispatcher.InvokeAsync(async () =>
+                    {
+                        await GenerateBuildingBlockedZonesForCurrentMap(folderPath);
+                        LoadBuildingBlockedZonesForCurrentMap(folderPath);
+                    });
+                }
                 return;
             }
 
@@ -180,6 +195,11 @@ namespace RustPlusDesk.Views
                 {
                     AppendLog("[MapParser] ✅ Heatmaps gerados — clica em 🗺️ Heatmap para ver.");
                     Dispatcher.InvokeAsync(() => GenerateAndLoadExtraMonumentsForCurrentMap(result.FolderPath));
+                    Dispatcher.InvokeAsync(async () =>
+                    {
+                        await GenerateBuildingBlockedZonesForCurrentMap(result.FolderPath);
+                        LoadBuildingBlockedZonesForCurrentMap(result.FolderPath);
+                    });
                 }
                 else if (result.NeedsManualMapSelection)
                 {
@@ -243,6 +263,37 @@ namespace RustPlusDesk.Views
                 _isHeatmapFetching = false;
                 Dispatcher.InvokeAsync(() => UpdateRustMapsUi());
             }
+        }
+
+        private async Task<DateTime?> RefreshProfileWipeTimeAsync(ServerProfile profile)
+        {
+            try
+            {
+                var info = _rust == null ? null : await _rust.GetServerInfoAsync();
+                if (info?.WipeTime is DateTime wipeTime)
+                {
+                    wipeTime = NormalizeWipeTime(wipeTime);
+                    if (profile.WipeTime != wipeTime)
+                    {
+                        profile.WipeTime = wipeTime;
+                        _vm.Save();
+                    }
+                    return wipeTime;
+                }
+            }
+            catch { }
+
+            return profile.WipeTime;
+        }
+
+        private static DateTime NormalizeWipeTime(DateTime value)
+            => value.Kind == DateTimeKind.Utc ? value : value.ToUniversalTime();
+
+        private static bool IsNewerWipe(DateTime? current, DateTime? cached)
+        {
+            if (!current.HasValue) return false;
+            if (!cached.HasValue) return true;
+            return NormalizeWipeTime(current.Value) > NormalizeWipeTime(cached.Value).AddMinutes(1);
         }
 
         private async Task<RustMapsMatch?> FetchRustMapsServerMatchAsync(string host, int companionPort)
@@ -537,8 +588,15 @@ namespace RustPlusDesk.Views
             CopyFileIfExists(Path.Combine(result.FolderPath, "map_texture.png"), Path.Combine(currentDir, "map_texture.png"));
             CopyFileIfExists(Path.Combine(result.FolderPath, "map_buildings.json"), Path.Combine(currentDir, "map_buildings.json"));
             CopyFileIfExists(Path.Combine(result.FolderPath, "building_blocked.json"), Path.Combine(currentDir, "building_blocked.json"));
+
+            double imgW = 0, imgH = 0;
+            if (ImgMap?.Source is BitmapSource bmp)
+            {
+                imgW = bmp.PixelWidth;
+                imgH = bmp.PixelHeight;
+            }
             await WriteViewerMapDataAsync(Path.Combine(result.FolderPath, "map_data.json"),
-                Path.Combine(currentDir, "map_data_viewer.json"), _worldRectPx, ImgMap.Width, ImgMap.Height);
+                Path.Combine(currentDir, "map_data_viewer.json"), _worldRectPx, imgW, imgH);
             return runtimeRoot;
         }
 
@@ -639,6 +697,26 @@ namespace RustPlusDesk.Views
             node["mapTextureSource"] = "/maps/current/map_texture.png";
             node["mapTexturePaddingWorld"] = 2000;
             node["mapTextureAutoAlign"] = true;
+
+            if ((imageWidth <= 0 || imageHeight <= 0 || double.IsNaN(imageWidth) || double.IsNaN(imageHeight)))
+            {
+                string targetTexturePath = Path.Combine(Path.GetDirectoryName(targetPath) ?? "", "map_texture.png");
+                if (File.Exists(targetTexturePath))
+                {
+                    try
+                    {
+                        var bi = new BitmapImage();
+                        bi.BeginInit();
+                        bi.CacheOption = BitmapCacheOption.OnLoad;
+                        bi.UriSource = new Uri(targetTexturePath);
+                        bi.EndInit();
+                        imageWidth = bi.PixelWidth;
+                        imageHeight = bi.PixelHeight;
+                    }
+                    catch { }
+                }
+            }
+
             if (imageWidth > 0 && imageHeight > 0 && worldRectPx.Width > 0 && worldRectPx.Height > 0)
             {
                 node["mapTextureUv"] = new JsonObject
@@ -749,11 +827,78 @@ namespace RustPlusDesk.Views
             await SearchRustMapsAsync(forceRefetch: true);
         }
 
+        private string? _currentActiveHeatmap = null;
+
+        private void BtnToggleHeatmap_Click(object sender, RoutedEventArgs e)
+        {
+            if (HeatmapPopup != null)
+            {
+                HeatmapPopup.IsOpen = !HeatmapPopup.IsOpen;
+                if (HeatmapPopup.IsOpen)
+                {
+                    UpdateBentoActiveStates();
+                }
+            }
+        }
+
+        private static readonly Dictionary<string, string> HeatmapLabels = new()
+        {
+            { "ores", "Ores" }, { "wood", "Wood Piles" }, { "logs", "Log Piles" },
+            { "mushroom", "Mushrooms" }, { "berries", "Berries" }, { "corn", "Corn" },
+            { "pumpkin", "Pumpkins" }, { "potato", "Potatoes" }, { "wheat", "Wheat" },
+            { "bear", "Bears" }, { "boar", "Boars" }, { "chicken", "Chickens" },
+            { "wolf", "Wolves" }, { "stag", "Deers" }, { "crocodile", "Crocodiles" },
+            { "tiger", "Tigers" }, { "snake", "Snakes" },
+            { "junkpiles", "Junkpiles" }, { "rowboat", "Rowboats" },
+            { "modularcar", "Modular Cars" }, { "horse", "Horses" },
+            { "pedalbike", "Bicycles" }, { "hab", "Hot Air Balloons" },
+            { "flowers", "Flowers" },
+        };
+
+        private void UpdateBentoActiveStates()
+        {
+            string[] allCategories = { "ores", "wood", "logs", "mushroom", "berries", "corn", "pumpkin", "potato", "wheat", "bear", "boar", "chicken", "wolf", "stag", "crocodile", "tiger", "snake", "junkpiles", "rowboat", "modularcar", "horse", "pedalbike", "hab", "flowers" };
+            foreach (var cat in allCategories)
+            {
+                var border = FindName("Bento_" + cat) as System.Windows.Controls.Border;
+                if (border != null)
+                {
+                    bool isActive = (cat == _currentActiveHeatmap);
+                    border.BorderBrush = isActive
+                        ? new SolidColorBrush(Color.FromRgb(74, 193, 255))
+                        : Brushes.Transparent;
+                    border.BorderThickness = isActive ? new Thickness(1.5) : new Thickness(1);
+                }
+            }
+
+            var badge = FindName("ActiveHeatmapBadge") as Wpf.Ui.Controls.Badge;
+            var label = FindName("ActiveHeatmapLabel") as System.Windows.Controls.TextBlock;
+            bool hasActive = _currentActiveHeatmap != null && HeatmapLabels.ContainsKey(_currentActiveHeatmap);
+            if (badge != null && label != null)
+            {
+                badge.Visibility = hasActive ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
+                label.Text = hasActive
+                    ? $"Active: {HeatmapLabels[_currentActiveHeatmap!]}"
+                    : "No heatmap active";
+            }
+
+            var glow = FindName("HeatmapActiveGlow") as System.Windows.Controls.Border;
+            if (glow != null)
+                glow.Visibility = hasActive ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
+        }
+
         private async void BtnHeatmapIcon_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Wpf.Ui.Controls.Button btn && btn.Tag is string heatmapType)
+            if (sender is FrameworkElement btn && btn.Tag is string heatmapType)
             {
-                BtnToggleHeatmap.IsChecked = false;
+                // Toggle behavior: clicking the active layer again clears it
+                if (_currentActiveHeatmap == heatmapType)
+                {
+                    heatmapType = "clear";
+                }
+
+                _currentActiveHeatmap = (heatmapType == "clear") ? null : heatmapType;
+                UpdateBentoActiveStates();
 
                 if (heatmapType == "clear")
                 {

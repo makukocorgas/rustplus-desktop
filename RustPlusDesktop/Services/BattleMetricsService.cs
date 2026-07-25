@@ -44,7 +44,7 @@ namespace RustPlusDesk.Services
             DefaultRequestHeaders = { { "User-Agent", "RustPlusDesktop/7.1 (github.com/makukocorgas/rustplus-desktop)" } }
         };
 
-        private const string BaseUrl = "https://api.battlemetrics.com";
+        private const string BaseUrl = "https://battlemetrics.com";
 
         // Cache simples para evitar hammer na API
         private static readonly Dictionary<string, (BmPlayerResult result, DateTime expiry)> _playerCache = new();

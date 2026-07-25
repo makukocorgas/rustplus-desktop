@@ -5,10 +5,14 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Navigation;
 using System.Net.Http;
 using System.Text.Json;
 using RustPlusDesk.Services;
+using WpfUi = Wpf.Ui.Controls;
 
 namespace RustPlusDesk.Views
 {
@@ -16,6 +20,66 @@ namespace RustPlusDesk.Views
     {
         public MainWindow? ParentWindow { get; set; }
         private bool _isSettingsInitialized = false;
+        private IReadOnlyList<SettingsSectionDefinition> _settingsSections = Array.Empty<SettingsSectionDefinition>();
+        private IReadOnlyList<SettingsOptionDefinition> _settingsOptions = Array.Empty<SettingsOptionDefinition>();
+        private string _activeSettingsCategory = "general";
+        private bool _isShowingSearchResults;
+        private bool _returnToCategoryPageAfterSearch;
+        private readonly List<(AdornerLayer Layer, Adorner Adorner)> _settingsHighlights = new();
+        private int _settingsHighlightGeneration;
+
+        private sealed class SettingsSectionDefinition
+        {
+            public required string Id { get; init; }
+            public required string Category { get; init; }
+            public required string Title { get; init; }
+            public required string Keywords { get; init; }
+            public required FrameworkElement Element { get; init; }
+        }
+
+        private sealed class SettingsSearchResult
+        {
+            public required string Id { get; init; }
+            public required string Category { get; init; }
+            public required string CategoryTitle { get; init; }
+            public required string Title { get; init; }
+        }
+
+        private sealed class SettingsOptionDefinition
+        {
+            public required string SectionId { get; init; }
+            public required string SectionTitle { get; init; }
+            public required string Category { get; init; }
+            public required string Title { get; init; }
+            public required string SearchText { get; init; }
+            public required FrameworkElement Target { get; init; }
+        }
+
+        private sealed class SettingsOptionResult
+        {
+            public required string SectionId { get; init; }
+            public required string SectionTitle { get; init; }
+            public required string Category { get; init; }
+            public required string CategoryTitle { get; init; }
+            public required string BeforeMatch { get; init; }
+            public required string Match { get; init; }
+            public required string AfterMatch { get; init; }
+            public required FrameworkElement Target { get; init; }
+        }
+
+        private sealed class SettingsMatchAdorner(UIElement adornedElement) : Adorner(adornedElement)
+        {
+            protected override void OnRender(DrawingContext drawingContext)
+            {
+                var bounds = new Rect(0, 0, AdornedElement.RenderSize.Width, AdornedElement.RenderSize.Height);
+                drawingContext.DrawRoundedRectangle(
+                    new SolidColorBrush(Color.FromArgb(0x24, 0x60, 0xCD, 0xFF)),
+                    new Pen(new SolidColorBrush(Color.FromRgb(0x60, 0xCD, 0xFF)), 1.5),
+                    bounds,
+                    5,
+                    5);
+            }
+        }
 
         public class LanguageOption
         {
@@ -27,7 +91,33 @@ namespace RustPlusDesk.Views
         public AppSettingsOverlay()
         {
             InitializeComponent();
+            InitializeSettingsNavigation();
             Loaded += AppSettingsOverlay_Loaded;
+            IsVisibleChanged += AppSettingsOverlay_IsVisibleChanged;
+        }
+
+        private void AppSettingsOverlay_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue is true)
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    SettingsSearchBox.Focus();
+                    Keyboard.Focus(SettingsSearchBox);
+                    SettingsSearchBox.SelectAll();
+                }), System.Windows.Threading.DispatcherPriority.Input);
+                return;
+            }
+
+            _isShowingSearchResults = false;
+            _returnToCategoryPageAfterSearch = false;
+            if (DataContext is ViewModels.MainViewModel viewModel)
+            {
+                viewModel.Save();
+            }
+            SettingsSearchBox.Clear();
+            ClearSettingsHighlights();
+            ShowSettingsCategoryList();
         }
 
         private static string T(string key, string fallback)
@@ -35,12 +125,428 @@ namespace RustPlusDesk.Views
             return Properties.Resources.ResourceManager.GetString(key) ?? fallback;
         }
 
+        private void InitializeSettingsNavigation()
+        {
+            _settingsSections = new[]
+            {
+                Section("general", "general", T("General", "General"), "language startup launch windows minimized auto connect server", SectionGeneral),
+                Section("behavior", "general", T("Behavior", "Behavior"), "tray closing streamer privacy background tracking console cloud sync upload", SectionBehavior),
+                Section("offline-death", "alerts", T("OfflineDeathNotifications", "Offline Death Notifications"), "offline death raid alerts sound loop discord log", SectionOfflineDeath),
+                Section("notifications", "alerts", T("NotificationCenterSettings", "Notification Center"), "toast sound alerts retention days muted servers notification center", SectionNotifications),
+                Section("map-performance", "map", "Map Performance & Quality", "image scaling quality gpu bitmap cache rendering scale anti aliasing performance", SectionMapPerformance),
+                Section("team-markers", "map", T("TeamMarkersSettings", "Team Markers"), "profile player direction arrows death markers streamer icon scale", SectionTeamMarkers),
+                Section("3d-map", "map", T("ThreeDMapSectionTitle", "3D Map"), "3d map delete data parse manually quality", SectionThreeDMap),
+                Section("discord", "connected", "Discord Settings", "discord bot invite channels raid events chat shop trackers tts sound integrations", SectionDiscord),
+                Section("chat-commands", "chat-commands", T("ChatCommandsSettings", "Chat Commands"), "chat team commands prefix delay population time promote cargo oil rig heli vendor upkeep afk timers switches logic rules", SectionChatCommands),
+                Section("alert-templates", "alert-templates", T("CustomAlertsHeader", "Chat Alert Templates"), "chat alert templates messages oil rig crate alarm deep sea shop cargo event heli player tracking online offline death respawn", SectionChatAlertTemplates),
+                Section("battlemetrics", "system", "BattleMetrics", "battlemetrics api key online players roster", SectionBattleMetrics),
+                Section("maintenance", "system", T("MaintenanceTitle", "Maintenance"), "reset app data backup restore maintenance", SectionMaintenance),
+                Section("credits", "system", T("CreditsTitle", "Credits"), "credits rustmaps icons legal", SectionCredits)
+            };
+
+            ShowSettingsCategoryList();
+        }
+
+        private static SettingsSectionDefinition Section(string id, string category, string title, string keywords, FrameworkElement element) =>
+            new() { Id = id, Category = category, Title = title, Keywords = keywords, Element = element };
+
+        private void BuildSettingsOptionIndex()
+        {
+            _settingsOptions = _settingsSections
+                .SelectMany(section => new[]
+                    {
+                        new SettingsOptionDefinition
+                        {
+                            SectionId = section.Id,
+                            SectionTitle = section.Title,
+                            Category = section.Category,
+                            Title = section.Title,
+                            SearchText = $"{section.Title} {section.Keywords}",
+                            Target = section.Element
+                        }
+                    }
+                    .Concat(EnumerateControls(section.Element)
+                    .Where(IsSearchableSettingControl)
+                    .Select(control => new SettingsOptionDefinition
+                    {
+                        SectionId = section.Id,
+                        SectionTitle = section.Title,
+                        Category = section.Category,
+                        Title = GetControlTitle(control),
+                        SearchText = $"{GetControlTitle(control)} {control.ToolTip} {section.Title}",
+                        Target = control
+                    })))
+                .Where(option => option.Title.Length > 1)
+                .DistinctBy(option => $"{option.SectionId}|{option.Title}", StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
+        private static bool IsSearchableSettingControl(Control control) =>
+            control is CheckBox or ComboBox or Slider or TextBox or ButtonBase or Expander;
+
+        private static IEnumerable<Control> EnumerateControls(DependencyObject root)
+        {
+            foreach (var child in LogicalTreeHelper.GetChildren(root).OfType<DependencyObject>())
+            {
+                if (child is Control control)
+                {
+                    yield return control;
+                }
+
+                foreach (var descendant in EnumerateControls(child))
+                {
+                    yield return descendant;
+                }
+            }
+        }
+
+        private static string GetControlTitle(Control control)
+        {
+            var automationName = System.Windows.Automation.AutomationProperties.GetName(control);
+            if (!string.IsNullOrWhiteSpace(automationName))
+            {
+                return automationName.Trim();
+            }
+
+            object? label = control switch
+            {
+                HeaderedContentControl headered => headered.Header,
+                ContentControl content => content.Content,
+                _ => null
+            };
+            var contentText = ExtractText(label);
+            return string.IsNullOrWhiteSpace(contentText) ? HumanizeControlName(control.Name) : contentText;
+        }
+
+        private static string ExtractText(object? value)
+        {
+            if (value is string text)
+            {
+                return text.Trim();
+            }
+
+            if (value is TextBlock textBlock)
+            {
+                return textBlock.Text.Trim();
+            }
+
+            if (value is not DependencyObject element)
+            {
+                return "";
+            }
+
+            return string.Join(" ", LogicalTreeHelper.GetChildren(element)
+                .Cast<object>()
+                .Select(ExtractText)
+                .Where(text => text.Length > 0));
+        }
+
+        private static string HumanizeControlName(string name)
+        {
+            foreach (var prefix in new[] { "Chk", "Cmb", "Slider", "Txt", "Btn" })
+            {
+                if (name.StartsWith(prefix, StringComparison.Ordinal))
+                {
+                    name = name[prefix.Length..];
+                    break;
+                }
+            }
+
+            var words = new System.Text.StringBuilder();
+            for (var i = 0; i < name.Length; i++)
+            {
+                if (i > 0 && char.IsUpper(name[i]) && !char.IsUpper(name[i - 1]))
+                {
+                    words.Append(' ');
+                }
+                words.Append(name[i]);
+            }
+            return words.ToString().Replace("Url", "URL", StringComparison.Ordinal).Trim();
+        }
+
+        private void SettingsCategoryList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (SettingsCategoryList.SelectedItem is not ListBoxItem { Tag: string category })
+            {
+                return;
+            }
+
+            SettingsCategoryList.SelectedItem = null;
+            SettingsSearchBox.Clear();
+            ShowSettingsCategory(category);
+        }
+
+        private void ShowSettingsCategoryList()
+        {
+            SettingsCategoryPage.Visibility = Visibility.Visible;
+            SettingsDetailPage.Visibility = Visibility.Collapsed;
+            SettingsCategoryList.SelectedItem = null;
+        }
+
+        private void ShowSettingsCategory(string category, string? selectedSectionId = null)
+        {
+            _activeSettingsCategory = category;
+            var sections = _settingsSections.Where(section => section.Category == category).ToList();
+            foreach (var section in _settingsSections)
+            {
+                section.Element.Visibility = section.Category == category ? Visibility.Visible : Visibility.Collapsed;
+            }
+
+            var (title, description) = GetSettingsCategoryText(category);
+            SettingsDetailTitle.Text = title;
+            SettingsDetailSubtitle.Text = description;
+            SettingsCategoryPage.Visibility = Visibility.Collapsed;
+            SettingsDetailPage.Visibility = Visibility.Visible;
+            var submenuItems = sections.Select(section => new SettingsSearchResult
+            {
+                Id = section.Id,
+                Category = section.Category,
+                CategoryTitle = title,
+                Title = section.Title
+            }).ToList();
+            SettingsSectionList.ItemsSource = submenuItems;
+            SettingsSectionList.SelectedItem = selectedSectionId == null
+                ? null
+                : submenuItems.FirstOrDefault(item => item.Id == selectedSectionId);
+            SettingsSectionList.Visibility = Visibility.Visible;
+            SettingsSearchResultsScroller.Visibility = Visibility.Collapsed;
+            SettingsScrollViewer.Visibility = Visibility.Visible;
+            SettingsScrollViewer.ScrollToTop();
+
+            if (string.IsNullOrWhiteSpace(SettingsSearchBox.Text))
+            {
+                ClearSettingsHighlights();
+            }
+            else
+            {
+                HighlightMatchingSettings(SettingsSearchBox.Text, category);
+            }
+        }
+
+        private void HighlightMatchingSettings(string query, string category)
+        {
+            ClearSettingsHighlights();
+            var targets = _settingsOptions
+                .Where(option => option.Category == category && SettingsSearchMatcher.Matches(query, option.Title, option.SearchText))
+                .Select(option => option.Target)
+                .Distinct()
+                .ToList();
+            var generation = _settingsHighlightGeneration;
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (generation != _settingsHighlightGeneration)
+                {
+                    return;
+                }
+
+                foreach (var target in targets)
+                {
+                    var layer = AdornerLayer.GetAdornerLayer(target);
+                    if (layer == null)
+                    {
+                        continue;
+                    }
+
+                    var adorner = new SettingsMatchAdorner(target) { IsHitTestVisible = false };
+                    layer.Add(adorner);
+                    _settingsHighlights.Add((layer, adorner));
+                }
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
+        private void ClearSettingsHighlights()
+        {
+            _settingsHighlightGeneration++;
+            foreach (var (layer, adorner) in _settingsHighlights)
+            {
+                layer.Remove(adorner);
+            }
+            _settingsHighlights.Clear();
+        }
+
+        private void SettingsSectionList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (SettingsSectionList.SelectedItem is not SettingsSearchResult selected)
+            {
+                return;
+            }
+
+            var section = _settingsSections.First(candidate => candidate.Id == selected.Id);
+            ScrollToSettingsElement(section.Element);
+        }
+
+        private void ScrollToSettingsElement(FrameworkElement target, bool focus = false)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                ExpandAncestorSettingsGroups(target);
+                SettingsScrollViewer.UpdateLayout();
+                target.UpdateLayout();
+
+                try
+                {
+                    var top = target.TransformToAncestor(SettingsSectionsPanel).Transform(new Point()).Y;
+                    SettingsScrollViewer.ScrollToVerticalOffset(Math.Clamp(top - 12, 0, SettingsScrollViewer.ScrollableHeight));
+                }
+                catch (InvalidOperationException)
+                {
+                    target.BringIntoView();
+                }
+
+                if (focus)
+                {
+                    target.Focus();
+                    Keyboard.Focus(target);
+                }
+            }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+        }
+
+        private static void ExpandAncestorSettingsGroups(DependencyObject element)
+        {
+            for (var parent = GetSettingsParent(element); parent != null; parent = GetSettingsParent(parent))
+            {
+                if (parent is Expander expander)
+                {
+                    expander.IsExpanded = true;
+                }
+            }
+        }
+
+        private static DependencyObject? GetSettingsParent(DependencyObject element) =>
+            LogicalTreeHelper.GetParent(element) ?? (element is Visual or System.Windows.Media.Media3D.Visual3D ? VisualTreeHelper.GetParent(element) : null);
+
+        private static (string Title, string Description) GetSettingsCategoryText(string category) => category switch
+        {
+            "alerts" => (T("Alerts", "Alerts"), T("UiNotificationsSoundsAndOfflineDeath", "Notifications, sounds, and offline death")),
+            "map" => (T("UiMap", "Map"), T("UiPerformanceMarkersAnd3DData", "Performance, markers, and 3D data")),
+            "connected" => (T("UiConnectedServices", "Connected Services"), "Discord and chat"),
+            "chat-commands" => (T("ChatCommandsSettings", "Chat Commands"), "Team chat commands and device bindings"),
+            "alert-templates" => (T("CustomAlertsHeader", "Chat Alert Templates"), T("CustomAlertsDesc", "Customize automated chat alert messages")),
+            "system" => (T("UiSystem", "System"), T("UiMaintenanceBackupResetAndCredits", "Maintenance, backup, reset, and credits")),
+            _ => (T("General", "General"), T("UiLanguageStartupAndAppBehavior", "Language, startup, and app behavior"))
+        };
+
+        private void SettingsBack_Click(object sender, RoutedEventArgs e)
+        {
+            _isShowingSearchResults = false;
+            SettingsSearchBox.Clear();
+            ShowSettingsCategoryList();
+        }
+
+        public void OpenCategory(string category)
+        {
+            _isShowingSearchResults = false;
+            _returnToCategoryPageAfterSearch = false;
+            SettingsSearchBox.Clear();
+            ShowSettingsCategory(category);
+        }
+
+        private void SettingsSearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var query = SettingsSearchBox.Text.Trim();
+            if (query.Length == 0)
+            {
+                ClearSettingsHighlights();
+                if (!_isShowingSearchResults)
+                {
+                    return;
+                }
+
+                _isShowingSearchResults = false;
+                if (_returnToCategoryPageAfterSearch)
+                {
+                    ShowSettingsCategoryList();
+                }
+                else
+                {
+                    ShowSettingsCategory(_activeSettingsCategory);
+                }
+                return;
+            }
+
+            ClearSettingsHighlights();
+            if (!_isShowingSearchResults)
+            {
+                _returnToCategoryPageAfterSearch = SettingsCategoryPage.Visibility == Visibility.Visible;
+            }
+            _isShowingSearchResults = true;
+
+            if (_settingsOptions.Count == 0)
+            {
+                BuildSettingsOptionIndex();
+            }
+
+            var matches = _settingsOptions
+                .Where(option => SettingsSearchMatcher.Matches(query, option.Title, option.SearchText))
+                .OrderBy(option => option.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ? 0 : 1)
+                .ThenBy(option => option.Title)
+                .ToList();
+            SettingsSearchResults.ItemsSource = matches.Select(option => CreateSettingsOptionResult(option, query)).ToList();
+            SettingsDetailTitle.Text = "Search results";
+            SettingsDetailSubtitle.Text = matches.Count == 0
+                ? $"No settings found for “{query}”"
+                : $"{matches.Count} setting{(matches.Count == 1 ? "" : "s")} found for “{query}”";
+            SettingsCategoryPage.Visibility = Visibility.Collapsed;
+            SettingsDetailPage.Visibility = Visibility.Visible;
+            SettingsSectionList.Visibility = Visibility.Collapsed;
+            SettingsScrollViewer.Visibility = Visibility.Collapsed;
+            SettingsSearchResultsScroller.Visibility = Visibility.Visible;
+        }
+
+        private static SettingsOptionResult CreateSettingsOptionResult(SettingsOptionDefinition option, string query)
+        {
+            var matchingTerm = query.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .FirstOrDefault(term => option.Title.Contains(term, StringComparison.OrdinalIgnoreCase));
+            if (matchingTerm == null)
+            {
+                return new SettingsOptionResult
+                {
+                    SectionId = option.SectionId,
+                    SectionTitle = option.SectionTitle,
+                    Category = option.Category,
+                    CategoryTitle = GetSettingsCategoryText(option.Category).Title,
+                    BeforeMatch = option.Title,
+                    Match = "",
+                    AfterMatch = "",
+                    Target = option.Target
+                };
+            }
+
+            var matchIndex = option.Title.IndexOf(matchingTerm, StringComparison.OrdinalIgnoreCase);
+            return new SettingsOptionResult
+            {
+                SectionId = option.SectionId,
+                SectionTitle = option.SectionTitle,
+                Category = option.Category,
+                CategoryTitle = GetSettingsCategoryText(option.Category).Title,
+                BeforeMatch = option.Title[..matchIndex],
+                Match = option.Title.Substring(matchIndex, matchingTerm.Length),
+                AfterMatch = option.Title[(matchIndex + matchingTerm.Length)..],
+                Target = option.Target
+            };
+        }
+
+        private void SettingsSearchResult_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not WpfUi.Button { Tag: SettingsOptionResult result })
+            {
+                return;
+            }
+
+            _isShowingSearchResults = false;
+            _returnToCategoryPageAfterSearch = false;
+            ShowSettingsCategory(result.Category, result.SectionId);
+            ScrollToSettingsElement(result.Target, focus: true);
+        }
+
         private void AppSettingsOverlay_Loaded(object sender, RoutedEventArgs e)
         {
             if (_isSettingsInitialized) return;
-            
+
             PopulateLanguages();
             LoadSettings();
+            BuildSettingsOptionIndex();
             _isSettingsInitialized = true;
         }
 
@@ -90,19 +596,47 @@ namespace RustPlusDesk.Views
         public void LoadSettings()
         {
             CmbLanguage.SelectedValue = TrackingService.SelectedLanguage;
-            
+
+            TxtBattleMetricsApiKey.Password = TrackingService.BattleMetricsApiKey;
+
             ChkAutoStart.IsChecked = TrackingService.AutoStartEnabled;
             ChkStartMinimized.IsChecked = TrackingService.StartMinimizedEnabled;
             ChkAutoConnect.IsChecked = TrackingService.AutoConnectEnabled;
             ChkCloseToTray.IsChecked = TrackingService.CloseToTrayEnabled;
             ChkBackgroundTracking.IsChecked = TrackingService.IsBackgroundTrackingEnabled;
-            ChkAutoLoadShops.IsChecked = TrackingService.AutoLoadShops;
-            CmbMonumentDisplayMode.SelectedIndex = Math.Clamp(TrackingService.MapMonumentDisplayMode, 0, 1);
             ChkHideConsole.IsChecked = TrackingService.HideConsole;
             ChkStreamerMode.IsChecked = TrackingService.MapAbbreviateNames;
-            SliderMonumentScale.Value = TrackingService.MapMonumentScale;
-            SliderMonumentOpacity.Value = TrackingService.MapMonumentOpacity;
-            PopulateExtraMonumentFilters();
+
+            // Map performance settings
+            CmbMapScalingMode.SelectedIndex = Math.Clamp(TrackingService.MapBitmapScalingMode, 0, 2);
+            ChkMapUseCacheMode.IsChecked = TrackingService.MapUseCacheMode;
+            
+            double scale = TrackingService.MapRenderScale;
+            int renderScaleIdx = 2; // Default to 1.0 (Native)
+            if (Math.Abs(scale - 0.5) < 0.01) renderScaleIdx = 0;
+            else if (Math.Abs(scale - 0.75) < 0.01) renderScaleIdx = 1;
+            else if (Math.Abs(scale - 1.0) < 0.01) renderScaleIdx = 2;
+            else if (Math.Abs(scale - 1.25) < 0.01) renderScaleIdx = 3;
+            else if (Math.Abs(scale - 1.5) < 0.01) renderScaleIdx = 4;
+            else if (Math.Abs(scale - 2.0) < 0.01) renderScaleIdx = 5;
+            CmbMapRenderScale.SelectedIndex = renderScaleIdx;
+
+            ChkMapUseAliasedEdgeMode.IsChecked = TrackingService.MapUseAliasedEdgeMode;
+
+            // Custom HD Map Image setting load
+            var selectedProfile = ParentWindow?.ViewModel?.Selected;
+            if (selectedProfile != null && TxtCustomMapUrl != null)
+            {
+                TxtCustomMapUrl.Text = selectedProfile.CustomMapUrl ?? "";
+                if (!string.IsNullOrWhiteSpace(selectedProfile.CustomMapUrl))
+                {
+                    TxtCustomMapStatus.Text = "Custom HD Map active. Map image is cached locally and will automatically reset on server wipe.";
+                }
+                else
+                {
+                    TxtCustomMapStatus.Text = "No custom map URL set. Standard server map image is currently in use.";
+                }
+            }
 
             // Cloud Sync Setting load
             ChkCloudSync.IsChecked = TrackingService.CloudSyncEnabled;
@@ -153,6 +687,12 @@ namespace RustPlusDesk.Views
             }
         }
 
+        private void TxtBattleMetricsApiKey_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (!_isSettingsInitialized) return;
+            TrackingService.BattleMetricsApiKey = TxtBattleMetricsApiKey.Password;
+        }
+
         private void OnSettingChanged(object sender, RoutedEventArgs e)
         {
             if (!_isSettingsInitialized) return;
@@ -162,16 +702,30 @@ namespace RustPlusDesk.Views
             TrackingService.AutoConnectEnabled = ChkAutoConnect.IsChecked == true;
             TrackingService.CloseToTrayEnabled = ChkCloseToTray.IsChecked == true;
             TrackingService.IsBackgroundTrackingEnabled = ChkBackgroundTracking.IsChecked == true;
-            TrackingService.AutoLoadShops = ChkAutoLoadShops.IsChecked == true;
-            if (CmbMonumentDisplayMode != null && CmbMonumentDisplayMode.SelectedIndex >= 0)
-            {
-                TrackingService.MapMonumentDisplayMode = CmbMonumentDisplayMode.SelectedIndex;
-            }
             TrackingService.HideConsole = ChkHideConsole.IsChecked == true;
             TrackingService.MapAbbreviateNames = ChkStreamerMode.IsChecked == true;
-            TrackingService.MapMonumentScale = SliderMonumentScale.Value;
-            TrackingService.MapMonumentOpacity = SliderMonumentOpacity.Value;
-            
+
+            if (CmbMapScalingMode != null && CmbMapScalingMode.SelectedIndex >= 0)
+            {
+                TrackingService.MapBitmapScalingMode = CmbMapScalingMode.SelectedIndex;
+            }
+            TrackingService.MapUseCacheMode = ChkMapUseCacheMode.IsChecked == true;
+            if (CmbMapRenderScale != null && CmbMapRenderScale.SelectedIndex >= 0)
+            {
+                double val = 1.0;
+                switch (CmbMapRenderScale.SelectedIndex)
+                {
+                    case 0: val = 0.5; break;
+                    case 1: val = 0.75; break;
+                    case 2: val = 1.0; break;
+                    case 3: val = 1.25; break;
+                    case 4: val = 1.5; break;
+                    case 5: val = 2.0; break;
+                }
+                TrackingService.MapRenderScale = val;
+            }
+            TrackingService.MapUseAliasedEdgeMode = ChkMapUseAliasedEdgeMode.IsChecked == true;
+
             // Save Cloud Sync setting
             if (sender == ChkCloudSync)
             {
@@ -234,43 +788,6 @@ namespace RustPlusDesk.Views
         {
             Visibility = Visibility.Collapsed;
             ParentWindow?.ApplySettings();
-        }
-
-        private void PopulateExtraMonumentFilters()
-        {
-            PnlExtraMonumentFilters.Children.Clear();
-
-            var types = ParentWindow?.GetKnownExtraMonumentTypes();
-            if (types == null || types.Count == 0)
-            {
-                PnlExtraMonumentFilters.Children.Add(TxtExtraMonFiltersEmpty);
-                return;
-            }
-
-            var dotStyle = TryFindResource("DotCheckBox") as System.Windows.Style;
-            foreach (var name in types)
-            {
-                var chk = new System.Windows.Controls.CheckBox
-                {
-                    Content = name,
-                    IsChecked = !TrackingService.IsExtraMonumentTypeHidden(name),
-                    Margin = new System.Windows.Thickness(0, 3, 0, 3),
-                    Tag = name,
-                    FontSize = 12,
-                    Style = dotStyle,
-                };
-                chk.Checked += OnExtraMonumentFilterChanged;
-                chk.Unchecked += OnExtraMonumentFilterChanged;
-                PnlExtraMonumentFilters.Children.Add(chk);
-            }
-        }
-
-        private void OnExtraMonumentFilterChanged(object? sender, RoutedEventArgs e)
-        {
-            if (!_isSettingsInitialized) return;
-            if (sender is not System.Windows.Controls.CheckBox chk || chk.Tag is not string name) return;
-            TrackingService.SetExtraMonumentTypeHidden(name, chk.IsChecked != true);
-            ParentWindow?.RebuildExtraMonumentOverlay();
         }
 
         private void OnMarkerSettingChanged(object sender, RoutedEventArgs e)
@@ -457,6 +974,8 @@ namespace RustPlusDesk.Views
                         case "events":       tts = ChkEventsTTS.IsChecked == true;    audio = ChkEventsAudio.IsChecked == true;    break;
                         case "teamchat":
                         case "chat":         tts = ChkChatTTS.IsChecked == true;      audio = ChkChatAudio.IsChecked == true;      break;
+                        case "shop":         tts = ChkShopTTS.IsChecked == true;      audio = ChkShopAudio.IsChecked == true;      break;
+                        case "trackers":     tts = ChkTrackersTTS.IsChecked == true;  audio = ChkTrackersAudio.IsChecked == true;  break;
                         default: continue;
                     }
 
@@ -564,11 +1083,15 @@ namespace RustPlusDesk.Views
                     TxtChannelRaid.Text     = FormatChannelId(guildChannels?.RaidId);
                     TxtChannelEvents.Text   = FormatChannelId(guildChannels?.EventsId);
                     TxtChannelChat.Text     = FormatChannelId(guildChannels?.TeamchatId);
+                    TxtChannelShop.Text     = FormatChannelId(guildChannels?.ShopId);
+                    TxtChannelTrackers.Text = FormatChannelId(guildChannels?.TrackersId);
 
                     // Reset all toggles
                     ChkRaidTTS.IsChecked = ChkRaidAudio.IsChecked = false;
                     ChkEventsTTS.IsChecked = ChkEventsAudio.IsChecked = false;
                     ChkChatTTS.IsChecked = ChkChatAudio.IsChecked = false;
+                    ChkShopTTS.IsChecked = ChkShopAudio.IsChecked = false;
+                    ChkTrackersTTS.IsChecked = ChkTrackersAudio.IsChecked = false;
 
                     foreach (var ch in channelsList)
                     {
@@ -578,6 +1101,8 @@ namespace RustPlusDesk.Views
                             case "events":          ChkEventsTTS.IsChecked = ch.TtsEnabled;    ChkEventsAudio.IsChecked = ch.AudioAlertEnabled;    break;
                             case "teamchat":
                             case "chat":            ChkChatTTS.IsChecked = ch.TtsEnabled;      ChkChatAudio.IsChecked = ch.AudioAlertEnabled;      break;
+                            case "shop":            ChkShopTTS.IsChecked = ch.TtsEnabled;      ChkShopAudio.IsChecked = ch.AudioAlertEnabled;      break;
+                            case "trackers":        ChkTrackersTTS.IsChecked = ch.TtsEnabled;  ChkTrackersAudio.IsChecked = ch.AudioAlertEnabled;  break;
                         }
                     }
                 });
@@ -632,7 +1157,7 @@ namespace RustPlusDesk.Views
             {
                 PnlMutedServers.Children.Add(new TextBlock
                 {
-                    Text = "No servers muted",
+                    Text = Properties.Resources.NoServersMuted,
                     Foreground = System.Windows.Media.Brushes.Gray,
                     FontSize = 11,
                     FontStyle = FontStyles.Italic,
@@ -643,39 +1168,62 @@ namespace RustPlusDesk.Views
 
             foreach (var serverKey in muted)
             {
-                var grid = new Grid { Margin = new Thickness(0, 2, 0, 2) };
+                var savedProfile = (ParentWindow?.DataContext as RustPlusDesk.ViewModels.MainViewModel)?.Servers
+                    .FirstOrDefault(server => $"{server.Host}:{server.Port}" == serverKey);
+                var serverName = TrackingService.GetMutedServerName(serverKey) ?? savedProfile?.Name;
+
+                var grid = new Grid { Margin = new Thickness(4, 4, 4, 4) };
                 grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                 grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-                var txt = new TextBlock
+                var serverDetails = new StackPanel
                 {
-                    Text = serverKey,
-                    Foreground = System.Windows.Media.Brushes.White,
                     VerticalAlignment = VerticalAlignment.Center,
-                    FontSize = 11
+                    Margin = new Thickness(4, 0, 12, 0)
                 };
-                Grid.SetColumn(txt, 0);
-                grid.Children.Add(txt);
-
-                var btn = new Button
+                var nameText = new TextBlock
                 {
-                    Content = "Unmute",
-                    Height = 20,
-                    Padding = new Thickness(6, 1, 6, 1),
-                    FontSize = 10,
+                    Text = string.IsNullOrWhiteSpace(serverName) ? serverKey : serverName,
+                    FontSize = 12,
+                    FontWeight = FontWeights.SemiBold,
+                    TextTrimming = TextTrimming.CharacterEllipsis
+                };
+                nameText.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimary");
+                serverDetails.Children.Add(nameText);
+
+                if (!string.IsNullOrWhiteSpace(serverName))
+                {
+                    var endpointText = new TextBlock
+                    {
+                        Text = serverKey,
+                        FontSize = 10,
+                        Margin = new Thickness(0, 2, 0, 0),
+                        TextTrimming = TextTrimming.CharacterEllipsis
+                    };
+                    endpointText.SetResourceReference(TextBlock.ForegroundProperty, "TextSubtle");
+                    serverDetails.Children.Add(endpointText);
+                }
+
+                Grid.SetColumn(serverDetails, 0);
+                grid.Children.Add(serverDetails);
+
+                var btn = new WpfUi.Button
+                {
+                    Content = Properties.Resources.UnmuteServer,
+                    Icon = new WpfUi.SymbolIcon { Symbol = WpfUi.SymbolRegular.AlertOn24 },
+                    Appearance = WpfUi.ControlAppearance.Secondary,
+                    Height = 30,
+                    Padding = new Thickness(10, 4, 10, 4),
+                    FontSize = 11,
+                    VerticalAlignment = VerticalAlignment.Center,
                     Tag = serverKey,
-                    Style = FindResource("GhostButton") as Style
                 };
                 btn.Click += (s, e) =>
                 {
-                    if (s is Button b && b.Tag is string key)
+                    if (s is WpfUi.Button { Tag: string key })
                     {
-                        var parts = key.Split(':');
-                        if (parts.Length == 2 && int.TryParse(parts[1], out int port))
-                        {
-                            TrackingService.UnmuteServer(parts[0], port);
-                            PopulateMutedServers();
-                        }
+                        TrackingService.UnmuteServer(key);
+                        PopulateMutedServers();
                     }
                 };
                 Grid.SetColumn(btn, 1);
@@ -684,12 +1232,6 @@ namespace RustPlusDesk.Views
                 PnlMutedServers.Children.Add(grid);
             }
         }
-
-        private void BtnModifyChatAlerts_Click(object sender, RoutedEventArgs e) =>
-            ParentWindow?.OpenChatAlertsFromSettings();
-
-        private void BtnChatCommands_Click(object sender, RoutedEventArgs e) =>
-            ParentWindow?.OpenChatCommandsFromSettings();
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
@@ -705,6 +1247,51 @@ namespace RustPlusDesk.Views
             catch { }
         }
 
-      
+        private void TxtCustomMapUrl_TextChanged(object sender, TextChangedEventArgs e)
+        {
+        }
+
+        private void BtnApplyCustomMapUrl_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedProf = ParentWindow?.ViewModel?.Selected;
+            if (selectedProf == null)
+            {
+                MessageBox.Show(ParentWindow, "No active server profile selected.", "Custom Map URL", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            string url = TxtCustomMapUrl.Text.Trim();
+            if (!string.IsNullOrEmpty(url) && !Uri.IsWellFormedUriString(url, UriKind.Absolute))
+            {
+                MessageBox.Show(ParentWindow, "Please enter a valid absolute HTTP or HTTPS URL (e.g. https://example.com/rust_map.png).", "Invalid URL", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            selectedProf.CustomMapUrl = string.IsNullOrWhiteSpace(url) ? null : url;
+            ParentWindow?.ViewModel?.Save();
+
+            if (!string.IsNullOrWhiteSpace(selectedProf.CustomMapUrl))
+            {
+                string host = selectedProf.Host;
+                int port = selectedProf.Port;
+                foreach (var c in System.IO.Path.GetInvalidFileNameChars()) host = host.Replace(c, '_');
+                string key = $"{host}_{port}";
+                MainWindow.DeleteCustomMapCache(key);
+
+                TxtCustomMapStatus.Text = "Custom HD Map URL updated. Reloading map image...";
+            }
+            else
+            {
+                TxtCustomMapStatus.Text = "Custom HD Map URL cleared. Reverting to standard server map...";
+            }
+
+            _ = ParentWindow?.ReloadMapAsync();
+        }
+
+        private void BtnClearCustomMapUrl_Click(object sender, RoutedEventArgs e)
+        {
+            TxtCustomMapUrl.Text = "";
+            BtnApplyCustomMapUrl_Click(sender, e);
+        }
     }
 }

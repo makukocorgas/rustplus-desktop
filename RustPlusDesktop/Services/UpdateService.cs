@@ -130,6 +130,7 @@ namespace RustPlusDesk.Services
                         {
                             Progress = total.HasValue ? (double)readTotal / total.Value : 0,
                             Percentage = total.HasValue ? $"{(double)readTotal / total.Value:P0}" : "0%",
+                            Status = "Downloading update...",
                             BytesReceived = FormatBytes(readTotal),
                             TotalBytes = total.HasValue ? FormatBytes(total.Value) : "Unknown",
                             Speed = FormatBytes((long)(readTotal / (sw.Elapsed.TotalSeconds > 0 ? sw.Elapsed.TotalSeconds : 1))) + "/s"

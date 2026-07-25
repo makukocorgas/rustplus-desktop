@@ -1,6 +1,7 @@
 using RustPlusDesk.Models;
 using RustPlusDesk.Services;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
@@ -13,11 +14,30 @@ public partial class MainWindow
     private DispatcherTimer? _storageTimer;
     private bool _storageTickBusy; // optionaler Reentrancy-Schutz
     private bool _isReconnecting = false;
+    private CancellationTokenSource _connectionPollingCts = new();
+
+    private void CancelConnectionPolling() => _connectionPollingCts.Cancel();
+
+    private void RenewConnectionPolling()
+    {
+        _connectionPollingCts.Cancel();
+        _connectionPollingCts.Dispose();
+        _connectionPollingCts = new CancellationTokenSource();
+    }
 
     private async Task HardResetAsync(bool reconnect = false)
     {
         _connectedProfile = null;
+        // Explicit disconnect: force the next connect to a server to re-sync with the
+        // cloud (in case markers were edited from elsewhere while offline).
+        _ownOverlayLoadedForServerKey = null;
+        // Don't let overlay-upload state leak across a server switch.
+        _overlayUploadInFlight = false;
+        _pendingOverlayUpload = null;
+        _overlaySyncPendingRetry = false;
+        _overlaySyncRetryBackoffTicks = 0;
         // 1) Laufende Polls/Tokens abbrechen
+        CancelConnectionPolling();
         try { StopDynPolling(clearKnown: !reconnect); } catch { }
         try { StopTeamPolling(); } catch { }
 
@@ -266,8 +286,17 @@ public partial class MainWindow
 
     private async void OnConnectionLost()
     {
+        if (!Dispatcher.CheckAccess())
+        {
+            _ = Dispatcher.BeginInvoke(new Action(OnConnectionLost));
+            return;
+        }
+
         if (_isReconnecting) return;
         _isReconnecting = true;
+
+        CancelConnectionPolling();
+        try { StopDynPolling(clearKnown: false); } catch { }
 
         if (_vm?.Selected != null)
         {

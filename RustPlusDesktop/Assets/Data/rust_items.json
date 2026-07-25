@@ -1,6 +1,7 @@
 {
   "id_to_short": {
     "1840570710": "above.ground.pool",
+    "1664052604": "apartment.master_key",
     "1055319033": "ammo.grenadelauncher.buckshot",
     "349762871": "ammo.grenadelauncher.he",
     "915408809": "ammo.grenadelauncher.smoke",
@@ -733,6 +734,7 @@
   },
   "short_to_nice": {
     "above.ground.pool": "Above Ground Pool",
+    "apartment.master_key": "Apartment Key",
     "ammo.grenadelauncher.buckshot": "40mm Shotgun Round",
     "ammo.grenadelauncher.he": "40mm HE Grenade",
     "ammo.grenadelauncher.smoke": "40mm Smoke Grenade",

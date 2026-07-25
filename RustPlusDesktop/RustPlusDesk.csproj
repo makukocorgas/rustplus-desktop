@@ -19,12 +19,12 @@
 
 	<PropertyGroup>
 		<!-- Produkt-/Paketversion (für Vergleich & Anzeige) -->
-		<Version>8.0.0</Version>
+		<Version>8.6.0</Version>
 		<Title>Rust+ Desk</Title>
 		<Authors>makukocorgas</Authors>
-		<AssemblyVersion>8.0.0</AssemblyVersion>
-		<FileVersion>8.0.0</FileVersion>
-		<InformationalVersion>8.0.0</InformationalVersion>
+		<AssemblyVersion>8.6.0</AssemblyVersion>
+		<FileVersion>8.6.0</FileVersion>
+		<InformationalVersion>8.6.0</InformationalVersion>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 		
 		<!-- (optional, hübsch im Datei-Eigenschaften-Dialog) -->
@@ -105,6 +105,7 @@
 	  <None Remove="Assets\icons\Lakes.png" />
 	  <None Remove="Assets\icons\largeoilrig.png" />
 	  <None Remove="Assets\icons\launchsite.png" />
+	  <None Remove="Assets\icons\raid-targets\**\*" />
 	  <None Remove="Assets\icons\lighthouse.png" />
 	  <None Remove="Assets\icons\map-icons\base1.png" />
 	  <None Remove="Assets\icons\map-icons\base2.png" />
@@ -145,6 +146,7 @@
 	  <None Remove="Assets\icons\pen.png" />
 	  <None Remove="Assets\icons\pencil.png" />
 	  <None Remove="Assets\icons\pin.png" />
+	  <None Remove="Assets\icons\recycler.png" />
 	  <None Remove="Assets\icons\PiP.png" />
 	  <None Remove="Assets\icons\Popup.png" />
 	  <None Remove="Assets\icons\powerplant.png" />
@@ -156,6 +158,7 @@
 	  <None Remove="Assets\icons\sewerbranch.png" />
 	  <None Remove="Assets\icons\smartalarm.png" />
 	  <None Remove="Assets\icons\smartswitch.png" />
+	  <None Remove="Assets\icons\automation.png" />
 	  <None Remove="Assets\icons\stable.png" />
 	  <None Remove="Assets\icons\stonequarry.png" />
 	  <None Remove="Assets\icons\storagemonitor.png" />
@@ -177,6 +180,7 @@
 	  <None Remove="Assets\icons\waterwell.png" />
 	  <None Remove="Assets\Data\rust-item-list.json" />
 	  <None Remove="Assets\Data\recycler-items.json" />
+	  <None Remove="Assets\Data\raid-data.json" />
 
 	  <None Remove="Assets\icons\discord.png" />
 	  <None Remove="Assets\icq-message.wav" />
@@ -231,8 +235,10 @@
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 	  </Resource>
+	  <Resource Include="Assets\icons\recycler.png" />
 	  <Resource Include="Assets\icons\smartalarm.png" />
 	  <Resource Include="Assets\icons\smartswitch.png" />
+	  <Resource Include="Assets\icons\automation.png" />
 	  <Resource Include="Assets\icons\storagemonitor.png" />
 	  <Resource Include="Assets\icons\text.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -326,7 +332,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
+    <Content Include="Assets\Data\raid-data.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
     <Resource Include="Assets\icons\airfield.png" />
+    <Resource Include="Assets\icons\apartments_complex_1.png" />
     <Resource Include="Assets\Fonts\PermanentMarker.ttf" />
     <Resource Include="Assets\icons\arcticresearch.png" />
     <Resource Include="Assets\icons\banditcamp.png" />
@@ -383,6 +394,10 @@
     <Resource Include="Assets\icons\powerplant.png" />
     <Resource Include="Assets\icons\powerstation.png" />
     <Resource Include="Assets\icons\radtown.png" />
+    <Content Include="Assets\icons\raid-targets\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
     <Resource Include="Assets\icons\satellitedish.png" />
     <Resource Include="Assets\icons\sewerbranch.png" />
     <Resource Include="Assets\icons\stable.png" />
@@ -407,6 +422,7 @@
     <Resource Include="Assets\Data\rust-item-list.json" />
     <EmbeddedResource Include="Assets\Data\recycler-items.json" />
     <EmbeddedResource Include="Assets\Data\Recycling-Data.json" />
+    <EmbeddedResource Include="Assets\Data\raid-data.json" />
     <Resource Include="Assets\icons\discord.png" />
     <Resource Include="Assets\icq-message.wav" />
     <Resource Include="Assets\rustplus-desktop-icon.ico" />
@@ -488,6 +504,7 @@
     <Resource Include="Assets\icons\map-markers\ore.png" />
     <Resource Include="Assets\Data\rust_items.json" />
     <Resource Include="Assets\Data\monument_bounds.json" />
+    <Resource Include="Assets\heatmap-icons\**\*.png" />
 
   </ItemGroup>
 

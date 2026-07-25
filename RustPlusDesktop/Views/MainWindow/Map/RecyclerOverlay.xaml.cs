@@ -29,39 +29,14 @@ namespace RustPlusDesk.Views
 
         public RecyclerOverlay()
         {
-            try
-            {
-                InitializeComponent();
-                InputsControl.ItemsSource = Items;
-                OutputsControl.ItemsSource = Outputs;
+            InitializeComponent();
+            InputsControl.ItemsSource = Items;
+            OutputsControl.ItemsSource = Outputs;
 
-                LoadItems();
+            LoadItems();
 
-                Loaded += RecyclerOverlay_Loaded;
-                MainWindow.IconsUpdated += OnIconsUpdated;
-
-                Unloaded += (s, e) => {
-                    MainWindow.IconsUpdated -= OnIconsUpdated;
-                };
-            }
-            catch (Exception ex)
-            {
-                try
-                {
-                    Directory.CreateDirectory(@"C:\Users\Jawad\.gemini\antigravity-ide\brain\c4d06e13-9fd0-4c38-9e9e-769d13bce6c7\scratch");
-                    File.WriteAllText(@"C:\Users\Jawad\.gemini\antigravity-ide\brain\c4d06e13-9fd0-4c38-9e9e-769d13bce6c7\scratch\crash.txt", ex.ToString());
-                }
-                catch { }
-                throw;
-            }
-        }
-
-        private void RecyclerOverlay_Loaded(object sender, RoutedEventArgs e)
-        {
-            LogDiag($"[RecyclerOverlay] Loaded Event Fired.");
-            LogDiag($"[RecyclerOverlay] InputsControl Items Count = {InputsControl.Items.Count}, OutputsControl Items Count = {OutputsControl.Items.Count}");
-            LogDiag($"[RecyclerOverlay] InputsControl Visibility = {InputsControl.Visibility}, Width = {InputsControl.ActualWidth}, Height = {InputsControl.ActualHeight}");
-            LogDiag($"[RecyclerOverlay] Items collection Count = {Items.Count}, Outputs collection Count = {Outputs.Count}");
+            MainWindow.IconsUpdated += OnIconsUpdated;
+            Unloaded += (s, e) => MainWindow.IconsUpdated -= OnIconsUpdated;
         }
 
         // Pretty display names for output resources
@@ -99,20 +74,6 @@ namespace RustPlusDesk.Views
             ["targeting.computer"]= "Targeting Computer",
             ["fuse"]              = "Fuse",
         };
-
-        private void LogDiag(string message)
-        {
-            try
-            {
-                var mainWin = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
-                mainWin?.AppendLog(message);
-                
-                string logPath = @"C:\Users\Jawad\.gemini\antigravity-ide\brain\c4d06e13-9fd0-4c38-9e9e-769d13bce6c7\scratch\recycler-log.txt";
-                Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
-                File.AppendAllText(logPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] {message}{Environment.NewLine}");
-            }
-            catch { }
-        }
 
         private void OnIconsUpdated()
         {
@@ -208,11 +169,8 @@ namespace RustPlusDesk.Views
 
         private void LoadItems()
         {
-            LogDiag("[RecyclerOverlay] Loading recycling calculator database...");
-
             string jsonContent = "";
             bool loaded = false;
-            string sourcePath = "";
 
             var baseDir = AppContext.BaseDirectory;
             var currDir = Directory.GetCurrentDirectory();
@@ -233,21 +191,15 @@ namespace RustPlusDesk.Views
             {
                 if (path != null)
                 {
-                    LogDiag($"[RecyclerOverlay] Checking file path: {path}");
                     if (File.Exists(path))
                     {
                         try
                         {
                             jsonContent = File.ReadAllText(path, System.Text.Encoding.UTF8);
                             loaded = true;
-                            sourcePath = path;
-                            LogDiag($"[RecyclerOverlay] Loaded database from disk: {path}");
                             break;
                         }
-                        catch (Exception ex)
-                        {
-                            LogDiag($"[RecyclerOverlay] Error reading file: {ex.Message}");
-                        }
+                        catch { }
                     }
                 }
             }
@@ -269,7 +221,6 @@ namespace RustPlusDesk.Views
 
                 foreach (var uri in packUris)
                 {
-                    LogDiag($"[RecyclerOverlay] Checking Pack URI: {uri}");
                     try
                     {
                         var sri = Application.GetResourceStream(new Uri(uri));
@@ -278,12 +229,10 @@ namespace RustPlusDesk.Views
                             using var r = new StreamReader(sri.Stream);
                             jsonContent = r.ReadToEnd();
                             loaded = true;
-                            sourcePath = uri;
-                            LogDiag($"[RecyclerOverlay] Loaded database from resource: {uri}");
                             break;
                         }
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         // Tolerate resource exceptions during check
                     }
@@ -295,7 +244,6 @@ namespace RustPlusDesk.Views
                 string entryName = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name ?? "RustPlusDesk";
                 var asm = System.Reflection.Assembly.GetExecutingAssembly();
                 var resName = $"{entryName}.Assets.Data.recycler-items.json";
-                LogDiag($"[RecyclerOverlay] Checking embedded resource: {resName}");
                 try
                 {
                     using var stream = asm.GetManifestResourceStream(resName);
@@ -304,14 +252,9 @@ namespace RustPlusDesk.Views
                         using var r = new StreamReader(stream);
                         jsonContent = r.ReadToEnd();
                         loaded = true;
-                        sourcePath = resName;
-                        LogDiag($"[RecyclerOverlay] Loaded database from embedded resource: {resName}");
                     }
                 }
-                catch (Exception ex)
-                {
-                    LogDiag($"[RecyclerOverlay] Embedded resource failed: {ex.Message}");
-                }
+                catch { }
             }
 
             if (loaded && !string.IsNullOrEmpty(jsonContent))
@@ -322,7 +265,6 @@ namespace RustPlusDesk.Views
                     var parsedItems = JsonSerializer.Deserialize<List<RecyclerItemData>>(jsonContent, options);
                     if (parsedItems != null)
                     {
-                        LogDiag($"[RecyclerOverlay] Successfully deserialized {parsedItems.Count} total items.");
                         var list = new List<RecyclerItemViewModel>();
                         foreach (var item in parsedItems)
                         {
@@ -345,7 +287,6 @@ namespace RustPlusDesk.Views
                         }
 
                         list = list.OrderBy(x => x.DisplayName).ToList();
-                        LogDiag($"[RecyclerOverlay] Filtered to {list.Count} recyclable components.");
 
                         _allRecyclerItems = list;
                         LoadStackSizes(list);
@@ -365,20 +306,8 @@ namespace RustPlusDesk.Views
                         }
                         CategoryComboBox.SelectedIndex = 0; // Triggers FilterItems()
                     }
-                    else
-                    {
-                        LogDiag("[RecyclerOverlay] Deserialized item list is null.");
-                    }
                 }
-                catch (Exception ex)
-                {
-                    LogDiag($"[RecyclerOverlay] JSON Deserialization failed: {ex.Message}");
-                    System.Diagnostics.Debug.WriteLine($"Failed to load recycler items: {ex.Message}");
-                }
-            }
-            else
-            {
-                LogDiag("[RecyclerOverlay] Failed to load json content from any source.");
+                catch { }
             }
         }
 
@@ -433,13 +362,9 @@ namespace RustPlusDesk.Views
                             }
                         }
                     }
-                    LogDiag($"[RecyclerOverlay] Successfully loaded stack sizes from Recycling-Data.json.");
                 }
             }
-            catch (Exception ex)
-            {
-                LogDiag($"[RecyclerOverlay] Failed to load stack sizes: {ex.Message}");
-            }
+            catch { }
         }
 
         private void CalculateYields()
@@ -544,10 +469,22 @@ namespace RustPlusDesk.Views
                     return null;
                 }
 
+                double wildChanceQty = Math.Max(0, wild.Max - wild.Min);
+                double wildChancePercent = wildChanceQty > 0 ? ((wild.Expected - wild.Min) / wildChanceQty) * 100.0 : 0.0;
+
+                double safeChanceQty = Math.Max(0, safe.Max - safe.Min);
+                double safeChancePercent = safeChanceQty > 0 ? ((safe.Expected - safe.Min) / safeChanceQty) * 100.0 : 0.0;
+
                 if (existingByShort.TryGetValue(sn, out var vm))
                 {
                     vm.WildAmount = wild.Expected;
+                    vm.WildGuaranteed = wild.Min;
+                    vm.WildChance = wildChanceQty;
+                    vm.WildChancePercent = wildChancePercent;
                     vm.SafeAmount = safe.Expected;
+                    vm.SafeGuaranteed = safe.Min;
+                    vm.SafeChance = safeChanceQty;
+                    vm.SafeChancePercent = safeChancePercent;
                     vm.WildToolTip = BuildTooltip(wild);
                     vm.SafeToolTip = BuildTooltip(safe);
                 }
@@ -564,7 +501,13 @@ namespace RustPlusDesk.Views
                         DisplayName = display,
                         Icon        = MainWindow.ResolveItemIcon(0, sn, 24),
                         WildAmount  = wild.Expected,
+                        WildGuaranteed = wild.Min,
+                        WildChance = wildChanceQty,
+                        WildChancePercent = wildChancePercent,
                         SafeAmount  = safe.Expected,
+                        SafeGuaranteed = safe.Min,
+                        SafeChance = safeChanceQty,
+                        SafeChancePercent = safeChancePercent,
                         WildToolTip = BuildTooltip(wild),
                         SafeToolTip = BuildTooltip(safe)
                     };
@@ -749,6 +692,42 @@ namespace RustPlusDesk.Views
             }
         }
 
+        private double _wildGuaranteed;
+        public double WildGuaranteed
+        {
+            get => _wildGuaranteed;
+            set
+            {
+                _wildGuaranteed = value;
+                OnPropertyChanged(nameof(WildGuaranteed));
+                OnPropertyChanged(nameof(WildGuaranteedText));
+            }
+        }
+
+        private double _wildChance;
+        public double WildChance
+        {
+            get => _wildChance;
+            set
+            {
+                _wildChance = value;
+                OnPropertyChanged(nameof(WildChance));
+                OnPropertyChanged(nameof(WildChanceText));
+            }
+        }
+
+        private double _wildChancePercent;
+        public double WildChancePercent
+        {
+            get => _wildChancePercent;
+            set
+            {
+                _wildChancePercent = value;
+                OnPropertyChanged(nameof(WildChancePercent));
+                OnPropertyChanged(nameof(WildChanceText));
+            }
+        }
+
         private double _safeAmount;
         public double SafeAmount
         {
@@ -759,6 +738,42 @@ namespace RustPlusDesk.Views
                 OnPropertyChanged(nameof(SafeAmount));
                 OnPropertyChanged(nameof(SafeText));
                 OnPropertyChanged(nameof(IsActive));
+            }
+        }
+
+        private double _safeGuaranteed;
+        public double SafeGuaranteed
+        {
+            get => _safeGuaranteed;
+            set
+            {
+                _safeGuaranteed = value;
+                OnPropertyChanged(nameof(SafeGuaranteed));
+                OnPropertyChanged(nameof(SafeGuaranteedText));
+            }
+        }
+
+        private double _safeChance;
+        public double SafeChance
+        {
+            get => _safeChance;
+            set
+            {
+                _safeChance = value;
+                OnPropertyChanged(nameof(SafeChance));
+                OnPropertyChanged(nameof(SafeChanceText));
+            }
+        }
+
+        private double _safeChancePercent;
+        public double SafeChancePercent
+        {
+            get => _safeChancePercent;
+            set
+            {
+                _safeChancePercent = value;
+                OnPropertyChanged(nameof(SafeChancePercent));
+                OnPropertyChanged(nameof(SafeChanceText));
             }
         }
 
@@ -804,6 +819,13 @@ namespace RustPlusDesk.Views
         public bool IsActive => WildAmount > 0 || SafeAmount > 0;
         public string WildText => WildAmount > 0 ? Math.Round(WildAmount).ToString("0") : "0";
         public string SafeText => SafeAmount > 0 ? Math.Round(SafeAmount).ToString("0") : "0";
+        public string WildGuaranteedText => FormatAmount(WildGuaranteed);
+        public string WildChanceText => WildChance > 0 ? $"{FormatAmount(WildChance)} ({Math.Round(WildChancePercent)}%)" : "0";
+        public string SafeGuaranteedText => FormatAmount(SafeGuaranteed);
+        public string SafeChanceText => SafeChance > 0 ? $"{FormatAmount(SafeChance)} ({Math.Round(SafeChancePercent)}%)" : "0";
+
+        private static string FormatAmount(double value)
+            => value > 0 ? Math.Round(value).ToString("0") : "0";
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string name) =>
@@ -814,6 +836,7 @@ namespace RustPlusDesk.Views
     {
         public string id { get; set; }
         public string shortName { get; set; }
+        public int ingameId { get; set; }
         public string category { get; set; }
         public string displayName { get; set; }
         public int stackSize { get; set; }

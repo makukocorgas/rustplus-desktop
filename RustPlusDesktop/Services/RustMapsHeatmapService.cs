@@ -56,6 +56,10 @@ namespace RustPlusDesk.Services
             ["junkpiles"]   = new[] { "JunkPile", "JunkPileWater" },
             ["rowboat"]     = new[] { "Rowboat", "RHIB" },
             ["modularcar"]  = new[] { "ModularCar", "BasicCar" },
+            ["horse"]       = new[] { "Horse", "RidableHorse" },
+            ["pedalbike"]   = new[] { "PedalBike", "Bicycle" },
+            ["hab"]         = new[] { "HotAirBalloon" },
+            ["flowers"]     = new[] { "Flowers", "CollectableFlowers" },
         };
 
         // ── Resultado da operação ────────────────────────────────────────

@@ -62,8 +62,15 @@ private bool _overlayToolsVisible = false;
     private System.Windows.Threading.DispatcherTimer? _overlayPollTimer;
     private string? _lastDevicesCloudTooltip;
     private string? _lastOverlayCloudTooltip;
-    private CancellationTokenSource? _overlaySyncCts;
-    private const int OverlaySyncDebounceMs = 800;
+
+    // Overlay cloud upload: immediate (no debounce) + serialized so completion order always
+    // matches send order (LastUpdatedUnix alone can't disambiguate — DataManager.UnixNow() is
+    // second-resolution, so two edits in the same second would tie).
+    private bool _overlayUploadInFlight;
+    private OverlaySaveData? _pendingOverlayUpload;
+    private int _pendingOverlayUploadSize;
+    private bool _overlaySyncPendingRetry;
+    private int _overlaySyncRetryBackoffTicks;
 
     private class TeammatePollState
     {
@@ -326,6 +333,13 @@ private bool _overlayToolsVisible = false;
     {
         try
         {
+            // Snapshot local timestamp BEFORE fetching. OverlayDataModule.FetchOverlayFromServerAsync
+            // already decides on its own whether the local cache file gets overwritten (only if the
+            // cloud copy is genuinely newer), so comparing before/after tells us whether that happened
+            // — without this function duplicating (and previously mismatching) that same decision.
+            var localBefore = OverlayDataModule.LoadLocalOverlay(GetServerKey(), steamId);
+            long localTsBefore = localBefore?.LastUpdatedUnix ?? 0;
+
             var remoteData = await OverlayDataModule.FetchOverlayFromServerAsync(GetServerKey(), steamId);
             if (remoteData == null)
             {
@@ -335,32 +349,15 @@ private bool _overlayToolsVisible = false;
                 return false;
             }
 
-            if (steamId == _mySteamId)
+            bool pulledNewer = remoteData.LastUpdatedUnix > localTsBefore;
+            string who = steamId == _mySteamId ? "self" : steamId.ToString();
+            if (!silent)
             {
-                var localData = OverlayDataModule.LoadLocalOverlay(GetServerKey(), steamId);
-                long localTs  = localData?.LastUpdatedUnix ?? 0;
-                long remoteTs = remoteData.LastUpdatedUnix;
-
-                if (remoteTs > localTs)
-                {
-                    OverlayDataModule.SaveLocalOverlay(GetServerKey(), steamId, remoteData);
-                    if (!silent)
-                        AppendLog($"[overlay/net] self: pulled newer cloud overlay (remote={remoteTs} > local={localTs})");
-                    return true;
-                }
-                else
-                {
-                    if (!silent)
-                        AppendLog($"[overlay/net] self: local overlay is newer or same, kept local.");
-                    return false;
-                }
+                AppendLog(pulledNewer
+                    ? $"[overlay/net] {who}: pulled newer cloud overlay (remote={remoteData.LastUpdatedUnix} > local={localTsBefore})"
+                    : $"[overlay/net] {who}: local overlay is newer or same, kept local.");
             }
-            else
-            {
-                // For teammates, always trust remote (they painted it)
-                OverlayDataModule.SaveLocalOverlay(GetServerKey(), steamId, remoteData);
-                return true;
-            }
+            return pulledNewer;
         }
         catch (Exception ex)
         {
@@ -524,6 +521,7 @@ private bool _overlayToolsVisible = false;
             Canvas.SetTop(img, icon.Y);
 
             Overlay.Children.Add(img);
+            Panel.SetZIndex(img, 901); // Acima dos icons de monumentos (900)
             myList.Add(img);
         }
 
@@ -551,6 +549,7 @@ private bool _overlayToolsVisible = false;
             Canvas.SetTop(tb, txt.Y);
 
             Overlay.Children.Add(tb);
+            Panel.SetZIndex(tb, 901); // Acima dos icons de monumentos (900)
             myList.Add(tb);
         }
 
@@ -810,6 +809,7 @@ private bool _overlayToolsVisible = false;
 
         // 6. ins Overlay
         Overlay.Children.Add(elementToPlace);
+        Panel.SetZIndex(elementToPlace, 901); // Acima dos icons de monumentos (900)
         RegisterElementForOwner(_mySteamId, elementToPlace);
 
         // 7. speichern (nimmt BASIS-W/H, nicht die skalierten Pixel - das ist korrekt!)
@@ -827,7 +827,6 @@ private bool _overlayToolsVisible = false;
                     baseMeta.Screenshots.Add(dlg.Base64Result);
                     if (elementToPlace is Grid g) UpdateScreenshotIndicator(g, baseMeta.Screenshots);
                     SaveOwnOverlayToJson();
-                    UploadOwnOverlayToTeam();
                 }
             }
         }
@@ -887,6 +886,7 @@ private bool _overlayToolsVisible = false;
         Canvas.SetTop(tb, mapPos.Y);
 
         Overlay.Children.Add(tb);
+        Panel.SetZIndex(tb, 901); // Acima dos icons de monumentos (900)
         RegisterElementForOwner(_mySteamId, tb);
 
         SaveOwnOverlayToJson();
@@ -1190,6 +1190,7 @@ private bool _overlayToolsVisible = false;
     public void UpdateCloudSyncUI()
     {
         _vm.IsCloudConnected = Services.Auth.SupabaseAuthManager.IsAuthenticated; // guest, Discord ou Email
+        _vm.IsPremium = Services.Auth.SupabaseAuthManager.IsPremium;
 
         bool deviceLimitExceeded = IsFreeDeviceSyncLimitExceeded();
         int overlaySizeBytes = GetCurrentOverlaySizeBytes();
@@ -1261,22 +1262,10 @@ private bool _overlayToolsVisible = false;
 
     public int GetCurrentBaseCount()
     {
-        int baseCount = 0;
-        foreach (var child in Overlay.Children)
-        {
-            if (child is Image img && img.Source is BitmapImage bi)
-            {
-                string path = bi.UriSource?.ToString() ?? "";
-                if (path.Contains("base1.png") || path.Contains("base2.png"))
-                {
-                    if (img.Tag is OverlayTag meta && meta.OwnerSteamId == _mySteamId)
-                    {
-                        baseCount++;
-                    }
-                }
-            }
-        }
-        return baseCount;
+        return Overlay.Children.OfType<FrameworkElement>().Count(child =>
+            child.Tag is OverlayTag meta &&
+            meta.OwnerSteamId == _mySteamId &&
+            OverlayDataModule.IsBaseIconPath(meta.CustomIconPath));
     }
 
     private bool IsBaseLimitExceeded()
@@ -1287,20 +1276,15 @@ private bool _overlayToolsVisible = false;
     private bool IsScreenshotLimitExceeded()
     {
         int maxScreenshots = Services.Auth.SupabaseAuthManager.GetMaxScreenshotsPerBase();
-        foreach (var child in Overlay.Children)
+        foreach (var child in Overlay.Children.OfType<FrameworkElement>())
         {
-            if (child is Image img && img.Source is BitmapImage bi)
+            if (child.Tag is OverlayTag meta &&
+                meta.OwnerSteamId == _mySteamId &&
+                OverlayDataModule.IsBaseIconPath(meta.CustomIconPath))
             {
-                string path = bi.UriSource?.ToString() ?? "";
-                if (path.Contains("base1.png") || path.Contains("base2.png"))
+                if (meta.Screenshots != null && meta.Screenshots.Count > maxScreenshots)
                 {
-                    if (img.Tag is OverlayTag meta && meta.OwnerSteamId == _mySteamId)
-                    {
-                        if (meta.Screenshots != null && meta.Screenshots.Count > maxScreenshots)
-                        {
-                            return true;
-                        }
-                    }
+                    return true;
                 }
             }
         }
@@ -1650,26 +1634,10 @@ private bool _overlayToolsVisible = false;
                 return;
             }
 
-            if (IsBaseLimitExceeded())
-            {
-                AppendLog("[overlay/cloud] Upload skipped: base count limit reached.");
-                UpdateCloudSyncUI();
-                return;
-            }
-
-            if (IsScreenshotLimitExceeded())
-            {
-                AppendLog("[overlay/cloud] Upload skipped: screenshot limit per base exceeded.");
-                UpdateCloudSyncUI();
-                return;
-            }
-
-            // optional, aber sinnvoll: sicherstellen, dass die lokale Datei "aktuell" ist
-            try
-            {
-                await TryFetchAndUpdateOverlayAsync(_mySteamId);
-            }
-            catch { /* nicht kritisch */ }
+            // Note: this used to pre-fetch from the cloud "to make sure local is current" before
+            // rebuilding from canvas — removed. Every edit now uploads immediately (see
+            // TriggerImmediateOverlayUpload), so the canvas is always the freshest source of
+            // truth and a pre-upload cloud read was just a needless race window.
 
             // 0) vorhandene JSON (fuer Devices) einlesen
             // 1) aktuelles Overlay aus dem Canvas bauen
@@ -2410,43 +2378,153 @@ private bool _overlayToolsVisible = false;
             UpdateCloudSyncUI();
             var overlayByteSize = OverlayDataModule.CalculateUncompressedSize(data);
 
-            // 4) Debounced Cloud upload if enabled (anon key works, no Discord needed)
+            // 4) Immediate cloud upload if enabled (anon key works, no Discord needed)
             if (TrackingService.CloudSyncEnabled && RustPlusDesk.Services.Auth.SupabaseAuthManager.Client != null)
             {
                 if (IsOverlaySyncLimitExceeded(overlayByteSize))
                     return;
 
-                _overlaySyncCts?.Cancel();
-                _overlaySyncCts?.Dispose();
-                _overlaySyncCts = new CancellationTokenSource();
-                var token = _overlaySyncCts.Token;
-                var sk = GetServerKey();
-                var sid = _mySteamId;
-                var capturedData = data;
-                var capturedSize = overlayByteSize;
-
-                _ = Task.Run(async () =>
+                if (!_ownCloudRestoreReady)
                 {
-                    try
-                    {
-                        await Task.Delay(OverlaySyncDebounceMs, token).ConfigureAwait(false);
-                        if (token.IsCancellationRequested) return;
-                        var uploaded = await OverlayDataModule.UploadOverlayAsync(sk, sid, capturedData);
-                        if (uploaded)
-                            Dispatcher.Invoke(() => MarkOverlayCloudSynced(capturedSize));
-                    }
-                    catch (OperationCanceledException) { }
-                    catch (Exception ex)
-                    {
-                        Dispatcher.Invoke(() => AppendLog("[overlay/cloud] Sync failed: " + ex.Message));
-                    }
-                });
+                    // A reconnect's local-vs-cloud reconcile (InitOwnOverlayAsync) is still in
+                    // progress — uploading now could race its own writes. Flag for the retry
+                    // hook to pick this edit up once the reconcile settles.
+                    _overlaySyncPendingRetry = true;
+                    return;
+                }
+
+                TriggerImmediateOverlayUpload(data, overlayByteSize);
             }
 
         }
         catch (Exception ex)
         {
             AppendLog("[overlay] SaveOwnOverlayToJson error: " + ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Uploads the given overlay snapshot to the cloud right away. If an upload is already
+    /// in flight, the snapshot is coalesced (only the latest one is kept and sent next) so
+    /// completion order always matches send order — no two uploads for the local player are
+    /// ever in flight at once, which is what actually prevents an older edit's response from
+    /// landing after a newer one's (LastUpdatedUnix is second-resolution and can't be trusted
+    /// to break ties between edits made in the same second).
+    /// </summary>
+    private void TriggerImmediateOverlayUpload(OverlaySaveData data, int byteSize)
+    {
+        if (_overlayUploadInFlight)
+        {
+            _pendingOverlayUpload = data;
+            _pendingOverlayUploadSize = byteSize;
+            return;
+        }
+
+        _overlayUploadInFlight = true;
+        var sk = GetServerKey();
+        var sid = _mySteamId;
+
+        _ = Task.Run(async () =>
+        {
+            var currentData = data;
+            var currentSize = byteSize;
+            try
+            {
+                while (true)
+                {
+                    bool uploaded = false;
+                    try
+                    {
+                        uploaded = await OverlayDataModule.UploadOverlayAsync(sk, sid, currentData);
+                    }
+                    catch (Exception ex)
+                    {
+                        Dispatcher.Invoke(() => AppendLog("[overlay/cloud] Sync failed: " + ex.Message));
+                    }
+
+                    if (uploaded)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            MarkOverlayCloudSynced(currentSize);
+                            _overlaySyncPendingRetry = false;
+                            _overlaySyncRetryBackoffTicks = 0;
+                        });
+                    }
+                    else if (OverlayDataModule.LastUploadHadError)
+                    {
+                        // Genuine failure (network/auth/server) — keep the local edit as-is
+                        // (it's real user work, don't roll it back) and let the poll-timer
+                        // retry hook pick it up. An intentional skip (wipe protection, tier
+                        // limit) is NOT a failure and must not trigger retries.
+                        Dispatcher.Invoke(() => _overlaySyncPendingRetry = true);
+                    }
+
+                    // Drain any edit that arrived while this upload was in flight, so its
+                    // upload starts immediately instead of waiting for the next poll tick.
+                    OverlaySaveData? next = null;
+                    int nextSize = 0;
+                    Dispatcher.Invoke(() =>
+                    {
+                        if (_pendingOverlayUpload != null)
+                        {
+                            next = _pendingOverlayUpload;
+                            nextSize = _pendingOverlayUploadSize;
+                            _pendingOverlayUpload = null;
+                        }
+                    });
+
+                    if (next == null) break;
+                    currentData = next;
+                    currentSize = nextSize;
+                }
+            }
+            finally
+            {
+                Dispatcher.Invoke(() => _overlayUploadInFlight = false);
+            }
+        });
+    }
+
+    /// <summary>
+    /// Called once per <see cref="_overlayPollTimer"/> tick (~1s). If a previous upload failed
+    /// (<see cref="_overlaySyncPendingRetry"/>) and enough backoff has elapsed, rebuilds a fresh
+    /// snapshot from the canvas and tries again — an outage doesn't lose the edit, it just delays
+    /// when the cloud finds out about it. Backoff grows on repeated failure (capped at 30s) so a
+    /// prolonged outage doesn't hammer the edge function once per second.
+    /// </summary>
+    private void RetryPendingOverlayUploadIfDue()
+    {
+        if (!_overlaySyncPendingRetry || _overlayUploadInFlight || !_ownCloudRestoreReady) return;
+
+        if (_overlaySyncRetryBackoffTicks > 0)
+        {
+            _overlaySyncRetryBackoffTicks--;
+            return;
+        }
+
+        _overlaySyncRetryBackoffTicks = Math.Min(30, _overlaySyncRetryBackoffTicks == 0 ? 2 : _overlaySyncRetryBackoffTicks * 2);
+
+        try
+        {
+            var data = BuildCurrentOverlaySaveDataForMe();
+            data.Devices.Clear();
+            if (_vm.Selected?.Devices != null)
+            {
+                foreach (var dev in _vm.Selected.Devices)
+                {
+                    data.Devices.Add(MapDeviceToDto(dev));
+                }
+            }
+
+            var overlayByteSize = OverlayDataModule.CalculateUncompressedSize(data);
+            if (IsOverlaySyncLimitExceeded(overlayByteSize)) return;
+
+            TriggerImmediateOverlayUpload(data, overlayByteSize);
+        }
+        catch (Exception ex)
+        {
+            AppendLog("[overlay/cloud] Retry failed: " + ex.Message);
         }
     }
 
@@ -2722,6 +2800,7 @@ private bool _overlayToolsVisible = false;
             Canvas.SetTop(elementToPlace, icon.Y);
 
             Overlay.Children.Add(elementToPlace);
+            Panel.SetZIndex(elementToPlace, 901); // Acima dos icons de monumentos (900)
             list.Add(elementToPlace);
         }
 
@@ -2751,6 +2830,7 @@ private bool _overlayToolsVisible = false;
             Canvas.SetTop(tb, txt.Y);
 
             Overlay.Children.Add(tb);
+            Panel.SetZIndex(tb, 901); // Acima dos icons de monumentos (900)
             list.Add(tb);
         }
     }
@@ -3008,6 +3088,11 @@ private bool _overlayToolsVisible = false;
 
             if (!TrackingService.CloudSyncEnabled) return;
 
+            // Retry a previously-failed overlay upload. Unrelated to the teammate HTTP-poll-vs-
+            // WebSocket decision below (this is about MY OWN edit, not teammates' overlays), so
+            // it must not be skipped by the WebSocket-active check that follows.
+            RetryPendingOverlayUploadIfDue();
+
             // Skip HTTP database fetches if WebSocket is active and connected
             if (TeamSyncWebSocketService.IsActive) return;
 
@@ -3151,6 +3236,7 @@ private bool _overlayToolsVisible = false;
 
     private async Task FetchSteamIdsWithOverlaysAsync()
     {
+        if (SupabaseAuthManager.IsUpgradeRequiredSnackbarShown) return;
         if (SupabaseAuthManager.Client == null) return;
         try
         {
@@ -3828,7 +3914,6 @@ private bool _overlayToolsVisible = false;
             }
 
             SaveOwnOverlayToJson();
-            UploadOwnOverlayToTeam();
 
             // Reapply the zoom-based scale so the new element looks correct at the current map zoom
             RefreshUserOverlayIcons();
@@ -3865,7 +3950,6 @@ private bool _overlayToolsVisible = false;
                 if (iconEl is Grid g)
                     UpdateNoteVisibilityAndText(g, null);
                 SaveOwnOverlayToJson();
-                UploadOwnOverlayToTeam();
             };
             menu.Items.Add(miDelNote);
         }
@@ -3918,7 +4002,6 @@ private bool _overlayToolsVisible = false;
             if (_playerOverlayElements.TryGetValue(_mySteamId, out var mine))
                 mine.Remove(iconEl);
             SaveOwnOverlayToJson();
-            UploadOwnOverlayToTeam();
         };
         menu.Items.Add(miDelete);
 
@@ -4220,7 +4303,6 @@ private bool _overlayToolsVisible = false;
             if (iconEl is Grid g)
                 UpdateNoteVisibilityAndText(g, meta.Note);
             SaveOwnOverlayToJson();
-            UploadOwnOverlayToTeam();
             RemoveInlinePanel(panel!, dismissLayer!);
         };
 
@@ -4267,7 +4349,6 @@ private bool _overlayToolsVisible = false;
                 if (baseImg is Grid g)
                     UpdateNoteVisibilityAndText(g, meta.Note);
                 SaveOwnOverlayToJson();
-                UploadOwnOverlayToTeam();
             }
         };
         menu.Items.Add(miNote);
@@ -4281,7 +4362,6 @@ private bool _overlayToolsVisible = false;
                 if (baseImg is Grid g)
                     UpdateNoteVisibilityAndText(g, null);
                 SaveOwnOverlayToJson();
-                UploadOwnOverlayToTeam();
             };
             menu.Items.Add(miDelNote);
         }
@@ -4306,7 +4386,6 @@ private bool _overlayToolsVisible = false;
                 if (_activeGalleryAnchor == baseImg && BaseGalleryPopup != null)
                     BaseGalleryPopup.Visibility = Visibility.Collapsed;
                 SaveOwnOverlayToJson();
-                UploadOwnOverlayToTeam();
             };
             menu.Items.Add(miDelScreen);
         }
@@ -4322,7 +4401,6 @@ private bool _overlayToolsVisible = false;
                     meta.Screenshots.Add(dlg.Base64Result);
                     if (baseImg is Grid g3) UpdateScreenshotIndicator(g3, meta.Screenshots);
                     SaveOwnOverlayToJson();
-                    UploadOwnOverlayToTeam();
                 }
             };
             menu.Items.Add(miAddScreen);
@@ -4357,7 +4435,6 @@ private bool _overlayToolsVisible = false;
             if (_activeGalleryAnchor == baseImg && BaseGalleryPopup != null)
                 BaseGalleryPopup.Visibility = Visibility.Collapsed;
             SaveOwnOverlayToJson();
-            UploadOwnOverlayToTeam();
         };
         menu.Items.Add(miDeleteBase);
 

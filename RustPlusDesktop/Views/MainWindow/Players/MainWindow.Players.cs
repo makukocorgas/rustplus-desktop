@@ -33,6 +33,30 @@ public partial class MainWindow
         OpenUrl($"https://www.battlemetrics.com/servers/rust/{bmServerId}");
     }
 
+    // Manual override for when the automatic IP/name lookup can't match the server on
+    // BattleMetrics — e.g. right after the server's IP changes and BM hasn't re-indexed
+    // it yet. Paste the server ID from its battlemetrics.com URL to fix it immediately.
+    public async void BtnSearchBM_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+
+        var dialog = new Views.Windows.PromptDialog(
+            "Definir ID do BattleMetrics manualmente (ex: 123456, da URL battlemetrics.com/servers/rust/123456)",
+            TrackingService.CurrentServerBMId ?? "")
+        { Owner = this };
+
+        if (dialog.ShowDialog() != true) return;
+
+        var bmId = dialog.InputText?.Trim();
+        if (string.IsNullOrEmpty(bmId)) return;
+
+        await TrackingService.SetServerBMIdManuallyAsync(bmId);
+        AppendLog($"[BM] ID do servidor definido manualmente: {bmId}");
+
+        _serverRosterLoaded = false;
+        await RefreshServerRosterListAsync();
+    }
+
     public void BtnViewTracked_Click(object sender, RoutedEventArgs e)
     {
         var player = ((sender as FrameworkElement)?.DataContext as TrackedPlayer);
@@ -322,8 +346,115 @@ public partial class MainWindow
         RefreshOnlinePlayersList();
     }
 
+    // ── Server Roster tab: search across every player ever seen on this
+    // server (online or offline), sourced from bm_seen_players (written only
+    // by the dedicated BattleMetrics bot). Loaded lazily the first time the
+    // tab is opened, to avoid extra background traffic on every connect.
+    private List<RosterPlayer> _serverRoster = new();
+    private bool _serverRosterLoaded;
+
+    public void PlayersRootTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        // TabControl.SelectionChanged is a bubbling routed event — it also fires when a
+        // child ListBox's selection changes, not just on an actual tab switch. Only react
+        // when the TabControl itself raised it.
+        if (e.OriginalSource is not TabControl tabControl || tabControl.Name != "RootTabControl") return;
+        if (tabControl.SelectedIndex != 2) return; // Roster tab
+        if (_serverRosterLoaded) return;
+        _ = RefreshServerRosterListAsync();
+    }
+
+    public async void BtnRefreshRoster_Click(object sender, RoutedEventArgs e)
+    {
+        await RefreshServerRosterListAsync();
+    }
+
+    private async Task RefreshServerRosterListAsync()
+    {
+        if (PlayersTab == null) return;
+
+        var host = TrackingService.LastServer.host;
+        if (string.IsNullOrEmpty(host))
+        {
+            PlayersTab.TxtRosterStatus.Text = Properties.Resources.ConnectToLoadPlayers;
+            PlayersTab.PnlRosterStatus.Visibility = Visibility.Visible;
+            PlayersTab.PbRosterLoading.Visibility = Visibility.Collapsed;
+            PlayersTab.ListRosterPlayers.ItemsSource = null;
+            return;
+        }
+
+        _serverRosterLoaded = true;
+        PlayersTab.TxtRosterStatus.Text = "Loading roster...";
+        PlayersTab.PnlRosterStatus.Visibility = Visibility.Visible;
+        PlayersTab.PbRosterLoading.Visibility = Visibility.Visible;
+        PlayersTab.ListRosterPlayers.Visibility = Visibility.Collapsed;
+        PlayersTab.ListRosterPlayers.ItemsSource = null;
+
+        var serverKey = $"{host}:{TrackingService.LastServer.port}";
+        _serverRoster = await TrackingService.GetServerRosterAsync(serverKey);
+
+        if (PlayersTab == null) return; // window/control may have gone away while awaiting
+
+        RenderServerRosterList();
+    }
+
+    private void RenderServerRosterList()
+    {
+        if (PlayersTab == null) return;
+
+        var players = _serverRoster;
+        var filterTxt = PlayersTab.TxtRosterFilter?.Text;
+        if (!string.IsNullOrWhiteSpace(filterTxt))
+        {
+            players = players.Where(p => p.Name.Contains(filterTxt, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+
+        PlayersTab.ListRosterPlayers.ItemsSource = null;
+        PlayersTab.ListRosterPlayers.ItemsSource = players;
+
+        if (_serverRoster.Count == 0)
+        {
+            PlayersTab.ListRosterPlayers.Visibility = Visibility.Collapsed;
+            PlayersTab.TxtRosterStatus.Text = "No players recorded for this server yet.";
+            PlayersTab.PnlRosterStatus.Visibility = Visibility.Visible;
+            PlayersTab.PbRosterLoading.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+            PlayersTab.ListRosterPlayers.Visibility = Visibility.Visible;
+            PlayersTab.PnlRosterStatus.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    public void TxtRosterFilter_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        RenderServerRosterList();
+    }
+
+    public void BtnTrackRosterPlayer_Click(object sender, RoutedEventArgs e)
+    {
+        if ((sender as Button)?.Tag is not RosterPlayer player) return;
+
+        if (player.IsTracked)
+        {
+            ShowPlayerAnalysis(player.BMId, player.Name);
+        }
+        else
+        {
+            TrackingService.TrackPlayer(player.BMId, player.Name, _vm.Selected?.Name ?? "Unknown");
+            player.IsTracked = true;
+            RenderServerRosterList();
+            AppendLog($"[tracking] Now tracking {player.Name} from server roster ({_vm.Selected?.Name ?? "this server"})");
+        }
+    }
+
     private void RefreshTrackedPlayersList(string filter = "")
     {
+        // Best effort, uma vez por sessão — traz jogadores adicionados por colegas de
+        // equipa a partir de outro PC. Dispara OnOnlinePlayersUpdated quando terminar,
+        // o que já desencadeia um novo refresh desta lista.
+        _ = TrackingService.SyncTrackedPlayersFromCloudAsync();
+
         try
         {
             if (PlayersTab?.ListTrackedPlayers == null) return;
@@ -861,10 +992,28 @@ public partial class MainWindow
         return result;
     }
 
-    private void ShowTrackingAnalysisWindow(string? bmId = null)
+    private async void ShowTrackingAnalysisWindow(string? bmId = null)
     {
         try
         {
+            // Traz sessões gravadas pelo bot BattleMetrics enquanto a app esteve fechada,
+            // antes de gerar o relatório — best effort, sem bloquear se o Supabase falhar.
+            // Sem isto, "View All" ficava preso ao cache local (só atualizado quando um
+            // jogador transita online/offline com a app aberta), fazendo o heatmap parecer
+            // vazio nos dias mais recentes logo a seguir a abrir a app.
+            if (!string.IsNullOrEmpty(bmId))
+            {
+                try { await TrackingService.RefreshPlayerSessionsFromCloudAsync(bmId); } catch { }
+            }
+            else
+            {
+                var allBmIds = TrackingService.GetTrackedPlayers().Where(p => !p.IsBMOnly).Select(p => p.BMId).ToList();
+                await Task.WhenAll(allBmIds.Select(async id =>
+                {
+                    try { await TrackingService.RefreshPlayerSessionsFromCloudAsync(id); } catch { }
+                }));
+            }
+
             var html = TrackingService.GetAnalysisReport(bmId);
 
             var win = new Window

@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using RustPlusDesk.Services;
 
 namespace RustPlusDesk.Views;
 
@@ -42,6 +43,7 @@ public partial class MainWindow
 
         GridLayer.Width = wDip;
         GridLayer.Height = hDip;
+        GridLayer.Opacity = TrackingService.MapGridOpacity;
         GridLayer.IsHitTestVisible = false;
 
         // WICHTIG: Overlay groesser machen, aber Map nicht anfassen
@@ -76,6 +78,7 @@ public partial class MainWindow
             Panel.SetZIndex(_mapView, 0);
         }
         _mapView.Child = _scene;
+        ApplyMapPerformanceSettings();
     }
 
     private void ResetMapDisplay()
@@ -109,5 +112,61 @@ public partial class MainWindow
         ImgMap.Source = bmp;               // zunaechst nackte Map
         SetupMapScene(bmp);
         RedrawGrid();
+    }
+
+    public void ApplyMapPerformanceSettings()
+    {
+        // 1. BitmapScalingMode
+        BitmapScalingMode scalingMode = BitmapScalingMode.HighQuality;
+        switch (TrackingService.MapBitmapScalingMode)
+        {
+            case 1:
+                scalingMode = BitmapScalingMode.LowQuality;
+                break;
+            case 2:
+                scalingMode = BitmapScalingMode.NearestNeighbor;
+                break;
+        }
+
+        if (ImgMap != null)
+        {
+            RenderOptions.SetBitmapScalingMode(ImgMap, scalingMode);
+        }
+        if (ImgHeatmap != null)
+        {
+            RenderOptions.SetBitmapScalingMode(ImgHeatmap, scalingMode);
+        }
+
+        // 2. AliasedEdgeMode
+        EdgeMode edgeMode = TrackingService.MapUseAliasedEdgeMode ? EdgeMode.Aliased : EdgeMode.Unspecified;
+        if (GridLayer != null)
+        {
+            RenderOptions.SetEdgeMode(GridLayer, edgeMode);
+        }
+        if (Overlay != null)
+        {
+            RenderOptions.SetEdgeMode(Overlay, edgeMode);
+        }
+        RefreshGridLineThickness();
+
+        // 3. CacheMode / RenderScale
+        if (_scene != null)
+        {
+            if (TrackingService.MapUseCacheMode)
+            {
+                if (_scene.CacheMode is BitmapCache currentCache)
+                {
+                    currentCache.RenderAtScale = TrackingService.MapRenderScale;
+                }
+                else
+                {
+                    _scene.CacheMode = new BitmapCache { RenderAtScale = TrackingService.MapRenderScale };
+                }
+            }
+            else
+            {
+                _scene.CacheMode = null;
+            }
+        }
     }
 }

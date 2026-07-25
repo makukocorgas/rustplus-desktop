@@ -39,6 +39,8 @@ public partial class MainWindow
 
     private bool ChatFeaturesBlockedByMaster => _chatFeaturesBlockedByMaster;
 
+    private TimeSpan TeamFeatureHeartbeatInterval => CloudTrafficPolicy.TeamHeartbeatInterval(WindowState == WindowState.Minimized);
+
     private void ResetTeamFeatureMasterSyncState()
     {
         _lastTeamFeatureMasterSyncSignature = null;
@@ -112,12 +114,12 @@ public partial class MainWindow
             var orderIndex = GetMyTeamOrderIndex();
 
             TeamFeatureMasterState? state;
-            if (SupabaseAuthManager.IsDiscordAuthenticated || SupabaseAuthManager.IsEmailAuthenticated)
+            if (SupabaseAuthManager.IsAuthenticated)
             {
-                var isCriticalChange = wantsAlerts != _lastWantsAlerts || wantsCommands != _lastWantsCommands || (!wantsAlerts && !wantsCommands);
+                var isCriticalChange = wantsAlerts != _lastWantsAlerts || wantsCommands != _lastWantsCommands;
                 var timeSinceLast = DateTime.UtcNow - _lastHeartbeatTime;
 
-                if (!isCriticalChange && timeSinceLast.TotalSeconds < 15)
+                if (!isCriticalChange && timeSinceLast < TeamFeatureHeartbeatInterval)
                 {
                     return; // Skip heartbeat to save server bandwidth
                 }
@@ -178,32 +180,20 @@ public partial class MainWindow
 
         if (_chatFeaturesBlockedByMaster || HasLocalChatFeatureIntent())
         {
-            int intervalSeconds;
-            if (SupabaseAuthManager.IsPremium)
-            {
-                intervalSeconds = 15;
-            }
-            else if (!string.IsNullOrEmpty(_lastKnownPremiumSponsorId))
-            {
-                intervalSeconds = 60;
-            }
-            else
-            {
-                intervalSeconds = 300;
-            }
+            var interval = TeamFeatureHeartbeatInterval;
 
             if (_teamFeatureMasterWatchTimer != null)
             {
-                if (_teamFeatureMasterWatchTimer.Interval.TotalSeconds != intervalSeconds)
+                if (_teamFeatureMasterWatchTimer.Interval != interval)
                 {
-                    _teamFeatureMasterWatchTimer.Interval = TimeSpan.FromSeconds(intervalSeconds);
+                    _teamFeatureMasterWatchTimer.Interval = interval;
                 }
                 return;
             }
 
             _teamFeatureMasterWatchTimer = new System.Windows.Threading.DispatcherTimer
             {
-                Interval = TimeSpan.FromSeconds(intervalSeconds)
+                Interval = interval
             };
             _teamFeatureMasterWatchTimer.Tick += TeamFeatureMasterWatchTimer_Tick;
             _teamFeatureMasterWatchTimer.Start();
@@ -257,7 +247,7 @@ public partial class MainWindow
             await SupabaseAuthManager.MarkAppOfflineAsync();
 
             if (_vm?.Selected == null || TeamMembers.Count == 0) return;
-            if (!SupabaseAuthManager.IsDiscordAuthenticated && !SupabaseAuthManager.IsEmailAuthenticated) return;
+            if (!SupabaseAuthManager.IsAuthenticated) return;
 
             var serverKey = GetServerKey();
             var teamKey = BuildTeamFeatureKey();
@@ -296,7 +286,7 @@ public partial class MainWindow
             StopTeamFeatureMasterWatch();
 
             if (_vm?.Selected == null || TeamMembers.Count == 0) return;
-            if (!SupabaseAuthManager.IsDiscordAuthenticated && !SupabaseAuthManager.IsEmailAuthenticated) return;
+            if (!SupabaseAuthManager.IsAuthenticated) return;
 
             var serverKey = GetServerKey();
             var teamKey = BuildTeamFeatureKey();
@@ -416,7 +406,7 @@ public partial class MainWindow
         if (ChatAnnounce != null)
         {
             ChatAnnounce.IsEnabled = !blocked;
-            ChatAnnounce.ToolTip = blocked ? message : FindResource("RightClickConfigure");
+            ChatAnnounce.ToolTip = blocked ? message : FindResource("Alerts");
         }
 
         if (ChatAlertsConfigureButton != null)
@@ -436,7 +426,7 @@ public partial class MainWindow
                 ? TeamFeatureText("ChatFeatureMasterOnlineTitle", "Chat Master online")
                 : "";
 
-        ChatCommandsOverlay?.SetMasterBlocked(blocked, message);
+        AppSettingsPanel?.ChatCommandsEditor?.SetMasterBlocked(blocked, message);
     }
 
     private bool HasLocalChatFeatureIntent()

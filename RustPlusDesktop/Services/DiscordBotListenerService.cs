@@ -21,6 +21,7 @@ public class DiscordBotListenerService
     private readonly HashSet<string> _subscribedGuildIds = new();
     private bool _isListening;
     private bool _isDirectMode; // Quando true, TeamFeature não pode parar a subscrição
+    private bool _isNotificationMaster; // Só o master envia notificações; comandos ficam sempre activos
     private List<string> _teamSteamIds = new();
 
     private DiscordBotListenerService() { }
@@ -30,11 +31,19 @@ public class DiscordBotListenerService
         // Modo directo activo — ignorar chamadas do TeamFeature
         if (_isDirectMode) return;
 
-        if (!isMaster || teamSteamIds == null || teamSteamIds.Count == 0 || !SupabaseAuthManager.IsPremium)
+        _isNotificationMaster = isMaster;
+
+        if (SupabaseAuthManager.IsUpgradeRequiredSnackbarShown)
+        {
+            StopListening();
+            return;
+        }
+
+        if (teamSteamIds == null || teamSteamIds.Count == 0 || !SupabaseAuthManager.IsPremium)
         {
             if (_isListening)
             {
-                Log($"[DiscordBotListener] Stopping subscription: isMaster={isMaster}, IsPremium={SupabaseAuthManager.IsPremium}");
+                Log($"[DiscordBotListener] Stopping subscription: teamCount={teamSteamIds?.Count ?? 0}, IsPremium={SupabaseAuthManager.IsPremium}");
                 StopListening();
             }
             return;
@@ -82,15 +91,18 @@ public class DiscordBotListenerService
 
     private async Task SubscribeToGuildQueueAsync(string guildId)
     {
+        if (SupabaseAuthManager.IsUpgradeRequiredSnackbarShown) return;
+
         try
         {
             var channel = SupabaseAuthManager.Client.Realtime
                 .Channel($"discord_queue_{guildId}");
 
             var options = new Supabase.Realtime.PostgresChanges.PostgresChangesOptions(
-                "public", 
-                "bot_commands_queue", 
-                Supabase.Realtime.PostgresChanges.PostgresChangesOptions.ListenType.Inserts);
+                "public",
+                "bot_commands_queue",
+                Supabase.Realtime.PostgresChanges.PostgresChangesOptions.ListenType.Inserts,
+                $"guild_id=eq.{guildId}");
             channel.Register(options);
 
             // Listen to inserts in the command queue for this guild
@@ -105,7 +117,7 @@ public class DiscordBotListenerService
                         Log($"[DiscordBotListener] Record is null - make sure REPLICA IDENTITY FULL is set: ALTER TABLE public.bot_commands_queue REPLICA IDENTITY FULL;");
                         return;
                     }
-                    Log($"[DiscordBotListener] Received command: id={record.Id}, type={record.CommandType}, status={record.Status}");
+                    Log($"[DiscordBotListener] Received command: id={record.Id}, guild={record.GuildId}, type={record.CommandType}, status={record.Status}");
                     _ = ProcessIncomingCommandAsync(record);
                 }
                 catch (Exception ex)
@@ -118,6 +130,7 @@ public class DiscordBotListenerService
             _activeChannels.Add(channel);
             lock (_subscribedGuildIds) { _subscribedGuildIds.Add(guildId); }
             Log($"[DiscordBotListener] Subscribed to command queue for Guild: {guildId}");
+            await ProcessRecentPendingCommandsAsync(guildId);
         }
         catch (Exception ex)
         {
@@ -127,6 +140,12 @@ public class DiscordBotListenerService
 
     private async Task ProcessIncomingCommandAsync(BotCommandsQueueModel record)
     {
+        if (SupabaseAuthManager.IsUpgradeRequiredSnackbarShown)
+        {
+            Log($"[DiscordBotListener] Ignoring command {record.Id}: application update is required.");
+            return;
+        }
+
         try
         {
             var id = record.Id;
@@ -134,7 +153,11 @@ public class DiscordBotListenerService
             var commandType = record.CommandType;
             var status = record.Status;
 
-            if (status != "pending" || string.IsNullOrEmpty(id) || string.IsNullOrEmpty(guildId)) return;
+            if (status != "pending" || string.IsNullOrEmpty(id) || string.IsNullOrEmpty(guildId))
+            {
+                Log($"[DiscordBotListener] Ignoring invalid command: id={id}, guild={guildId}, status={status}");
+                return;
+            }
 
             if (commandType != null && (commandType.StartsWith("notify_") || commandType == "map_screenshot"))
             {
@@ -145,7 +168,11 @@ public class DiscordBotListenerService
             // Filter locally to ensure we only process commands for guilds we are subscribed to
             lock (_subscribedGuildIds)
             {
-                if (!_subscribedGuildIds.Contains(guildId)) return;
+                if (!_subscribedGuildIds.Contains(guildId))
+                {
+                    Log($"[DiscordBotListener] Ignoring command {id}: Guild {guildId} is not active on this client.");
+                    return;
+                }
             }
 
             // Try to acquire the command lock by changing status to 'processing'
@@ -159,6 +186,7 @@ public class DiscordBotListenerService
             if (updateResponse.Models == null || updateResponse.Models.Count == 0)
             {
                 // Lock acquisition failed (another client picked it up)
+                Log($"[DiscordBotListener] Command {id} was not claimed (already handled or rejected by RLS).");
                 return;
             }
 
@@ -376,10 +404,16 @@ public class DiscordBotListenerService
     public async Task StartDirectAsync(string steamId)
     {
         if (string.IsNullOrEmpty(steamId) || SupabaseAuthManager.Client == null) return;
-        if (_isListening) return; // Already listening
+        if (_isDirectMode) return; // Already in direct mode
 
         try
         {
+            // A subscrição do TeamFeature (não-master) pode já ter marcado _isListening=true
+            // só para comandos, sem _isDirectMode. Limpar essa subscrição parcial antes de
+            // estabelecer a subscrição directa (que também cobre notificações de saída).
+            if (_isListening)
+                StopListening();
+
             // Find guild_id for this steam_id
             var settingsRes = await SupabaseAuthManager.Client
                 .From<DiscordBotSettingsModel>()
@@ -396,6 +430,7 @@ public class DiscordBotListenerService
             _teamSteamIds = new List<string> { steamId };
             _isListening = true;
             _isDirectMode = true; // Proteger de StopListening do TeamFeature
+            _isNotificationMaster = true;
 
             foreach (var setting in settings)
             {
@@ -413,11 +448,10 @@ public class DiscordBotListenerService
 
     public async Task SendNotificationAsync(string notificationType, string message, string? serverName = null)
     {
-        if (!_isListening || _teamSteamIds.Count == 0) return;
+        if (!_isNotificationMaster || !_isListening || _teamSteamIds.Count == 0) return;
 
         var srv = serverName ?? TrackingService.LastServer.name;
-        var fullMessage = string.IsNullOrWhiteSpace(srv) ? message : $"{message}\n**{srv}**";
-        await SendNotificationToOwnersAsync(notificationType, fullMessage, _teamSteamIds);
+        await SendNotificationToOwnersAsync(notificationType, message, _teamSteamIds, string.IsNullOrWhiteSpace(srv) ? null : srv);
     }
 
     public async Task SendRaidNotificationAsync(string serverKey, string ownerSteamId, string message)
@@ -427,7 +461,7 @@ public class DiscordBotListenerService
             + $"ownerSteamId='{ownerSteamId}', isListening={_isListening}, "
             + $"teamCount={_teamSteamIds.Count}, IsPremium={SupabaseAuthManager.IsPremium}.");
 
-        if (_isListening && _teamSteamIds.Count > 0)
+        if (_isNotificationMaster && _isListening && _teamSteamIds.Count > 0)
         {
             await SendNotificationToOwnersAsync("raid", message, _teamSteamIds);
             return;
@@ -458,8 +492,11 @@ public class DiscordBotListenerService
     private static async Task SendNotificationToOwnersAsync(
         string notificationType,
         string message,
-        List<string> ownerSteamIds)
+        List<string> ownerSteamIds,
+        string? serverName = null)
     {
+        if (SupabaseAuthManager.IsUpgradeRequiredSnackbarShown) return;
+
         if (ownerSteamIds.Count == 0)
         {
             Log($"[DiscordBotListener] {notificationType} notification skipped: no owner Steam IDs.");
@@ -491,12 +528,37 @@ public class DiscordBotListenerService
             // Enviar directamente para a Edge Function /notify — sem passar pela
             // bot_commands_queue, porque o bot Node.js não escuta notify_*.
             // (notify_* fica reservado para a app, nunca é processado pelo bot.)
-            bool tts = notificationType == "raid";
+
+            // Ler os toggles TTS/Sound reais configurados por guild para este tipo de canal,
+            // em vez de assumir tts=true só para "raid".
+            var channelConfigsRes = await SupabaseAuthManager.Client
+                .From<DiscordChannelsConfigModel>()
+                .Filter("guild_id", Operator.In, guildIds)
+                .Filter("notification_type", Operator.Equals, notificationType)
+                .Get();
+
+            var configByGuild = (channelConfigsRes.Models ?? new List<DiscordChannelsConfigModel>())
+                .GroupBy(c => c.GuildId)
+                .ToDictionary(g => g.Key, g => g.First());
+
             int sent = 0;
 
             foreach (var guildId in guildIds)
             {
-                bool ok = await SendNotifyHttpAsync(guildId, notificationType, message, tts);
+                bool tts, audioAlert;
+                if (configByGuild.TryGetValue(guildId, out var cfg))
+                {
+                    tts = cfg.TtsEnabled;
+                    audioAlert = cfg.AudioAlertEnabled;
+                }
+                else
+                {
+                    // Sem config guardada ainda (guild antigo/recém-criado): usa o default do setup do bot.
+                    tts = notificationType == "raid";
+                    audioAlert = notificationType == "raid";
+                }
+
+                bool ok = await SendNotifyHttpAsync(guildId, notificationType, message, tts, audioAlert, serverName);
                 if (ok) sent++;
             }
 
@@ -508,13 +570,36 @@ public class DiscordBotListenerService
         }
     }
 
+    private async Task ProcessRecentPendingCommandsAsync(string guildId)
+    {
+        try
+        {
+            var cutoff = DateTime.UtcNow.AddSeconds(-15);
+            var response = await SupabaseAuthManager.Client
+                .From<BotCommandsQueueModel>()
+                .Filter("guild_id", Operator.Equals, guildId)
+                .Filter("status", Operator.Equals, "pending")
+                .Get();
+
+            foreach (var command in response.Models.Where(x => x.CreatedAt >= cutoff))
+            {
+                Log($"[DiscordBotListener] Recovering pending command {command.Id} ({command.CommandType}).");
+                await ProcessIncomingCommandAsync(command);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log($"[DiscordBotListener] Failed to recover pending commands for Guild {guildId}: {ex.Message}");
+        }
+    }
+
     /// <summary>
     /// POST directo para a Edge Function discord-bot-interactions/notify.
     /// Substitui o caminho antigo via bot_commands_queue (notify_*), que
     /// ficava preso em "pending" porque o bot Node.js não escuta esse tipo
     /// de comando — só processa map_screenshot e respostas de interactions.
     /// </summary>
-    private static async Task<bool> SendNotifyHttpAsync(string guildId, string notificationType, string message, bool tts)
+    private static async Task<bool> SendNotifyHttpAsync(string guildId, string notificationType, string message, bool tts, bool audioAlert = false, string? serverName = null)
     {
         try
         {
@@ -533,6 +618,8 @@ public class DiscordBotListenerService
                 content = message,
                 notification_type = notificationType,
                 tts = tts,
+                audio_alert = audioAlert,
+                server_name = serverName,
             };
 
             request.Content = new StringContent(
@@ -543,6 +630,10 @@ public class DiscordBotListenerService
             {
                 var err = await response.Content.ReadAsStringAsync();
                 Log($"[DiscordBotListener] /notify failed for guild {guildId}: {response.StatusCode} — {err}");
+
+                if (SupabaseAuthManager.HandleUpgradeRequiredResponse(err))
+                    return false;
+
                 return false;
             }
 

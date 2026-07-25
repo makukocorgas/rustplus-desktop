@@ -74,6 +74,28 @@ namespace RustPlusDesk.Services.Data
                     File.Copy(crosshairPath, Path.Combine(tempDir, "custom_crosshairs.json"), true);
                 }
 
+                // 3b. Copy custom_alerts.json
+                string customAlertsPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "RustPlusDesk", "custom_alerts.json");
+                if (File.Exists(customAlertsPath))
+                {
+                    File.Copy(customAlertsPath, Path.Combine(tempDir, "custom_alerts.json"), true);
+                }
+
+                // 3c. Copy notifications_history.json and map3d_consent.json
+                string notificationsHistoryPath = Path.Combine(DataManager.CacheDir, "notifications_history.json");
+                if (File.Exists(notificationsHistoryPath))
+                {
+                    File.Copy(notificationsHistoryPath, Path.Combine(tempDir, "notifications_history.json"), true);
+                }
+
+                string map3DConsentPath = Path.Combine(DataManager.CacheDir, "map3d_consent.json");
+                if (File.Exists(map3DConsentPath))
+                {
+                    File.Copy(map3DConsentPath, Path.Combine(tempDir, "map3d_consent.json"), true);
+                }
+
                 // 4. Copy settings and cloud files from Cache and AppData
                 string minimapPath = Path.Combine(DataManager.CacheDir, "minimap_settings.json");
                 if (File.Exists(minimapPath))
@@ -254,12 +276,41 @@ namespace RustPlusDesk.Services.Data
                     File.Copy(stagingCrosshairs, targetCrosshairs, true);
                 }
 
+                // 5b. Restore custom_alerts.json
+                string stagingCustomAlerts = Path.Combine(tempDir, "custom_alerts.json");
+                if (File.Exists(stagingCustomAlerts))
+                {
+                    string targetCustomAlerts = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                        "RustPlusDesk", "custom_alerts.json");
+                    string targetDir = Path.GetDirectoryName(targetCustomAlerts);
+                    if (targetDir != null)
+                    {
+                        Directory.CreateDirectory(targetDir);
+                    }
+                    File.Copy(stagingCustomAlerts, targetCustomAlerts, true);
+                }
+
                 // 6. Restore Cache files
                 string stagingMinimap = Path.Combine(tempDir, "minimap_settings.json");
                 if (File.Exists(stagingMinimap))
                 {
                     Directory.CreateDirectory(DataManager.CacheDir);
                     File.Copy(stagingMinimap, Path.Combine(DataManager.CacheDir, "minimap_settings.json"), true);
+                }
+
+                string stagingNotificationsHistory = Path.Combine(tempDir, "notifications_history.json");
+                if (File.Exists(stagingNotificationsHistory))
+                {
+                    Directory.CreateDirectory(DataManager.CacheDir);
+                    File.Copy(stagingNotificationsHistory, Path.Combine(DataManager.CacheDir, "notifications_history.json"), true);
+                }
+
+                string stagingMap3DConsent = Path.Combine(tempDir, "map3d_consent.json");
+                if (File.Exists(stagingMap3DConsent))
+                {
+                    Directory.CreateDirectory(DataManager.CacheDir);
+                    File.Copy(stagingMap3DConsent, Path.Combine(DataManager.CacheDir, "map3d_consent.json"), true);
                 }
 
                 string stagingSupabase = Path.Combine(tempDir, "supabase_session.json");

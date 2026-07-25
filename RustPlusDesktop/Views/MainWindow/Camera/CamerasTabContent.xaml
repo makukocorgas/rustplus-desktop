@@ -9,10 +9,7 @@
             DockPanel.Dock="Bottom"
             Orientation="Horizontal">
             <Button x:Name="BtnAddCam" Style="{StaticResource PrimaryButton}">
-                <StackPanel Margin="6,1" Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Text="📷 " />
-                    <TextBlock VerticalAlignment="Center" Text="{DynamicResource AddCamera}" />
-                </StackPanel>
+                <TextBlock Margin="6,1" VerticalAlignment="Center" Text="{DynamicResource AddCamera}" />
             </Button>
         </StackPanel>
         <ScrollViewer VerticalScrollBarVisibility="Auto">

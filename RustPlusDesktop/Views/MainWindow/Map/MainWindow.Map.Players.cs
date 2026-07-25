@@ -571,6 +571,7 @@ public partial class MainWindow
             ApplyCurrentOverlayScale(fe);
 
         RefreshShopIconScales();
+        RefreshGridLineThickness();
     }
 
     private FrameworkElement BuildDeathPin(Guid id, ulong steamId, string label)
@@ -944,9 +945,8 @@ public partial class MainWindow
 
         if (_abbreviateNames)
         {
-            if (BtnToggleServerArea != null && BtnToggleServerArea.IsChecked == false)
+            if (PanelServerArea?.Visibility == Visibility.Visible)
             {
-                BtnToggleServerArea.IsChecked = true;
                 BtnToggleServerArea_Click(null, null);
             }
 

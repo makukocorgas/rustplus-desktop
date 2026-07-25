@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.WebSockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +19,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 using RustPlusDesk.Services;
 using StorageSnap = RustPlusDesk.Models.StorageSnapshot;
@@ -63,6 +65,11 @@ private void ListDevices_SelectedItemChanged(object sender, RoutedPropertyChange
     private Point _dragStartPoint;
     private TreeViewItem? _draggedItemContainer;
     private SmartDevice? _draggedDevice;
+    private TreeViewItem? _dropVisualItemContainer;
+    private Popup? _dragPreviewPopup;
+    private FrameworkElement? _dragPreviewSource;
+    private double _dragPreviewSourceOpacity = 1;
+    private bool _isDeviceDragInProgress;
 
     private void TreeViewItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
@@ -102,15 +109,55 @@ private void ListDevices_SelectedItemChanged(object sender, RoutedPropertyChange
 
     private void TreeViewItem_PreviewMouseMove(object sender, MouseEventArgs e)
     {
-        if (e.LeftButton == MouseButtonState.Pressed && _draggedItemContainer != null && _draggedDevice != null)
+        if (e.LeftButton == MouseButtonState.Pressed && !_isDeviceDragInProgress && _draggedItemContainer != null && _draggedDevice != null)
         {
             Point currentPosition = e.GetPosition(null);
             if (Math.Abs(currentPosition.X - _dragStartPoint.X) > SystemParameters.MinimumHorizontalDragDistance ||
                 Math.Abs(currentPosition.Y - _dragStartPoint.Y) > SystemParameters.MinimumVerticalDragDistance)
             {
-                DragDrop.DoDragDrop(_draggedItemContainer, _draggedDevice, DragDropEffects.Move);
+                var dragContainer = _draggedItemContainer;
+                var dragDevice = _draggedDevice;
+                if (dragContainer == null || dragDevice == null)
+                {
+                    return;
+                }
+
+                try
+                {
+                    _isDeviceDragInProgress = true;
+                    ShowDragPreview(dragContainer);
+                    dragContainer.GiveFeedback += TreeViewItem_GiveFeedback;
+                    dragContainer.QueryContinueDrag += TreeViewItem_QueryContinueDrag;
+                    DragDrop.DoDragDrop(dragContainer, dragDevice, DragDropEffects.Move);
+                }
+                finally
+                {
+                    dragContainer.QueryContinueDrag -= TreeViewItem_QueryContinueDrag;
+                    dragContainer.GiveFeedback -= TreeViewItem_GiveFeedback;
+                    HideDragPreview();
+                    ClearDropVisual();
+                    _isDeviceDragInProgress = false;
+                    _draggedDevice = null;
+                    _draggedItemContainer = null;
+                }
             }
         }
+    }
+
+    private void TreeViewItem_QueryContinueDrag(object sender, QueryContinueDragEventArgs e)
+    {
+        if ((e.KeyStates & DragDropKeyStates.RightMouseButton) == DragDropKeyStates.RightMouseButton)
+        {
+            e.Action = DragAction.Cancel;
+            e.Handled = true;
+        }
+    }
+
+    private void TreeViewItem_GiveFeedback(object sender, GiveFeedbackEventArgs e)
+    {
+        UpdateDragPreviewPosition();
+        e.UseDefaultCursors = true;
+        e.Handled = false;
     }
 
     private void TreeViewItem_DragEnter(object sender, DragEventArgs e)
@@ -118,18 +165,46 @@ private void ListDevices_SelectedItemChanged(object sender, RoutedPropertyChange
         if (!e.Data.GetDataPresent(typeof(SmartDevice)))
         {
             e.Effects = DragDropEffects.None;
+            ClearDropVisual();
+        }
+        else if (sender is TreeViewItem item)
+        {
+            UpdateDropVisual(item, e);
         }
         e.Handled = true;
     }
 
     private void TreeViewItem_DragOver(object sender, DragEventArgs e)
     {
+        if (sender is TreeViewItem item && e.Data.GetDataPresent(typeof(SmartDevice)))
+        {
+            UpdateDropVisual(item, e);
+            e.Effects = DragDropEffects.Move;
+        }
+        else
+        {
+            e.Effects = DragDropEffects.None;
+            ClearDropVisual();
+        }
+
+        e.Handled = true;
+    }
+
+    private void TreeViewItem_DragLeave(object sender, DragEventArgs e)
+    {
+        if (ReferenceEquals(sender, _dropVisualItemContainer))
+        {
+            ClearDropVisual();
+        }
+
         e.Handled = true;
     }
 
     private void TreeViewItem_Drop(object sender, DragEventArgs e)
     {
         e.Handled = true;
+        ClearDropVisual();
+
         if (_draggedDevice == null || !e.Data.GetDataPresent(typeof(SmartDevice)))
             return;
 
@@ -212,9 +287,207 @@ private void ListDevices_SelectedItemChanged(object sender, RoutedPropertyChange
 
         CleanupEmptyGroups(_vm.Selected.Devices);
         _vm.Selected.NotifySmartSwitchesChanged();
-        _vm.Save();
+        _vm?.Save();
         _draggedDevice = null;
         _draggedItemContainer = null;
+    }
+
+    private void UpdateDropVisual(TreeViewItem targetContainer, DragEventArgs e)
+    {
+        if (_draggedDevice == null)
+        {
+            ClearDropVisual();
+            return;
+        }
+
+        var targetDevice = targetContainer.Header as SmartDevice ?? targetContainer.DataContext as SmartDevice;
+        if (targetDevice == null ||
+            ReferenceEquals(_draggedDevice, targetDevice) ||
+            IsDescendant(_draggedDevice, targetDevice))
+        {
+            e.Effects = DragDropEffects.None;
+            ClearDropVisual();
+            return;
+        }
+
+        if (!ReferenceEquals(_dropVisualItemContainer, targetContainer))
+        {
+            ClearDropVisual();
+            _dropVisualItemContainer = targetContainer;
+        }
+
+        targetContainer.Tag = GetDropVisualState(targetContainer, e);
+    }
+
+    private static string GetDropVisualState(TreeViewItem targetContainer, DragEventArgs e)
+    {
+        var position = e.GetPosition(targetContainer);
+        var height = Math.Max(1, targetContainer.ActualHeight);
+
+        if (position.Y <= height * 0.25)
+        {
+            return "DropBefore";
+        }
+
+        if (position.Y >= height * 0.75)
+        {
+            return "DropAfter";
+        }
+
+        return "DropInto";
+    }
+
+    private void ClearDropVisual()
+    {
+        if (_dropVisualItemContainer != null)
+        {
+            _dropVisualItemContainer.Tag = null;
+            _dropVisualItemContainer = null;
+        }
+    }
+
+    private void ShowDragPreview(TreeViewItem item)
+    {
+        var rowCard = FindVisualChildByName<FrameworkElement>(item, "DeviceRowCard");
+        if (rowCard == null || rowCard.ActualWidth <= 0 || rowCard.ActualHeight <= 0)
+        {
+            return;
+        }
+
+        _dragPreviewSource = rowCard;
+        _dragPreviewSourceOpacity = rowCard.Opacity;
+        rowCard.Opacity = 0.38;
+
+        var previewCard = new Border
+        {
+            Width = rowCard.ActualWidth,
+            Height = rowCard.ActualHeight,
+            Background = new VisualBrush(rowCard),
+            CornerRadius = new CornerRadius(10),
+            Opacity = 0.86,
+            IsHitTestVisible = false,
+            Effect = new DropShadowEffect
+            {
+                BlurRadius = 18,
+                ShadowDepth = 0,
+                Opacity = 0.55,
+                Color = Color.FromRgb(0, 0, 0)
+            }
+        };
+
+        var hint = new Border
+        {
+            Margin = new Thickness(0, 6, 0, 0),
+            Padding = new Thickness(8, 4, 8, 4),
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Background = new SolidColorBrush(Color.FromArgb(230, 11, 15, 20)),
+            BorderBrush = new SolidColorBrush(Color.FromArgb(70, 255, 255, 255)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(7),
+            IsHitTestVisible = false,
+            Child = new TextBlock
+            {
+                Text = "Right-click or Esc to cancel",
+                FontSize = 11,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = new SolidColorBrush(Color.FromRgb(148, 160, 179))
+            }
+        };
+
+        var preview = new StackPanel
+        {
+            IsHitTestVisible = false
+        };
+        preview.Children.Add(previewCard);
+        preview.Children.Add(hint);
+
+        _dragPreviewPopup = new Popup
+        {
+            AllowsTransparency = true,
+            IsHitTestVisible = false,
+            Placement = PlacementMode.AbsolutePoint,
+            Child = preview
+        };
+
+        UpdateDragPreviewPosition();
+        _dragPreviewPopup.IsOpen = true;
+    }
+
+    private void UpdateDragPreviewPosition()
+    {
+        if (_dragPreviewPopup == null || !TryGetCursorPosition(out var screenPoint))
+        {
+            return;
+        }
+
+        _dragPreviewPopup.HorizontalOffset = screenPoint.X + 14;
+        _dragPreviewPopup.VerticalOffset = screenPoint.Y + 12;
+    }
+
+    private void HideDragPreview()
+    {
+        if (_dragPreviewSource != null)
+        {
+            _dragPreviewSource.Opacity = _dragPreviewSourceOpacity;
+            _dragPreviewSource = null;
+        }
+
+        if (_dragPreviewPopup != null)
+        {
+            _dragPreviewPopup.IsOpen = false;
+            _dragPreviewPopup.Child = null;
+            _dragPreviewPopup = null;
+        }
+    }
+
+    private bool TryGetCursorPosition(out Point point)
+    {
+        point = default;
+
+        if (!GetCursorPos(out var nativePoint))
+        {
+            return false;
+        }
+
+        point = new Point(nativePoint.X, nativePoint.Y);
+        var source = PresentationSource.FromVisual(this);
+        if (source?.CompositionTarget != null)
+        {
+            point = source.CompositionTarget.TransformFromDevice.Transform(point);
+        }
+
+        return true;
+    }
+
+    private static T? FindVisualChildByName<T>(DependencyObject parent, string name)
+        where T : FrameworkElement
+    {
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is T element && element.Name == name)
+            {
+                return element;
+            }
+
+            var match = FindVisualChildByName<T>(child, name);
+            if (match != null)
+            {
+                return match;
+            }
+        }
+
+        return null;
+    }
+
+    [DllImport("user32.dll")]
+    private static extern bool GetCursorPos(out NativePoint point);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativePoint
+    {
+        public int X;
+        public int Y;
     }
 
     private bool IsDescendant(SmartDevice potentialParent, SmartDevice potentialChild)
@@ -410,19 +683,25 @@ private void ListDevices_SelectedItemChanged(object sender, RoutedPropertyChange
 
     private void OnSelectAlarmAudioFileClick(object sender, RoutedEventArgs e)
     {
-        if (sender is MenuItem mi && mi.Tag is SmartDevice dev)
-        {
-            var dlg = new Microsoft.Win32.OpenFileDialog
-            {
-                Filter = "Audio Files|*.mp3;*.wav|All Files|*.*"
-            };
+        if (sender is not MenuItem mi) return;
 
-            if (dlg.ShowDialog() == true)
-            {
-                dev.AudioFilePath = dlg.FileName;
-                _vm.Save();
-                AppendLog($"Selected audio for #{dev.EntityId}: {dlg.SafeFileName}");
-            }
+        var dlg = new Microsoft.Win32.OpenFileDialog
+        {
+            Filter = "Audio Files|*.mp3;*.wav|All Files|*.*"
+        };
+
+        if (dlg.ShowDialog() != true) return;
+
+        if (mi.Tag is SmartDevice dev)
+        {
+            dev.AudioFilePath = dlg.FileName;
+            _vm.Save();
+            AppendLog($"Selected audio for #{dev.EntityId}: {dlg.SafeFileName}");
+        }
+        else if (Equals(mi.Tag, "GenericAlarm"))
+        {
+            TrackingService.GenericAlarmAudioFilePath = dlg.FileName;
+            AppendLog($"Selected generic alarm audio: {dlg.SafeFileName}");
         }
     }
 
@@ -433,6 +712,11 @@ private void ListDevices_SelectedItemChanged(object sender, RoutedPropertyChange
             dev.AudioFilePath = null;
             _vm.Save();
             AppendLog($"Reset audio to default for #{dev.EntityId}");
+        }
+        else if (sender is MenuItem generic && Equals(generic.Tag, "GenericAlarm"))
+        {
+            TrackingService.GenericAlarmAudioFilePath = string.Empty;
+            AppendLog("Reset generic alarm audio to default");
         }
     }
 
@@ -468,7 +752,7 @@ private void ListDevices_SelectedItemChanged(object sender, RoutedPropertyChange
     private void PlayAlarmAudio(SmartDevice? dev)
     {
         // Wenn ein Gerät erkannt wurde, prüfen wir seine individuellen Audio-Einstellungen.
-        // Wenn kein Gerät erkannt wurde (generischer Alarm), spielen wir den Standard-Sound ab.
+        // Wenn kein Gerät erkannt wurde, verwenden wir den generischen benutzerdefinierten oder Standard-Sound.
         if (dev != null && !dev.AudioEnabled) return;
 
         try
@@ -479,6 +763,10 @@ private void ListDevices_SelectedItemChanged(object sender, RoutedPropertyChange
             if (dev != null && !string.IsNullOrWhiteSpace(dev.AudioFilePath))
             {
                 audioFile = dev.AudioFilePath!;
+            }
+            else if (dev == null && !string.IsNullOrWhiteSpace(TrackingService.GenericAlarmAudioFilePath))
+            {
+                audioFile = TrackingService.GenericAlarmAudioFilePath;
             }
             else
             {
@@ -601,6 +889,12 @@ private async void DeviceToggle_Click(object sender, RoutedEventArgs e)
         if (_logicEngineRunningAction)
         {
             AppendLog("[LogicEngine] Manual toggle blocked: Logic Engine is executing an action.");
+            return;
+        }
+
+        if (_deviceAutomationRunningAction)
+        {
+            AppendLog("[DeviceAutomation] Manual toggle blocked while an automation action is running.");
             return;
         }
 
@@ -981,6 +1275,90 @@ private async void BtnDeviceRefresh_Click(object sender, RoutedEventArgs e)
         }
     }
 
+    private void SwitchCommandPill_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount == 2)
+        {
+            e.Handled = true;
+            BeginSwitchCommandEditing((sender as FrameworkElement)?.DataContext as SmartDevice);
+        }
+    }
+
+    private void SwitchCommand_Edit_Click(object sender, RoutedEventArgs e)
+    {
+        BeginSwitchCommandEditing((sender as FrameworkElement)?.DataContext as SmartDevice);
+    }
+
+    private void BeginSwitchCommandEditing(SmartDevice? dev)
+    {
+        if (dev == null || !IsSwitchDevice(dev)) return;
+        dev.IsEditingSwitchCommand = true;
+    }
+
+    private void TxtSwitchCommand_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is TextBox tb && tb.DataContext is SmartDevice dev)
+            EndSwitchCommandEditing(dev, tb.Text, save: true);
+    }
+
+    private void TxtSwitchCommand_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (sender is not TextBox tb || tb.DataContext is not SmartDevice dev) return;
+
+        if (e.Key == Key.Enter)
+        {
+            e.Handled = true;
+            EndSwitchCommandEditing(dev, tb.Text, save: true);
+        }
+        else if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            EndSwitchCommandEditing(dev, tb.Text, save: false);
+        }
+    }
+
+    private void TxtSwitchCommand_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (sender is TextBox tb && tb.Visibility == Visibility.Visible)
+        {
+            tb.Focus();
+            tb.SelectAll();
+        }
+    }
+
+    private void EndSwitchCommandEditing(SmartDevice dev, string text, bool save)
+    {
+        if (!dev.IsEditingSwitchCommand) return;
+
+        if (save)
+        {
+            SetSwitchCommand(dev, text);
+        }
+
+        dev.IsEditingSwitchCommand = false;
+        ListDevices.Items.Refresh();
+    }
+
+    private void SetSwitchCommand(SmartDevice dev, string text)
+    {
+        var profile = _vm?.Selected;
+        if (profile == null || !IsSwitchDevice(dev)) return;
+
+        profile.SyncChatCommands();
+        var mapping = profile.SwitchCommandMappings.FirstOrDefault(m => m.EntityId == dev.EntityId);
+        if (mapping == null) return;
+
+        mapping.Command = text;
+        _vm?.Save();
+        profile.NotifySmartSwitchesChanged();
+    }
+
+    private static bool IsSwitchDevice(SmartDevice dev)
+    {
+        return string.Equals(dev.Kind, "SmartSwitch", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(dev.Kind, "Smart Switch", StringComparison.OrdinalIgnoreCase);
+    }
+
     private void TxtRename_LostFocus(object sender, RoutedEventArgs e)
     {
         if (sender is TextBox tb && tb.DataContext is SmartDevice dev)
@@ -1279,11 +1657,22 @@ public List<ExportedDeviceDto> Devices { get; set; } = new();
     }
 
     private int _refreshAllBusy = 0;
-    private async Task RefreshAllDevicesStatusAsync(int maxRetries = 3)
+    private async Task RefreshAllDevicesStatusAsync(int maxRetries = 3, bool skipIfRecentlyChecked = false)
     {
         if (Interlocked.Exchange(ref _refreshAllBusy, 1) == 1) return;
         try
         {
+        void StartProgress(int max)
+        {
+            _vm.IsDeviceStatusChecking = true;
+            _vm.DeviceStatusMax = Math.Max(1, max);
+            _vm.DeviceStatusProgress = 0;
+            _vm.DeviceStatusText = "Checking devices...";
+            UpdateFullConnectButtonsEnabled();
+        }
+
+        if (!skipIfRecentlyChecked) StartProgress(1);
+
         if (_logicEngineRunningAction)
         {
             AppendLog("[LogicEngine] Manual refresh blocked: Logic Engine is executing an action.");
@@ -1299,70 +1688,48 @@ public List<ExportedDeviceDto> Devices { get; set; } = new();
         if (!await EnsureConnectedAsync())
             return;
 
-        var list = _vm.Selected.Devices;
-        if (list == null || list.Count == 0)
+        var devices = _vm.Selected.AllDevices.ToList();
+        if (devices.Count == 0)
         {
             AppendLog("No Devices Available.");
             return;
         }
 
+        if (skipIfRecentlyChecked
+            && devices.All(d => (DateTime.UtcNow - d.LastPolledAt).TotalSeconds < 15))
+        {
+            AppendLog("Device status refresh skipped; recent check is still fresh.");
+            return;
+        }
+
         AppendLog("Updating Device Status (sequential).");
-        
-        foreach (var d in list)
+        StartProgress(devices.Count);
+
+        foreach (var device in devices)
         {
             try
             {
-                await RefreshDeviceRecursiveAsync(d, maxRetries);
+                _vm.DeviceStatusText = $"Checking device #{device.EntityId} ({device.DisplayName})...";
+                await RefreshDeviceStateAsync(device, log: true, forcePull: true, maxRetries: maxRetries);
+                device.LastPolledAt = DateTime.UtcNow;
+                _vm.DeviceStatusProgress++;
                 await Task.Delay(250); // Increased gap to prevent API spam
             }
             catch (Exception ex)
             {
-                AppendLog($"Error refreshing {d.DisplayName}: {ex.Message}");
+                _vm.DeviceStatusProgress++;
+                AppendLog($"Error refreshing {device.DisplayName}: {ex.Message}");
             }
         }
-        
+
         _vm.Save();
         AppendLog("Refresh completed.");
         }
         finally
         {
+            _vm.IsDeviceStatusChecking = false;
+            UpdateFullConnectButtonsEnabled();
             Interlocked.Exchange(ref _refreshAllBusy, 0);
-        }
-    }
-
-    private async Task RefreshDeviceRecursiveAsync(SmartDevice d, int maxRetries = 3)
-    {
-        try
-        {
-            if (!d.IsGroup)
-            {
-                if ((DateTime.UtcNow - d.LastPolledAt).TotalSeconds < 15)
-                {
-                    // Skip if recently polled
-                    return;
-                }
-                
-                await RefreshDeviceStateAsync(d, log: true, forcePull: true, maxRetries: maxRetries);
-                d.LastPolledAt = DateTime.UtcNow;
-            }
-            else
-            {
-                // Gruppen haben keinen direkten Status, aber wir refreshen Kinder
-                d.IsMissing = false; // groups are never missing
-                if (d.Children != null)
-                {
-                    foreach (var child in d.Children)
-                    {
-                        await RefreshDeviceRecursiveAsync(child);
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            d.IsMissing = true;
-            if (!d.IsGroup)
-                AppendLog($"#{d.EntityId}: Status Request Failed → {ex.Message}");
         }
     }
 

@@ -481,6 +481,20 @@ public class ServerProfile : INotifyPropertyChanged
         set { _rustMapsWipeTime = value; OnProp(); }
     }
 
+    private string? _customMapUrl;
+    public string? CustomMapUrl
+    {
+        get => _customMapUrl;
+        set { _customMapUrl = value; OnProp(); }
+    }
+
+    private DateTime? _wipeTime;
+    public DateTime? WipeTime
+    {
+        get => _wipeTime;
+        set { _wipeTime = value; OnProp(); }
+    }
+
     private List<LogicRule> _logicRules = new();
     public List<LogicRule> LogicRules
     {
@@ -493,6 +507,20 @@ public class ServerProfile : INotifyPropertyChanged
     {
         get => _isLogicEngineActive;
         set { if (_isLogicEngineActive != value) { _isLogicEngineActive = value; OnProp(); } }
+    }
+
+    private List<DeviceAutomationRule> _deviceAutomationRules = new();
+    public List<DeviceAutomationRule> DeviceAutomationRules
+    {
+        get => _deviceAutomationRules;
+        set { _deviceAutomationRules = value ?? new(); OnProp(); }
+    }
+
+    private bool _isDeviceAutomationActive;
+    public bool IsDeviceAutomationActive
+    {
+        get => _isDeviceAutomationActive;
+        set { if (_isDeviceAutomationActive != value) { _isDeviceAutomationActive = value; OnProp(); } }
     }
 
     private List<ulong> _subscribedTeammateSteamIds = new();

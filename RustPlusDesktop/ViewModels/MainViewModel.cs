@@ -53,6 +53,8 @@ public class MainViewModel : INotifyPropertyChanged
 
     private void TickClock()
     {
+        UpdateServerWipe();
+
         if (_lastStatusRealTime.HasValue && _lastStatusGameTime.HasValue)
         {
             var now = DateTime.UtcNow;
@@ -83,7 +85,7 @@ public class MainViewModel : INotifyPropertyChanged
         string newTime = $"{h:00}:{m:00}";
 
         // Update ServerTime string directly if it changed
-        if (_serverTime != newTime && _serverTime != "-" && _serverTime != "–")
+        if (_serverTime != newTime)
         {
             _serverTime = newTime;
             OnPropertyChanged(nameof(ServerTime));
@@ -153,11 +155,87 @@ public class MainViewModel : INotifyPropertyChanged
         set { _isBusy = value; OnPropertyChanged(); OnPropertyChanged(nameof(CanStartPairing)); OnPropertyChanged(nameof(ShowLoginOverlay)); }
     }
 
+    private bool _isConnectionLoading;
+    public bool IsConnectionLoading
+    {
+        get => _isConnectionLoading;
+        set { _isConnectionLoading = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsGlobalBusyOverlayVisible)); }
+    }
+
+    private bool _isDeviceStatusChecking;
+    public bool IsDeviceStatusChecking
+    {
+        get => _isDeviceStatusChecking;
+        set { if (_isDeviceStatusChecking != value) { _isDeviceStatusChecking = value; OnPropertyChanged(); } }
+    }
+
+    private bool _isDeviceSubscribePriming;
+    public bool IsDeviceSubscribePriming
+    {
+        get => _isDeviceSubscribePriming;
+        set { if (_isDeviceSubscribePriming != value) { _isDeviceSubscribePriming = value; OnPropertyChanged(); } }
+    }
+
+    private int _deviceSubscribeProgress;
+    public int DeviceSubscribeProgress
+    {
+        get => _deviceSubscribeProgress;
+        set { if (_deviceSubscribeProgress != value) { _deviceSubscribeProgress = value; OnPropertyChanged(); OnPropertyChanged(nameof(DeviceSubscribeProgressText)); } }
+    }
+
+    private int _deviceSubscribeMax = 1;
+    public int DeviceSubscribeMax
+    {
+        get => _deviceSubscribeMax;
+        set { if (_deviceSubscribeMax != value) { _deviceSubscribeMax = value; OnPropertyChanged(); OnPropertyChanged(nameof(DeviceSubscribeProgressText)); } }
+    }
+
+    private string _deviceSubscribeText = "";
+    public string DeviceSubscribeText
+    {
+        get => _deviceSubscribeText;
+        set { if (_deviceSubscribeText != value) { _deviceSubscribeText = value; OnPropertyChanged(); } }
+    }
+
+    public string DeviceSubscribeProgressText => $"{DeviceSubscribeProgress} / {DeviceSubscribeMax}";
+
+    private int _deviceStatusProgress;
+    public int DeviceStatusProgress
+    {
+        get => _deviceStatusProgress;
+        set { if (_deviceStatusProgress != value) { _deviceStatusProgress = value; OnPropertyChanged(); OnPropertyChanged(nameof(DeviceStatusProgressText)); } }
+    }
+
+    private int _deviceStatusMax = 1;
+    public int DeviceStatusMax
+    {
+        get => _deviceStatusMax;
+        set { if (_deviceStatusMax != value) { _deviceStatusMax = value; OnPropertyChanged(); OnPropertyChanged(nameof(DeviceStatusProgressText)); } }
+    }
+
+    private string _deviceStatusText = "";
+    public string DeviceStatusText
+    {
+        get => _deviceStatusText;
+        set { if (_deviceStatusText != value) { _deviceStatusText = value; OnPropertyChanged(); } }
+    }
+
+    public string DeviceStatusProgressText => $"{DeviceStatusProgress} / {DeviceStatusMax}";
+
+    public bool IsGlobalBusyOverlayVisible => IsBusy && !IsConnectionLoading;
+
     private bool _isCloudConnected;
     public bool IsCloudConnected
     {
         get => _isCloudConnected;
         set { _isCloudConnected = value; OnPropertyChanged(); }
+    }
+
+    private bool _isPremium;
+    public bool IsPremium
+    {
+        get => _isPremium;
+        set { if (_isPremium != value) { _isPremium = value; OnPropertyChanged(); } }
     }
 
     private bool _isInitializing;
@@ -191,7 +269,7 @@ public class MainViewModel : INotifyPropertyChanged
     public bool IsDownloadingUpdate
     {
         get => _isDownloadingUpdate;
-        set { _isDownloadingUpdate = value; OnPropertyChanged(); }
+        set { _isDownloadingUpdate = value; OnPropertyChanged(); OnPropertyChanged(nameof(CanControlUpdateDownload)); }
     }
 
     private double _updateDownloadProgress;
@@ -221,6 +299,29 @@ public class MainViewModel : INotifyPropertyChanged
         get => _updateDownloadPercentage;
         set { _updateDownloadPercentage = value; OnPropertyChanged(); }
     }
+
+    private string _updateStatusText = "Check for updates";
+    public string UpdateStatusText
+    {
+        get => _updateStatusText;
+        set { _updateStatusText = value; OnPropertyChanged(); }
+    }
+
+    private bool _isUpdateStatusExpanded;
+    public bool IsUpdateStatusExpanded
+    {
+        get => _isUpdateStatusExpanded;
+        set { _isUpdateStatusExpanded = value; OnPropertyChanged(); }
+    }
+
+    private bool _isUpdateProcessing;
+    public bool IsUpdateProcessing
+    {
+        get => _isUpdateProcessing;
+        set { _isUpdateProcessing = value; OnPropertyChanged(); OnPropertyChanged(nameof(CanControlUpdateDownload)); }
+    }
+
+    public bool CanControlUpdateDownload => IsDownloadingUpdate && !IsUpdateProcessing;
 
     private string _busyText = "";
     public string BusyText
@@ -313,10 +414,19 @@ public class MainViewModel : INotifyPropertyChanged
         set
         {
             if (_selected == value) return;
+            if (_selected != null) _selected.PropertyChanged -= SelectedProfile_PropertyChanged;
             _selected = value; 
+            if (_selected != null) _selected.PropertyChanged += SelectedProfile_PropertyChanged;
             OnPropertyChanged();                   // "Selected"
             OnPropertyChanged(nameof(CurrentDevices));
+            UpdateServerWipe();
         }
+    }
+
+    private void SelectedProfile_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ServerProfile.WipeTime))
+            UpdateServerWipe();
     }
 
     public sealed class StorageSnapshot
@@ -357,8 +467,24 @@ public class MainViewModel : INotifyPropertyChanged
         } 
     }
 
-    private bool _isDay;
-    public bool IsDay { get => _isDay; set { _isDay = value; OnPropertyChanged(); } }
+    private bool _isDay = true;
+    public bool IsDay 
+    { 
+        get => _isDay; 
+        set 
+        { 
+            if (_isDay != value)
+            {
+                _isDay = value; 
+                OnPropertyChanged(); 
+                OnPropertyChanged(nameof(DayNightIcon));
+                OnPropertyChanged(nameof(DayNightColor));
+            }
+        } 
+    }
+
+    public string DayNightIcon => IsDay ? "\uE706" : "\uE708";
+    public string DayNightColor => IsDay ? "#FFD166" : "#90CAF9";
 
     private string _timeUntilNextPhase = "";
     public string TimeUntilNextPhase { get => _timeUntilNextPhase; set { _timeUntilNextPhase = value; OnPropertyChanged(); } }
@@ -459,11 +585,40 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
     private string _serverWipe = "-";
-    public string ServerWipe { get => _serverWipe; set { _serverWipe = value; OnPropertyChanged(); } }
+    public string ServerWipe
+    {
+        get => _serverWipe;
+        set
+        {
+            if (_serverWipe == value) return;
+            _serverWipe = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public void UpdateServerWipe()
+    {
+        if (Selected?.WipeTime is not DateTime wipeTime)
+        {
+            ServerWipe = "-";
+            return;
+        }
+
+        var local = (wipeTime.Kind == DateTimeKind.Utc ? wipeTime : wipeTime.ToUniversalTime()).ToLocalTime();
+        var days = Math.Max(0, (int)Math.Floor((DateTime.Now - local).TotalDays));
+        ServerWipe = $"{local.ToString("g", System.Globalization.CultureInfo.CurrentCulture)} ({days}d ago)";
+    }
 
     // NEU: Abgeleitete Binding-Quelle für die Liste
     public ObservableCollection<SmartDevice>? CurrentDevices
         => Selected?.Devices;
+
+    private IReadOnlyDictionary<string, List<long>>? _currentHotkeys;
+    public IReadOnlyDictionary<string, List<long>>? CurrentHotkeys
+    {
+        get => _currentHotkeys;
+        set { _currentHotkeys = value; OnPropertyChanged(); }
+    }
 
     // Auswahl im UI
     private SmartDevice? _selectedDevice;
@@ -502,4 +657,7 @@ public class MainViewModel : INotifyPropertyChanged
     // HILFSMETHODE: UI anstupsen, wenn Devices in-place aktualisiert wurden
     public void NotifyDevicesChanged()
         => OnPropertyChanged(nameof(CurrentDevices));
+
+    public void NotifyHotkeysChanged()
+        => OnPropertyChanged(nameof(CurrentHotkeys));
 }

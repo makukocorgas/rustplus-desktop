@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -20,12 +21,67 @@ namespace RustPlusDesk.Services.Auth
 {
     public static class SupabaseAuthManager
     {
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        private static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
+
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern uint SendInput(uint inputCount, NativeInput[] inputs, int inputSize);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct NativeInput
+        {
+            public uint Type;
+            public NativeInputUnion Data;
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        private struct NativeInputUnion
+        {
+            [FieldOffset(0)] public NativeKeyboardInput Keyboard;
+            [FieldOffset(0)] public NativeMouseInput Mouse;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct NativeMouseInput
+        {
+            public int X;
+            public int Y;
+            public uint MouseData;
+            public uint Flags;
+            public uint Time;
+            public UIntPtr ExtraInfo;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct NativeKeyboardInput
+        {
+            public ushort VirtualKey;
+            public ushort ScanCode;
+            public uint Flags;
+            public uint Time;
+            public UIntPtr ExtraInfo;
+        }
+
         public static Supabase.Client Client { get; private set; }
         public static bool IsPremium { get; private set; }
         public static string CurrentTier { get; private set; } = "supporter";
         public static string DiscordProviderToken { get; private set; }
         public static bool IsGuestAuthenticated { get; private set; }
         private static readonly SemaphoreSlim SessionRefreshLock = new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim CloudSyncConsentLock = new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim ProfileRefreshLock = new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim ProfileTouchLock = new SemaphoreSlim(1, 1);
+        private static DateTime LastProfileRefreshUtc = DateTime.MinValue;
+        private static string? LastProfileRefreshIdentity;
+        private static DateTime LastProfileTouchUtc = DateTime.MinValue;
+        private static string? LastProfileTouchIdentity;
+        private static string? ConfirmedCloudSyncConsentIdentity;
         private static bool CloudAccountPromptShownThisSession;
         private static bool GuestRegistrationFailedPermanently;
 
@@ -116,6 +172,21 @@ namespace RustPlusDesk.Services.Auth
             return 1;
         }
 
+        private static void ApplyProfileTier(string? tier, bool isManualSupporter, DateTime? premiumUntil)
+        {
+            var profileTier = tier ?? "free";
+            // Mirror the server-side team-feature/heartbeat election logic exactly: any one of
+            // these three conditions grants premium. Previously a non-null premiumUntil short-
+            // circuited the check and ignored isManualSupporter entirely, so a manual supporter
+            // with an expired/irrelevant premiumUntil could incorrectly read as non-premium.
+            IsPremium = isManualSupporter
+                || (profileTier != "free" && !string.Equals(profileTier, "guest", StringComparison.OrdinalIgnoreCase))
+                || (premiumUntil.HasValue && premiumUntil.Value.ToUniversalTime() > DateTime.UtcNow);
+            CurrentTier = IsPremium && string.Equals(profileTier, "free", StringComparison.OrdinalIgnoreCase)
+                ? "supporter"
+                : profileTier;
+        }
+
         /// <summary>True when the user is signed in via email+password (not Discord OAuth).</summary>
         public static bool IsEmailAuthenticated
         {
@@ -132,6 +203,12 @@ namespace RustPlusDesk.Services.Auth
 
         public static async Task InitializeAsync()
         {
+            if (IsUpgradeRequiredSnackbarShown)
+            {
+                ShowUpgradeRequiredWarning();
+                return;
+            }
+
             try
             {
                 var url = DataManager.SUPABASE_URL;
@@ -175,6 +252,8 @@ namespace RustPlusDesk.Services.Auth
                         var restored = await Client.Auth.SetSession(saved.AccessToken, saved.RefreshToken);
                         if (restored != null)
                         {
+                            if (!string.IsNullOrEmpty(restored.AccessToken))
+                                Client.Realtime.SetAuth(restored.AccessToken);
                             AppendLog($"[Supabase] Discord session restored. User: {restored.User?.Email}");
                         }
                         else
@@ -344,11 +423,13 @@ namespace RustPlusDesk.Services.Auth
                 {
                     System.Threading.Interlocked.Exchange(ref _profileUpdateBusy, 0);
                 }
-            }, null, TimeSpan.FromSeconds(290), TimeSpan.FromSeconds(290));
+            }, null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
         }
 
         public static async Task<bool> EnsureFreshSessionAsync()
         {
+            if (IsUpgradeRequiredSnackbarShown) return false;
+
             // Guest JWT refresh — no refresh token, so call the handshake refresh flow
             if (IsGuestAuthenticated)
             {
@@ -422,7 +503,14 @@ namespace RustPlusDesk.Services.Auth
                 AppendLog("[Cloud/Debug] Refreshing expired Supabase session...");
                 var refreshed = await Client.Auth.RefreshSession();
                 if (refreshed != null)
+                {
+                    // Sem isto, a ligação Realtime (usada p. ex. pela fila de comandos do
+                    // Discord) continua a autenticar com o JWT antigo e acaba desligada em
+                    // silêncio quando esse token expira, mesmo com a sessão HTTP já renovada.
+                    if (!string.IsNullOrEmpty(refreshed.AccessToken))
+                        Client.Realtime.SetAuth(refreshed.AccessToken);
                     return true;
+                }
 
                 AppendLog("[Cloud/Debug] Supabase session refresh returned no session.");
             }
@@ -625,11 +713,36 @@ namespace RustPlusDesk.Services.Auth
             return false;
         }
 
-        public static async Task RefreshUserProfileAsync()
+        public static async Task RefreshUserProfileAsync(bool forceRefresh = false)
+        {
+            if (!IsDiscordAuthenticated && !IsEmailAuthenticated) return;
+
+            var identity = $"{Client?.Auth?.CurrentUser?.Id}:{TrackingService.SteamId64}";
+            await ProfileRefreshLock.WaitAsync();
+            try
+            {
+                if (!forceRefresh &&
+                    identity == LastProfileRefreshIdentity &&
+                    DateTime.UtcNow - LastProfileRefreshUtc < TimeSpan.FromMinutes(15))
+                    return;
+
+                if (await RefreshUserProfileCoreAsync())
+                {
+                    LastProfileRefreshIdentity = identity;
+                    LastProfileRefreshUtc = DateTime.UtcNow;
+                }
+            }
+            finally
+            {
+                ProfileRefreshLock.Release();
+            }
+        }
+
+        private static async Task<bool> RefreshUserProfileCoreAsync()
         {
             // Run for Discord OR Email auth (not anon/guest — they use handshake)
-            if (!IsDiscordAuthenticated && !IsEmailAuthenticated) return;
-            if (!await EnsureFreshSessionAsync()) return;
+            if (!IsDiscordAuthenticated && !IsEmailAuthenticated) return false;
+            if (!await EnsureFreshSessionAsync()) return false;
             string discordId = null;
             if (Client.Auth.CurrentUser?.UserMetadata != null)
             {
@@ -644,7 +757,7 @@ namespace RustPlusDesk.Services.Auth
                     ? Client.Auth.CurrentUser.Identities[0].Id
                     : Client.Auth.CurrentUser?.Id;
             }
-            if (discordId == null) return;
+            if (discordId == null) return false;
 
             string steamId = null;
             if (Application.Current != null)
@@ -672,7 +785,7 @@ namespace RustPlusDesk.Services.Auth
             if (string.IsNullOrEmpty(steamId) || steamId == "0")
             {
                 AppendLog("[Cloud/Debug] No valid SteamID64 available yet to sync user profile.");
-                return;
+                return false;
             }
 
             // ── Step 1: GET /user-profile ──
@@ -699,12 +812,12 @@ namespace RustPlusDesk.Services.Auth
 
             if (existingProfile != null)
             {
-                CurrentTier = existingProfile.SubscriptionTier ?? "free";
-                IsPremium = existingProfile.IsManualSupporter || (CurrentTier != "free" && !string.Equals(CurrentTier, "guest", StringComparison.OrdinalIgnoreCase));
+                var previousTier = CurrentTier;
+                ApplyProfileTier(existingProfile.SubscriptionTier, existingProfile.IsManualSupporter, existingProfile.PremiumUntil);
                 AppendLog($"[Cloud/Debug] Found existing profile. Tier: {CurrentTier} (IsPremium: {IsPremium})");
-                await FetchTierLimitsAsync(forceRefresh: true);
+                await FetchTierLimitsAsync(forceRefresh: TierLimits.Count == 0 || !string.Equals(previousTier, CurrentTier, StringComparison.OrdinalIgnoreCase));
                 await TouchProfileAsync(steamId, discordId);
-                return;
+                return true;
             }
 
             // ── Step 2: Claim via secure Edge Function (user-profile/claim) ──
@@ -736,13 +849,16 @@ namespace RustPlusDesk.Services.Auth
 
                     if (hasRow)
                     {
-                        CurrentTier = row.TryGetProperty("subscription_tier", out var tierEl) ? tierEl.GetString() ?? "free" : "free";
+                        var profileTier = row.TryGetProperty("subscription_tier", out var tierEl) ? tierEl.GetString() : "free";
                         var isManual = row.TryGetProperty("is_manual_supporter", out var manualEl) && manualEl.GetBoolean();
-                        IsPremium = isManual || (CurrentTier != "free" && !string.Equals(CurrentTier, "guest", StringComparison.OrdinalIgnoreCase));
+                        DateTime? premiumUntil = row.TryGetProperty("premium_until", out var premiumEl) && premiumEl.ValueKind == JsonValueKind.String && DateTime.TryParse(premiumEl.GetString(), out var parsedPremiumUntil)
+                            ? parsedPremiumUntil
+                            : null;
+                        ApplyProfileTier(profileTier, isManual, premiumUntil);
                         AppendLog($"[Cloud] Claimed guest profile — linked to Discord/Email. Tier: {CurrentTier} (IsPremium: {IsPremium})");
-                        await FetchTierLimitsAsync(forceRefresh: true);
+                        await FetchTierLimitsAsync(forceRefresh: TierLimits.Count == 0);
                         await TouchProfileAsync(steamId, discordId);
-                        return;
+                        return true;
                     }
                 }
                 AppendLog("[Cloud/Debug] claim returned empty — profile does not exist. Will create.");
@@ -771,10 +887,12 @@ namespace RustPlusDesk.Services.Auth
                 CurrentTier = "free";
                 IsPremium = false;
                 AppendLog("[Cloud] Created new user profile row in database successfully.");
+                return true;
             }
             catch (Exception insertEx)
             {
                 AppendLog($"[Cloud/Error] Failed to create new user profile: {insertEx.Message}");
+                return false;
             }
         }
 
@@ -821,16 +939,17 @@ namespace RustPlusDesk.Services.Auth
                     var response = await responseMsg.Content.ReadAsStringAsync();
                     if (!responseMsg.IsSuccessStatusCode)
                     {
+                        HandleUpgradeRequiredResponse(response);
                         throw new Exception($"HTTP {responseMsg.StatusCode}: {response}");
                     }
                     AppendLog($"[Cloud] Edge Function completed. Response: {response}");
                 }
-                await RefreshUserProfileAsync();
+                await RefreshUserProfileAsync(forceRefresh: true);
             }
             catch (Exception ex)
             {
                 AppendLog($"[Cloud/Error] Failed to sync roles via Edge Function: {ex.Message}");
-                await RefreshUserProfileAsync();
+                await RefreshUserProfileAsync(forceRefresh: true);
             }
         }
 
@@ -882,35 +1001,131 @@ namespace RustPlusDesk.Services.Auth
                 // We will attempt exchange, but typically `SetSession` is enough if implicit.
             }
 
-            var responseHtml = success 
-                ? "<html><body><h1>Authentication Successful!</h1><p>You can close this window and return to Rust+ Desktop.</p></body></html>"
+            var responseHtml = success
+                ? "<!doctype html><html><head><meta charset='utf-8'><title>Rust+ Desktop</title></head><body><h1>Authentication successful</h1><p id='status'>Returning to Rust+ Desktop...</p><script>history.replaceState(null,'','/callback/');fetch('/callback/close',{method:'POST'}).finally(function(){window.close();setTimeout(function(){document.getElementById('status').textContent='Login complete. You can close this tab and return to Rust+ Desktop.';},500);});</script></body></html>"
                 : "<html><body><h1>Authentication Failed</h1><p>Something went wrong.</p></body></html>";
 
             var responseBytes = Encoding.UTF8.GetBytes(responseHtml);
+            res.Headers[HttpResponseHeader.CacheControl] = "no-store";
             res.ContentLength64 = responseBytes.Length;
             await res.OutputStream.WriteAsync(responseBytes, 0, responseBytes.Length);
             res.Close();
+
+            IntPtr callbackBrowserWindow = IntPtr.Zero;
+            if (success)
+            {
+                try
+                {
+                    var closeContext = await listener.GetContextAsync().WaitAsync(TimeSpan.FromSeconds(2));
+                    bool closeCallbackTab = closeContext.Request.HttpMethod == "POST" &&
+                                            closeContext.Request.Url?.AbsolutePath == "/callback/close";
+                    if (closeCallbackTab) callbackBrowserWindow = GetForegroundWindow();
+                    closeContext.Response.StatusCode = closeCallbackTab ? 204 : 404;
+                    closeContext.Response.Close();
+                }
+                catch (TimeoutException)
+                {
+                    // JavaScript may be disabled; the app can still regain focus.
+                }
+            }
+
             listener.Stop();
 
+            if (success)
+            {
+                if (callbackBrowserWindow != IntPtr.Zero)
+                {
+                    await Task.Delay(100);
+                    Console.WriteLine($"[Supabase] Browser tab close input: {SendCloseTabInput(callbackBrowserWindow)}/4 events sent.");
+                    await Task.Delay(100);
+                }
+
+                Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (Application.Current.MainWindow is Window mainWindow)
+                    {
+                        if (!mainWindow.IsVisible) mainWindow.Show();
+                        if (mainWindow.WindowState == WindowState.Minimized) mainWindow.WindowState = WindowState.Normal;
+                        mainWindow.Activate();
+                        mainWindow.Topmost = true;
+                        mainWindow.Topmost = false;
+                        mainWindow.Focus();
+                    }
+                }));
+            }
+
             return success;
+        }
+
+        private static uint SendCloseTabInput(IntPtr callbackBrowserWindow)
+        {
+            var title = new StringBuilder(256);
+            if (GetForegroundWindow() != callbackBrowserWindow ||
+                GetWindowText(callbackBrowserWindow, title, title.Capacity) <= 0 ||
+                !title.ToString().Contains("Rust+ Desktop", StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine($"[Supabase] Browser tab close skipped; foreground title was '{title}'.");
+                return 0;
+            }
+
+            SetForegroundWindow(callbackBrowserWindow);
+            const uint keyboardInput = 1;
+            const uint keyUp = 2;
+            const ushort controlKey = 0x11;
+            const ushort wKey = 0x57;
+            var inputs = new[]
+            {
+                new NativeInput { Type = keyboardInput, Data = new NativeInputUnion { Keyboard = new NativeKeyboardInput { VirtualKey = controlKey } } },
+                new NativeInput { Type = keyboardInput, Data = new NativeInputUnion { Keyboard = new NativeKeyboardInput { VirtualKey = wKey } } },
+                new NativeInput { Type = keyboardInput, Data = new NativeInputUnion { Keyboard = new NativeKeyboardInput { VirtualKey = wKey, Flags = keyUp } } },
+                new NativeInput { Type = keyboardInput, Data = new NativeInputUnion { Keyboard = new NativeKeyboardInput { VirtualKey = controlKey, Flags = keyUp } } }
+            };
+            int inputSize = Marshal.SizeOf<NativeInput>();
+            uint sent = SendInput((uint)inputs.Length, inputs, inputSize);
+            if (sent != inputs.Length)
+                Console.WriteLine($"[Supabase] SendInput failed with Windows error {Marshal.GetLastWin32Error()} (INPUT size {inputSize}).");
+            return sent;
         }
 
         public static async Task LogoutAsync()
         {
             if (Client != null && IsAuthenticated)
             {
+                ConfirmedCloudSyncConsentIdentity = null;
                 IsGuestAuthenticated = false;
                 HandshakeService.Clear();
                 await Client.Auth.SignOut();
             }
         }
 
-        public static async Task UpdateCloudSyncConsentAsync(bool accepted)
+        private static string? GetCloudSyncConsentIdentity()
         {
-            if (!IsAuthenticated) return;
-            if (!await EnsureFreshSessionAsync()) return;
             string steamId = TrackingService.SteamId64;
-            if (string.IsNullOrEmpty(steamId) || steamId == "0") return;
+            if (string.IsNullOrEmpty(steamId) || steamId == "0")
+                return null;
+
+            string? userId = Client?.Auth?.CurrentUser?.Id;
+            if (!string.IsNullOrEmpty(userId))
+                return $"{userId}:{steamId}";
+
+            // Guest sessions never populate Client.Auth.CurrentUser — SetGuestSessionAsync is a
+            // lightweight custom JWT handshake (HandshakeService), not a real Supabase Auth
+            // session. Fall back to the Steam ID alone so guest sync (the default, no-account
+            // flow most users are on) isn't permanently locked out of cloud sync.
+            return IsGuestAuthenticated ? $"guest:{steamId}" : null;
+        }
+
+        private static async Task<bool> UpdateCloudSyncConsentCoreAsync(bool accepted)
+        {
+            if (!accepted)
+                ConfirmedCloudSyncConsentIdentity = null;
+
+            if (!IsAuthenticated) return false;
+            if (!await EnsureFreshSessionAsync()) return false;
+
+            string steamId = TrackingService.SteamId64;
+            string? consentIdentity = GetCloudSyncConsentIdentity();
+            if (consentIdentity == null) return false;
 
             try
             {
@@ -920,11 +1135,77 @@ namespace RustPlusDesk.Services.Auth
                     sync_accepted = accepted
                 };
                 await CallEdgeFunctionAsync("user-profile/consent", HttpMethod.Post, payload);
+                ConfirmedCloudSyncConsentIdentity = accepted ? consentIdentity : null;
                 AppendLog($"[Cloud] Updated database consent status to: {accepted}");
+                return true;
             }
             catch (Exception ex)
             {
+                if (accepted)
+                    ConfirmedCloudSyncConsentIdentity = null;
                 AppendLog($"[Cloud/Error] Failed to update consent status in database: {ex.Message}");
+                return false;
+            }
+        }
+
+        private static void PauseCloudSyncAfterConsentFailure()
+        {
+            // Keep UploadConsentGiven so a temporary network/auth failure does
+            // not force the user to accept the disclaimer again. Only pause
+            // uploading until they explicitly retry enabling cloud sync.
+            ConfirmedCloudSyncConsentIdentity = null;
+            TrackingService.CloudSyncEnabled = false;
+            AppendLog("[Cloud/Error] Cloud sync paused because consent could not be confirmed. Retry enabling it when the connection is available.");
+        }
+
+        public static async Task<bool> UpdateCloudSyncConsentAsync(bool accepted)
+        {
+            await CloudSyncConsentLock.WaitAsync();
+            try
+            {
+                bool updated = await UpdateCloudSyncConsentCoreAsync(accepted);
+                if (accepted && !updated)
+                    PauseCloudSyncAfterConsentFailure();
+                return updated;
+            }
+            finally
+            {
+                CloudSyncConsentLock.Release();
+            }
+        }
+
+        /// <summary>
+        /// Confirms that cloud-sync consent has been persisted for the current
+        /// authenticated user and Steam ID before any user-owned data is uploaded.
+        /// This prevents autosync from racing the consent update and repeatedly
+        /// failing the database ownership/consent RLS policies.
+        /// </summary>
+        public static async Task<bool> EnsureCloudSyncConsentAsync()
+        {
+            if (!TrackingService.CloudSyncEnabled || !TrackingService.UploadConsentGiven)
+                return false;
+
+            await CloudSyncConsentLock.WaitAsync();
+            try
+            {
+                if (!TrackingService.CloudSyncEnabled || !TrackingService.UploadConsentGiven)
+                    return false;
+
+                string? consentIdentity = GetCloudSyncConsentIdentity();
+                if (consentIdentity != null &&
+                    string.Equals(ConfirmedCloudSyncConsentIdentity, consentIdentity, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+
+                bool updated = await UpdateCloudSyncConsentCoreAsync(true);
+                if (!updated)
+                    PauseCloudSyncAfterConsentFailure();
+                return updated;
+            }
+            finally
+            {
+                CloudSyncConsentLock.Release();
             }
         }
 
@@ -1066,69 +1347,51 @@ namespace RustPlusDesk.Services.Auth
 
         private static void ShowCloudAccountRequiredPromptOnce(bool sessionExpired = false)
         {
-            if (CloudAccountPromptShownThisSession || (!sessionExpired && !TrackingService.CloudSyncEnabled))
-                return;
-
-            if (!sessionExpired && (IsDiscordAuthenticated || IsEmailAuthenticated || IsGuestAuthenticated))
-                return;
-
-            CloudAccountPromptShownThisSession = true;
-
-            try
-            {
-                Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    if (Application.Current.MainWindow is RustPlusDesk.Views.MainWindow mainWin)
-                    {
-                        mainWin.UpdateCloudSyncUI();
-                        mainWin.UpdateRustMapsUi();
-                        var prompt = new RustPlusDesk.Views.Windows.CloudLoginPromptWindow(mainWin, sessionExpired)
-                        {
-                            Owner = mainWin
-                        };
-                        prompt.ShowDialog();
-                    }
-                }));
-            }
-            catch
-            {
-                // UI prompt is best effort; cloud sync remains disabled if auth is unavailable.
-            }
+            // Esta app não depende de conta cloud (Supabase) para funcionar — todas as
+            // features já correm localmente com o bot de Discord próprio. O prompt de
+            // "sign in again" não faz sentido aqui, por isso fica sempre desativado.
         }
 
         /// <summary>
-        /// Sets the guest JWT as the active Supabase session so subsequent
-        /// data operations (From / Rpc) authenticate with the guest identity.
+        /// Marks the guest JWT as active. Note: guest sessions only ever have an access
+        /// token (no refresh token), and Gotrue's SetSession(access, refresh) requires both
+        /// to be non-empty — calling it here always throws, so we don't even try anymore
+        /// (it used to log a "cannot be empty" warning on every single cloud call). Guest
+        /// requests already authenticate fine via the anon key + open RLS, so this is a
+        /// no-op that only exists so callers can keep treating a valid JWT as "success".
         /// </summary>
-        private static async Task<bool> SetGuestSessionAsync(string jwt)
+        private static Task<bool> SetGuestSessionAsync(string jwt)
         {
-            try
-            {
-                if (Client?.Auth == null) return false;
-                var session = await Client.Auth.SetSession(jwt, "");
-                return session != null;
-            }
-            catch (Exception ex)
-            {
-                AppendLog($"[Supabase/Guest] SetSession warning: {ex.Message}");
-                return false;
-            }
+            return Task.FromResult(!string.IsNullOrEmpty(jwt));
         }
 
         private static async Task TouchProfileAsync(string steamId, string? discordId = null)
         {
             if (Client?.Auth?.CurrentUser == null && !IsGuestAuthenticated) return;
+            await ProfileTouchLock.WaitAsync();
             try
             {
+                var identity = $"{Client?.Auth?.CurrentUser?.Id}:{steamId}";
+                var minimized = CloudTrafficPolicy.IsMinimized;
+                if (identity == LastProfileTouchIdentity &&
+                    DateTime.UtcNow - LastProfileTouchUtc < CloudTrafficPolicy.ProfileTouchInterval(minimized))
+                    return;
+
                 var payload = new
                 {
                     steam_id = steamId
                 };
                 await CallEdgeFunctionAsync("user-profile/touch", HttpMethod.Post, payload);
+                LastProfileTouchIdentity = identity;
+                LastProfileTouchUtc = DateTime.UtcNow;
             }
             catch (Exception ex)
             {
                 AppendLog($"[Cloud/Debug] Touch profile failed: {ex.Message}");
+            }
+            finally
+            {
+                ProfileTouchLock.Release();
             }
         }
 
@@ -1143,7 +1406,7 @@ namespace RustPlusDesk.Services.Auth
             bool wantsChatCommands)
         {
             if (Client == null) return null;
-            if (!IsDiscordAuthenticated && !IsEmailAuthenticated) return null;
+            if (!IsAuthenticated) return null;
             if (!await EnsureFreshSessionAsync()) return null;
 
             try
@@ -1326,7 +1589,25 @@ namespace RustPlusDesk.Services.Auth
             }
         }
 
-        public static bool IsUpgradeRequiredSnackbarShown { get; set; } = false;
+        private const string UpgradeRequiredCacheKey = "upgrade_required";
+
+        private sealed class UpgradeRequiredCache
+        {
+            public string MinimumVersion { get; set; } = "";
+            public string ClientVersion { get; set; } = "";
+            public string Message { get; set; } = "";
+            public string UpgradeUrl { get; set; } = "";
+        }
+
+        private static UpgradeRequiredCache? CachedUpgradeRequirement =
+            DataManager.LoadCache<UpgradeRequiredCache>(UpgradeRequiredCacheKey);
+        private static readonly object UpgradeRequirementLock = new();
+
+        public static bool IsUpgradeRequiredSnackbarShown { get; private set; } =
+            CloudTrafficPolicy.IsUpgradeBlockedVersion(
+                CachedUpgradeRequirement?.MinimumVersion,
+                CachedUpgradeRequirement?.ClientVersion,
+                Helpers.VersionHelper.GetClientVersion());
 
         private static readonly HttpClient Http = new();
 
@@ -1378,35 +1659,89 @@ namespace RustPlusDesk.Services.Auth
                     using var doc = JsonDocument.Parse(body);
                     var root = doc.RootElement;
                     if (root.TryGetProperty("error", out var errEl) && errEl.GetString() == "upgrade_required")
-                    {
-                        if (!IsUpgradeRequiredSnackbarShown)
-                        {
-                            IsUpgradeRequiredSnackbarShown = true;
-                            string message = root.TryGetProperty("message", out var msgEl)
-                                ? msgEl.GetString() ?? "An update is required to use cloud features."
-                                : "An update is required to use cloud features.";
-                            string upgradeUrl = root.TryGetProperty("upgrade_url", out var urlEl)
-                                ? urlEl.GetString() ?? "https://github.com/JawadYzbk/rustplus-desktop/releases/latest"
-                                : "https://github.com/JawadYzbk/rustplus-desktop/releases/latest";
-
-                            if (Application.Current != null)
-                            {
-                                Application.Current.Dispatcher.Invoke(() =>
-                                {
-                                    if (Application.Current.MainWindow is RustPlusDesk.Views.MainWindow mainWin)
-                                    {
-                                        mainWin.ShowUpgradeRequiredSnackbar(message, upgradeUrl);
-                                    }
-                                });
-                            }
-                        }
-                    }
+                        CacheUpgradeRequirement(root);
                 }
                 catch { /* Ignore JSON parse errors */ }
 
                 throw new Exception($"Edge Function {functionName} returned {resp.StatusCode}: {body}");
             }
             return body;
+        }
+
+        internal static bool HandleUpgradeRequiredResponse(string body)
+        {
+            try
+            {
+                using var document = JsonDocument.Parse(body);
+                var root = document.RootElement;
+                if (!root.TryGetProperty("error", out var error) || error.GetString() != "upgrade_required")
+                    return false;
+
+                CacheUpgradeRequirement(root);
+                return true;
+            }
+            catch (JsonException)
+            {
+                return false;
+            }
+        }
+
+        internal static void ShowUpgradeRequiredWarning()
+        {
+            if (!IsUpgradeRequiredSnackbarShown) return;
+
+            var message = CachedUpgradeRequirement?.Message ?? "An update is required to use cloud features.";
+            var upgradeUrl = CachedUpgradeRequirement?.UpgradeUrl ?? "https://github.com/JawadYzbk/rustplus-desktop/releases/latest";
+            Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (Application.Current.MainWindow is RustPlusDesk.Views.MainWindow mainWindow)
+                {
+                    mainWindow.StopCloudTrafficForUpgrade();
+                    mainWindow.ShowUpgradeRequiredSnackbar(message, upgradeUrl);
+                }
+            }));
+        }
+
+        private static void CacheUpgradeRequirement(JsonElement root)
+        {
+            lock (UpgradeRequirementLock)
+            {
+                if (IsUpgradeRequiredSnackbarShown) return;
+
+                CachedUpgradeRequirement = new UpgradeRequiredCache
+                {
+                    MinimumVersion = GetMinimumVersion(root),
+                    ClientVersion = Helpers.VersionHelper.GetClientVersion(),
+                    Message = root.TryGetProperty("message", out var message)
+                        ? message.GetString() ?? "An update is required to use cloud features."
+                        : "An update is required to use cloud features.",
+                    UpgradeUrl = root.TryGetProperty("upgrade_url", out var url)
+                        ? url.GetString() ?? "https://github.com/JawadYzbk/rustplus-desktop/releases/latest"
+                        : "https://github.com/JawadYzbk/rustplus-desktop/releases/latest"
+                };
+
+                DataManager.SaveCache(UpgradeRequiredCacheKey, CachedUpgradeRequirement);
+                IsUpgradeRequiredSnackbarShown = true;
+            }
+
+            _keepAliveTimer?.Dispose();
+            _keepAliveTimer = null;
+            _profileUpdateTimer?.Dispose();
+            _profileUpdateTimer = null;
+            TeamSyncWebSocketService.Shutdown();
+            DiscordBotListenerService.Instance.StopListening();
+            ShowUpgradeRequiredWarning();
+        }
+
+        private static string GetMinimumVersion(JsonElement root)
+        {
+            foreach (var propertyName in new[] { "minimum_version", "min_version", "required_version" })
+            {
+                if (root.TryGetProperty(propertyName, out var value) && value.ValueKind == JsonValueKind.String)
+                    return value.GetString() ?? "";
+            }
+
+            return "";
         }
 
         private static void AppendLog(string msg)

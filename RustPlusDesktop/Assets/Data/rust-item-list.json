@@ -8715,6 +8715,13 @@
     "iconUrl": "https://cdn.rusthelp.com/images/public/yellowidtag.png"
   },
   {
+    "shortName": "apartment.master_key",
+    "id": 1664052604,
+    "displayName": "Apartment Key",
+    "description": "An old rusty key that can open the door to an apartment.",
+    "iconUrl": "https://cdn.rusthelp.com/images/public/apartment.master_key.png"
+  },
+  {
     "shortName": "fish.yellowperch",
     "id": 680234026,
     "displayName": "Yellow Perch",

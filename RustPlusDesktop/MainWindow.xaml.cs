@@ -59,7 +59,6 @@ public partial class MainWindow : WpfUi.FluentWindow
 {
     private readonly MainViewModel _vm = new();
     internal MainViewModel ViewModel => _vm;
-    private bool _chatOpenedForCommandsOnly = false;
     private readonly UpdateService _updateService = new();
 
     private DateTime _lastPairingPingAt = DateTime.MinValue;
@@ -246,16 +245,18 @@ public partial class MainWindow : WpfUi.FluentWindow
     }
 
     // --- Sidebar State ---
-    private const double CompactSidebarWidth = 72;
-    private const double MinExpandedSidebarWidth = 400;
-    private const double MaxExpandedSidebarWidth = 600;
+    private const double CompactSidebarWidth = 64;
+    private const double MinExpandedSidebarWidth = 360;
+    private const double MaxExpandedSidebarWidth = 480;
     private const int SidebarAnimationDurationMs = 180;
-    private double _expandedSidebarWidth = 600;
+    private const int SidebarHoverExpandDelayMs = 200;
+    private double _expandedSidebarWidth = 420;
     private bool _isSidebarExpanded;
     private bool _isSidebarPinnedExpanded;
     private bool _isSidebarTemporarilyExpandedForOverlay;
     private bool _sidebarOverlayVisibilityUpdateQueued;
     private System.Windows.Threading.DispatcherTimer? _sidebarAnimationTimer;
+    private System.Windows.Threading.DispatcherTimer? _sidebarHoverExpandTimer;
     private DateTime _sidebarAnimationStartedAt;
     private double _sidebarAnimationStartWidth;
     private double _sidebarAnimationTargetWidth;
@@ -267,7 +268,20 @@ public partial class MainWindow : WpfUi.FluentWindow
     private System.Windows.Threading.DispatcherTimer? _overlayHideTimer;
     private System.Windows.Threading.DispatcherTimer? _cloudSyncTimer;
     private volatile bool _ownCloudRestoreReady = false;
+    // Tracks which server's overlay was already merged with the cloud this session, so
+    // automatic silent reconnects (health-check / auto-reconnect) don't re-run the
+    // cold-start cloud restore mid-session and risk overwriting fresh local edits with a
+    // stale cloud snapshot. Reset to null on explicit disconnects (HardResetAsync).
+    private string? _ownOverlayLoadedForServerKey = null;
     private bool _premiumProfileRefreshBusy = false;
+    private bool _upgradeRequiredSnackbarShown;
+
+    internal void StopCloudTrafficForUpgrade()
+    {
+        _cloudSyncTimer?.Stop();
+        StopOverlayPollTimer();
+        StopTeamFeatureMasterWatch();
+    }
 
     private void StartCloudSyncTimer()
     {
@@ -375,6 +389,26 @@ public partial class MainWindow : WpfUi.FluentWindow
         _pendingUploadAction = null;
     }
 
+    private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+        {
+            if (e.Key == Key.T)
+            {
+                e.Handled = true;
+                BtnToggleChat_Click(BtnChatToggle, new RoutedEventArgs());
+                return;
+            }
+
+            if (e.Key == Key.S)
+            {
+                e.Handled = true;
+                BtnShopSearch_Click(BtnShopToggle, new RoutedEventArgs());
+                return;
+            }
+        }
+    }
+
     public MainWindow()
     {
         // Nur freiwillig zum Diagnostizieren:
@@ -382,6 +416,48 @@ public partial class MainWindow : WpfUi.FluentWindow
 
         _vm.IsInitializing = true;
         InitializeComponent();
+        MainTabs.SelectedItem = DevicesTabItem;
+
+        // Restore window dimensions and position
+        double savedWidth = TrackingService.WindowWidth;
+        double savedHeight = TrackingService.WindowHeight;
+        double? savedLeft = TrackingService.WindowLeft;
+        double? savedTop = TrackingService.WindowTop;
+        bool savedMaximized = TrackingService.WindowMaximized;
+
+        if (savedWidth > 100 && savedHeight > 100)
+        {
+            this.Width = savedWidth;
+            this.Height = savedHeight;
+        }
+
+        if (savedLeft.HasValue && savedTop.HasValue)
+        {
+            double minLeft = SystemParameters.VirtualScreenLeft;
+            double minTop = SystemParameters.VirtualScreenTop;
+            double maxLeft = SystemParameters.VirtualScreenLeft + SystemParameters.VirtualScreenWidth;
+            double maxTop = SystemParameters.VirtualScreenTop + SystemParameters.VirtualScreenHeight;
+
+            if (savedLeft.Value >= minLeft && savedLeft.Value < maxLeft - 100 &&
+                savedTop.Value >= minTop && savedTop.Value < maxTop - 100)
+            {
+                this.WindowStartupLocation = WindowStartupLocation.Manual;
+                this.Left = savedLeft.Value;
+                this.Top = savedTop.Value;
+            }
+        }
+
+        if (savedMaximized)
+        {
+            this.WindowState = WindowState.Maximized;
+        }
+        Services.Auth.SupabaseAuthManager.ShowUpgradeRequiredWarning();
+        CloudTrafficPolicy.IsMinimized = WindowState == WindowState.Minimized;
+        StateChanged += (_, _) =>
+        {
+            CloudTrafficPolicy.IsMinimized = WindowState == WindowState.Minimized;
+            UpdateTeamFeatureMasterWatch();
+        };
         FlushPendingLogs();
         MainTabs.SelectionChanged += MainTabs_SelectionChanged;
         
@@ -477,9 +553,9 @@ public partial class MainWindow : WpfUi.FluentWindow
             {
                 SwitchCameraSourceTo(_vm.Selected);
                 LogicEnginePanel?.RefreshListBindings();
+                DeviceAutomationPanel?.RefreshListBindings();
+                RefreshCurrentHotkeyBindings();
             }
-            if (e.PropertyName == nameof(MainViewModel.IsDownloadingUpdate) && !_vm.IsDownloadingUpdate)
-                UpdateDownloadPopup.IsOpen = false;
         };
 
         // MapTransform.Changed += (_, __) => UpdateMarkerPositions();
@@ -516,8 +592,12 @@ public partial class MainWindow : WpfUi.FluentWindow
 
             StartPairingSilent(true);
             
-            // Auto-connect if enabled and not already connected
-            if (TrackingService.AutoConnectEnabled && _vm.Selected != null && !_vm.Selected.IsConnected)
+            // Auto-connect if enabled and not already fully connected. Checking IsConnected
+            // (instead of IsFullConnected) used to skip this entirely: selecting the restored
+            // server in the list already triggers a soft (devices-only) connect via
+            // ListServers_SelectionChanged, which sets IsConnected before this code runs —
+            // so "Connect Last Server on Start" silently never upgraded to a full connect.
+            if (TrackingService.AutoConnectEnabled && _vm.Selected != null && !_vm.Selected.IsFullConnected)
             {
                 _ = Task.Run(async () => {
                     await Task.Delay(1000); // Give Pairing Listener a head start
@@ -554,12 +634,13 @@ public partial class MainWindow : WpfUi.FluentWindow
             pr.AlarmReceived += (_, a) => Dispatcher.Invoke(() => ShowAlarmPopup(a));
             pr.OfflineDeathReceived += (_, d) => Dispatcher.Invoke(() => HandleOfflineDeath(d));
             pr.ChatReceived += (_, c) => Dispatcher.Invoke(() => HandleFcmChatReceived(c));
+            pr.ServerInfoReceived += (_, info) => Dispatcher.BeginInvoke(new Action(() => CaptureFcmServerDescription(info)));
         }
 
         NotificationCenterService.NotificationAdded -= OnNotificationAdded;
         NotificationCenterService.NotificationAdded += OnNotificationAdded;
 
-        // Status ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ UI
+        // Status → UI
         _pairing.Listening += (_, __) => Dispatcher.BeginInvoke(new Action(() =>
         {
             _vm.IsPairingRunning = true;
@@ -671,7 +752,7 @@ public partial class MainWindow : WpfUi.FluentWindow
         try { ClearAllToggleBusy(); } catch { }
         try { ResetAllBusyStates(); } catch { }
         this.Closed += MainWindow_Closed;
-        ChatCommandsOverlay.CommandsEnabledChanged += ChatCommandsOverlay_CommandsEnabledChanged;
+        AppSettingsPanel.ChatCommandsEditor.CommandsEnabledChanged += ChatCommandsOverlay_CommandsEnabledChanged;
 
         _toolButtons = new Dictionary<OverlayToolMode, Button>
     {
@@ -743,8 +824,8 @@ public partial class MainWindow : WpfUi.FluentWindow
         }
 
         // Discord â€” always send regardless of current server
-        string emoji = msg.Contains("ONLINE",  StringComparison.OrdinalIgnoreCase) ? "ðŸŸ¢" :
-                       msg.Contains("OFFLINE", StringComparison.OrdinalIgnoreCase) ? "ðŸ”´" : "ðŸ‘ï¸";
+        string emoji = msg.Contains("ONLINE",  StringComparison.OrdinalIgnoreCase) ? "🟢" :
+                       msg.Contains("OFFLINE", StringComparison.OrdinalIgnoreCase) ? "🔴" : "👁️";
         _ = DiscordBotListenerService.Instance.SendNotificationAsync("trackers", $"{emoji} **Tracker:** {msg}", serverName);
     }
 
@@ -1662,6 +1743,7 @@ public partial class MainWindow : WpfUi.FluentWindow
     { "large god rock",          "pack://application:,,,/Assets/icons/godrock_large.png" },
     { "anvil rock",              "pack://application:,,,/Assets/icons/anvil-rock.png" },
     { "tunnel entrance",         "pack://application:,,,/Assets/icons/Tunnel_Entrance.png" },
+    { "apartments complex",      "pack://application:,,,/Assets/icons/apartments_complex_1.png" },
 };
 
     private static double CalcOverlayScale(double effZoom, double exp, double baseMult = 1.0)
@@ -1751,6 +1833,8 @@ public partial class MainWindow : WpfUi.FluentWindow
               .Replace("sewer display name", "sewer branch")
              .Replace("abandonedmilitarybase", "abandoned military base")
              .Replace("ferryterminal", "ferry terminal")
+             .Replace("apartmentscomplex", "apartments complex")
+             .Replace("apartmentcomplex", "apartments complex")
              .Replace("launch site", "launchsite")
              .Replace("missile silo monument", "missile silo")
              .Replace("military tunnels display name", "military tunnel")
@@ -2336,29 +2420,44 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 _lastGenericAlarmPerServer[cleanSrv] = now;
         }
 
-        // 4) Play Audio (Respects settings if device is identified, otherwise plays default)
-        PlayAlarmAudio(dev);
+        // 4) Play Audio (per-device setting when identified, generic fallback otherwise)
+        if (dev != null || TrackingService.GenericAlarmAudioEnabled)
+        {
+            PlayAlarmAudio(dev);
+        }
+        else
+        {
+            AppendLog($"[alarm/debug] ({source}) Skipping audio because generic alarm audio is disabled.");
+        }
 
-        // Send smart alert to Discord Bot
-        alarmProfile ??= _vm.Servers.FirstOrDefault(p =>
-            string.Equals(CleanServerName(p.Name), cleanSrv, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(p.Host, cleanSrv, StringComparison.OrdinalIgnoreCase));
-        var raidServerKey = alarmProfile == null ? "" : $"{alarmProfile.Host}-{alarmProfile.Port}";
-        var raidOwnerSteamId = !string.IsNullOrWhiteSpace(_vm.SteamId64)
-            ? _vm.SteamId64
-            : alarmProfile?.SteamId64 ?? "";
-        _ = DiscordBotListenerService.Instance.SendRaidNotificationAsync(
-            raidServerKey,
-            raidOwnerSteamId,
-            $"\uD83D\uDEA8 **{dev?.PureName ?? n.DeviceName ?? "Smart Alarm"}**: {n.Message}");
+        // Discord webhook alert (independent of the team-chat announce toggle below \u2014
+        // subscribing to webhook alerts shouldn't require also enabling in-game chat spam).
+        string alarmName = dev?.PureName ?? (!string.IsNullOrEmpty(n.DeviceName) ? n.DeviceName : "Smart Alarm");
+        string alarmAlert = AlertTemplateService.GetFormattedAlert("AlertAlarmTriggered", alarmName);
+        _ = SendDiscordWebhookAsync(alarmProfile ?? _vm.Selected, alarmAlert);
+
+        // Send smart alert to Discord Bot (respects same toggle as team chat below)
+        if (_announceSpawns && TrackingService.AnnounceSmartAlerts)
+        {
+            alarmProfile ??= _vm.Servers.FirstOrDefault(p =>
+                string.Equals(CleanServerName(p.Name), cleanSrv, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(p.Host, cleanSrv, StringComparison.OrdinalIgnoreCase));
+            var raidServerKey = alarmProfile == null ? "" : $"{alarmProfile.Host}-{alarmProfile.Port}";
+            var raidOwnerSteamId = !string.IsNullOrWhiteSpace(_vm.SteamId64)
+                ? _vm.SteamId64
+                : alarmProfile?.SteamId64 ?? "";
+            _ = DiscordBotListenerService.Instance.SendRaidNotificationAsync(
+                raidServerKey,
+                raidOwnerSteamId,
+                $"\uD83D\uDEA8 **{dev?.PureName ?? n.DeviceName ?? "Smart Alarm"}**: {n.Message}");
+        }
 
         // Send smart alert to team chat if setting and master switch are enabled
         if (_vm.Selected?.IsFullConnected == true
             && TrackingService.AnnounceSmartAlerts
             && _announceSpawns)
         {
-            string alarmName = dev?.PureName ?? (!string.IsNullOrEmpty(n.DeviceName) ? n.DeviceName : "Smart Alarm");
-            _ = SendTeamChatSafeAsync(AlertTemplateService.GetFormattedAlert("AlertAlarmTriggered", alarmName), false, true);
+            _ = SendTeamChatSafeAsync(alarmAlert, false, true, skipBasicWebhook: true);
         }
 
         if (dev != null)
@@ -2392,12 +2491,20 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         else
         {
             if (n.EntityId.HasValue)
-                AppendLog($"[alarm/debug] ({source}) No device found for ID {n.EntityId.Value}. Showing generic popup.");
+                AppendLog($"[alarm/debug] ({source}) No device found for ID {n.EntityId.Value}. Using generic alarm settings.");
             else
-                AppendLog($"[alarm/debug] ({source}) Generic alarm (no ID). Showing generic popup.");
+                AppendLog($"[alarm/debug] ({source}) Generic alarm (no ID). Using generic alarm settings.");
 
-            // Generic overlay fallback
-            AddAlarmToOverlay(null, n);
+            if (TrackingService.GenericAlarmOverlayEnabled)
+            {
+                AddAlarmToOverlay(null, n);
+            }
+
+            if (!TrackingService.GenericAlarmPopupEnabled)
+            {
+                AppendLog($"[alarm/debug] ({source}) Skipping popup window because generic alarm popups are disabled.");
+                return;
+            }
         }
 
         AppendLog($"[alarm/debug] ({source}) Executing: Show Alarm Window");
@@ -2485,13 +2592,29 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         }
     }
 
+    private int _lastWorkspaceTabIndex;
+
     private void MainTabs_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (e.Source == MainTabs && MainTabs.SelectedItem == NotificationsTab)
+        if (e.Source != MainTabs) return;
+
+        bool raidSelected = MainTabs.SelectedItem == RaidCalculatorTab;
+        bool recyclerSelected = MainTabs.SelectedItem == RecyclerCalculatorTab;
+        RaidCalculatorPanel.Visibility = raidSelected ? Visibility.Visible : Visibility.Collapsed;
+        ServerContextPanel.Visibility = recyclerSelected ? Visibility.Collapsed : Visibility.Visible;
+        if (!raidSelected && !recyclerSelected)
+            _lastWorkspaceTabIndex = MainTabs.SelectedIndex;
+
+        if (MainTabs.SelectedItem == NotificationsTab)
         {
             NotificationCenterService.MarkAllAsRead();
         }
     }
+
+    private void RaidCalculator_CloseRequested(object sender, RoutedEventArgs e) => ReturnToLastWorkspace();
+
+    private void ReturnToLastWorkspace() =>
+        MainTabs.SelectedIndex = Math.Clamp(_lastWorkspaceTabIndex, 0, MainTabs.Items.Count - 1);
 
     private void HandleOfflineDeath(OfflineDeathNotification d)
     {
@@ -2662,7 +2785,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 await DiscordBotListenerService.Instance.SendRaidNotificationAsync(
                     raidServerKey,
                     raidOwnerSteamId,
-                    $"â˜ ï¸ **Offline Death**: You were killed by **{d.AttackerName}** on **{d.ServerName}**"
+                    $"☠️ **Offline Death**: You were killed by **{d.AttackerName}** on **{d.ServerName}**"
                 );
             }
             catch (Exception ex)
@@ -2888,8 +3011,41 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         return (s, offX, offY);
     }
 
+    private void SaveWindowSettings()
+    {
+        try
+        {
+            if (this.WindowState == WindowState.Normal)
+            {
+                TrackingService.SaveWindowBounds(this.ActualWidth, this.ActualHeight, this.Left, this.Top, false);
+            }
+            else if (this.WindowState == WindowState.Maximized)
+            {
+                var bounds = this.RestoreBounds;
+                if (!bounds.IsEmpty)
+                {
+                    TrackingService.SaveWindowBounds(bounds.Width, bounds.Height, bounds.Left, bounds.Top, true);
+                }
+                else
+                {
+                    TrackingService.SaveWindowBounds(TrackingService.WindowWidth, TrackingService.WindowHeight, TrackingService.WindowLeft ?? this.Left, TrackingService.WindowTop ?? this.Top, true);
+                }
+            }
+            else if (this.WindowState == WindowState.Minimized)
+            {
+                var bounds = this.RestoreBounds;
+                if (!bounds.IsEmpty)
+                {
+                    TrackingService.SaveWindowBounds(bounds.Width, bounds.Height, bounds.Left, bounds.Top, TrackingService.WindowMaximized);
+                }
+            }
+        }
+        catch { }
+    }
+
     private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
+        SaveWindowSettings();
         if (_isShuttingDown) return;
 
         if (TrackingService.CloseToTrayEnabled)
@@ -2923,7 +3079,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 Dispatcher.Invoke(() =>
                 {
                     _isShuttingDown = true;
-                    this.Close();
+                    try { this.Close(); } catch { }
+                    System.Windows.Application.Current.Shutdown();
                 });
             }
         });
@@ -3020,6 +3177,26 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         var name = q["name"];
         return (host, port, playerId, token, name);
     }
+
+    private void CaptureFcmServerDescription(PairingPayload info)
+    {
+        if (string.IsNullOrWhiteSpace(info.ServerDescription)) return;
+
+        var profile = !string.IsNullOrWhiteSpace(info.Host)
+            ? _vm.Servers.FirstOrDefault(server =>
+                server.Host.Equals(info.Host, StringComparison.OrdinalIgnoreCase) &&
+                (info.Port <= 0 || server.Port == info.Port))
+            : null;
+        profile ??= !string.IsNullOrWhiteSpace(info.ServerName)
+            ? _vm.Servers.FirstOrDefault(server => server.Name.Equals(info.ServerName, StringComparison.OrdinalIgnoreCase))
+            : null;
+
+        if (profile == null || !string.IsNullOrWhiteSpace(profile.Description)) return;
+        profile.Description = info.ServerDescription.Trim();
+        _vm.Save();
+        AppendLog($"[FCM] Saved missing server description for '{profile.Name}'.");
+    }
+
     private void Pairing_Paired(object? sender, PairingPayload e)
     {
         // Key OHNE EntityId: dient nur fÃƒÆ’Ã‚Â¼r ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Server-keepaliveÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ-Erkennung
@@ -3132,7 +3309,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                     Devices = new ObservableCollection<SmartDevice>()
                 };
                 _vm.AddServer(prof);
-                AppendLog($"Pairing received ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ {prof.Name} ({prof.Host}:{prof.Port})");
+                AppendLog($"Pairing received → {prof.Name} ({prof.Host}:{prof.Port})");
             }
             else
             {
@@ -3140,7 +3317,13 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 prof.PlayerToken = e.PlayerToken;
                 prof.SteamId64 = keySteam;
                 prof.Devices ??= new ObservableCollection<SmartDevice>();
-                AppendLog($"Pairing updated ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ {prof.Name}");
+                AppendLog($"Pairing updated → {prof.Name}");
+            }
+
+            if (string.IsNullOrWhiteSpace(prof.Description) && !string.IsNullOrWhiteSpace(e.ServerDescription))
+            {
+                prof.Description = e.ServerDescription.Trim();
+                _vm.Save();
             }
 
             // >>> GerÃƒÆ’Ã‚Â¤te zuverlÃƒÆ’Ã‚Â¤ssig hinzufÃƒÆ’Ã‚Â¼gen/aktualisieren (Switch + Alarm + StorageMonitor)
@@ -3164,7 +3347,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 else if (TypeHas("Switch")) kind = "SmartSwitch";
                 else if (TypeHas("Storage")) kind = "StorageMonitor";
 
-                // 2) Falls Typ leer/ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾serverÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ/ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾entityÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ/unklar ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ nach Name mappen
+                // 2) Falls Typ leer/ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾serverÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ/ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾entityÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ/unklar → nach Name mappen
                 if (string.IsNullOrWhiteSpace(kind) ||
                     string.Equals(rawType, "server", StringComparison.OrdinalIgnoreCase) ||
                     string.Equals(rawType, "entity", StringComparison.OrdinalIgnoreCase))
@@ -3198,7 +3381,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                         IsMissing = false,
                     };
                     prof.Devices.Add(dev);
-                    AppendLog($"Device added ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ {dev.Display}");
+                    AppendLog($"Device added → {dev.Display}");
                 }
                 else
                 {
@@ -3213,14 +3396,14 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                     }
 
                     dev.IsMissing = false;
-                    AppendLog($"Device updated ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ {dev.Display}");
+                    AppendLog($"Device updated → {dev.Display}");
                 }
 
                 /* >>>>>>> HIER EINSETZEN (direkt nach dem add/update-Block) <<<<<<< */
                 // >>> Cache sofort ins UI + Einmal-Expand + Sub/Poke
                 if (string.Equals(dev.Kind, "StorageMonitor", StringComparison.OrdinalIgnoreCase))
                 {
-                    // 1) Cache ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ UI (falls vorhanden), sonst HÃƒÆ’Ã‚Â¼lle
+                    // 1) Cache → UI (falls vorhanden), sonst HÃƒÆ’Ã‚Â¼lle
                     if (_rust is RustPlusClientReal rpc && rpc.TryGetCachedStorage(dev.EntityId, out var cached))
                     {
                         dev.IsMissing = false;
@@ -3239,7 +3422,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                     else
                     {
                         dev.Storage ??= new StorageSnapshot();
-                       // AppendLog($"[stor/refresh] (no cache) #{dev.EntityId} ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ awaiting event");
+                       // AppendLog($"[stor/refresh] (no cache) #{dev.EntityId} → awaiting event");
                     }
 
                     // 2) Einmal automatisch aufklappen + abonnieren
@@ -3270,6 +3453,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                     _vm.Selected = prof;
 
                 _vm.Save();
+                _ = CapturePairedDeviceLocationAsync(prof, dev, keySteam);
             }
 
 
@@ -3770,6 +3954,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     public void RefreshStreamerModeUI()
     {
         if (TxtSteamId == null || TxtSteamName == null || _vm == null) return;
+        if (NotificationsTabControl != null) NotificationsTabControl.IsStreamerMode = _abbreviateNames;
         
         var sid = _vm.SteamId64;
         if (string.IsNullOrWhiteSpace(sid))
@@ -3798,7 +3983,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     {
         if (PanelServerArea == null || IconToggleServerArea == null) return;
 
-        if (BtnToggleServerArea.IsChecked == true)
+        if (PanelServerArea.Visibility == Visibility.Visible)
         {
             PanelServerArea.Visibility = Visibility.Collapsed;
             IconToggleServerArea.Symbol = Wpf.Ui.Controls.SymbolRegular.ChevronDown20;
@@ -3867,6 +4052,12 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         if (itemId != 0 && sItemsById.TryGetValue(itemId, out var ii1)) rusthelpUrl = ii1.IconUrl;
         if (rusthelpUrl == null && !string.IsNullOrWhiteSpace(shortName) && sItemsByShort.TryGetValue(shortName!, out var ii2))
             rusthelpUrl = ii2.IconUrl;
+
+        return ResolveRustHelpIcon(rusthelpUrl, decodePx);
+    }
+
+    public static System.Windows.Media.ImageSource? ResolveRustHelpIcon(string? rusthelpUrl, int decodePx = 32)
+    {
 
         // PrimÃ¤r-URL (rusthelp optimized to 40px)
         string? optimizedUrl = !string.IsNullOrWhiteSpace(rusthelpUrl)
@@ -4131,6 +4322,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
         if (lower.Contains("harbor_2") || lower.Contains("harbor 2")) return "Harbor";
         if (lower.Contains("harbor")) return "Harbor 2";
+        if (lower.Contains("apartmentscomplex") || lower.Contains("apartmentcomplex")) return "Apartments Complex";
 
         s = s.Replace('\\', '/');
         var last = s.LastIndexOf('/');
@@ -4194,21 +4386,6 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             return h;
         }
     }
-    private void BtnDonate_Click(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "https://www.patreon.com/cw/makukocorgas",
-                UseShellExecute = true   // ÃƒÆ’Ã‚Â¶ffnet im Standard-Browser
-            });
-        }
-        catch (Exception ex)
-        {
-            AppendLog("Couldn't open Donate Link: " + ex.Message);
-        }
-    }
     private bool _announceSpawns = false;
 
     private void ChatAnnounce_Toggle(object sender, RoutedEventArgs e)
@@ -4247,30 +4424,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
     private void EditAlertTemplates_Click(object sender, RoutedEventArgs e)
     {
-        var win = new Views.Windows.CustomAlertsWindow();
-        win.Owner = this;
-        _activeDialog = win;
-        ApplyWindowBlur();
-        if (Root != null)
-        {
-            Root.IsHitTestVisible = false;
-        }
-
-        win.Closed += (s, ev) =>
-        {
-            if (ReferenceEquals(_activeDialog, win))
-            {
-                _activeDialog = null;
-            }
-            RemoveWindowBlur();
-            if (Root != null)
-            {
-                Root.IsHitTestVisible = true;
-            }
-        };
-
-        win.Show();
-        CenterActiveDialog();
+        OpenSettingsCategory("alert-templates");
     }
 
     private void SetAllAlerts(bool val)
@@ -4297,6 +4451,17 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         TrackingService.AnnounceSmartAlerts = val;
         TrackingService.AnnounceTradeAlerts = val;
         if (_vm.Selected != null) { _vm.Selected.AlertCustomTimer = val; _vm.Selected.DiscordWebhookChatAlertsEnabled = val; }
+        TrackingService.HotkeyTriggerChatAlertsEnabled = val;
+        if (HotkeyTriggersMenuItem != null)
+        {
+            string serverKey = CurrentServerKey();
+            foreach (var item in HotkeyTriggersMenuItem.Items.OfType<MenuItem>())
+            {
+                if (item.Tag is not long entityId) continue;
+                item.IsChecked = val;
+                TrackingService.SetHotkeyTriggerChatAlert(serverKey, entityId, val);
+            }
+        }
     }
 
     private bool CheckIfAllOff()
@@ -4377,17 +4542,90 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         }
     }
 
+    private void GenericAlarmSetting_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not ToggleButton toggle || toggle.Tag is not string setting) return;
+
+        bool enabled = toggle.IsChecked == true;
+        switch (setting)
+        {
+            case "Popup": TrackingService.GenericAlarmPopupEnabled = enabled; break;
+            case "Overlay": TrackingService.GenericAlarmOverlayEnabled = enabled; break;
+            case "Audio": TrackingService.GenericAlarmAudioEnabled = enabled; break;
+        }
+    }
+
+    private void GenericAlarmSetting_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is not ToggleButton toggle || toggle.Tag is not string setting) return;
+
+        toggle.IsChecked = setting switch
+        {
+            "Popup" => TrackingService.GenericAlarmPopupEnabled,
+            "Overlay" => TrackingService.GenericAlarmOverlayEnabled,
+            "Audio" => TrackingService.GenericAlarmAudioEnabled,
+            _ => false
+        };
+    }
+
+    private void GenericAlarmAudioMenu_Click(object sender, RoutedEventArgs e)
+    {
+        e.Handled = true;
+        if (sender is not FrameworkElement button || button.ContextMenu is not ContextMenu menu) return;
+
+        menu.PlacementTarget = button;
+        menu.Placement = PlacementMode.Bottom;
+        menu.IsOpen = true;
+    }
+
     internal void SyncAlertMenuItems()
     {
         bool masterOn = TrackingService.AnnounceSpawnsMaster;
         PopulateTradeAlertsSubMenu(masterOn);
         PopulateHotkeyTriggersSubMenu();
+        UpdateAlertEnabledBadge(masterOn);
 
-        SyncContextMenu(ChatAnnounce.ContextMenu, masterOn);
         if (ChatAlertsConfigureButton.Flyout is ContextMenu cm)
         {
             SyncContextMenu(cm, masterOn);
         }
+    }
+
+    private void UpdateAlertEnabledBadge(bool? masterEnabled = null)
+    {
+        bool masterOn = masterEnabled ?? TrackingService.AnnounceSpawnsMaster;
+        int enabledCount = new[]
+        {
+            TrackingService.AnnounceCargo,
+            TrackingService.AnnounceCargoDocking,
+            TrackingService.AnnounceCargoEgress,
+            TrackingService.AnnounceCargoArrival,
+            TrackingService.AnnounceHeli,
+            TrackingService.AnnounceChinook,
+            TrackingService.AnnounceVendor,
+            TrackingService.AnnounceOilRig,
+            TrackingService.AnnounceDeepSea,
+            TrackingService.AnnouncePlayerOnline,
+            TrackingService.AnnouncePlayerOffline,
+            TrackingService.AnnouncePlayerAfk,
+            TrackingService.AnnouncePlayerDeathSelf,
+            TrackingService.AnnouncePlayerDeathTeam,
+            TrackingService.AnnouncePlayerRespawnSelf,
+            TrackingService.AnnouncePlayerRespawnTeam,
+            TrackingService.AnnounceTracking,
+            TrackingService.AnnounceNewShops,
+            TrackingService.AnnounceSuspiciousShops,
+            TrackingService.AnnounceSmartAlerts,
+            TrackingService.AnnounceTradeAlerts,
+            _vm.Selected?.AlertCustomTimer == true,
+            _vm.Selected?.DiscordWebhookChatAlertsEnabled == true
+        }.Count(enabled => enabled);
+        if (TrackingService.HotkeyTriggerChatAlertsEnabled)
+            enabledCount += HotkeyTriggersMenuItem.Items.OfType<MenuItem>().Count(item => item.Tag is long && item.IsChecked);
+
+        AlertEnabledBadge.Visibility = masterOn && enabledCount > 0 ? Visibility.Visible : Visibility.Collapsed;
+        AlertEnabledDot.Visibility = masterOn && enabledCount == 0 ? Visibility.Visible : Visibility.Collapsed;
+        AlertEnabledCountText.Text = enabledCount > 99 ? "99+" : enabledCount.ToString(CultureInfo.InvariantCulture);
     }
 
     private void SyncContextMenu(ContextMenu menu, bool masterOn)
@@ -4566,11 +4804,21 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
         if (uniqueDevices.Count == 0)
         {
-            HotkeyTriggersMenuItem.Header = "Hotkey Triggers (0)";
+            UpdateHotkeyTriggersMenuIndicator();
             return;
         }
 
-        HotkeyTriggersMenuItem.Header = "Hotkey Triggers";
+        var masterToggle = new MenuItem
+        {
+            Header = "Hotkey alerts enabled",
+            IsCheckable = true,
+            IsChecked = TrackingService.HotkeyTriggerChatAlertsEnabled,
+            StaysOpenOnClick = true,
+            Style = (Style)FindResource("DarkMenuItem")
+        };
+        masterToggle.Click += HotkeyTriggersMaster_Click;
+        HotkeyTriggersMenuItem.Items.Add(masterToggle);
+        HotkeyTriggersMenuItem.Items.Add(new Separator { Margin = new Thickness(8, 4, 8, 4) });
 
         foreach (var (gesture, entityId, dev) in uniqueDevices)
         {
@@ -4590,6 +4838,26 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             mi.Click += HotkeyTriggerSubItem_Click;
             HotkeyTriggersMenuItem.Items.Add(mi);
         }
+        UpdateHotkeyTriggersMenuIndicator();
+    }
+
+    private void HotkeyTriggersMaster_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not MenuItem masterToggle) return;
+        TrackingService.HotkeyTriggerChatAlertsEnabled = masterToggle.IsChecked;
+        UpdateHotkeyTriggersMenuIndicator();
+        UpdateAlertEnabledBadge();
+    }
+
+    private void UpdateHotkeyTriggersMenuIndicator()
+    {
+        int selectedCount = HotkeyTriggersMenuItem.Items.OfType<MenuItem>().Count(item => item.Tag is long && item.IsChecked);
+        bool enabled = TrackingService.HotkeyTriggerChatAlertsEnabled && HotkeyTriggersMenuItem.IsEnabled;
+        HotkeyTriggersEnabledDot.Visibility = enabled ? Visibility.Visible : Visibility.Collapsed;
+        HotkeyTriggersCountBadge.Visibility = selectedCount > 0 ? Visibility.Visible : Visibility.Collapsed;
+        HotkeyTriggersCountBadge.Background = enabled ? new SolidColorBrush(Color.FromRgb(0x45, 0xE3, 0x9A)) : new SolidColorBrush(Color.FromRgb(0x43, 0x49, 0x52));
+        HotkeyTriggersCountText.Foreground = enabled ? new SolidColorBrush(Color.FromRgb(0x07, 0x17, 0x11)) : new SolidColorBrush(Color.FromRgb(0xC0, 0xC6, 0xCF));
+        HotkeyTriggersCountText.Text = selectedCount > 99 ? "99+" : selectedCount.ToString(CultureInfo.InvariantCulture);
     }
 
     private void HotkeyTriggerSubItem_Click(object sender, RoutedEventArgs e)
@@ -4598,6 +4866,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         {
             string serverKey = CurrentServerKey();
             TrackingService.SetHotkeyTriggerChatAlert(serverKey, entityId, mi.IsChecked);
+            UpdateHotkeyTriggersMenuIndicator();
+            UpdateAlertEnabledBadge();
         }
     }
 
@@ -4626,15 +4896,15 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
     private static string EventKindEmoji(int type) => type switch
     {
-        5 => "ðŸš¢",
-        6 => "ðŸ›’",
-        4 => "ðŸš",
-        8 => "ðŸš",
-        9 => "ðŸ›¢ï¸",
-        150 => "ðŸ›¢ï¸",
-        2 => "ðŸ’¥",
-        7 => "ðŸ›¡ï¸",
-        _ => "ðŸŽ¯"
+        5 => "🚢",
+        6 => "🛒",
+        4 => "🚁",
+        8 => "🚁",
+        9 => "🛢️",
+        150 => "🛢️",
+        2 => "💥",
+        7 => "🛡️",
+        _ => "🎯"
     };
 
     private List<RustPlusClientReal.ShopMarker> _lastShops = new(); // fÃƒÆ’Ã‚Â¼llen wir beim Polling
@@ -4683,7 +4953,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
         border.Child = content;
 
-        // Optional: Klick auf Karte ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ Map auf Shop zentrieren
+        // Optional: Klick auf Karte → Map auf Shop zentrieren
         border.Cursor = Cursors.Hand;
         border.MouseLeftButtonUp += (_, __) =>
         {
@@ -4841,7 +5111,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 Content = new TextBlock
                 {
                     Style = null,
-                    Text = "ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â¬",
+                    Text = "ÃƒÂ°Ã…Â¸Ã¢â‚¬Ã‚Â¬",
                     FontSize = 14,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
@@ -4876,7 +5146,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             chkSound.Checked += (_, __) => { rule.NotifySound = true; SavePersistentAlerts(); };
             chkSound.Unchecked += (_, __) => { rule.NotifySound = false; SavePersistentAlerts(); };
 
-            // Save-Button (ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â¾) - optisch "ausgegraut", wenn schon gespeichert
+            // Save-Button (ÃƒÂ°Ã…Â¸Ã¢â‚¬Ã‚Â¾) - optisch "ausgegraut", wenn schon gespeichert
             var btnSave = new Button
             {
                 Width = 28,
@@ -4910,7 +5180,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             var saveIcon = new TextBlock
             {
                 Style = null,
-                Text = "ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â¾",
+                Text = "ÃƒÂ°Ã…Â¸Ã¢â‚¬Ã‚Â¾",
                 FontSize = 14,
                 FontWeight = FontWeights.SemiBold,
                 HorizontalAlignment = HorizontalAlignment.Center,
@@ -5150,7 +5420,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                     baseline.Stock = curStock;
                 }
 
-                // 4) Wenn aktuell kein Stock ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ nie alerten, nur Zustand merken
+                // 4) Wenn aktuell kein Stock → nie alerten, nur Zustand merken
                 if (curStock <= 0)
                     continue;
 
@@ -5168,7 +5438,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
                 if (!isNewDeal && !isRestock && alreadySeenWithStock)
                 {
-                    // hatten wir schon mit Stock > 0, und es ist kein neuer Preis/Menge ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ nichts tun
+                    // hatten wir schon mit Stock > 0, und es ist kein neuer Preis/Menge → nichts tun
                     continue;
                 }
 
@@ -5206,16 +5476,17 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
                 AppendLog($"[{DateTime.Now:HH:mm:ss}] Alert: {msg}");
 
+                // 9) Zeitstempel fÃƒÆ’Ã‚Â¼r diese Kombo updaten (sofort, nicht erst nach dem async chat call)
+                rule.LastAnnouncements[sig] = DateTime.UtcNow;
+
                 if (rule.NotifyChat)
-                    await SendTeamChatSafeAsync(msg, false, true);
-                
-                _ = DiscordBotListenerService.Instance.SendNotificationAsync("shop", $"ðŸ›’ **Trade Alert:** {msg}");
+                    _ = SendTeamChatSafeAsync(msg, false, true);
+
+                if (_announceSpawns && TrackingService.AnnounceTradeAlerts)
+                    _ = DiscordBotListenerService.Instance.SendNotificationAsync("shop", $"🛒 **Trade Alert:** {msg}");
 
                 if (rule.NotifySound)
                     PlayShopAlertSound();
-
-                // 9) Zeitstempel fÃƒÆ’Ã‚Â¼r diese Kombo updaten
-                rule.LastAnnouncements[sig] = DateTime.UtcNow;
             }           // end foreach order
             }           // end foreach shop
 
@@ -5530,6 +5801,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 {
                     _vm.IsUpdateAvailable = true;
                     _vm.UpdateTag = tag;
+                    _vm.UpdateStatusText = $"Update {tag} available";
+                    _vm.IsUpdateStatusExpanded = true;
                     AppendLog($"ÃƒÂ¢Ã…â€œÃ‚Â¨ Update found: {tag}");
                     ShowUpdateSnackbar(tag, dlUrl);
                 });
@@ -5618,6 +5891,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
         BuildMonumentOverlays();
         UpdateCloudSyncUI();
+        ApplyMapPerformanceSettings();
     }
 
     internal void ShowInfoSnackbar(string title, string message, WpfUi.ControlAppearance appearance)
@@ -5647,6 +5921,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     {
         if (RootSnackbar == null) return;
         if (_vm.IsDownloadingUpdate || !string.IsNullOrEmpty(_updateService.PendingInstallerPath)) return;
+        if (_upgradeRequiredSnackbarShown) return;
+        _upgradeRequiredSnackbarShown = true;
 
         var stack = new StackPanel { Orientation = Orientation.Vertical };
 
@@ -5840,22 +6116,54 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
     private void LeftPanelBorder_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
     {
-        if (!_isSidebarPinnedExpanded && !_isSidebarTemporarilyExpandedForOverlay)
-            SetSidebarExpanded(true);
+        if (_isSidebarPinnedExpanded || _isSidebarTemporarilyExpandedForOverlay || _isSidebarExpanded)
+            return;
+
+        if (_sidebarHoverExpandTimer == null)
+        {
+            _sidebarHoverExpandTimer = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(SidebarHoverExpandDelayMs)
+            };
+            _sidebarHoverExpandTimer.Tick += SidebarHoverExpandTimer_Tick;
+        }
+
+        if (!_sidebarHoverExpandTimer.IsEnabled)
+            _sidebarHoverExpandTimer.Start();
     }
 
     private void LeftPanelBorder_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
     {
+        _sidebarHoverExpandTimer?.Stop();
         if (!_isSidebarPinnedExpanded && !_isSidebarTemporarilyExpandedForOverlay)
             SetSidebarExpanded(false);
     }
 
+    private void SidebarHoverExpandTimer_Tick(object? sender, EventArgs e)
+    {
+        _sidebarHoverExpandTimer?.Stop();
+        if (!_isSidebarExpanded && !_isSidebarPinnedExpanded && !_isSidebarTemporarilyExpandedForOverlay &&
+            (LeftPanelBorder?.IsMouseOver == true || SidebarSplitter?.IsMouseOver == true))
+        {
+            SetSidebarExpanded(true);
+        }
+    }
+
     private void CompactSidebarTab_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is FrameworkElement { Tag: string tag } && int.TryParse(tag, out int index))
+        if (sender is FrameworkElement { Tag: TabItem tab })
         {
-            MainTabs.SelectedIndex = index;
+            MainTabs.SelectedItem = tab;
             SetSidebarExpanded(true);
+        }
+    }
+
+    private void SidebarTabPopover_Opened(object? sender, EventArgs e)
+    {
+        if (sender is Popup { Child: DependencyObject child } &&
+            FindVisualChildByName<Image>(child, "RustPopoverIcon") is { } icon)
+        {
+            icon.GetBindingExpression(Image.SourceProperty)?.UpdateTarget();
         }
     }
 
@@ -5880,6 +6188,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
     private void SetSidebarExpanded(bool isExpanded)
     {
+        _sidebarHoverExpandTimer?.Stop();
         bool isFcmConfigured = TrackingService.IsFcmConfigured();
         bool needsFcmLogin = !isFcmConfigured ||
                              (TrackingService.FcmExpiresAt.HasValue &&
@@ -5894,11 +6203,11 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
         if (isExpanded)
         {
-            double width = Math.Clamp(_expandedSidebarWidth, MinExpandedSidebarWidth, MaxExpandedSidebarWidth);
+            double width = MaxExpandedSidebarWidth;
             ColSidebar.MinWidth = CompactSidebarWidth;
-            LeftPanelBorder.Padding = new Thickness(16);
+            LeftPanelBorder.Padding = new Thickness(0);
             LeftPanelContent.Visibility = Visibility.Visible;
-            CompactSidebarRail.Visibility = Visibility.Collapsed;
+            CompactSidebarRail.Visibility = Visibility.Visible;
             AnimateSidebarWidth(width, () =>
             {
                 if (_isSidebarExpanded)
@@ -6067,11 +6376,23 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         else
         {
             LogicEnginePanel.Visibility = Visibility.Collapsed;
+            DeviceAutomationPanel.Visibility = Visibility.Collapsed;
             ProfitTradesPanel.Visibility = Visibility.Collapsed;
             BuyXForYPanel.Visibility = Visibility.Collapsed;
             AppSettingsPanel.LoadSettings();
             AppSettingsPanel.Visibility = Visibility.Visible;
         }
+    }
+
+    private void OpenSettingsCategory(string category)
+    {
+        LogicEnginePanel.Visibility = Visibility.Collapsed;
+        DeviceAutomationPanel.Visibility = Visibility.Collapsed;
+        ProfitTradesPanel.Visibility = Visibility.Collapsed;
+        BuyXForYPanel.Visibility = Visibility.Collapsed;
+        AppSettingsPanel.LoadSettings();
+        AppSettingsPanel.Visibility = Visibility.Visible;
+        AppSettingsPanel.OpenCategory(category);
     }
 
     private void BtnLogicEngine_Click(object sender, RoutedEventArgs e)
@@ -6085,8 +6406,26 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             AppSettingsPanel.Visibility = Visibility.Collapsed;
             ProfitTradesPanel.Visibility = Visibility.Collapsed;
             BuyXForYPanel.Visibility = Visibility.Collapsed;
+            DeviceAutomationPanel.Visibility = Visibility.Collapsed;
             LogicEnginePanel.Visibility = Visibility.Visible;
         }
+    }
+
+    private void BtnDeviceAutomation_Click(object sender, RoutedEventArgs e)
+    {
+        if (DeviceAutomationPanel.Visibility == Visibility.Visible)
+        {
+            DeviceAutomationPanel.Visibility = Visibility.Collapsed;
+            _vm.Save();
+            return;
+        }
+
+        AppSettingsPanel.Visibility = Visibility.Collapsed;
+        ProfitTradesPanel.Visibility = Visibility.Collapsed;
+        BuyXForYPanel.Visibility = Visibility.Collapsed;
+        LogicEnginePanel.Visibility = Visibility.Collapsed;
+        DeviceAutomationPanel.RefreshListBindings();
+        DeviceAutomationPanel.Visibility = Visibility.Visible;
     }
 
     private void BtnLanguageSettings_Click(object sender, RoutedEventArgs e)
@@ -6137,18 +6476,10 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         {
             LogicEnginePanel.ParentWindow = this;
         }
-    }
-
-    public void OpenChatAlertsFromSettings()
-    {
-        Dispatcher.BeginInvoke(new Action(() => {
-            if (ChatAlertsConfigureButton.Flyout is ContextMenu cm)
-            {
-                cm.PlacementTarget = ChatAlertsConfigureButton;
-                cm.Placement = System.Windows.Controls.Primitives.PlacementMode.Custom;
-                cm.IsOpen = true;
-            }
-        }), System.Windows.Threading.DispatcherPriority.Input);
+        if (DeviceAutomationPanel != null)
+        {
+            DeviceAutomationPanel.ParentWindow = this;
+        }
     }
 
     public System.Windows.Controls.Primitives.CustomPopupPlacement[] CenterMegaMenu_Callback(Size popupSize, Size targetSize, Point offset)
@@ -6159,20 +6490,6 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         x = Math.Min(x, ActualWidth - popupSize.Width - 8 - targetLeft);
         double y = targetSize.Height + 4;
         return new[] { new System.Windows.Controls.Primitives.CustomPopupPlacement(new Point(x, y), System.Windows.Controls.Primitives.PopupPrimaryAxis.Horizontal) };
-    }
-
-    public async void OpenChatCommandsFromSettings()
-    {
-        if (ChatContentBorder.Visibility != Visibility.Visible)
-        {
-            _chatOpenedForCommandsOnly = true;
-            await OpenChatOverlayAsync();
-        }
-        else
-        {
-            _chatOpenedForCommandsOnly = false;
-        }
-        BtnOpenChatCommands_Click(null, null);
     }
 
     private async Task PerformUpdateDownloadAsync(string tag, string dlUrl)
@@ -6214,16 +6531,22 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         if (_listenerStarting || _vm.IsDownloadingUpdate) return;
         if (!string.IsNullOrEmpty(_updateService.PendingInstallerPath))
         {
+            _vm.UpdateStatusText = "Update ready — installs on close";
+            _vm.IsUpdateStatusExpanded = true;
             ShowInfoSnackbar("Update", "Update already downloaded. It will be installed when you close the app.", WpfUi.ControlAppearance.Info);
             return;
         }
 
         try
         {
+            _vm.UpdateStatusText = "Checking for updates...";
+            _vm.IsUpdateStatusExpanded = true;
             var curr = _updateService.VersionForCompare;
             var latestInfo = await _updateService.GetLatestReleaseAsync();
             if (latestInfo is null)
             {
+                _vm.UpdateStatusText = "Could not check for updates";
+                _vm.IsUpdateStatusExpanded = true;
                 System.Windows.MessageBox.Show(
                     "Could not query latest release. Please try again or open Releases page.",
                     "Update", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -6245,12 +6568,16 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             if (!updateAvailable)
             {
                 _vm.IsUpdateAvailable = false;
+                _vm.UpdateStatusText = "You are up to date";
+                _vm.IsUpdateStatusExpanded = false;
                 System.Windows.MessageBox.Show("You are up to date.", "Update", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
             _vm.IsUpdateAvailable = true;
             _vm.UpdateTag = tag;
+            _vm.UpdateStatusText = $"Update {tag} available";
+            _vm.IsUpdateStatusExpanded = true;
 
             if (string.IsNullOrWhiteSpace(dlUrl))
             {
@@ -6269,8 +6596,11 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             if (ask != MessageBoxResult.Yes) return;
 
             _vm.IsDownloadingUpdate = true;
+            _vm.UpdateStatusText = $"Downloading {tag}";
+            _vm.IsUpdateStatusExpanded = true;
             var prog = new Progress<DownloadReport>(r =>
             {
+                _vm.UpdateStatusText = r.Status;
                 _vm.BusyText = $"Downloading installer ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ {r.Percentage}";
                 _vm.UpdateDownloadProgress = r.Progress * 100;
                 _vm.UpdateDownloadSpeed = r.Speed;
@@ -6283,10 +6613,13 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
             if (path == null)
             {
+                _vm.UpdateStatusText = "Update download failed";
+                _vm.IsUpdateStatusExpanded = true;
                 System.Windows.MessageBox.Show("Download failed.", "Update", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
+            _vm.UpdateStatusText = "Applying update...";
             AppendLog("Starting installer...");
             _updateService.StartInstaller(path);
             try { if (_pairing?.IsRunning == true) await Task.Run(async () => await _pairing.StopAsync()); } catch { }
@@ -6297,20 +6630,11 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         {
             _vm.IsUpdateAvailable = false;
             _vm.IsDownloadingUpdate = false;
+            _vm.UpdateStatusText = "Update check failed";
+            _vm.IsUpdateStatusExpanded = true;
             AppendLog("ÃƒÂ¢Ã‚ÂÃ…â€™ Update check failed: " + ex.Message);
             System.Windows.MessageBox.Show("Update check failed.\n" + ex.Message, "Update", MessageBoxButton.OK, MessageBoxImage.Error);
         }
-    }
-
-    private void BtnCheckUpdates_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
-    {
-        if (_vm.IsDownloadingUpdate)
-            UpdateDownloadPopup.IsOpen = true;
-    }
-
-    private void BtnCheckUpdates_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
-    {
-        UpdateDownloadPopup.IsOpen = false;
     }
 
     /// DEVICE HOTKEYS
@@ -6382,6 +6706,12 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         return map;
     }
 
+    private void RefreshCurrentHotkeyBindings()
+    {
+        if (_vm == null) return;
+        _vm.CurrentHotkeys = MapForCurrentServer();
+    }
+
 
     protected override void OnSourceInitialized(EventArgs e)
     {
@@ -6399,6 +6729,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
         LoadHotkeyOptions();
         LoadHotkeys();
+        RefreshCurrentHotkeyBindings();
         ActivateHotkeysForCurrentServer();   // statt RegisterAllHotkeys()
     }
 
@@ -6614,7 +6945,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             // Send chat alerts for devices that had it enabled
             foreach (var (dev, desired, _) in toggleWork)
             {
-                if (TrackingService.GetHotkeyTriggerChatAlert(serverKey, dev.EntityId))
+                if (TrackingService.HotkeyTriggerChatAlertsEnabled && TrackingService.GetHotkeyTriggerChatAlert(serverKey, dev.EntityId))
                 {
                     string state = desired ? Properties.Resources.StateOn : Properties.Resources.StateOff;
                     string msg = string.Format(Properties.Resources.HotkeyTriggerToggled, dev.PureName, state, await MyPlayerNameOrYouAsync());
@@ -6632,7 +6963,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 await HandleDeviceToggleAsync(fakeSender, desired, ignoreGlobalBusy: true);
 
                 // Send chat alert if enabled for this device
-                if (TrackingService.GetHotkeyTriggerChatAlert(serverKey, dev.EntityId))
+                if (TrackingService.HotkeyTriggerChatAlertsEnabled && TrackingService.GetHotkeyTriggerChatAlert(serverKey, dev.EntityId))
                 {
                     string state = desired ? Properties.Resources.StateOn : Properties.Resources.StateOff;
                     string msg = string.Format(Properties.Resources.HotkeyTriggerToggled, dev.PureName, state, await MyPlayerNameOrYouAsync());
@@ -6733,6 +7064,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
         SaveHotkeys();
         SaveHotkeyOptions();
+        RefreshCurrentHotkeyBindings();
 
         if (activate == true) ActivateHotkeysForCurrentServer();
         else DeactivateHotkeys();

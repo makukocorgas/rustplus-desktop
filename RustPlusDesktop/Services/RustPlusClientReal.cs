@@ -48,6 +48,8 @@ public sealed class RustPlusClientReal : IRustPlusClient, IDisposable
     private readonly SemaphoreSlim _rateLimitLock = new(1, 1);
     private int _tokens = 50;
     private DateTime _lastRefill = DateTime.UtcNow;
+    private int _consecutiveTimeouts = 0;
+    private DateTime? _lastTeamInfoSuccessUtc;
 
     private async Task AcquireTokenAsync(CancellationToken ct)
     {
@@ -96,6 +98,7 @@ public sealed class RustPlusClientReal : IRustPlusClient, IDisposable
     private void CheckConnectionLost(Exception ex)
     {
         var current = ex;
+        bool isTimeoutOrCancellation = false;
         while (current != null)
         {
             var msg = current.Message;
@@ -105,10 +108,32 @@ public sealed class RustPlusClientReal : IRustPlusClient, IDisposable
                 msg.Contains("eof", StringComparison.OrdinalIgnoreCase) || 
                 msg.Contains("unable to read", StringComparison.OrdinalIgnoreCase))
             {
+                _consecutiveTimeouts = 0;
                 ConnectionLost?.Invoke();
                 return;
             }
+            if (current is TimeoutException ||
+                current is TaskCanceledException ||
+                current is OperationCanceledException ||
+                msg.Contains("canceled", StringComparison.OrdinalIgnoreCase) ||
+                msg.Contains("timed out", StringComparison.OrdinalIgnoreCase) ||
+                msg.Contains("timeout", StringComparison.OrdinalIgnoreCase))
+            {
+                isTimeoutOrCancellation = true;
+            }
             current = current.InnerException;
+        }
+
+        if (isTimeoutOrCancellation)
+        {
+            _consecutiveTimeouts++;
+            _log?.Invoke($"[connection] Consecutive timeout/cancellation count: {_consecutiveTimeouts}/5. (Ex: {ex.GetType().Name}: {ex.Message})");
+            if (_consecutiveTimeouts >= 5)
+            {
+                _consecutiveTimeouts = 0;
+                _log?.Invoke("[connection] Triggering ConnectionLost due to 5 consecutive timeouts/cancellations.");
+                ConnectionLost?.Invoke();
+            }
         }
     }
 
@@ -126,7 +151,6 @@ public sealed class RustPlusClientReal : IRustPlusClient, IDisposable
          return StorageService.LoadCache<T>(key);
     }
 
-    
     // ---------- TEAM-CHAT ----------
 
     public void EnsureEventsHooked() => HookEventsIfNeeded();
@@ -3134,13 +3158,14 @@ function _serr(e) {
     }
 
     public sealed class MapWithMonuments
-{
-    public required BitmapSource Bitmap { get; init; }
-    public required int PixelWidth  { get; init; }
-    public required int PixelHeight { get; init; }
-    public required int WorldSize   { get; init; } // falls vorhanden, sonst 0
-    public required List<(double X, double Y, string Name)> Monuments { get; init; }
-}
+    {
+        public required BitmapSource Bitmap { get; init; }
+        public required int PixelWidth  { get; init; }
+        public required int PixelHeight { get; init; }
+        public required int WorldSize   { get; init; } // falls vorhanden, sonst 0
+        public DateTime? WipeTime { get; init; }
+        public required List<(double X, double Y, string Name)> Monuments { get; init; }
+    }
 
 
 
@@ -3216,6 +3241,7 @@ function _serr(e) {
                 data.GetType().GetProperty("WorldSize")?.GetValue(data)
              ?? data.GetType().GetProperty("MapSize")?.GetValue(data)
              ?? 0);
+            DateTime? wipeTime = null;
 
             // Monuments aus dieser Antwort
             var monsList = new List<(double X, double Y, string Name)>();
@@ -3261,15 +3287,18 @@ function _serr(e) {
                             await tInfo.WaitAsync(ct).ConfigureAwait(false);
                             var res = tInfo.GetType().GetProperty("Result")?.GetValue(tInfo);
                             var info = res?.GetType().GetProperty("Data")?.GetValue(res) ?? res;
-                            world = Convert.ToInt32(
+                            int infoWorld = Convert.ToInt32(
                                 info?.GetType().GetProperty("WorldSize")?.GetValue(info)
                              ?? info?.GetType().GetProperty("MapSize")?.GetValue(info)
                              ?? 0);
+                            if (infoWorld > 0) world = infoWorld;
                         }
                     }
                 }
                 catch { /* tolerant */ }
             }
+
+            wipeTime = (await GetServerInfoAsync(ct).ConfigureAwait(false))?.WipeTime;
 
             // -------- 3) Letzter Fallback: robust aus Monuments kalibrieren --------
             if (world <= 0 && monsList.Count > 0)
@@ -3300,6 +3329,7 @@ function _serr(e) {
                 PixelWidth = mapW,
                 PixelHeight = mapH,
                 WorldSize = world,
+                WipeTime = wipeTime,
                 Monuments = monsList
             };
         }
@@ -3693,7 +3723,12 @@ function _serr(e) {
             resp = tsk.GetType().GetProperty("Result")?.GetValue(tsk);
         }
 
-        if (!IsResponseValid(resp)) return LoadFromCache<TeamInfo>("team");
+        if (!IsResponseValid(resp))
+        {
+            var staleAge = _lastTeamInfoSuccessUtc.HasValue ? (DateTime.UtcNow - _lastTeamInfoSuccessUtc.Value) : (TimeSpan?)null;
+            _log?.Invoke($"[team] GetTeamInfoAsync got an invalid response — falling back to cached team info (age: {(staleAge.HasValue ? $"{staleAge.Value.TotalSeconds:0}s" : "unknown")}).");
+            return LoadFromCache<TeamInfo>("team");
+        }
 
         var r  = P(resp, "Response") ?? resp;
         var ti = P(r, "TeamInfo") ?? r;
@@ -3797,12 +3832,16 @@ function _serr(e) {
         list.MapNotes.AddRange(ParseNotes(mapNotes));
         list.LeaderMapNotes.AddRange(ParseNotes(leaderMapNotes));
 
+        _consecutiveTimeouts = 0;
+        _lastTeamInfoSuccessUtc = DateTime.UtcNow;
         SaveToCache("team", list);
         return list;
     }
     catch (Exception ex)
     {
         CheckConnectionLost(ex);
+        var staleAge = _lastTeamInfoSuccessUtc.HasValue ? (DateTime.UtcNow - _lastTeamInfoSuccessUtc.Value) : (TimeSpan?)null;
+        _log?.Invoke($"[team] GetTeamInfoAsync failed ({ex.GetType().Name}: {ex.Message}) — falling back to cached team info (age: {(staleAge.HasValue ? $"{staleAge.Value.TotalSeconds:0}s" : "unknown")}).");
         return LoadFromCache<TeamInfo>("team");
     }
 }
@@ -4077,6 +4116,10 @@ function _serr(e) {
                 list.Add(new DynMarker(id, norm, kind, x, y, label, pname ?? label, steamId, rotation));
             }
         }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             CheckConnectionLost(ex);
@@ -4084,7 +4127,11 @@ function _serr(e) {
             return LoadFromCache<List<DynMarker>>("markers") ?? list;
         }
 
-        if (list.Count > 0) SaveToCache("markers", list);
+        if (list.Count > 0) 
+        {
+            _consecutiveTimeouts = 0;
+            SaveToCache("markers", list);
+        }
         return list;
     }
 
@@ -4325,6 +4372,7 @@ function _serr(e) {
                 }
             }
         }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
         catch (Exception ex) { CheckConnectionLost(ex); /* ignore, fallback next */ }
 
         // PATH B – raw AppRequest (enum-agnostic)
@@ -4380,8 +4428,13 @@ function _serr(e) {
                     }
                 }
             }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
+                CheckConnectionLost(ex);
                 L("Error in GetVendingShopsAsync: " + ex.Message);
                 return null;
             }
@@ -4389,6 +4442,7 @@ function _serr(e) {
 
         if (shops.Count > 0) 
         {
+            _consecutiveTimeouts = 0;
             SaveToCache("shops", shops);
         }
         return shops;
@@ -5114,7 +5168,7 @@ function _serr(e) {
         return null;
     }
 
-    public async Task PrimeSubscriptionsAsync(IEnumerable<uint> entityIds, CancellationToken ct = default)
+    public async Task PrimeSubscriptionsAsync(IEnumerable<uint> entityIds, Action<int, int, uint>? progress = null, CancellationToken ct = default)
     {
         HookEventsIfNeeded();
 
@@ -5122,16 +5176,23 @@ function _serr(e) {
         if (ids.Count == 0) return;
 
         _log?.Invoke($"[prime] Priming {ids.Count} subscriptions sequentially with a safe delay...");
+        int done = 0;
         foreach (var id in ids)
         {
             if (ct.IsCancellationRequested) break;
             try
             {
-                await EnsureSubOnceAsync(id);
-                // A safe 300ms delay between each subscription/poke to prevent flooding the Rust+ server
-                await Task.Delay(300, ct);
+                progress?.Invoke(done, ids.Count, id);
+                using var itemCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                itemCts.CancelAfter(TimeSpan.FromSeconds(5));
+                await EnsureSubOnceAsync(id).WaitAsync(itemCts.Token);
+                done++;
+                progress?.Invoke(done, ids.Count, id);
+                // A small gap avoids flooding Rust+ while keeping startup responsive.
+                await Task.Delay(100, ct);
             }
-            catch { }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested) { break; }
+            catch (Exception ex) { _log?.Invoke($"[prime] Subscription #{id} failed: {ex.Message}"); }
         }
     }
 
@@ -5151,6 +5212,7 @@ function _serr(e) {
         _port = profile.Port;
         _steamId = steamId;
         _playerToken = playerToken;
+        _consecutiveTimeouts = 0;
 
         // Reset subscription state for new connection
         lock (_subOnce) _subOnce.Clear();
@@ -6940,6 +7002,7 @@ function _serr(e) {
         if (responseStr == "Error: Timeout reached while waiting for response")
         {
             _log("[ERROR] Response timeout reached");
+            CheckConnectionLost(new TimeoutException("Timeout reached while waiting for response"));
             return false;
         }
 
@@ -6965,6 +7028,7 @@ function _serr(e) {
             return false;
         }
 
+        _consecutiveTimeouts = 0;
         return true;
     }
 

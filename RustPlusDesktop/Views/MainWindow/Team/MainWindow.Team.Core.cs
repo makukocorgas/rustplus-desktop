@@ -281,7 +281,11 @@ public partial class MainWindow
     private async void TeamTimer_Tick(object? sender, EventArgs e)
     {
         if (System.Threading.Interlocked.Exchange(ref _teamPollBusy, 1) == 1) return;
-        try { await LoadTeamAsync(); }
+        try
+        {
+            await LoadTeamAsync();
+            await EvaluateDeviceAutomationAsync();
+        }
         finally { System.Threading.Interlocked.Exchange(ref _teamPollBusy, 0); }
         CenterMiniMapOnPlayer();
     }
@@ -446,7 +450,7 @@ public partial class MainWindow
             var serverName = _vm.Selected?.Name;
             var cloudPresenceSignature = BuildCloudPresenceSignature(serverKey, serverName, cloudTeamMembers);
             var timeSinceLast = DateTime.UtcNow - _lastPresenceUploadTime;
-            bool forcePeriodicUpload = timeSinceLast.TotalSeconds >= 290;
+            bool forcePeriodicUpload = timeSinceLast >= CloudTrafficPolicy.PresenceInterval(WindowState == WindowState.Minimized);
             if (cloudPresenceSignature != _lastCloudPresenceSignature || forcePeriodicUpload)
             {
                 if (_hasCriticalPresenceChange || forcePeriodicUpload || timeSinceLast.TotalSeconds >= 15)
@@ -681,8 +685,20 @@ public partial class MainWindow
 
     private void TeamItem_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
-        if ((sender as FrameworkElement)?.DataContext is TeamMemberVM vm)
-            CenterOnMember(vm);
+        if (sender is not FrameworkElement fe) return;
+        if (fe.DataContext is not TeamMemberVM vm) return;
+
+        if (e.ClickCount == 2)
+        {
+            if (fe.ContextMenu != null)
+            {
+                fe.ContextMenu.PlacementTarget = fe;
+                fe.ContextMenu.IsOpen = true;
+            }
+            return;
+        }
+
+        CenterOnMember(vm);
     }
 
     private void Team_Center_Click(object sender, RoutedEventArgs e)

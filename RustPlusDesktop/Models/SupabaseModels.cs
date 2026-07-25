@@ -261,6 +261,11 @@ namespace RustPlusDesk.Models
         [JsonPropertyName("raid_id")]
         public string? RaidId { get; set; }
 
+        [Column("shop_id")]
+        [JsonProperty("shop_id")]
+        [JsonPropertyName("shop_id")]
+        public string? ShopId { get; set; }
+
         [Column("created_at", NullValueHandling = NullValueHandling.Ignore)]
         [JsonProperty("created_at")]
         [JsonPropertyName("created_at")]
@@ -490,5 +495,175 @@ namespace RustPlusDesk.Models
         [JsonProperty("team_key")]
         [JsonPropertyName("team_key")]
         public string? TeamKey { get; set; }
+    }
+
+    [Table("bm_tracked_servers")]
+    public class BmTrackedServerModel : BaseModel
+    {
+        [PrimaryKey("guild_id", false)]
+        [Column("guild_id")]
+        [JsonProperty("guild_id")]
+        [JsonPropertyName("guild_id")]
+        public string GuildId { get; set; } = string.Empty;
+
+        [Column("server_key")]
+        [JsonProperty("server_key")]
+        [JsonPropertyName("server_key")]
+        public string ServerKey { get; set; } = string.Empty;
+
+        [Column("host")]
+        [JsonProperty("host")]
+        [JsonPropertyName("host")]
+        public string? Host { get; set; }
+
+        [Column("port")]
+        [JsonProperty("port")]
+        [JsonPropertyName("port")]
+        public int Port { get; set; }
+
+        [Column("server_name")]
+        [JsonProperty("server_name")]
+        [JsonPropertyName("server_name")]
+        public string? ServerName { get; set; }
+
+        [Column("battlemetrics_server_id")]
+        [JsonProperty("battlemetrics_server_id")]
+        [JsonPropertyName("battlemetrics_server_id")]
+        public string? BattlemetricsServerId { get; set; }
+
+        [Column("updated_at")]
+        [JsonProperty("updated_at")]
+        [JsonPropertyName("updated_at")]
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    [Table("bm_tracked_players")]
+    public class BmTrackedPlayerModel : BaseModel
+    {
+        [PrimaryKey("id", true)]
+        [Column("id")]
+        [JsonProperty("id")]
+        [JsonPropertyName("id")]
+        public string Id { get; set; } = Guid.NewGuid().ToString();
+
+        [Column("guild_id")]
+        [JsonProperty("guild_id")]
+        [JsonPropertyName("guild_id")]
+        public string GuildId { get; set; } = string.Empty;
+
+        [Column("bm_id")]
+        [JsonProperty("bm_id")]
+        [JsonPropertyName("bm_id")]
+        public string BmId { get; set; } = string.Empty;
+
+        [Column("name")]
+        [JsonProperty("name")]
+        [JsonPropertyName("name")]
+        public string? Name { get; set; }
+
+        [Column("server_key")]
+        [JsonProperty("server_key")]
+        [JsonPropertyName("server_key")]
+        public string ServerKey { get; set; } = string.Empty;
+
+        [Column("group_name")]
+        [JsonProperty("group_name")]
+        [JsonPropertyName("group_name")]
+        public string? GroupName { get; set; }
+
+        [Column("group_color")]
+        [JsonProperty("group_color")]
+        [JsonPropertyName("group_color")]
+        public string? GroupColor { get; set; }
+
+        [Column("is_bm_only")]
+        [JsonProperty("is_bm_only")]
+        [JsonPropertyName("is_bm_only")]
+        public bool IsBmOnly { get; set; }
+
+        [Column("created_at")]
+        [JsonProperty("created_at")]
+        [JsonPropertyName("created_at")]
+        public DateTime CreatedAt { get; set; }
+    }
+
+    [Table("bm_player_sessions")]
+    public class BmPlayerSessionModel : BaseModel
+    {
+        [PrimaryKey("id", true)]
+        [Column("id")]
+        [JsonProperty("id")]
+        [JsonPropertyName("id")]
+        public long Id { get; set; }
+
+        [Column("guild_id")]
+        [JsonProperty("guild_id")]
+        [JsonPropertyName("guild_id")]
+        public string GuildId { get; set; } = string.Empty;
+
+        [Column("bm_id")]
+        [JsonProperty("bm_id")]
+        [JsonPropertyName("bm_id")]
+        public string BmId { get; set; } = string.Empty;
+
+        [Column("server_key")]
+        [JsonProperty("server_key")]
+        [JsonPropertyName("server_key")]
+        public string ServerKey { get; set; } = string.Empty;
+
+        [Column("connect_time")]
+        [JsonProperty("connect_time")]
+        [JsonPropertyName("connect_time")]
+        public DateTime ConnectTime { get; set; }
+
+        [Column("disconnect_time")]
+        [JsonProperty("disconnect_time")]
+        [JsonPropertyName("disconnect_time")]
+        public DateTime? DisconnectTime { get; set; }
+
+        [Column("created_at")]
+        [JsonProperty("created_at")]
+        [JsonPropertyName("created_at")]
+        public DateTime CreatedAt { get; set; }
+    }
+
+    /// <summary>
+    /// Diretório pesquisável de todos os jogadores já vistos num servidor (não só a
+    /// watchlist) — gravado pelo bot BattleMetrics dedicado (tracker.js), lido pela app
+    /// só para a pesquisa de roster. A app nunca escreve nesta tabela.
+    /// </summary>
+    [Table("bm_seen_players")]
+    public class BmSeenPlayerModel : BaseModel
+    {
+        [PrimaryKey("guild_id", false)]
+        [Column("guild_id")]
+        [JsonProperty("guild_id")]
+        [JsonPropertyName("guild_id")]
+        public string GuildId { get; set; } = string.Empty;
+
+        [Column("bm_id")]
+        [JsonProperty("bm_id")]
+        [JsonPropertyName("bm_id")]
+        public string BmId { get; set; } = string.Empty;
+
+        [Column("server_key")]
+        [JsonProperty("server_key")]
+        [JsonPropertyName("server_key")]
+        public string ServerKey { get; set; } = string.Empty;
+
+        [Column("name")]
+        [JsonProperty("name")]
+        [JsonPropertyName("name")]
+        public string? Name { get; set; }
+
+        [Column("first_seen_at")]
+        [JsonProperty("first_seen_at")]
+        [JsonPropertyName("first_seen_at")]
+        public DateTime FirstSeenAt { get; set; }
+
+        [Column("last_seen_at")]
+        [JsonProperty("last_seen_at")]
+        [JsonPropertyName("last_seen_at")]
+        public DateTime LastSeenAt { get; set; }
     }
 }
