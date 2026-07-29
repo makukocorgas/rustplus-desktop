@@ -2683,6 +2683,11 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         {
             NotificationCenterService.MarkAllAsRead();
         }
+
+        if (MainTabs.SelectedItem == TabClan)
+        {
+            _ = LoadClanAsync();
+        }
     }
 
     private void RaidCalculator_CloseRequested(object sender, RoutedEventArgs e) => ReturnToLastWorkspace();
@@ -2690,9 +2695,33 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     private void ReturnToLastWorkspace() =>
         MainTabs.SelectedIndex = Math.Clamp(_lastWorkspaceTabIndex, 0, MainTabs.Items.Count - 1);
 
+    private readonly Dictionary<string, DateTime> _lastOfflineDeathProcessed = new();
+
     private void HandleOfflineDeath(OfflineDeathNotification d)
     {
         if (!TrackingService.OfflineDeathAlertsEnabled) return;
+
+        // The FCM console dump for a single push gets parsed through more than one code path
+        // in PairingListenerRealProcess (raw key/value lines AND JSON blocks), which can fire
+        // this event twice for the same real death. Dedup the same attacker+server pair within
+        // a short window — mirrors the same fix already in place for Alarms (_lastAlarmProcessed).
+        string dedupKey = $"{d.ServerName}|{d.AttackerName}";
+        var nowUtc = DateTime.UtcNow;
+        if (_lastOfflineDeathProcessed.TryGetValue(dedupKey, out var lastProcessed) && (nowUtc - lastProcessed).TotalSeconds < 10)
+        {
+            AppendLog($"[FCM] Duplicate offline death notification ignored ({dedupKey}).");
+            return;
+        }
+        _lastOfflineDeathProcessed[dedupKey] = nowUtc;
+        if (_lastOfflineDeathProcessed.Count > 200)
+        {
+            foreach (var staleKey in _lastOfflineDeathProcessed
+                         .Where(kv => (nowUtc - kv.Value).TotalMinutes > 5)
+                         .Select(kv => kv.Key).ToList())
+            {
+                _lastOfflineDeathProcessed.Remove(staleKey);
+            }
+        }
 
         AppendLog($"[FCM] Offline Death Notification received: You were killed by {d.AttackerName} on {d.ServerName}");
 
@@ -4683,6 +4712,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         TrackingService.AnnounceVendor = val;
         TrackingService.AnnounceOilRig = val;
         TrackingService.AnnounceDeepSea = val;
+        TrackingService.AnnounceSatelliteCrash = val;
         TrackingService.AnnouncePlayerOnline = val;
         TrackingService.AnnouncePlayerOffline = val;
         TrackingService.AnnouncePlayerAfk = val;
@@ -4715,6 +4745,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                !TrackingService.AnnounceCargoEgress && !TrackingService.AnnounceCargoArrival &&
                !TrackingService.AnnounceHeli && !TrackingService.AnnounceChinook &&
                !TrackingService.AnnounceVendor && !TrackingService.AnnounceOilRig && !TrackingService.AnnounceDeepSea &&
+               !TrackingService.AnnounceSatelliteCrash &&
                !TrackingService.AnnouncePlayerOnline && !TrackingService.AnnouncePlayerOffline && !TrackingService.AnnouncePlayerAfk &&
                !TrackingService.AnnouncePlayerDeathSelf && !TrackingService.AnnouncePlayerDeathTeam &&
                !TrackingService.AnnouncePlayerRespawnSelf && !TrackingService.AnnouncePlayerRespawnTeam &&
@@ -4750,6 +4781,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 case "Vendor": TrackingService.AnnounceVendor = val; break;
                 case "OilRig": TrackingService.AnnounceOilRig = val; break;
                 case "DeepSea": TrackingService.AnnounceDeepSea = val; break;
+                case "SatelliteCrash": TrackingService.AnnounceSatelliteCrash = val; break;
                 case "SmartAlerts": TrackingService.AnnounceSmartAlerts = val; break;
                 case "PlayerOnline": TrackingService.AnnouncePlayerOnline = val; break;
                 case "PlayerOffline": TrackingService.AnnouncePlayerOffline = val; break;
@@ -4850,6 +4882,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             TrackingService.AnnounceVendor,
             TrackingService.AnnounceOilRig,
             TrackingService.AnnounceDeepSea,
+            TrackingService.AnnounceSatelliteCrash,
             TrackingService.AnnouncePlayerOnline,
             TrackingService.AnnouncePlayerOffline,
             TrackingService.AnnouncePlayerAfk,
@@ -4921,6 +4954,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 case "Vendor": isSelected = TrackingService.AnnounceVendor; break;
                 case "OilRig": isSelected = TrackingService.AnnounceOilRig; break;
                 case "DeepSea": isSelected = TrackingService.AnnounceDeepSea; break;
+                case "SatelliteCrash": isSelected = TrackingService.AnnounceSatelliteCrash; break;
                 case "SmartAlerts": isSelected = TrackingService.AnnounceSmartAlerts; break;
                 case "PlayerOnline": isSelected = TrackingService.AnnouncePlayerOnline; break;
                 case "PlayerOffline": isSelected = TrackingService.AnnouncePlayerOffline; break;

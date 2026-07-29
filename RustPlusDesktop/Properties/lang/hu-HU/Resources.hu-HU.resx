@@ -3846,4 +3846,55 @@ További információkat a szerver hivatalos honlapján talál:
   <data name="CodeUiNoShopsMatch" xml:space="preserve">
     <value>No shops match &quot;{0}&quot;</value>
   </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>KLÁN CSEVEGÉS</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>Műholdzuhanás</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>Egy műhold zuhan!</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>Műholdzuhanás aktív – {0} óta tart</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>Klán</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>Nem található klán</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>Csatlakozz egy klánhoz a játékban, hogy itt lásd a tagjait</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>Nincs beállítva napi üzenet.</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>Beállította: {0}</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>Beállította: {0}, dátum: {1}</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>Klán információ</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>Pontszám</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>Tagok</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>Létrehozva</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>Alapító</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>Kövesd nyomon a klán tagjait, állapotukat, szerepüket és megjegyzéseiket.</value>
+  </data>
 </root>

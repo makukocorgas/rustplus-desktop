@@ -454,6 +454,42 @@ Download and install now?</value>
   <data name="TeamTab" xml:space="preserve">
     <value>Team</value>
   </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>Clan</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>No clan found</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>Join a clan in-game to see its members here</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>Member</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>No message of the day set.</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>Set by {0}</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>Set by {0} on {1}</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>Clan Info</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>Score</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>Members</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>Founder</value>
+  </data>
   <data name="CenterOnMap" xml:space="preserve">
     <value>Center on map</value>
   </data>
@@ -633,6 +669,9 @@ Download and install now?</value>
   </data>
   <data name="DeepSea" xml:space="preserve">
     <value>Deep Sea Event</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>Satellite Crash</value>
   </data>
   <data name="SmartAlerts" xml:space="preserve">
     <value>Smart Alerts</value>
@@ -1279,6 +1318,9 @@ Download and install now?</value>
   <data name="DeepSeaActiveRunningFor" xml:space="preserve">
     <value>Deep Sea active – running for {0}</value>
   </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>Satellite crash active – running for {0}</value>
+  </data>
   <data name="DeepSeaActiveSpawnUnknown" xml:space="preserve">
     <value>Deep Sea active (spawn time unknown)</value>
   </data>
@@ -1500,6 +1542,9 @@ Download and install now?</value>
   </data>
   <data name="AlertDeepSeaUp" xml:space="preserve">
     <value>Deep Sea is up</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>A satellite is crashing!</value>
   </data>
   <data name="AlertNewShop" xml:space="preserve">
     <value>New shop {0} [{1}]: {2}</value>
@@ -4055,6 +4100,9 @@ Please pair this server first.</value>
   </data>
   <data name="UiTrackTeammatesAndSharedActivity" xml:space="preserve">
     <value>Track teammates and shared activity.</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>Track clan members, their status, roles and notes.</value>
   </data>
   <data name="UiTriggerEvent" xml:space="preserve">
     <value>Trigger Event</value>

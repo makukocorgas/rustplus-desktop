@@ -2790,6 +2790,289 @@
                             </Grid>
                         </TabItem>
 
+                        <!--  ===== CLAN =====  -->
+                        <TabItem
+                            x:Name="TabClan"
+                            Style="{StaticResource PrettyTabItem}">
+                            <TabItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Symbol="PeopleTeam24" Margin="0,0,6,0" VerticalAlignment="Center" FontSize="14" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}" />
+                                    <TextBlock VerticalAlignment="Center" Text="{DynamicResource ClanTab}" />
+                                </StackPanel>
+                            </TabItem.Header>
+                            <Grid Background="#181A1E">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Grid.Resources>
+                                    <conv:BoolToVisibilityConverter x:Key="VisClan" />
+                                    <conv:BoolToVisibilityConverter x:Key="VisClanInv" Invert="True" />
+                                    <Style x:Key="ClanCard" TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="10" />
+                                        <Setter Property="Background" Value="#FF141F2D" />
+                                        <Setter Property="Padding" Value="10" />
+                                        <Setter Property="Margin" Value="6" />
+                                    </Style>
+                                </Grid.Resources>
+
+                                <ListBox
+                                    x:Name="ClanList"
+                                    Grid.Row="0"
+                                    HorizontalContentAlignment="Stretch"
+                                    ItemsSource="{Binding ClanMembers, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel />
+                                        </ItemsPanelTemplate>
+                                    </ListBox.ItemsPanel>
+
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Width" Value="230" />
+                                            <Setter Property="Margin" Value="6" />
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource ClanCard}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="44" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <!--  Avatar + status  -->
+                                                    <Grid Grid.Column="0" Width="44" Height="44">
+                                                        <Image
+                                                            ClipToBounds="True"
+                                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                                            Source="{Binding Avatar}"
+                                                            Stretch="UniformToFill" />
+                                                        <Ellipse
+                                                            Width="12"
+                                                            Height="12"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Bottom"
+                                                            Fill="#4CAF50"
+                                                            Stroke="Black"
+                                                            Visibility="{Binding IsOnline, Converter={StaticResource VisClan}}" />
+                                                        <Ellipse
+                                                            Width="12"
+                                                            Height="12"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Bottom"
+                                                            Fill="#666"
+                                                            Stroke="Black"
+                                                            Visibility="{Binding IsOnline, Converter={StaticResource VisClanInv}}" />
+                                                    </Grid>
+
+                                                    <!--  Text side  -->
+                                                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                                        <TextBlock
+                                                            FontSize="14"
+                                                            FontWeight="SemiBold"
+                                                            Foreground="White"
+                                                            Text="{Binding Name}"
+                                                            TextTrimming="CharacterEllipsis" />
+                                                        <Border
+                                                            Margin="0,3,0,0"
+                                                            Padding="5,1"
+                                                            HorizontalAlignment="Left"
+                                                            Background="#26FFFFFF"
+                                                            CornerRadius="4">
+                                                            <TextBlock
+                                                                FontSize="10"
+                                                                FontWeight="SemiBold"
+                                                                Foreground="#8FD3FF"
+                                                                Text="{Binding RoleName}" />
+                                                        </Border>
+                                                        <TextBlock
+                                                            Margin="0,4,0,0"
+                                                            FontSize="10"
+                                                            Foreground="#AAA"
+                                                            Text="{Binding Notes}"
+                                                            TextWrapping="Wrap"
+                                                            Visibility="{Binding HasNotes, Converter={StaticResource VisClan}}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+
+                                <StackPanel
+                                    Grid.Row="0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    IsHitTestVisible="False">
+                                    <StackPanel.Style>
+                                        <Style TargetType="StackPanel">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasItems, ElementName=ClanList}" Value="False">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+                                    <Border
+                                        Padding="32,24"
+                                        HorizontalAlignment="Center"
+                                        Background="{DynamicResource Surface}"
+                                        BorderBrush="{DynamicResource CardBorder}"
+                                        BorderThickness="1"
+                                        CornerRadius="12">
+                                        <StackPanel>
+                                            <ui:SymbolIcon
+                                                Symbol="PeopleTeam24"
+                                                Margin="0,0,0,12"
+                                                HorizontalAlignment="Center"
+                                                FontSize="44"
+                                                Foreground="{DynamicResource TextSubtle}" />
+                                            <TextBlock
+                                                Margin="0,0,0,6"
+                                                HorizontalAlignment="Center"
+                                                FontSize="16"
+                                                FontWeight="SemiBold"
+                                                Foreground="#EAECEE"
+                                                Text="{DynamicResource NoClanFound}" />
+                                            <TextBlock
+                                                MaxWidth="220"
+                                                HorizontalAlignment="Center"
+                                                FontSize="12"
+                                                Foreground="#7F8A96"
+                                                Text="{DynamicResource JoinClanToSeeMembers}"
+                                                TextAlignment="Center"
+                                                TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+
+                                <Grid Grid.Row="1" Margin="10,6,10,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock
+                                        x:Name="TxtClanLastPull"
+                                        Grid.Column="0"
+                                        VerticalAlignment="Center"
+                                        FontSize="10"
+                                        Foreground="{DynamicResource TextSubtle}"
+                                        Text="{DynamicResource LastPull}" />
+
+                                    <ui:Button
+                                        x:Name="BtnClanInfo"
+                                        Grid.Column="1"
+                                        Margin="0,0,6,0"
+                                        Padding="8,4"
+                                        Appearance="Secondary"
+                                        Click="BtnClanInfo_Click"
+                                        Content="{DynamicResource ClanInfoTitle}"
+                                        Icon="{ui:SymbolIcon Symbol=Info24}" />
+                                    <Popup
+                                        x:Name="PopupClanInfo"
+                                        AllowsTransparency="True"
+                                        Placement="Top"
+                                        PlacementTarget="{Binding ElementName=BtnClanInfo}"
+                                        StaysOpen="False"
+                                        VerticalOffset="-10">
+                                        <ui:Card
+                                            MinWidth="260"
+                                            MaxWidth="320"
+                                            Padding="16"
+                                            Background="#EE16181C"
+                                            BorderBrush="#40FFFFFF"
+                                            BorderThickness="1">
+                                            <StackPanel>
+                                                <TextBlock
+                                                    x:Name="TxtClanInfoName"
+                                                    Margin="0,0,0,8"
+                                                    FontSize="15"
+                                                    FontWeight="Bold"
+                                                    Foreground="White"
+                                                    TextWrapping="Wrap" />
+
+                                                <Border
+                                                    Margin="0,0,0,8"
+                                                    Padding="8,6"
+                                                    Background="#16FFFFFF"
+                                                    CornerRadius="6">
+                                                    <StackPanel>
+                                                        <TextBlock
+                                                            x:Name="TxtClanInfoMotd"
+                                                            FontSize="11"
+                                                            FontStyle="Italic"
+                                                            Foreground="#DDD"
+                                                            TextWrapping="Wrap" />
+                                                        <TextBlock
+                                                            x:Name="TxtClanInfoMotdMeta"
+                                                            Margin="0,3,0,0"
+                                                            FontSize="9"
+                                                            Foreground="#888" />
+                                                    </StackPanel>
+                                                </Border>
+
+                                                <Grid Margin="0,0,0,3">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" FontSize="11" Foreground="#AAA" Text="{DynamicResource ClanScoreLabel}" />
+                                                    <TextBlock x:Name="TxtClanInfoScore" Grid.Column="1" FontSize="11" FontWeight="SemiBold" Foreground="White" />
+                                                </Grid>
+                                                <Grid Margin="0,0,0,3">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" FontSize="11" Foreground="#AAA" Text="{DynamicResource ClanMembersLabel}" />
+                                                    <TextBlock x:Name="TxtClanInfoMembers" Grid.Column="1" FontSize="11" FontWeight="SemiBold" Foreground="White" />
+                                                </Grid>
+                                                <Grid Margin="0,0,0,3">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" FontSize="11" Foreground="#AAA" Text="{DynamicResource ClanCreatedLabel}" />
+                                                    <TextBlock x:Name="TxtClanInfoCreated" Grid.Column="1" FontSize="11" FontWeight="SemiBold" Foreground="White" />
+                                                </Grid>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" FontSize="11" Foreground="#AAA" Text="{DynamicResource ClanCreatorLabel}" />
+                                                    <TextBlock
+                                                        x:Name="TxtClanInfoCreator"
+                                                        Grid.Column="1"
+                                                        MaxWidth="150"
+                                                        FontSize="11"
+                                                        FontWeight="SemiBold"
+                                                        Foreground="White"
+                                                        TextTrimming="CharacterEllipsis" />
+                                                </Grid>
+                                            </StackPanel>
+                                        </ui:Card>
+                                    </Popup>
+
+                                    <ui:Button
+                                        x:Name="BtnRefreshClan"
+                                        Grid.Column="2"
+                                        Padding="8,4"
+                                        Appearance="Secondary"
+                                        Click="BtnRefreshClan_Click"
+                                        Content="{DynamicResource Refresh}"
+                                        Icon="{ui:SymbolIcon Symbol=ArrowSync24}" />
+                                </Grid>
+                            </Grid>
+                        </TabItem>
+
                         <!--  ===== CAMERAS =====  -->
                         <TabItem x:Name="CamerasTabItem" Style="{StaticResource PrettyTabItem}">
                             <TabItem.Header>
@@ -3154,6 +3437,12 @@
                                 <ui:Button x:Name="RailTeamButton" Style="{StaticResource SidebarRailButton}" AutomationProperties.Name="{DynamicResource TeamTab}" AutomationProperties.HelpText="{DynamicResource UiTrackTeammatesAndSharedActivity}" Click="CompactSidebarTab_Click" Icon="{ui:SymbolIcon Symbol=People24}" Tag="{Binding ElementName=TabTeam}" />
                                 <Popup AllowsTransparency="True" HorizontalOffset="8" IsHitTestVisible="False" IsOpen="{Binding IsMouseOver, ElementName=RailTeamButton, Mode=OneWay}" Opened="SidebarTabPopover_Opened" Placement="Right" PlacementTarget="{Binding ElementName=RailTeamButton}" PopupAnimation="Fade" StaysOpen="True">
                                     <ContentControl Content="{Binding ElementName=RailTeamButton}" ContentTemplate="{StaticResource SidebarTabPopoverTemplate}" />
+                                </Popup>
+                            </Grid>
+                            <Grid>
+                                <ui:Button x:Name="RailClanButton" Style="{StaticResource SidebarRailButton}" AutomationProperties.Name="{DynamicResource ClanTab}" AutomationProperties.HelpText="{DynamicResource UiTrackClanMembersStatusRolesNotes}" Click="CompactSidebarTab_Click" Icon="{ui:SymbolIcon Symbol=PeopleTeam24}" Tag="{Binding ElementName=TabClan}" />
+                                <Popup AllowsTransparency="True" HorizontalOffset="8" IsHitTestVisible="False" IsOpen="{Binding IsMouseOver, ElementName=RailClanButton, Mode=OneWay}" Opened="SidebarTabPopover_Opened" Placement="Right" PlacementTarget="{Binding ElementName=RailClanButton}" PopupAnimation="Fade" StaysOpen="True">
+                                    <ContentControl Content="{Binding ElementName=RailClanButton}" ContentTemplate="{StaticResource SidebarTabPopoverTemplate}" />
                                 </Popup>
                             </Grid>
                             <Grid>
@@ -4181,6 +4470,13 @@
                                                              StaysOpenOnClick="True"
                                                              Style="{StaticResource DarkMenuItem}"
                                                              Tag="DeepSea" />
+                                                         <MenuItem
+                                                             Click="Alert_MenuItem_Click"
+                                                             Header="{DynamicResource SatelliteCrash}"
+                                                             IsCheckable="True"
+                                                             StaysOpenOnClick="True"
+                                                             Style="{StaticResource DarkMenuItem}"
+                                                             Tag="SatelliteCrash" />
                                                          <MenuItem
                                                              Click="Alert_MenuItem_Click"
                                                              Header="{DynamicResource SmartAlerts}"

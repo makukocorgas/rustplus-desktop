@@ -4518,4 +4518,55 @@ You can find more information on the server&apos;s official website:
   <data name="CodeUiNoShopsMatch" xml:space="preserve">
     <value>No shops match &quot;{0}&quot;</value>
   </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>CLAN CHAT</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>Satellite Crash</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>A satellite is crashing!</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>Satellite crash active – running for {0}</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>Clan</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>No clan found</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>Join a clan in-game to see its members here</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>Member</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>No message of the day set.</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>Set by {0}</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>Set by {0} on {1}</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>Clan Info</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>Score</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>Members</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>Founder</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>Track clan members, their status, roles and notes.</value>
+  </data>
 </root>

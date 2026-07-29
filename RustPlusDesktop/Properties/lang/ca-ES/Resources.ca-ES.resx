@@ -3846,4 +3846,55 @@ Podeu trobar més informació al lloc web oficial del servidor:
   <data name="CodeUiNoShopsMatch" xml:space="preserve">
     <value>No shops match &quot;{0}&quot;</value>
   </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>XAT DEL CLAN</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>Caiguda de satèl·lit</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>Un satèl·lit està caient!</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>Caiguda de satèl·lit activa – fa {0}</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>Clan</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>No s'ha trobat cap clan</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>Uneix-te a un clan al joc per veure els seus membres aquí</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>Membre</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>No s'ha establert cap missatge del dia.</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>Establert per {0}</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>Establert per {0} el {1}</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>Informació del clan</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>Puntuació</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>Membres</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>Creat</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>Fundador</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>Fes seguiment dels membres del clan, el seu estat, rols i notes.</value>
+  </data>
 </root>

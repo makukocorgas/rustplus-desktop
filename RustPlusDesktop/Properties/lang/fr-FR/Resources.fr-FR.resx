@@ -4646,4 +4646,55 @@ Vous pouvez trouver plus d&apos;informations sur le site officiel du serveur :
   <data name="CodeUiNoShopsMatch" xml:space="preserve">
     <value>No shops match &quot;{0}&quot;</value>
   </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>CHAT DU CLAN</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>Crash de satellite</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>Un satellite s'écrase !</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>Crash de satellite actif – en cours depuis {0}</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>Clan</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>Aucun clan trouvé</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>Rejoins un clan en jeu pour voir ses membres ici</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>Membre</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>Aucun message du jour défini.</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>Défini par {0}</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>Défini par {0} le {1}</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>Infos du clan</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>Score</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>Membres</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>Créé</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>Fondateur</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>Suis les membres du clan, leur statut, leurs rôles et leurs notes.</value>
+  </data>
 </root>

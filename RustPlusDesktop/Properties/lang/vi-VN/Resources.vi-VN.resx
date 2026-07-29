@@ -3846,4 +3846,55 @@ Bạn có thể tìm thêm thông tin trên trang web chính thức của máy c
   <data name="CodeUiNoShopsMatch" xml:space="preserve">
     <value>No shops match &quot;{0}&quot;</value>
   </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>TRÒ CHUYỆN BANG HỘI</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>Vệ tinh rơi</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>Một vệ tinh đang rơi!</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>Vệ tinh rơi đang diễn ra – đã {0}</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>Bang hội</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>Không tìm thấy bang hội</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>Tham gia một bang hội trong game để xem thành viên tại đây</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>Thành viên</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>Chưa đặt thông điệp trong ngày.</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>Đặt bởi {0}</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>Đặt bởi {0} vào {1}</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>Thông tin bang hội</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>Điểm số</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>Thành viên</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>Ngày tạo</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>Người sáng lập</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>Theo dõi thành viên bang hội, trạng thái, vai trò và ghi chú của họ.</value>
+  </data>
 </root>

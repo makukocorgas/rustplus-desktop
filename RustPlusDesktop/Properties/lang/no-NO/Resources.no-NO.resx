@@ -3846,4 +3846,55 @@ Du kan finne mer informasjon på serverens offisielle nettsted:
   <data name="CodeUiNoShopsMatch" xml:space="preserve">
     <value>No shops match &quot;{0}&quot;</value>
   </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>KLAN-CHAT</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>Satellittkrasj</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>En satellitt styrter ned!</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>Satellittkrasj aktivt – har pågått i {0}</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>Klan</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>Ingen klan funnet</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>Bli med i en klan i spillet for å se medlemmene her</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>Medlem</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>Ingen dagens melding angitt.</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>Angitt av {0}</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>Angitt av {0} den {1}</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>Klaninfo</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>Poeng</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>Medlemmer</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>Opprettet</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>Grunnlegger</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>Følg med på klanmedlemmer, status, roller og notater.</value>
+  </data>
 </root>

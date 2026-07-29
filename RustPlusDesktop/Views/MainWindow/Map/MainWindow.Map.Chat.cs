@@ -359,7 +359,8 @@ public partial class MainWindow
                 if (!isAutomated)
                 {
                     string emoji = channel == ChatChannel.Clan ? "🏰" : "💬";
-                    _ = DiscordBotListenerService.Instance.SendNotificationAsync("chat", $"{emoji} **{m.Author}**: {m.Text}");
+                    string tag = channel == ChatChannel.Clan ? "[CLAN]" : "[TEAM]";
+                    _ = DiscordBotListenerService.Instance.SendNotificationAsync("chat", $"{emoji} {tag} **{m.Author}**: {m.Text}");
                 }
             }
         }

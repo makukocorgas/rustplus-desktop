@@ -3846,4 +3846,55 @@ Löydät lisätietoja palvelimen viralliselta verkkosivustolta:
   <data name="CodeUiNoShopsMatch" xml:space="preserve">
     <value>No shops match &quot;{0}&quot;</value>
   </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>KLAANIKESKUSTELU</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>Satelliittitörmäys</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>Satelliitti syöksyy alas!</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>Satelliittitörmäys käynnissä – kestänyt {0}</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>Klaani</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>Klaania ei löytynyt</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>Liity klaaniin pelissä nähdäksesi sen jäsenet täällä</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>Jäsen</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>Päivän viestiä ei ole asetettu.</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>Asettanut {0}</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>Asettanut {0}, {1}</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>Klaanin tiedot</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>Pisteet</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>Jäsenet</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>Luotu</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>Perustaja</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>Seuraa klaanin jäseniä, heidän tilaansa, rooleja ja muistiinpanoja.</value>
+  </data>
 </root>

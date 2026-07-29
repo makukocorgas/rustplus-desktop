@@ -3846,4 +3846,55 @@ Sunucunun resmi web sitesinde daha fazla bilgi bulabilirsiniz:
   <data name="CodeUiNoShopsMatch" xml:space="preserve">
     <value>No shops match &quot;{0}&quot;</value>
   </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>KLAN SOHBETİ</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>Uydu Düşüşü</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>Bir uydu düşüyor!</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>Uydu düşüşü aktif – {0} önce başladı</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>Klan</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>Klan bulunamadı</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>Üyelerini burada görmek için oyun içinde bir klana katıl</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>Üye</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>Günün mesajı ayarlanmadı.</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>{0} tarafından ayarlandı</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>{0} tarafından {1} tarihinde ayarlandı</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>Klan Bilgisi</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>Puan</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>Üyeler</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>Oluşturulma</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>Kurucu</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>Klan üyelerini, durumlarını, rollerini ve notlarını takip et.</value>
+  </data>
 </root>

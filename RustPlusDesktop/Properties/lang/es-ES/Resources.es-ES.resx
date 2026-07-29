@@ -4436,4 +4436,55 @@ Puedes encontrar más información en el sitio web oficial del servidor:
   <data name="CodeUiNoShopsMatch" xml:space="preserve">
     <value>No shops match &quot;{0}&quot;</value>
   </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>CHAT DEL CLAN</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>Caída de satélite</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>¡Un satélite está cayendo!</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>Caída de satélite activa – lleva {0}</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>Clan</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>No se encontró ningún clan</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>Únete a un clan en el juego para ver a sus miembros aquí</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>Miembro</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>No se ha establecido ningún mensaje del día.</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>Establecido por {0}</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>Establecido por {0} el {1}</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>Información del clan</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>Puntuación</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>Miembros</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>Creado</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>Fundador</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>Sigue a los miembros del clan, su estado, roles y notas.</value>
+  </data>
 </root>

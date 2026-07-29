@@ -3846,4 +3846,55 @@ Open Releases page?</value>
   <data name="CodeUiNoShopsMatch" xml:space="preserve">
     <value>No shops match &quot;{0}&quot;</value>
   </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>ΣΥΝΟΜΙΛΙΑ ΚΛΑΝ</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>Συντριβή δορυφόρου</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>Ένας δορυφόρος συντρίβεται!</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>Συντριβή δορυφόρου ενεργή – διαρκεί {0}</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>Κλαν</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>Δεν βρέθηκε κλαν</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>Μπες σε ένα κλαν μέσα στο παιχνίδι για να δεις τα μέλη του εδώ</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>Μέλος</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>Δεν έχει οριστεί μήνυμα της ημέρας.</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>Ορίστηκε από {0}</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>Ορίστηκε από {0} στις {1}</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>Πληροφορίες κλαν</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>Βαθμολογία</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>Μέλη</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>Δημιουργήθηκε</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>Ιδρυτής</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>Παρακολούθησε τα μέλη του κλαν, την κατάστασή τους, τους ρόλους και τις σημειώσεις τους.</value>
+  </data>
 </root>

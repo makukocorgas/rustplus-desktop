@@ -169,6 +169,7 @@ public sealed class RustPlusClientReal : IRustPlusClient, IDisposable
 
     public event EventHandler<TeamChatMessage>? TeamChatReceived;
     public event EventHandler<TeamChatMessage>? ClanChatReceived;
+    public event EventHandler<RustPlusApi.Data.Clans.ClanInfo?>? ClanChanged;
     // Overload ohne Token (falls irgendwo so aufgerufen wird)
     public Task ConnectAsync(ServerProfile profile) =>
     ConnectAsync(profile, CancellationToken.None);
@@ -2100,6 +2101,18 @@ function _serr(e) {
         }
     }
 
+    private void Api_OnClanChanged(object? sender, ClanChangedEventArg e)
+    {
+        try
+        {
+            ClanChanged?.Invoke(this, e.ClanInfo);
+        }
+        catch
+        {
+            // Roster refresh darf nichts reißen
+        }
+    }
+
     private void Api_OnClanChatReceived(object? sender, ClanMessageEventArg e)
     {
         try
@@ -2211,6 +2224,9 @@ function _serr(e) {
 
         _api.OnStorageMonitorTriggered -= Api_OnStorageMonitorTriggered;
         _api.OnStorageMonitorTriggered += Api_OnStorageMonitorTriggered;
+
+        _api.OnClanChanged -= Api_OnClanChanged;
+        _api.OnClanChanged += Api_OnClanChanged;
 
         _api.RequestSent += (_, reqObj) =>
         {
@@ -3089,6 +3105,26 @@ function _serr(e) {
         {
             _log("[clan-chat-history:error] " + ex.Message);
             return result;
+        }
+    }
+
+    /// <summary>
+    /// Roster, roles and MOTD for the caller's clan. Unlike GetTeamInfoAsync (which predates
+    /// RustPlusApi v2 and has to survive several incompatible library shapes via reflection),
+    /// this is a straight call — v2's ClanInfo shape is known and current.
+    /// </summary>
+    public async Task<RustPlusApi.Data.Clans.ClanInfo?> GetClanInfoAsync(CancellationToken ct = default)
+    {
+        if (_api is null) return null;
+        try
+        {
+            var res = await _api.GetClanInfoAsync(ct).ConfigureAwait(false);
+            return res?.IsSuccess == true ? res.Data : null;
+        }
+        catch (Exception ex)
+        {
+            _log?.Invoke("[clan-info:error] " + ex.Message);
+            return null;
         }
     }
 

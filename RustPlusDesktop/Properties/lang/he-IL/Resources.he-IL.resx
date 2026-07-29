@@ -3891,4 +3891,55 @@
   <data name="CodeUiNoShopsMatch" xml:space="preserve">
     <value>No shops match &quot;{0}&quot;</value>
   </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>צ'אט השבט</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>התרסקות לוויין</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>לוויין מתרסק!</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>התרסקות לוויין פעילה – נמשכת {0}</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>שבט</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>לא נמצא שבט</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>הצטרף לשבט במשחק כדי לראות את חבריו כאן</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>חבר</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>לא הוגדרה הודעת יום.</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>הוגדר על ידי {0}</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>הוגדר על ידי {0} בתאריך {1}</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>מידע על השבט</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>ניקוד</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>חברים</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>נוצר</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>מייסד</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>עקוב אחר חברי השבט, הסטטוס, התפקידים וההערות שלהם.</value>
+  </data>
 </root>

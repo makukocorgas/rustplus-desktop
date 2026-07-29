@@ -4547,4 +4547,55 @@
   <data name="CodeUiNoShopsMatch" xml:space="preserve">
     <value>No shops match &quot;{0}&quot;</value>
   </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>ЧАТ КЛАНА</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>Падение спутника</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>Спутник падает!</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>Падение спутника активно – длится {0}</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>Клан</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>Клан не найден</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>Вступи в клан в игре, чтобы увидеть здесь его участников</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>Участник</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>Сообщение дня не задано.</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>Установлено {0}</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>Установлено {0}, {1}</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>Информация о клане</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>Очки</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>Участники</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>Создан</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>Основатель</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>Отслеживай участников клана, их статус, роли и заметки.</value>
+  </data>
 </root>

@@ -3846,4 +3846,55 @@ Você pode encontrar mais informações no site oficial do servidor:
   <data name="CodeUiNoShopsMatch" xml:space="preserve">
     <value>No shops match &quot;{0}&quot;</value>
   </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>CHAT DO CLÃ</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>Queda de satélite</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>Um satélite está caindo!</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>Queda de satélite ativa – há {0}</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>Clã</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>Nenhum clã encontrado</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>Entre em um clã no jogo para ver os membros aqui</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>Membro</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>Nenhuma mensagem do dia definida.</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>Definido por {0}</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>Definido por {0} em {1}</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>Informações do clã</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>Pontuação</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>Membros</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>Criado</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>Fundador</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>Acompanhe os membros do clã, seu status, funções e anotações.</value>
+  </data>
 </root>

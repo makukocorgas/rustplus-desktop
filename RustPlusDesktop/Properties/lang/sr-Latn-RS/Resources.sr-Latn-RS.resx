@@ -3846,4 +3846,55 @@
   <data name="CodeUiNoShopsMatch" xml:space="preserve">
     <value>No shops match &quot;{0}&quot;</value>
   </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>KLAN ĆASKANJE</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>Pad satelita</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>Satelit se ruši!</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>Pad satelita aktivan – traje {0}</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>Klan</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>Klan nije pronađen</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>Pridruži se klanu u igri da bi ovde video njegove članove</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>Član</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>Poruka dana nije postavljena.</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>Postavio {0}</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>Postavio {0}, {1}</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>Informacije o klanu</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>Skor</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>Članovi</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>Kreiran</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>Osnivač</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>Prati članove klana, njihov status, uloge i beleške.</value>
+  </data>
 </root>

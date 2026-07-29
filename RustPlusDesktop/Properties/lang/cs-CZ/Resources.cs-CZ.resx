@@ -3846,4 +3846,55 @@ Více informací naleznete na oficiálních stránkách serveru:
   <data name="CodeUiNoShopsMatch" xml:space="preserve">
     <value>No shops match &quot;{0}&quot;</value>
   </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>KLANOVÝ CHAT</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>Pád satelitu</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>Satelit padá!</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>Pád satelitu aktivní – běží {0}</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>Klan</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>Žádný klan nenalezen</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>Připoj se ke klanu ve hře, abys zde viděl jeho členy</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>Člen</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>Není nastavena žádná zpráva dne.</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>Nastavil {0}</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>Nastavil {0} dne {1}</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>Informace o klanu</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>Skóre</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>Členové</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>Založeno</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>Zakladatel</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>Sleduj členy klanu, jejich stav, role a poznámky.</value>
+  </data>
 </root>
