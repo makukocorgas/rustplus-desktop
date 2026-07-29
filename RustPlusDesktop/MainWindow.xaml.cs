@@ -3305,8 +3305,27 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
         Dispatcher.Invoke(() =>
         {
+            var keyHost = (e.Host ?? "").Trim();
+            var keyPort = e.Port;
+            // PREFER the SteamID from the pairing payload if it exists.
+            // Only fallback to _vm.SteamId64 if the payload is missing it.
+            var keySteam = !string.IsNullOrEmpty(e.SteamId64) ? e.SteamId64 : _vm.SteamId64;
+
+            // The phone keeps resending this pairing as an FCM keepalive as long as it's paired
+            // in-game, even after the user deletes it here — don't silently resurrect it, and
+            // don't show a "Pairing Successful" notification for something we're ignoring.
+            bool serverKnown = _vm.Servers.Any(s =>
+                s.Host.Equals(keyHost, StringComparison.OrdinalIgnoreCase) &&
+                s.Port == keyPort &&
+                s.SteamId64 == keySteam);
+            if (!serverKnown && TrackingService.IsPairingDismissed(keyHost, keyPort, keySteam))
+            {
+                AppendLog($"[pairing] Ignored — {keyHost}:{keyPort} was explicitly deleted by the user.");
+                return;
+            }
+
             // Add to Notification Center!
-            var pairedMsg = e.EntityId.HasValue 
+            var pairedMsg = e.EntityId.HasValue
                 ? $"Paired device: {e.EntityName ?? "Smart Device"} (ID: {e.EntityId.Value}, Type: {e.EntityType ?? "Unknown"})"
                 : $"Paired server: {e.ServerName ?? e.Host}:{e.Port}";
             var notif = new RustPlusNotification(
@@ -3323,12 +3342,6 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 Timestamp = DateTime.Now
             };
             NotificationCenterService.AddNotification(notif);
-
-            var keyHost = (e.Host ?? "").Trim();
-            var keyPort = e.Port;
-            // PREFER the SteamID from the pairing payload if it exists. 
-            // Only fallback to _vm.SteamId64 if the payload is missing it.
-            var keySteam = !string.IsNullOrEmpty(e.SteamId64) ? e.SteamId64 : _vm.SteamId64;
 
             // Save SteamID globally if we just received a new one
             if (!string.IsNullOrEmpty(e.SteamId64) && e.SteamId64 != TrackingService.SteamId64)
@@ -3717,6 +3730,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             var prof = _serverToDelete;
             _vm.Servers.Remove(prof);
             _vm.Save();
+            TrackingService.AddDismissedPairing(prof.Host, prof.Port, prof.SteamId64);
             AppendLog($"Server deleted: {prof.Name}");
         }
 
@@ -3863,6 +3877,12 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     private static readonly List<string> sPendingLogs = new();
     public static event Action? IconsUpdated;
 
+    private const int MaxLogLines = 2000;
+    private const double CollapsedLogHeight = 200;
+    private const double ExpandedLogHeight = 420;
+    private bool _isLogExpanded;
+    private readonly List<string> _logLines = new();
+
     public void FlushPendingLogs()
     {
         if (TxtLog == null) return;
@@ -3870,17 +3890,12 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         {
             if (sPendingLogs.Count > 0)
             {
-                foreach (var pl in sPendingLogs)
-                {
-                    TxtLog.AppendText(pl + Environment.NewLine);
-                }
+                foreach (var pl in sPendingLogs) AddLogLine(pl);
                 sPendingLogs.Clear();
-                TxtLog.ScrollToEnd();
+                RefreshLogText();
             }
         }
     }
-
-    private const int MaxLogLines = 2000;
 
     public void AppendLog(string line)
     {
@@ -3898,22 +3913,61 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             else
             {
                 FlushPendingLogs();
-                TxtLog.AppendText(formatted + Environment.NewLine);
-                TrimLogIfNeeded();
-                TxtLog.ScrollToEnd();
+                bool trimmed = AddLogLine(formatted);
+                if (trimmed || HasLogFilter())
+                {
+                    RefreshLogText();
+                }
+                else
+                {
+                    TxtLog.AppendText(formatted + Environment.NewLine);
+                    TxtLog.ScrollToEnd();
+                }
             }
         });
     }
 
-    private void TrimLogIfNeeded()
+    private bool AddLogLine(string line)
     {
-        int excess = TxtLog.LineCount - MaxLogLines;
-        if (excess <= 0) return;
-        int charIndex = TxtLog.GetCharacterIndexFromLineIndex(excess);
-        if (charIndex > 0)
-        {
-            TxtLog.Text = TxtLog.Text.Substring(charIndex);
-        }
+        _logLines.Add(line);
+        int overflow = _logLines.Count - MaxLogLines;
+        if (overflow <= 0) return false;
+
+        _logLines.RemoveRange(0, overflow);
+        return true;
+    }
+
+    private bool HasLogFilter()
+        => !string.IsNullOrWhiteSpace(TxtLogFilter?.Text);
+
+    private void RefreshLogText()
+    {
+        if (TxtLog == null) return;
+
+        string filter = TxtLogFilter?.Text?.Trim() ?? "";
+        IEnumerable<string> lines = string.IsNullOrWhiteSpace(filter)
+            ? _logLines
+            : _logLines.Where(x => x.Contains(filter, StringComparison.OrdinalIgnoreCase));
+
+        TxtLog.Text = string.Join(Environment.NewLine, lines);
+        if (TxtLog.Text.Length > 0) TxtLog.AppendText(Environment.NewLine);
+        TxtLog.ScrollToEnd();
+    }
+
+    private void TxtLogFilter_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        RefreshLogText();
+    }
+
+    private void BtnToggleLogExpand_Click(object sender, RoutedEventArgs e)
+    {
+        _isLogExpanded = !_isLogExpanded;
+        if (LogPanel != null) LogPanel.Height = _isLogExpanded ? ExpandedLogHeight : CollapsedLogHeight;
+        if (BtnToggleLogExpand != null)
+            BtnToggleLogExpand.Content = _isLogExpanded
+                ? RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiCollapse", RustPlusDesk.Properties.Resources.Culture) ?? "Collapse"
+                : RustPlusDesk.Properties.Resources.ResourceManager.GetString("UiExpand", RustPlusDesk.Properties.Resources.Culture) ?? "Expand";
+        TxtLog?.ScrollToEnd();
     }
 
     static readonly JsonSerializerOptions JsonOpt = new()
@@ -6046,9 +6100,9 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
     public void ApplySettings()
     {
-        if (TxtLog != null)
+        if (LogPanel != null)
         {
-            TxtLog.Visibility = TrackingService.HideConsole ? Visibility.Collapsed : Visibility.Visible;
+            LogPanel.Visibility = TrackingService.HideConsole ? Visibility.Collapsed : Visibility.Visible;
         }
 
         if (ColSidebar != null)

@@ -22,55 +22,71 @@ public partial class MainWindow
 
         if (_isShowingDeepSeaMap)
         {
-            int dsCells = 20; // 3000m / 150m grid size
-
-            double dsOx = _worldRectPx.X;
-            double dsOy = _worldRectPx.Y;
-            double dsOw = _worldRectPx.Width;
-            double dsOh = _worldRectPx.Height;
-            double dsStep = dsOw / dsCells;
-
             var dsStroke = Brushes.Black;
             double dsThin = 1.0;
 
-            for (int i = 0; i <= dsCells; i++)
+            double minX = -5250;
+            double maxX = -2250;
+            double minY = 500;
+            double maxY = 3500;
+
+            double startX = -6075;
+            for (double worldX = startX; worldX <= maxX + 150; worldX += 150)
             {
-                double x = dsOx + i * dsStep;
+                if (worldX < minX - 75 || worldX > maxX + 75) continue;
+
+                var pTop = WorldToImagePx(worldX, maxY);
+                var pBottom = WorldToImagePx(worldX, minY);
+
                 var line = new System.Windows.Shapes.Line
                 {
-                    X1 = x,
-                    Y1 = dsOy,
-                    X2 = x,
-                    Y2 = dsOy + dsOh,
+                    X1 = pTop.X,
+                    Y1 = pTop.Y,
+                    X2 = pBottom.X,
+                    Y2 = pBottom.Y,
                     Stroke = dsStroke,
                     StrokeThickness = dsThin
                 };
                 GridLayer.Children.Add(line);
             }
 
-            for (int j = 0; j <= dsCells; j++)
+            double startY = _worldSizeS + 75;
+            for (double worldY = startY; worldY >= minY - 150; worldY -= 150)
             {
-                double y = dsOy + j * dsStep;
+                if (worldY < minY - 75 || worldY > maxY + 75) continue;
+
+                var pLeft = WorldToImagePx(minX, worldY);
+                var pRight = WorldToImagePx(maxX, worldY);
+
                 var line = new System.Windows.Shapes.Line
                 {
-                    X1 = dsOx,
-                    Y1 = y,
-                    X2 = dsOx + dsOw,
-                    Y2 = y,
+                    X1 = pLeft.X,
+                    Y1 = pLeft.Y,
+                    X2 = pRight.X,
+                    Y2 = pRight.Y,
                     Stroke = dsStroke,
                     StrokeThickness = dsThin
                 };
                 GridLayer.Children.Add(line);
             }
 
-            for (int i = 0; i < dsCells; i++)
+            int minCol = (int)Math.Floor((minX - startX) / 150.0);
+            int maxCol = (int)Math.Floor((maxX - startX) / 150.0);
+            int minRow = (int)Math.Floor((startY - maxY) / 150.0);
+            int maxRow = (int)Math.Floor((startY - minY) / 150.0);
+
+            for (int col = minCol; col <= maxCol; col++)
             {
-                string col = "DS-" + ColumnLabel(i);
-                for (int j = 0; j < dsCells; j++)
+                string colStr = ColumnLabel(col);
+                double cellX = startX + col * 150;
+
+                for (int row = minRow; row <= maxRow; row++)
                 {
+                    double cellY = startY - row * 150;
+
                     var tb = new TextBlock
                     {
-                        Text = $"{col}{j}",
+                        Text = $"{colStr}{row}",
                         Foreground = Brushes.LightBlue,
                         FontSize = 9,
                         Margin = new Thickness(6, 4, 0, 0),
@@ -78,36 +94,33 @@ public partial class MainWindow
                         Padding = new Thickness(0)
                     };
 
-                    double x = dsOx + i * dsStep + 1;
-                    double y = dsOy + j * dsStep + 1;
+                    var p = WorldToImagePx(cellX, cellY);
 
                     GridLayer.Children.Add(tb);
-                    Canvas.SetLeft(tb, x);
-                    Canvas.SetTop(tb, y);
+                    Canvas.SetLeft(tb, p.X);
+                    Canvas.SetTop(tb, p.Y);
                 }
             }
             RefreshGridLineThickness();
             return;
         }
 
-        int cells = Math.Max(1, (int)Math.Round(_worldSizeS / 150.0));
-
-        double ox = _worldRectPx.X, oy = _worldRectPx.Y;
-        double ow = _worldRectPx.Width, oh = _worldRectPx.Height;
-        double step = ow / cells;
+        int cells = Math.Max(1, (int)Math.Ceiling(_worldSizeS / 150.0));
 
         var stroke = Brushes.Black;
         double thin = 1.0;
 
         for (int i = 0; i <= cells; i++)
         {
-            double x = ox + i * step;
+            var pTop = WorldToImagePx(i * 150, cells * 150);
+            var pBottom = WorldToImagePx(i * 150, 0);
+
             var line = new System.Windows.Shapes.Line
             {
-                X1 = x,
-                Y1 = oy,
-                X2 = x,
-                Y2 = oy + oh,
+                X1 = pTop.X,
+                Y1 = pTop.Y,
+                X2 = pBottom.X,
+                Y2 = pBottom.Y,
                 Stroke = stroke,
                 StrokeThickness = thin
             };
@@ -116,13 +129,15 @@ public partial class MainWindow
 
         for (int j = 0; j <= cells; j++)
         {
-            double y = oy + j * step;
+            var pLeft = WorldToImagePx(0, (cells - j) * 150);
+            var pRight = WorldToImagePx(cells * 150, (cells - j) * 150);
+
             var line = new System.Windows.Shapes.Line
             {
-                X1 = ox,
-                Y1 = y,
-                X2 = ox + ow,
-                Y2 = y,
+                X1 = pLeft.X,
+                Y1 = pLeft.Y,
+                X2 = pRight.X,
+                Y2 = pRight.Y,
                 Stroke = stroke,
                 StrokeThickness = thin
             };
@@ -144,12 +159,11 @@ public partial class MainWindow
                     Padding = new Thickness(0)
                 };
 
-                double x = ox + i * step + 1;
-                double y = oy + j * step + 1;
+                var p = WorldToImagePx(i * 150, (cells - j) * 150);
 
                 GridLayer.Children.Add(tb);
-                Canvas.SetLeft(tb, x);
-                Canvas.SetTop(tb, y);
+                Canvas.SetLeft(tb, p.X);
+                Canvas.SetTop(tb, p.Y);
             }
         }
         RefreshGridLineThickness();
@@ -188,13 +202,19 @@ public partial class MainWindow
         label = "";
         if (_worldSizeS <= 0) return false;
 
-        int cells = Math.Max(1, (int)Math.Round(_worldSizeS / 150.0));
-        double cell = _worldSizeS / (double)cells;
+        if (_isShowingDeepSeaMap)
+        {
+            int col = (int)Math.Floor((x - (-6075)) / 150.0);
+            int row = (int)Math.Floor((_worldSizeS + 75 - y) / 150.0);
+            label = $"DS-{ColumnLabel(col)}{row}";
+            return true;
+        }
 
-        int col = Math.Clamp((int)Math.Floor(x / cell), 0, cells - 1);
-        int row = Math.Clamp((int)Math.Floor((_worldSizeS - y) / cell), 0, cells - 1);
+        int cells = Math.Max(1, (int)Math.Ceiling(_worldSizeS / 150.0));
+        int colNormal = Math.Clamp((int)Math.Floor(x / 150.0), 0, cells - 1);
+        int rowNormal = Math.Clamp((int)Math.Floor((_worldSizeS - y) / 150.0), 0, cells - 1);
 
-        label = $"{ColumnLabel(col)}{row}";
+        label = $"{ColumnLabel(colNormal)}{rowNormal}";
         return true;
     }
 
@@ -206,5 +226,3 @@ public partial class MainWindow
     private string GetGridLabel(double x, double y)
         => TryGetGridRef(x, y, out var g) ? g : "off-grid";
 }
-
-

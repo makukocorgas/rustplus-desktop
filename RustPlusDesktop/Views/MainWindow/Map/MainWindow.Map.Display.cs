@@ -115,7 +115,8 @@ public partial class MainWindow
 
         ImgMap.Source = bmp;               // zunaechst nackte Map
         SetupMapScene(bmp);
-        RedrawGrid();
+        // Grid is (re)drawn by the caller once _worldSizeS/_worldRectPx have been updated
+        // for this map — drawing it here would use stale values from the previous server.
     }
 
     public void ApplyMapPerformanceSettings()

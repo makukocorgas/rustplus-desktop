@@ -160,6 +160,12 @@ public class TrackingSettings
     public bool MapUseCacheMode { get; set; } = false;
     public double MapRenderScale { get; set; } = 1.0;
     public bool MapUseAliasedEdgeMode { get; set; } = false;
+
+    // Servers the user explicitly deleted from the list. The phone's Rust+ app keeps
+    // sending FCM "pairing" keepalives for a server as long as it's paired in-game,
+    // regardless of whether it's still in this app's list — without this, every such
+    // keepalive silently re-adds the deleted server on next launch.
+    public List<string> DismissedPairingSignatures { get; set; } = new();
 }
 
 
@@ -2553,4 +2559,21 @@ function schedRender(pid) {
             SaveSettings();
         }
     }
+
+    private static string PairingSignature(string host, int port, string steamId64) =>
+        $"{(host ?? "").Trim().ToLowerInvariant()}:{port}|{steamId64 ?? ""}";
+
+    public static void AddDismissedPairing(string host, int port, string steamId64)
+    {
+        _settings.DismissedPairingSignatures ??= new();
+        var sig = PairingSignature(host, port, steamId64);
+        if (!_settings.DismissedPairingSignatures.Contains(sig))
+        {
+            _settings.DismissedPairingSignatures.Add(sig);
+            SaveSettings();
+        }
+    }
+
+    public static bool IsPairingDismissed(string host, int port, string steamId64) =>
+        _settings.DismissedPairingSignatures?.Contains(PairingSignature(host, port, steamId64)) == true;
 }
