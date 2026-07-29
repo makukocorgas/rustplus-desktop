@@ -154,6 +154,7 @@ public class TrackingSettings
     public int NotificationsRetentionDays { get; set; } = 30;
     public List<string> MutedNotificationServers { get; set; } = new();
     public Dictionary<string, string> MutedNotificationServerNames { get; set; } = new();
+    public Dictionary<string, ulong> ServerFollowingSteamId { get; set; } = new();
 
     public int MapBitmapScalingMode { get; set; } = 0;
     public bool MapUseCacheMode { get; set; } = false;
@@ -296,6 +297,7 @@ public static class TrackingService
     private static readonly object _dbLock = new();
     private static Dictionary<string, TrackedPlayer> _trackedPlayers = new();
     private static TrackingSettings _settings = new();
+    public static TrackingSettings Settings => _settings;
     private static Timer? _trackingTimer;
     private static string? _lastServerHost;
     private static int _lastServerPort;
@@ -355,6 +357,26 @@ public static class TrackingService
 
             var jsonS = JsonSerializer.Serialize(_settings, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(_settingsPath, jsonS);
+        }
+        catch { }
+    }
+
+    // Settings-only writes should not pay the cost of re-serializing and pruning the
+    // entire tracked-players database (which SaveDB() does on every call). Use this for
+    // property setters that only touch _settings.
+    private static void SaveSettings()
+    {
+        try
+        {
+            var dir = Path.GetDirectoryName(_settingsPath);
+            if (dir != null && !Directory.Exists(dir)) Directory.CreateDirectory(dir);
+
+            string json;
+            lock (_dbLock)
+            {
+                json = JsonSerializer.Serialize(_settings, new JsonSerializerOptions { WriteIndented = true });
+            }
+            File.WriteAllText(_settingsPath, json);
         }
         catch { }
     }
@@ -880,7 +902,7 @@ public static class TrackingService
     public static string BattleMetricsApiKey
     {
         get => _settings.BattleMetricsApiKey;
-        set { _settings.BattleMetricsApiKey = value?.Trim() ?? ""; SaveDB(); }
+        set { _settings.BattleMetricsApiKey = value?.Trim() ?? ""; SaveSettings(); }
     }
 
     private static async Task<HttpResponseMessage> BmGetAsync(string url)
@@ -1047,7 +1069,7 @@ public static class TrackingService
     {
         var key = $"{serverName}|{groupName}";
         _settings.GroupStates[key] = expanded;
-        SaveDB();
+        SaveSettings();
     }
 
     public static List<string> GetGroupOrder(string serverName)
@@ -1059,31 +1081,31 @@ public static class TrackingService
     public static void SetGroupOrder(string serverName, List<string> order)
     {
         _settings.GroupOrder[serverName] = order;
-        SaveDB();
+        SaveSettings();
     }
 
     public static bool IsBackgroundTrackingEnabled
     {
         get => _settings.BackgroundTrackingEnabled;
-        set { _settings.BackgroundTrackingEnabled = value; SaveDB(); }
+        set { _settings.BackgroundTrackingEnabled = value; SaveSettings(); }
     }
 
     public static bool CloseToTrayEnabled
     {
         get => _settings.CloseToTrayEnabled;
-        set { _settings.CloseToTrayEnabled = value; SaveDB(); }
+        set { _settings.CloseToTrayEnabled = value; SaveSettings(); }
     }
 
     public static bool StartMinimizedEnabled
     {
         get => _settings.StartMinimizedEnabled;
-        set { _settings.StartMinimizedEnabled = value; SaveDB(); }
+        set { _settings.StartMinimizedEnabled = value; SaveSettings(); }
     }
 
     public static bool AutoConnectEnabled
     {
         get => _settings.AutoConnectEnabled;
-        set { _settings.AutoConnectEnabled = value; SaveDB(); }
+        set { _settings.AutoConnectEnabled = value; SaveSettings(); }
     }
 
     public static bool AutoStartEnabled
@@ -1092,33 +1114,33 @@ public static class TrackingService
         set 
         { 
             if (_settings.AutoStartEnabled == value) return;
-            _settings.AutoStartEnabled = value; 
+            _settings.AutoStartEnabled = value;
             SetAutoStart(value);
-            SaveDB(); 
+            SaveSettings();
         }
     }
 
     public static bool AutoLoadShops
     {
         get => _settings.AutoLoadShops;
-        set { _settings.AutoLoadShops = value; SaveDB(); }
+        set { _settings.AutoLoadShops = value; SaveSettings(); }
     }
 
     public static bool HideConsole
     {
         get => _settings.HideConsole;
-        set { _settings.HideConsole = value; SaveDB(); }
+        set { _settings.HideConsole = value; SaveSettings(); }
     }
 
     public static double SidebarWidth
     {
         get => _settings.SidebarWidth;
-        set { _settings.SidebarWidth = value; SaveDB(); }
+        set { _settings.SidebarWidth = value; SaveSettings(); }
     }
     public static bool SidebarPinned
     {
         get => _settings.SidebarPinned;
-        set { _settings.SidebarPinned = value; SaveDB(); }
+        set { _settings.SidebarPinned = value; SaveSettings(); }
     }
 
     public static double WindowWidth => _settings.WindowWidth;
@@ -1134,147 +1156,147 @@ public static class TrackingService
         _settings.WindowLeft = left;
         _settings.WindowTop = top;
         _settings.WindowMaximized = maximized;
-        SaveDB();
+        SaveSettings();
     }
 
     public static string SteamId64
     {
         get => _settings.SteamId64;
-        set { _settings.SteamId64 = value; SaveDB(); }
+        set { _settings.SteamId64 = value; SaveSettings(); }
     }
 
     public static DateTime? FcmIssuedAt
     {
         get => _settings.FcmIssuedAt;
-        set { _settings.FcmIssuedAt = value; SaveDB(); }
+        set { _settings.FcmIssuedAt = value; SaveSettings(); }
     }
 
     public static DateTime? FcmExpiresAt
     {
         get => _settings.FcmExpiresAt;
-        set { _settings.FcmExpiresAt = value; SaveDB(); }
+        set { _settings.FcmExpiresAt = value; SaveSettings(); }
     }
 
     public static bool AnnounceCargo
     {
         get => _settings.AnnounceCargo;
-        set { _settings.AnnounceCargo = value; SaveDB(); }
+        set { _settings.AnnounceCargo = value; SaveSettings(); }
     }
     public static bool AnnounceHeli
     {
         get => _settings.AnnounceHeli;
-        set { _settings.AnnounceHeli = value; SaveDB(); }
+        set { _settings.AnnounceHeli = value; SaveSettings(); }
     }
     public static bool AnnounceChinook
     {
         get => _settings.AnnounceChinook;
-        set { _settings.AnnounceChinook = value; SaveDB(); }
+        set { _settings.AnnounceChinook = value; SaveSettings(); }
     }
     public static bool AnnounceVendor
     {
         get => _settings.AnnounceVendor;
-        set { _settings.AnnounceVendor = value; SaveDB(); }
+        set { _settings.AnnounceVendor = value; SaveSettings(); }
     }
     public static bool AnnounceOilRig
     {
         get => _settings.AnnounceOilRig;
-        set { _settings.AnnounceOilRig = value; SaveDB(); }
+        set { _settings.AnnounceOilRig = value; SaveSettings(); }
     }
     public static bool AnnounceDeepSea
     {
         get => _settings.AnnounceDeepSea;
-        set { _settings.AnnounceDeepSea = value; SaveDB(); }
+        set { _settings.AnnounceDeepSea = value; SaveSettings(); }
     }
     public static bool AnnouncePlayerOnline
     {
         get => _settings.AnnouncePlayerOnline;
-        set { _settings.AnnouncePlayerOnline = value; SaveDB(); }
+        set { _settings.AnnouncePlayerOnline = value; SaveSettings(); }
     }
     public static bool AnnounceTracking
     {
         get => _settings.AnnounceTracking;
-        set { _settings.AnnounceTracking = value; SaveDB(); }
+        set { _settings.AnnounceTracking = value; SaveSettings(); }
     }
     public static bool AnnouncePlayerOffline
     {
         get => _settings.AnnouncePlayerOffline;
-        set { _settings.AnnouncePlayerOffline = value; SaveDB(); }
+        set { _settings.AnnouncePlayerOffline = value; SaveSettings(); }
     }
     public static bool AnnouncePlayerAfk
     {
         get => _settings.AnnouncePlayerAfk;
-        set { _settings.AnnouncePlayerAfk = value; SaveDB(); }
+        set { _settings.AnnouncePlayerAfk = value; SaveSettings(); }
     }
     public static bool AnnouncePlayerDeathSelf
     {
         get => _settings.AnnouncePlayerDeathSelf;
-        set { _settings.AnnouncePlayerDeathSelf = value; SaveDB(); }
+        set { _settings.AnnouncePlayerDeathSelf = value; SaveSettings(); }
     }
     public static bool AnnouncePlayerDeathTeam
     {
         get => _settings.AnnouncePlayerDeathTeam;
-        set { _settings.AnnouncePlayerDeathTeam = value; SaveDB(); }
+        set { _settings.AnnouncePlayerDeathTeam = value; SaveSettings(); }
     }
     public static bool AnnouncePlayerRespawnSelf
     {
         get => _settings.AnnouncePlayerRespawnSelf;
-        set { _settings.AnnouncePlayerRespawnSelf = value; SaveDB(); }
+        set { _settings.AnnouncePlayerRespawnSelf = value; SaveSettings(); }
     }
     public static bool AnnouncePlayerRespawnTeam
     {
         get => _settings.AnnouncePlayerRespawnTeam;
-        set { _settings.AnnouncePlayerRespawnTeam = value; SaveDB(); }
+        set { _settings.AnnouncePlayerRespawnTeam = value; SaveSettings(); }
     }
     public static bool AnnounceNewShops
     {
         get => _settings.AnnounceNewShops;
-        set { _settings.AnnounceNewShops = value; SaveDB(); }
+        set { _settings.AnnounceNewShops = value; SaveSettings(); }
     }
     public static bool AnnounceSuspiciousShops
     {
         get => _settings.AnnounceSuspiciousShops;
-        set { _settings.AnnounceSuspiciousShops = value; SaveDB(); }
+        set { _settings.AnnounceSuspiciousShops = value; SaveSettings(); }
     }
     public static bool AnnounceTradeAlerts
     {
         get => _settings.AnnounceTradeAlerts;
-        set { _settings.AnnounceTradeAlerts = value; SaveDB(); }
+        set { _settings.AnnounceTradeAlerts = value; SaveSettings(); }
     }
 
     public static string SelectedLanguage
     {
         get => _settings.SelectedLanguage;
-        set { _settings.SelectedLanguage = value; SaveDB(); }
+        set { _settings.SelectedLanguage = value; SaveSettings(); }
     }
 
     public static bool AnnounceSpawnsMaster
     {
         get => _settings.AnnounceSpawnsMaster;
-        set { _settings.AnnounceSpawnsMaster = value; SaveDB(); }
+        set { _settings.AnnounceSpawnsMaster = value; SaveSettings(); }
     }
 
     public static bool ChatMasterOfferSoundEnabled
     {
         get => _settings.ChatMasterOfferSoundEnabled;
-        set { _settings.ChatMasterOfferSoundEnabled = value; SaveDB(); }
+        set { _settings.ChatMasterOfferSoundEnabled = value; SaveSettings(); }
     }
 
     public static bool TranslationConsentGiven
     {
         get => _settings.TranslationConsentGiven;
-        set { _settings.TranslationConsentGiven = value; SaveDB(); }
+        set { _settings.TranslationConsentGiven = value; SaveSettings(); }
     }
 
     public static bool UploadConsentGiven
     {
         get => _settings.UploadConsentGiven;
-        set { _settings.UploadConsentGiven = value; SaveDB(); }
+        set { _settings.UploadConsentGiven = value; SaveSettings(); }
     }
 
     public static bool CloudSyncEnabled
     {
         get => _settings.CloudSyncEnabled;
-        set { _settings.CloudSyncEnabled = value; SaveDB(); }
+        set { _settings.CloudSyncEnabled = value; SaveSettings(); }
     }
 
     private static string HotkeyAlertKey(string serverKey, long entityId) => $"{serverKey}|{entityId}";
@@ -1289,7 +1311,7 @@ public static class TrackingService
     {
         var key = HotkeyAlertKey(serverKey, entityId);
         _settings.HotkeyTriggerChatAlertEnabled[key] = enabled;
-        SaveDB();
+        SaveSettings();
     }
 
     public static IReadOnlyDictionary<string, bool> GetAllHotkeyTriggerChatAlerts()
@@ -1298,18 +1320,18 @@ public static class TrackingService
     public static bool HotkeyTriggerChatAlertsEnabled
     {
         get => _settings.HotkeyTriggerChatAlertsEnabled;
-        set { _settings.HotkeyTriggerChatAlertsEnabled = value; SaveDB(); }
+        set { _settings.HotkeyTriggerChatAlertsEnabled = value; SaveSettings(); }
     }
 
     public static bool AnnounceCargoDocking
     {
         get => _settings.AnnounceCargoDocking;
-        set { _settings.AnnounceCargoDocking = value; SaveDB(); }
+        set { _settings.AnnounceCargoDocking = value; SaveSettings(); }
     }
     public static bool AnnounceCargoEgress
     {
         get => _settings.AnnounceCargoEgress;
-        set { _settings.AnnounceCargoEgress = value; SaveDB(); }
+        set { _settings.AnnounceCargoEgress = value; SaveSettings(); }
     }
     public static int GetLearnedDockingDuration(string host)
     {
@@ -1320,12 +1342,12 @@ public static class TrackingService
     {
         if (minutes < 1 || minutes > 60) return;
         _settings.LearnedDockingDurations[host] = minutes;
-        SaveDB();
+        SaveSettings();
     }
     public static bool AnnounceCargoArrival
     {
         get => _settings.AnnounceCargoArrival;
-        set { _settings.AnnounceCargoArrival = value; _settings.AnnounceCargoArrivalUserSet = true; SaveDB(); }
+        set { _settings.AnnounceCargoArrival = value; _settings.AnnounceCargoArrivalUserSet = true; SaveSettings(); }
     }
 
     /// <summary>
@@ -1339,119 +1361,119 @@ public static class TrackingService
             return false;
 
         _settings.AnnounceCargoArrival = true;
-        SaveDB();
+        SaveSettings();
         return true;
     }
     public static bool AnnounceSmartAlerts
     {
         get => _settings.AnnounceSmartAlerts;
-        set { _settings.AnnounceSmartAlerts = value; SaveDB(); }
+        set { _settings.AnnounceSmartAlerts = value; SaveSettings(); }
     }
     public static bool GenericAlarmPopupEnabled
     {
         get => _settings.GenericAlarmPopupEnabled;
-        set { _settings.GenericAlarmPopupEnabled = value; SaveDB(); }
+        set { _settings.GenericAlarmPopupEnabled = value; SaveSettings(); }
     }
     public static bool GenericAlarmOverlayEnabled
     {
         get => _settings.GenericAlarmOverlayEnabled;
-        set { _settings.GenericAlarmOverlayEnabled = value; SaveDB(); }
+        set { _settings.GenericAlarmOverlayEnabled = value; SaveSettings(); }
     }
     public static bool GenericAlarmAudioEnabled
     {
         get => _settings.GenericAlarmAudioEnabled;
-        set { _settings.GenericAlarmAudioEnabled = value; SaveDB(); }
+        set { _settings.GenericAlarmAudioEnabled = value; SaveSettings(); }
     }
     public static string GenericAlarmAudioFilePath
     {
         get => _settings.GenericAlarmAudioFilePath ?? string.Empty;
-        set { _settings.GenericAlarmAudioFilePath = value; SaveDB(); }
+        set { _settings.GenericAlarmAudioFilePath = value; SaveSettings(); }
     }
     public static string LastServerName
     {
         get => _settings.LastServerName;
-        set { _settings.LastServerName = value; SaveDB(); }
+        set { _settings.LastServerName = value; SaveSettings(); }
     }
 
     public static bool MapShowSteamMarkers
     {
         get => _settings.MapShowSteamMarkers;
-        set { _settings.MapShowSteamMarkers = value; SaveDB(); }
+        set { _settings.MapShowSteamMarkers = value; SaveSettings(); }
     }
     public static bool MapShowPlayerArrows
     {
         get => _settings.MapShowPlayerArrows;
-        set { _settings.MapShowPlayerArrows = value; SaveDB(); }
+        set { _settings.MapShowPlayerArrows = value; SaveSettings(); }
     }
     public static bool MapShowDeathTags
     {
         get => _settings.MapShowDeathTags;
-        set { _settings.MapShowDeathTags = value; SaveDB(); }
+        set { _settings.MapShowDeathTags = value; SaveSettings(); }
     }
     public static int MaxSelfDeathMarkers
     {
         get => _settings.MaxSelfDeathMarkers;
-        set { _settings.MaxSelfDeathMarkers = value; SaveDB(); }
+        set { _settings.MaxSelfDeathMarkers = value; SaveSettings(); }
     }
     public static int MaxTeamDeathMarkers
     {
         get => _settings.MaxTeamDeathMarkers;
-        set { _settings.MaxTeamDeathMarkers = value; SaveDB(); }
+        set { _settings.MaxTeamDeathMarkers = value; SaveSettings(); }
     }
     public static bool MapAbbreviateNames
     {
         get => _settings.MapAbbreviateNames;
-        set { _settings.MapAbbreviateNames = value; SaveDB(); }
+        set { _settings.MapAbbreviateNames = value; SaveSettings(); }
     }
     public static double MapPlayerIconScale
     {
         get => _settings.MapPlayerIconScale;
-        set { _settings.MapPlayerIconScale = value; SaveDB(); }
+        set { _settings.MapPlayerIconScale = value; SaveSettings(); }
     }
     public static bool MapUseMonumentText
     {
         get => _settings.MapMonumentDisplayMode == 1;
-        set { _settings.MapMonumentDisplayMode = value ? 1 : 0; SaveDB(); }
+        set { _settings.MapMonumentDisplayMode = value ? 1 : 0; SaveSettings(); }
     }
     public static int MapMonumentDisplayMode
     {
         get => _settings.MapMonumentDisplayMode;
-        set { _settings.MapMonumentDisplayMode = value; SaveDB(); }
+        set { _settings.MapMonumentDisplayMode = value; SaveSettings(); }
     }
     public static double MapMonumentScale
     {
         get => _settings.MapMonumentScale;
-        set { _settings.MapMonumentScale = value; SaveDB(); }
+        set { _settings.MapMonumentScale = value; SaveSettings(); }
     }
     public static double MapMonumentOpacity
     {
         get => _settings.MapMonumentOpacity;
-        set { _settings.MapMonumentOpacity = value; SaveDB(); }
+        set { _settings.MapMonumentOpacity = value; SaveSettings(); }
     }
     public static double MapGridOpacity
     {
         get => _settings.MapGridOpacity;
-        set { _settings.MapGridOpacity = value; SaveDB(); }
+        set { _settings.MapGridOpacity = value; SaveSettings(); }
     }
     public static int MapBitmapScalingMode
     {
         get => _settings.MapBitmapScalingMode;
-        set { _settings.MapBitmapScalingMode = value; SaveDB(); }
+        set { _settings.MapBitmapScalingMode = value; SaveSettings(); }
     }
     public static bool MapUseCacheMode
     {
         get => _settings.MapUseCacheMode;
-        set { _settings.MapUseCacheMode = value; SaveDB(); }
+        set { _settings.MapUseCacheMode = value; SaveSettings(); }
     }
     public static double MapRenderScale
     {
         get => _settings.MapRenderScale;
-        set { _settings.MapRenderScale = value; SaveDB(); }
+        set { _settings.MapRenderScale = value; SaveSettings(); }
     }
     public static bool MapUseAliasedEdgeMode
     {
         get => _settings.MapUseAliasedEdgeMode;
-        set { _settings.MapUseAliasedEdgeMode = value; SaveDB(); }
+        set { _settings.MapUseAliasedEdgeMode = value; SaveSettings(); }
     }
 
     public static IReadOnlyList<string> HiddenExtraMonumentTypes
@@ -1474,7 +1496,7 @@ public static class TrackingService
         }
         else
             changed = _settings.HiddenExtraMonumentTypes.RemoveAll(n => string.Equals(n, name, StringComparison.OrdinalIgnoreCase)) > 0;
-        if (changed) SaveDB();
+        if (changed) SaveSettings();
     }
 
     public static int GetLearnedCargoFullLife(string host)
@@ -1486,7 +1508,7 @@ public static class TrackingService
     {
         if (minutes < 10 || minutes > 120) return;
         _settings.LearnedCargoFullLifeMinutes[host] = minutes;
-        SaveDB();
+        SaveSettings();
     }
     public static int GetLearnedCargoTravelTime(string host)
     {
@@ -1497,7 +1519,7 @@ public static class TrackingService
     {
         if (minutes < 1 || minutes > 30) return;
         _settings.LearnedCargoTravelMinutes[host] = minutes;
-        SaveDB();
+        SaveSettings();
     }
 
     public static List<HarborInfo> GetServerHarbors(string host)
@@ -1510,7 +1532,7 @@ public static class TrackingService
     {
         _settings.ServerHarbors[host] = harbors;
         _settings.ServerCargoTriggers.Remove(host); // Wipe detected -> Clear triggers
-        SaveDB();
+        SaveSettings();
     }
 
     public static CargoTriggerPoint? GetCargoTriggerPoint(string host, string harborName)
@@ -1527,7 +1549,7 @@ public static class TrackingService
         if (!_settings.ServerCargoTriggers.ContainsKey(host))
             _settings.ServerCargoTriggers[host] = new();
         _settings.ServerCargoTriggers[host][harborName] = new CargoTriggerPoint { X = x, Y = y };
-        SaveDB();
+        SaveSettings();
     }
 
     public static bool HasAnyCargoTrigger(string host)
@@ -1538,19 +1560,19 @@ public static class TrackingService
     public static bool SaveAlertSelection
     {
         get => _settings.SaveAlertSelection;
-        set { _settings.SaveAlertSelection = value; SaveDB(); }
+        set { _settings.SaveAlertSelection = value; SaveSettings(); }
     }
 
     public static string LastCrosshairStyle
     {
         get => _settings.LastCrosshairStyle ?? "GreenDot";
-        set { _settings.LastCrosshairStyle = value; SaveDB(); }
+        set { _settings.LastCrosshairStyle = value; SaveSettings(); }
     }
 
     public static string LastCustomCrosshairId
     {
         get => _settings.LastCustomCrosshairId ?? string.Empty;
-        set { _settings.LastCustomCrosshairId = value; SaveDB(); }
+        set { _settings.LastCustomCrosshairId = value; SaveSettings(); }
     }
 
     private static void SetAutoStart(bool enabled)
@@ -2163,7 +2185,7 @@ function schedRender(pid) {
         _settings.LastPort = port;
         _settings.LastServerName = name;
         _settings.LastBMId = null;
-        SaveDB();
+        SaveSettings();
 
         _trackingTimer?.Dispose();
         if (GetTrackedPlayers().Any(p => !p.IsBMOnly))
@@ -2422,25 +2444,25 @@ function schedRender(pid) {
     public static bool OfflineDeathAlertsEnabled
     {
         get => _settings.OfflineDeathAlertsEnabled;
-        set { _settings.OfflineDeathAlertsEnabled = value; SaveDB(); }
+        set { _settings.OfflineDeathAlertsEnabled = value; SaveSettings(); }
     }
 
     public static string OfflineDeathSoundPath
     {
         get => _settings.OfflineDeathSoundPath;
-        set { _settings.OfflineDeathSoundPath = value; SaveDB(); }
+        set { _settings.OfflineDeathSoundPath = value; SaveSettings(); }
     }
 
     public static bool OfflineDeathSoundLoopEnabled
     {
         get => _settings.OfflineDeathSoundLoopEnabled;
-        set { _settings.OfflineDeathSoundLoopEnabled = value; SaveDB(); }
+        set { _settings.OfflineDeathSoundLoopEnabled = value; SaveSettings(); }
     }
 
     public static bool OfflineDeathDiscordEnabled
     {
         get => _settings.OfflineDeathDiscordEnabled;
-        set { _settings.OfflineDeathDiscordEnabled = value; SaveDB(); }
+        set { _settings.OfflineDeathDiscordEnabled = value; SaveSettings(); }
     }
 
     public static List<OfflineDeathNotification> OfflineDeathHistory
@@ -2460,7 +2482,7 @@ function schedRender(pid) {
         {
             _settings.OfflineDeathHistory.RemoveAt(_settings.OfflineDeathHistory.Count - 1);
         }
-        SaveDB();
+        SaveSettings();
     }
 
     public static void ClearOfflineDeathHistory()
@@ -2469,25 +2491,25 @@ function schedRender(pid) {
         {
             _settings.OfflineDeathHistory.Clear();
         }
-        SaveDB();
+        SaveSettings();
     }
 
     public static bool NotificationsToastEnabled
     {
         get => _settings.NotificationsToastEnabled;
-        set { _settings.NotificationsToastEnabled = value; SaveDB(); }
+        set { _settings.NotificationsToastEnabled = value; SaveSettings(); }
     }
 
     public static bool NotificationsSoundsEnabled
     {
         get => _settings.NotificationsSoundsEnabled;
-        set { _settings.NotificationsSoundsEnabled = value; SaveDB(); }
+        set { _settings.NotificationsSoundsEnabled = value; SaveSettings(); }
     }
 
     public static int NotificationsRetentionDays
     {
         get => _settings.NotificationsRetentionDays <= 0 ? 30 : _settings.NotificationsRetentionDays;
-        set { _settings.NotificationsRetentionDays = value; SaveDB(); }
+        set { _settings.NotificationsRetentionDays = value; SaveSettings(); }
     }
 
     public static List<string> MutedNotificationServers
@@ -2509,11 +2531,11 @@ function schedRender(pid) {
         if (!_settings.MutedNotificationServers.Contains(key))
         {
             _settings.MutedNotificationServers.Add(key);
-            SaveDB();
+            SaveSettings();
         }
         else if (!string.IsNullOrWhiteSpace(name))
         {
-            SaveDB();
+            SaveSettings();
         }
     }
 
@@ -2528,7 +2550,7 @@ function schedRender(pid) {
         var removedName = _settings.MutedNotificationServerNames?.Remove(key) == true;
         if (removed || removedName)
         {
-            SaveDB();
+            SaveSettings();
         }
     }
 }

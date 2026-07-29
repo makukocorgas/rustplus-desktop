@@ -112,7 +112,10 @@ public partial class MainWindow
         }
         else
         {
-            MessageBox.Show("Ungültige Eingaben.", "Fehler", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(
+                RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiUngültigeEingaben") ?? "Ungültige Eingaben.",
+                RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiFehler") ?? "Fehler",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 
@@ -238,9 +241,10 @@ public partial class MainWindow
         while (!ct.IsCancellationRequested)
         {
             bool success = false;
+            var selected = _vm.Selected;
             try
             {
-                if (_rust is RustPlusClientReal real && _vm.Selected != null && _vm.Selected.IsConnected)
+                if (_rust is RustPlusClientReal real && selected != null && selected.IsConnected)
                 {
                     var st = await real.GetServerStatusAsync(ct);
                     if (st != null && st.Players >= 0)
@@ -249,7 +253,7 @@ public partial class MainWindow
                         serverStatusFailCount = 0;
                         _vm.ServerPlayers = $"{st.Players}/{st.MaxPlayers}";
                         _vm.ServerQueue = (st.Queue >= 0) ? st.Queue.ToString() : "0";
-                        
+
                         if (!string.IsNullOrWhiteSpace(st.TimeString))
                             _vm.ServerTime = st.TimeString;
                     }
@@ -257,7 +261,8 @@ public partial class MainWindow
             }
             catch { /* Keep last known values on error */ }
 
-            if (_vm.Selected != null && _vm.Selected.IsConnected)
+            var currentSelected = _vm.Selected;
+            if (currentSelected != null && currentSelected.IsConnected)
             {
                 if (!success)
                 {
@@ -400,6 +405,7 @@ public partial class MainWindow
             if (showBusy)
             {
                 _vm.IsBusy = true;
+                _vm.IsConnectionLoading = true;
                 _vm.BusyText = "Connecting …";
             }
 
@@ -416,6 +422,7 @@ public partial class MainWindow
             _connectedProfile = _vm.Selected;
 
             TrackingService.StartPolling(_vm.Selected.Host ?? "", _vm.Selected.Port, _vm.Selected.Name ?? "", _vm.Selected.BattleMetricsId);
+            _ = TrackingService.FetchOnlinePlayersNowAsync();
             _serverRosterLoaded = false; // new server — force a fresh roster fetch next time that tab is opened
 
             // Garantir que o bot listener está activo
@@ -613,6 +620,7 @@ public partial class MainWindow
             {
                 _vm.IsInitializing = false;
                 _vm.IsBusy = false;
+                _vm.IsConnectionLoading = false;
                 _vm.BusyText = "";
             }
             AppendLog("Fehler: " + ex.Message);

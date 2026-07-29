@@ -16,8 +16,8 @@ namespace RustPlusDesk.Views
 {
     public partial class ShopSearchControl : UserControl
     {
-        private MainWindow _mainWindow;
-        private AutocompleteItem _selectedItem;
+        private MainWindow? _mainWindow;
+        private AutocompleteItem? _selectedItem;
         private System.Threading.CancellationTokenSource? _searchCts;
 
         private bool _filterSell = true;
@@ -135,7 +135,7 @@ namespace RustPlusDesk.Views
             ["Vehicles"] = "minicopter"
         };
 
-        private static ImageSource? GetCategoryIcon(string categoryName)
+        internal static ImageSource? GetCategoryIcon(string categoryName)
         {
             if (_categoryRepresentativeIcons.TryGetValue(categoryName, out var shortName))
             {
@@ -360,7 +360,7 @@ namespace RustPlusDesk.Views
         public class CategoryItem
         {
             public string Name { get; set; } = "all";
-            public string Display { get; set; } = "All Categories";
+            public string Display { get; set; } = Properties.Resources.ResourceManager.GetString("CodeUiAllCategories") ?? "All Categories";
             public ImageSource? Icon { get; set; }
         }
 
@@ -370,7 +370,7 @@ namespace RustPlusDesk.Views
 
             var categories = new List<CategoryItem>
             {
-                new CategoryItem { Name = "all", Display = "All Categories", Icon = null }
+                new CategoryItem { Name = "all", Display = Properties.Resources.ResourceManager.GetString("CodeUiAllCategories") ?? "All Categories", Icon = null }
             };
 
             foreach (var cat in _allCategoriesList)
@@ -391,8 +391,8 @@ namespace RustPlusDesk.Views
         public class ResourceItem
         {
             public int Id { get; set; }
-            public string Display { get; set; }
-            public string Tag { get; set; }
+            public string Display { get; set; } = string.Empty;
+            public string Tag { get; set; } = string.Empty;
             public ImageSource? Icon { get; set; }
         }
 
@@ -400,7 +400,7 @@ namespace RustPlusDesk.Views
         {
             var resources = new List<ResourceItem>
             {
-                new ResourceItem { Id = 0, Display = "All Resources", Tag = "all", Icon = null },
+                new ResourceItem { Id = 0, Display = Properties.Resources.ResourceManager.GetString("CodeUiAllResources") ?? "All Resources", Tag = "all", Icon = null },
                 new ResourceItem { Id = -932201673, Display = "Scrap", Tag = "scrap", Icon = MainWindow.ResolveItemIcon(-932201673, "scrap") },
                 new ResourceItem { Id = 317398316, Display = "High Quality Metal", Tag = "hqm", Icon = MainWindow.ResolveItemIcon(317398316, "metal.refined") },
                 new ResourceItem { Id = -1581843485, Display = "Sulfur", Tag = "sulfur", Icon = MainWindow.ResolveItemIcon(-1581843485, "sulfur") },
@@ -424,9 +424,9 @@ namespace RustPlusDesk.Views
         public class AutocompleteItem
         {
             public int Id { get; set; }
-            public string Display { get; set; }
-            public string ShortName { get; set; }
-            public ImageSource Icon { get; set; }
+            public string Display { get; set; } = string.Empty;
+            public string ShortName { get; set; } = string.Empty;
+            public ImageSource? Icon { get; set; }
             public bool IsCategory { get; set; } = false;
             public string CategoryName { get; set; } = string.Empty;
 
@@ -579,7 +579,7 @@ namespace RustPlusDesk.Views
             await RefreshSearchResultsAsync(lowercaseQuery, token);
         }
 
-        private void LstAutocomplete_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void LstAutocomplete_SelectionChanged(object? sender, SelectionChangedEventArgs? e)
         {
             if (LstAutocomplete.SelectedItem is AutocompleteItem selected)
             {
@@ -863,7 +863,9 @@ namespace RustPlusDesk.Views
             if (shops == null || !shops.Any())
             {
                 ShopSearchResultsContainer.Children.Clear();
-                ShowEmptyMessage(string.IsNullOrWhiteSpace(query) ? "No shops loaded yet..." : "No matching shops found.");
+                ShowEmptyMessage(string.IsNullOrWhiteSpace(query)
+                    ? (Properties.Resources.ResourceManager.GetString("CodeUiNoShopsLoadedYet") ?? "No shops loaded yet...")
+                    : (Properties.Resources.ResourceManager.GetString("CodeUiNoMatchingShopsFound") ?? "No matching shops found."));
                 return;
             }
 
@@ -1016,7 +1018,9 @@ namespace RustPlusDesk.Views
 
             if (!matchedResults.Any())
             {
-                ShowEmptyMessage(string.IsNullOrWhiteSpace(query) ? "No matching shops found." : $"No shops match \"{TxtShopSearch.Text}\"");
+                ShowEmptyMessage(string.IsNullOrWhiteSpace(query)
+                    ? (Properties.Resources.ResourceManager.GetString("CodeUiNoMatchingShopsFound") ?? "No matching shops found.")
+                    : string.Format(Properties.Resources.ResourceManager.GetString("CodeUiNoShopsMatch") ?? "No shops match \"{0}\"", TxtShopSearch.Text));
                 return;
             }
 
@@ -1062,7 +1066,7 @@ namespace RustPlusDesk.Views
             {
                 LstItemAlerts.Items.Add(new TextBlock
                 {
-                    Text = "No alerts configured yet.",
+                    Text = Properties.Resources.ResourceManager.GetString("CodeUiNoAlertsConfiguredYet") ?? "No alerts configured yet.",
                     Foreground = InactiveText,
                     FontSize = 11,
                     FontStyle = FontStyles.Italic,
@@ -1121,7 +1125,7 @@ namespace RustPlusDesk.Views
                 {
                     Content = "💬",
                     Style = (Style)FindResource("AlertActionButton"),
-                    ToolTip = "Send to team chat"
+                    ToolTip = Properties.Resources.ResourceManager.GetString("CodeUiSendToTeamChat") ?? "Send to team chat"
                 };
                 ApplyAlertBtnStyle(btnChat, rule.NotifyChat, false);
                 btnChat.Click += (s, ev) =>
@@ -1139,7 +1143,7 @@ namespace RustPlusDesk.Views
                 {
                     Content = "🔊",
                     Style = (Style)FindResource("AlertActionButton"),
-                    ToolTip = "Play sound alert"
+                    ToolTip = Properties.Resources.ResourceManager.GetString("CodeUiPlaySoundAlert") ?? "Play sound alert"
                 };
                 ApplyAlertBtnStyle(btnSound, rule.NotifySound, false);
                 btnSound.Click += (s, ev) =>
@@ -1152,11 +1156,15 @@ namespace RustPlusDesk.Views
                 grid.Children.Add(btnSound);
 
                 // 💾 Persistent save toggle button
+                string SavedTooltip() => rule.IsSaved
+                    ? (Properties.Resources.ResourceManager.GetString("CodeUiSavedClickToUnsave") ?? "Saved (click to unsave)")
+                    : (Properties.Resources.ResourceManager.GetString("CodeUiSaveAlert") ?? "Save alert");
+
                 var btnSave = new Button
                 {
                     Content = "💾",
                     Style = (Style)FindResource("AlertActionButton"),
-                    ToolTip = rule.IsSaved ? "Saved (click to unsave)" : "Save alert"
+                    ToolTip = SavedTooltip()
                 };
                 ApplyAlertBtnStyle(btnSave, rule.IsSaved, true);
                 btnSave.Click += (s, ev) =>
@@ -1164,7 +1172,7 @@ namespace RustPlusDesk.Views
                     rule.IsSaved = !rule.IsSaved;
                     _mainWindow.SavePersistentAlerts();
                     ApplyAlertBtnStyle(btnSave, rule.IsSaved, true);
-                    btnSave.ToolTip = rule.IsSaved ? "Saved (click to unsave)" : "Save alert";
+                    btnSave.ToolTip = SavedTooltip();
                 };
                 Grid.SetColumn(btnSave, 3);
                 grid.Children.Add(btnSave);
@@ -1175,7 +1183,7 @@ namespace RustPlusDesk.Views
                     Content = "🗑",
                     Style = (Style)FindResource("AlertActionButton"),
                     Foreground = new SolidColorBrush(Color.FromRgb(239, 83, 80)),
-                    ToolTip = "Remove Alert"
+                    ToolTip = Properties.Resources.ResourceManager.GetString("CodeUiRemoveAlert") ?? "Remove Alert"
                 };
                 btnDel.Click += (s, ev) =>
                 {

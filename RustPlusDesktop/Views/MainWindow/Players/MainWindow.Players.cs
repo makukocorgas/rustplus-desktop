@@ -284,7 +284,7 @@ public partial class MainWindow
         catch (Exception ex)
         {
             if (PlayersTab == null) return;
-            PlayersTab.TxtOnlinePlayersStatus.Text = $"Error: {ex.Message}";
+            PlayersTab.TxtOnlinePlayersStatus.Text = string.Format(RustPlusDesk.Properties.Resources.ResourceManager.GetString("FormatPlayerStatusError") ?? "Error: {0}", ex.Message);
             PlayersTab.PnlOnlineStatus.Visibility = Visibility.Visible;
             PlayersTab.PbOnlineLoading.Visibility = Visibility.Collapsed;
             if (PlayersTab.PnlManualTrack != null) PlayersTab.PnlManualTrack.Visibility = Visibility.Visible;
@@ -511,7 +511,7 @@ public partial class MainWindow
                         {
                             try
                             {
-                                var groupColorBrush = (SolidColorBrush)new BrushConverter().ConvertFromString(headerColor);
+                                var groupColorBrush = new BrushConverter().ConvertFromString(headerColor) as SolidColorBrush ?? Brushes.Transparent;
                                 var dot = new Ellipse
                                 {
                                     Width = 10,
@@ -595,7 +595,7 @@ public partial class MainWindow
             }
             if (players.Count == 0 && !string.IsNullOrEmpty(filter))
             {
-                PlayersTab?.ListTrackedPlayers.Children.Add(new TextBlock { Text = "No results found matching filter.", Margin = new Thickness(0, 20, 0, 0), Foreground = Brushes.Gray, HorizontalAlignment = HorizontalAlignment.Center });
+                PlayersTab?.ListTrackedPlayers.Children.Add(new TextBlock { Text = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiNoResultsFoundMatchingFilter") ?? "No results found matching filter.", Margin = new Thickness(0, 20, 0, 0), Foreground = Brushes.Gray, HorizontalAlignment = HorizontalAlignment.Center });
             }
         }
         catch (Exception ex)
@@ -750,7 +750,7 @@ public partial class MainWindow
         foreach (var c in colors)
         {
             var stack = new StackPanel { Orientation = Orientation.Horizontal };
-            var brush = c == "None" ? Brushes.Transparent : (SolidColorBrush)new BrushConverter().ConvertFromString(c);
+            var brush = c == "None" ? Brushes.Transparent : new BrushConverter().ConvertFromString(c) as SolidColorBrush ?? Brushes.Transparent;
             
             stack.Children.Add(new System.Windows.Shapes.Ellipse { 
                 Width = 12, Height = 12, 
@@ -785,7 +785,10 @@ public partial class MainWindow
 
         return (combo, () => {
             if (combo.SelectedItem is ComboBoxItem selectedItem)
-                return selectedItem.Tag.ToString() == "None" ? "" : selectedItem.Tag.ToString();
+            {
+                var tag = selectedItem.Tag?.ToString() ?? "None";
+                return tag == "None" ? "" : tag;
+            }
             return "";
         }, setter);
     }
@@ -823,13 +826,13 @@ public partial class MainWindow
         grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }); // Players List
         grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // Buttons
 
-        grid.Children.Add(new TextBlock { Text = "Manage Player Group", FontSize = 20, FontWeight = FontWeights.Bold, Margin = new Thickness(0,0,0,16) });
+        grid.Children.Add(new TextBlock { Text = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiManagePlayerGroup") ?? "Manage Player Group", FontSize = 20, FontWeight = FontWeights.Bold, Margin = new Thickness(0,0,0,16) });
 
-        var nameLabel = new TextBlock { Text = "Group Name", Margin = new Thickness(0, 10, 0, 8), Foreground = (Brush)FindResource("TextSubtle") };
+        var nameLabel = new TextBlock { Text = RustPlusDesk.Properties.Resources.ResourceManager.GetString("GroupName") ?? "Group Name", Margin = new Thickness(0, 10, 0, 8), Foreground = (Brush)FindResource("TextSubtle") };
         Grid.SetRow(nameLabel, 1);
         grid.Children.Add(nameLabel);
 
-        var nameInput = new WpfUi.TextBox { PlaceholderText = "Enter group name..." };
+        var nameInput = new WpfUi.TextBox { PlaceholderText = RustPlusDesk.Properties.Resources.ResourceManager.GetString("EnterGroupNamePlaceholder") ?? "Enter group name..." };
         Grid.SetRow(nameInput, 2);
         grid.Children.Add(nameInput);
         
@@ -897,7 +900,7 @@ public partial class MainWindow
             var gName = nameInput.Text.Trim();
             var gColor = colorSelector.Getter();
             if (string.IsNullOrEmpty(gName)) {
-                MessageBox.Show("Please enter a group name.");
+                MessageBox.Show(RustPlusDesk.Properties.Resources.ResourceManager.GetString("EnterGroupName") ?? "Please enter a group name.");
                 return;
             }
             
@@ -935,7 +938,7 @@ public partial class MainWindow
     {
         var win = new Window
         {
-            Title = "Assign Group",
+            Title = RustPlusDesk.Properties.Resources.ResourceManager.GetString("AssignGroupTitle") ?? "Assign Group",
             Width = 400,
             Height = 350,
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
@@ -958,14 +961,14 @@ public partial class MainWindow
         
         stack.Children.Add(new TextBlock { Text = $"Group Settings: {player.Name}", FontSize = 20, FontWeight = FontWeights.Bold, Margin = new Thickness(0,0,0,16) });
         
-        stack.Children.Add(new TextBlock { Text = "Group Name", Foreground = (Brush)FindResource("TextSubtle") });
+        stack.Children.Add(new TextBlock { Text = RustPlusDesk.Properties.Resources.ResourceManager.GetString("GroupName") ?? "Group Name", Foreground = (Brush)FindResource("TextSubtle") });
         var input = new WpfUi.TextBox { 
             Text = player.GroupName, 
-            PlaceholderText = "Enter group name..."
+            PlaceholderText = RustPlusDesk.Properties.Resources.ResourceManager.GetString("EnterGroupNamePlaceholder") ?? "Enter group name..."
         };
         stack.Children.Add(input);
 
-        stack.Children.Add(new TextBlock { Text = "Group Color", Margin = new Thickness(0, 8, 0, 0), Foreground = (Brush)FindResource("TextSubtle") });
+        stack.Children.Add(new TextBlock { Text = RustPlusDesk.Properties.Resources.ResourceManager.GetString("GroupColor") ?? "Group Color", Margin = new Thickness(0, 8, 0, 0), Foreground = (Brush)FindResource("TextSubtle") });
         var colorSelector = CreateColorSelector(string.IsNullOrEmpty(player.GroupColor) ? "None" : player.GroupColor);
         stack.Children.Add(colorSelector.UI);
 
@@ -1018,7 +1021,7 @@ public partial class MainWindow
 
             var win = new Window
             {
-                Title = "Player Activity Analytics & Forecasts",
+                Title = RustPlusDesk.Properties.Resources.ResourceManager.GetString("PlayerAnalyticsTitle") ?? "Player Activity Analytics & Forecasts",
                 Width = 900,
                 Height = 750,
                 Background = new SolidColorBrush(Color.FromRgb(18, 20, 23)),
@@ -1100,7 +1103,7 @@ public partial class MainWindow
         catch (Exception ex)
         {
             _playersPopoutWin = null;
-            MessageBox.Show($"Failed to open players window:\n\n{ex.GetType().Name}: {ex.Message}\n\nStack:\n{ex.StackTrace}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(string.Format(RustPlusDesk.Properties.Resources.ResourceManager.GetString("FormatFailedOpenPlayers") ?? "Failed to open players window:\n\n{0}: {1}\n\nStack:\n{2}", ex.GetType().Name, ex.Message, ex.StackTrace), RustPlusDesk.Properties.Resources.ResourceManager.GetString("ErrorTitle") ?? "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -1169,7 +1172,7 @@ public partial class MainWindow
         var trackedForegroundBinding = new System.Windows.Data.Binding("Foreground") { Source = trackedTab };
         trackedIcon.SetBinding(Control.ForegroundProperty, trackedForegroundBinding);
 
-        var trackedText = new TextBlock { Text = "Tracked", VerticalAlignment = VerticalAlignment.Center };
+        var trackedText = new TextBlock { Text = RustPlusDesk.Properties.Resources.ResourceManager.GetString("TrackedTab") ?? "Tracked", VerticalAlignment = VerticalAlignment.Center };
         trackedHeaderPanel.Children.Add(trackedIcon);
         trackedHeaderPanel.Children.Add(trackedText);
         trackedTab.Header = trackedHeaderPanel;
@@ -1244,7 +1247,7 @@ public partial class MainWindow
                     VerticalAlignment = VerticalAlignment.Center,
                     Fill = p.IsTracked
                         ? new SolidColorBrush(Color.FromRgb(0xFF, 0xD1, 0x66))
-                        : (SolidColorBrush)new BrushConverter().ConvertFromString("#60CDFF"),
+                        : new BrushConverter().ConvertFromString("#60CDFF") as SolidColorBrush ?? Brushes.DeepSkyBlue,
                 };
                 hp.Children.Add(dot);
 
@@ -1297,7 +1300,7 @@ public partial class MainWindow
                     {
                         var srvName = TrackingService.LastServer.name ?? "Unknown";
                         TrackingService.TrackPlayer(capturedBmId, capturedName, srvName);
-                        btnTrack.Content = "Details";
+                        btnTrack.Content = RustPlusDesk.Properties.Resources.ResourceManager.GetString("UiDetails") ?? "Details";
                         btnTrack.Appearance = WpfUi.ControlAppearance.Primary;
                     }
                 };
@@ -1349,7 +1352,7 @@ public partial class MainWindow
                         {
                             try
                             {
-                                var groupColorBrush = (SolidColorBrush)new BrushConverter().ConvertFromString(headerColor);
+                                var groupColorBrush = new BrushConverter().ConvertFromString(headerColor) as SolidColorBrush ?? Brushes.Transparent;
                                 var dot = new Ellipse
                                 {
                                     Width = 10, Height = 10, Fill = groupColorBrush,

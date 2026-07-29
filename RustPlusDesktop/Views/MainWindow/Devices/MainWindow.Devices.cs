@@ -1031,7 +1031,7 @@ private async void DeviceToggle_Click(object sender, RoutedEventArgs e)
             try
             {
                 // (1) Cache → UI
-                if (real.TryGetCachedStorage(dev.EntityId, out var cached))
+                if (real.TryGetCachedStorage(dev.EntityId, out var cached) && cached != null)
                 {
                     Dispatcher.Invoke(() =>
                     {
@@ -1590,7 +1590,7 @@ public List<ExportedDeviceDto> Devices { get; set; } = new();
 
             if (items.Count == 0)
             {
-                MessageBox.Show("No device exports found for your team / server.\n\n" +
+                MessageBox.Show((RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiNoDeviceExportsFoundForYourTeamServer") ?? "No device exports found for your team / server.\n\n") +
                                 "Make sure Cloud Sync is enabled and at least one team member has synced their devices.",
                     "Device Import", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
@@ -1651,7 +1651,7 @@ public List<ExportedDeviceDto> Devices { get; set; } = new();
         catch (Exception ex)
         {
             AppendLog("[dev/import] Error: " + ex.Message);
-            MessageBox.Show("Device import failed:\n" + ex.Message,
+            MessageBox.Show((RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiDeviceImportFailed") ?? "Device import failed:\n") + ex.Message,
                 "Device Import", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
@@ -1667,7 +1667,7 @@ public List<ExportedDeviceDto> Devices { get; set; } = new();
             _vm.IsDeviceStatusChecking = true;
             _vm.DeviceStatusMax = Math.Max(1, max);
             _vm.DeviceStatusProgress = 0;
-            _vm.DeviceStatusText = "Checking devices...";
+            _vm.DeviceStatusText = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiCheckingDevices") ?? "Checking devices...";
             UpdateFullConnectButtonsEnabled();
         }
 
@@ -1709,7 +1709,7 @@ public List<ExportedDeviceDto> Devices { get; set; } = new();
         {
             try
             {
-                _vm.DeviceStatusText = $"Checking device #{device.EntityId} ({device.DisplayName})...";
+                _vm.DeviceStatusText = string.Format(RustPlusDesk.Properties.Resources.ResourceManager.GetString("FormatCheckingDevice") ?? "Checking device #{0} ({1})...", device.EntityId, device.DisplayName);
                 await RefreshDeviceStateAsync(device, log: true, forcePull: true, maxRetries: maxRetries);
                 device.LastPolledAt = DateTime.UtcNow;
                 _vm.DeviceStatusProgress++;
@@ -1735,7 +1735,7 @@ public List<ExportedDeviceDto> Devices { get; set; } = new();
 
     private void AddDeviceToImportItems(List<DeviceImportItem> items, ExportedDeviceDto d, TeamMemberVM tm)
     {
-        bool already = FindDeviceById(_vm.Selected.Devices, d.EntityId) != null;
+        bool already = _vm.Selected?.Devices != null && FindDeviceById(_vm.Selected.Devices, d.EntityId) != null;
 
         var item = new DeviceImportItem
         {
@@ -1748,7 +1748,7 @@ public List<ExportedDeviceDto> Devices { get; set; } = new();
             AlreadyPresent = already,
             IsSelected = !already,
             ExistsState = already ? "local" : "?",
-            ServerName = _vm.Selected.Name,
+            ServerName = _vm.Selected?.Name ?? string.Empty,
             OriginalDto = d // <- Hier speichern wir das volle DTO inklusive Children!
         };
         items.Add(item);

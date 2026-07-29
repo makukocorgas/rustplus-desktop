@@ -112,12 +112,28 @@ public partial class MainWindow : WpfUi.FluentWindow
         _vm.FollowingSteamId = null;
         _vm.FollowingPlayerName = "";
         _vm.FollowingPlayerAvatar = null;
+
+        string serverKey = GetServerKey();
+        if (!string.IsNullOrEmpty(serverKey))
+        {
+            if (Services.TrackingService.Settings.ServerFollowingSteamId.ContainsKey(serverKey))
+            {
+                Services.TrackingService.Settings.ServerFollowingSteamId.Remove(serverKey);
+                Services.TrackingService.SaveDB();
+            }
+        }
     }
 
     private void BtnFollowPlayer_Click(object sender, RoutedEventArgs e)
     {
         if (_vm.IsFollowing)
         {
+            var serverKey = GetServerKey();
+            if (!string.IsNullOrEmpty(serverKey))
+            {
+                Services.TrackingService.Settings.ServerFollowingSteamId.Remove(serverKey);
+                Services.TrackingService.SaveDB();
+            }
             StopTracking();
             return;
         }
@@ -471,8 +487,7 @@ public partial class MainWindow : WpfUi.FluentWindow
         // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Wpf.Ui: Apply Fluent dark theme to all controls ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
         ApplicationThemeManager.Apply(ApplicationTheme.Dark, updateAccent: true);
         
-        if (AppTitleBar != null) AppTitleBar.Title = $"RUST+ DESKTOP v{_updateService.VersionRaw}";
-        this.Title = $"RUST+ DESKTOP v{_updateService.VersionRaw}";
+        UpdateAppTitle();
         this.LocationChanged += MainWindow_LocationChangedOrResized;
         this.SizeChanged += MainWindow_LocationChangedOrResized;
         if (FindName("TxtAppVersion") is TextBlock txt)
@@ -543,6 +558,7 @@ public partial class MainWindow : WpfUi.FluentWindow
         WebViewHost.Focusable = true;
         DataContext = _vm;
         _vm.Load();
+        InitializeTutorials();
         // NEU: einmalig auf die aktuell ausgewÃƒÆ’Ã‚Â¤hlte Server-Instanz ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾umsteckenÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ
         SwitchCameraSourceTo(_vm.Selected);
 
@@ -1317,8 +1333,11 @@ public partial class MainWindow : WpfUi.FluentWindow
                 _miniMap = null;
             }
 
-            // KontextmenÃƒÂ¼ sauber schlieÃƒÅ¸en (optional)
-            BtnCrosshair.ContextMenu?.IsOpen.Equals(false);
+            // Kontextmenü sauber schließen (optional)
+            if (BtnCrosshair.ContextMenu != null)
+            {
+                BtnCrosshair.ContextMenu.IsOpen = false;
+            }
 
             // Launch pending update installer if available
             if (!string.IsNullOrEmpty(_updateService.PendingInstallerPath))
@@ -1404,6 +1423,57 @@ public partial class MainWindow : WpfUi.FluentWindow
         catch (Exception ex) { AppendLog($"[CHAT-LOAD] {ex.Message}"); }
     }
 
+    private void SaveClanChatHistory(ServerProfile? p)
+    {
+        if (p == null) return;
+        try
+        {
+            var serverKey = $"{p.Host}_{p.Port}_clan";
+            var path = GetChatCachePath(serverKey);
+            lock (_clanChatHistoryLog)
+            {
+                while (_clanChatHistoryLog.Count > 500) _clanChatHistoryLog.RemoveAt(0);
+
+                var json = JsonSerializer.Serialize(_clanChatHistoryLog);
+                System.IO.File.WriteAllText(path, json);
+            }
+        }
+        catch (Exception ex) { AppendLog($"[CLAN-CHAT-SAVE] {ex.Message}"); }
+    }
+
+    private void LoadClanChatHistory(ServerProfile? p)
+    {
+        lock (_clanChatHistoryLog) { _clanChatHistoryLog.Clear(); }
+        _lastClanChatTsForCurrentServer = null;
+
+        if (p == null) return;
+
+        try
+        {
+            var serverKey = $"{p.Host}_{p.Port}_clan";
+            var path = GetChatCachePath(serverKey);
+            if (System.IO.File.Exists(path))
+            {
+                var json = System.IO.File.ReadAllText(path);
+                var loaded = JsonSerializer.Deserialize<List<TeamChatMessage>>(json);
+                if (loaded != null)
+                {
+                    lock (_clanChatHistoryLog)
+                    {
+                        foreach (var m in loaded)
+                        {
+                            _clanChatHistoryLog.Add(m);
+                            if (!_lastClanChatTsForCurrentServer.HasValue || m.Timestamp > _lastClanChatTsForCurrentServer.Value)
+                                _lastClanChatTsForCurrentServer = m.Timestamp;
+                        }
+                    }
+                }
+            }
+            AppendLog($"[CLAN-CHAT-LOAD] Loaded {_clanChatHistoryLog.Count} entries for {serverKey}");
+        }
+        catch (Exception ex) { AppendLog($"[CLAN-CHAT-LOAD] {ex.Message}"); }
+    }
+
     // Ersetzt deine bestehende SwitchCameraSourceTo Logic z.T.
     private void SwitchCameraSourceTo(ServerProfile? srv)
     {
@@ -1412,6 +1482,7 @@ public partial class MainWindow : WpfUi.FluentWindow
             // If srv is null, we are effectively disconnecting from a server.
             // Save chat for the last profile, then clear camera IDs.
             SaveChatHistory(_lastChatProfile);
+            SaveClanChatHistory(_lastChatProfile);
             _lastChatProfile = null; // No current server
             _cameraIds = new ObservableCollection<string>();
             RebuildCameraTiles();
@@ -1420,10 +1491,12 @@ public partial class MainWindow : WpfUi.FluentWindow
 
         // 1. Chat speichern (alter Server)
         SaveChatHistory(_lastChatProfile);
-        
+        SaveClanChatHistory(_lastChatProfile);
+
         // 2. Chat laden (neuer Server)
         LoadChatHistory(srv);
-        
+        LoadClanChatHistory(srv);
+
         _lastChatProfile = srv;
 
         // Reset state for specific server logic
@@ -2588,7 +2661,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         // Also add it to the chat UI if the server is current!
         if (_vm.Selected != null && _vm.Selected.Host == c.Ip && _vm.Selected.Port == c.Port)
         {
-            AppendChatIfNew(c, isHistorical: false);
+            AppendChatIfNew(c, ChatChannel.Team, isHistorical: false);
         }
     }
 
@@ -2601,6 +2674,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         bool raidSelected = MainTabs.SelectedItem == RaidCalculatorTab;
         bool recyclerSelected = MainTabs.SelectedItem == RecyclerCalculatorTab;
         RaidCalculatorPanel.Visibility = raidSelected ? Visibility.Visible : Visibility.Collapsed;
+        if (raidSelected) _ = OfferNewFeatureTutorialOnceAsync("raid-calculator");
         ServerContextPanel.Visibility = recyclerSelected ? Visibility.Collapsed : Visibility.Visible;
         if (!raidSelected && !recyclerSelected)
             _lastWorkspaceTabIndex = MainTabs.SelectedIndex;
@@ -3090,6 +3164,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     {
         try
         {
+            link = link.Trim().Trim('"', '\'').Trim();
+
             string host = "";
             int port = 28082; // Standard Rust+ Port
             string playerId = _vm.SteamId64 ?? "0";
@@ -3404,7 +3480,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 if (string.Equals(dev.Kind, "StorageMonitor", StringComparison.OrdinalIgnoreCase))
                 {
                     // 1) Cache → UI (falls vorhanden), sonst HÃƒÆ’Ã‚Â¼lle
-                    if (_rust is RustPlusClientReal rpc && rpc.TryGetCachedStorage(dev.EntityId, out var cached))
+                    if (_rust is RustPlusClientReal rpc && rpc.TryGetCachedStorage(dev.EntityId, out var cached) && cached != null)
                     {
                         dev.IsMissing = false;
                         Dispatcher.Invoke(() =>
@@ -3482,7 +3558,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
         _listenerStarting = true;
         _vm.IsPairingBusy = true; // Tell UI we are trying to start
-        TxtPairingState.Text = "Pairing: starting...";
+        TxtPairingState.Text = RustPlusDesk.Properties.Resources.ResourceManager.GetString("PairingStarting") ?? "Pairing: starting...";
         _ = Task.Run(async () =>
         {
             try { await _pairing.StartAsync(); }
@@ -3624,7 +3700,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         if (((FrameworkElement)sender).Tag is not ServerProfile prof) return;
         
         _serverToDelete = prof;
-        TxtDeleteConfirmation.Text = $"Are you sure you want to delete Server \"{prof.Name}\"? This action cannot be undone.";
+        TxtDeleteConfirmation.Text = string.Format(RustPlusDesk.Properties.Resources.ResourceManager.GetString("DeleteServerConfirmFormatted") ?? "Are you sure you want to delete Server \"{0}\"? This action cannot be undone.", prof.Name);
         DeleteConfirmationOverlay.Visibility = Visibility.Visible;
     }
 
@@ -3804,6 +3880,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         }
     }
 
+    private const int MaxLogLines = 2000;
+
     public void AppendLog(string line)
     {
         Dispatcher.Invoke(() =>
@@ -3821,9 +3899,21 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             {
                 FlushPendingLogs();
                 TxtLog.AppendText(formatted + Environment.NewLine);
+                TrimLogIfNeeded();
                 TxtLog.ScrollToEnd();
             }
         });
+    }
+
+    private void TrimLogIfNeeded()
+    {
+        int excess = TxtLog.LineCount - MaxLogLines;
+        if (excess <= 0) return;
+        int charIndex = TxtLog.GetCharacterIndexFromLineIndex(excess);
+        if (charIndex > 0)
+        {
+            TxtLog.Text = TxtLog.Text.Substring(charIndex);
+        }
     }
 
     static readonly JsonSerializerOptions JsonOpt = new()
@@ -3995,11 +4085,50 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         }
     }
 
+    private string? _fetchedSteamId64;
+
+    private string GetOwnAvatarCachePath(string steamId64)
+    {
+        var dir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RustPlusDesk", "avatars");
+        if (!System.IO.Directory.Exists(dir))
+        {
+            System.IO.Directory.CreateDirectory(dir);
+        }
+        return System.IO.Path.Combine(dir, $"{steamId64}.png");
+    }
+
     private async Task TryLoadSteamAvatarAsync(string? steamId64)
     {
         if (string.IsNullOrWhiteSpace(steamId64))
         {
             _vm.MyAvatar = null;
+            return;
+        }
+
+        var cachePath = GetOwnAvatarCachePath(steamId64);
+
+        // Try load from local cache first on start
+        if (System.IO.File.Exists(cachePath) && _vm.MyAvatar == null)
+        {
+            try
+            {
+                var cachedBmp = new BitmapImage();
+                cachedBmp.BeginInit();
+                cachedBmp.CacheOption = BitmapCacheOption.OnLoad;
+                cachedBmp.UriSource = new Uri(cachePath);
+                cachedBmp.EndInit();
+                cachedBmp.Freeze();
+                _vm.MyAvatar = cachedBmp;
+            }
+            catch
+            {
+                // Ignore cache load failure, fallback to network
+            }
+        }
+
+        // Fetch once per session (skip if already fetched this steam ID this session)
+        if (_fetchedSteamId64 == steamId64)
+        {
             return;
         }
 
@@ -4015,14 +4144,18 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             if (avatarMatch.Success)
             {
                 var uri = new Uri(avatarMatch.Groups[1].Value);
+                var bytes = await http.GetByteArrayAsync(uri);
+                await System.IO.File.WriteAllBytesAsync(cachePath, bytes);
+
                 var bmp = new BitmapImage();
                 bmp.BeginInit();
                 bmp.CacheOption = BitmapCacheOption.OnLoad;
-                bmp.UriSource = uri;
+                bmp.UriSource = new Uri(cachePath);
                 bmp.EndInit();
                 bmp.Freeze();
 
                 _vm.MyAvatar = bmp;
+                _fetchedSteamId64 = steamId64;
             }
             if (nameMatch.Success)
             {
@@ -4033,8 +4166,11 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         }
         catch
         {
-            // Avatar optional ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ bei Fehlern still
-            _vm.MyAvatar = null;
+            // If network fails but cache exists, keep the cached version; otherwise clear it.
+            if (!System.IO.File.Exists(cachePath))
+            {
+                _vm.MyAvatar = null;
+            }
         }
     }
 
@@ -4067,24 +4203,26 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         // 1) Versuche Optimierte URL
         if (optimizedUrl != null)
         {
-            if (sIconCache.TryGetValue(optimizedUrl, out var ready)) return ready;
+            string cacheKey = $"{optimizedUrl}|{decodePx}";
+            if (sIconCache.TryGetValue(cacheKey, out var ready)) return ready;
             var path = GetIconCachePath(optimizedUrl);
             if (System.IO.File.Exists(path))
             {
                 var img = TryLoadBitmapFromFile(path, decodePx);
-                if (img != null) { sIconCache[optimizedUrl] = img; return img; }
+                if (img != null) { sIconCache[cacheKey] = img; return img; }
             }
         }
 
         // 2) Versuche Original URL (Fallback/DB)
         if (rusthelpUrl != null)
         {
-            if (sIconCache.TryGetValue(rusthelpUrl, out var ready)) return ready;
+            string cacheKey = $"{rusthelpUrl}|{decodePx}";
+            if (sIconCache.TryGetValue(cacheKey, out var ready)) return ready;
             var path = GetIconCachePath(rusthelpUrl);
             if (System.IO.File.Exists(path))
             {
                 var img = TryLoadBitmapFromFile(path, decodePx);
-                if (img != null) { sIconCache[rusthelpUrl] = img; return img; }
+                if (img != null) { sIconCache[cacheKey] = img; return img; }
             }
         }
 
@@ -4293,11 +4431,26 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     private static Image MakeIcon(string packUri, double size = 32)
     {
         var bi = new BitmapImage();
-        bi.BeginInit();
-        bi.UriSource = new Uri(packUri, UriKind.Absolute);
-        bi.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
-        bi.CacheOption = BitmapCacheOption.OnLoad;
-        bi.EndInit();
+        try
+        {
+            bi.BeginInit();
+            bi.UriSource = new Uri(packUri, UriKind.Absolute);
+            bi.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+            bi.CacheOption = BitmapCacheOption.OnLoad;
+            bi.EndInit();
+        }
+        catch when (packUri.StartsWith("pack://application:,,,/Assets/", StringComparison.OrdinalIgnoreCase))
+        {
+            bi = new BitmapImage();
+            string relativePath = packUri["pack://application:,,,/".Length..].Replace('/', System.IO.Path.DirectorySeparatorChar);
+            string filePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, relativePath);
+
+            bi.BeginInit();
+            bi.UriSource = new Uri(filePath, UriKind.Absolute);
+            bi.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+            bi.CacheOption = BitmapCacheOption.OnLoad;
+            bi.EndInit();
+        }
 
         var img = new Image
         {
@@ -4319,10 +4472,49 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         {
             return "Underwater Labs";
         }
+        if (lower.Contains("dome") || lower.Contains("dome monument"))
+        {
+            return "Dome";
+        }
+        if (lower.Contains("launch facility") || lower.Contains("launch_facility"))
+        {
+            return "Launch Site";
+        }
+        if (lower.Contains("missile silo monument") || lower.Contains("missile_silo_monument") ||
+            lower.Contains("missle silo monument") || lower.Contains("missle_silo_monument"))
+        {
+            return "Missile Silo";
+        }
+        if (lower.Contains("mining quarry sulfur") || lower.Contains("mining_quarry_sulfur"))
+        {
+            return "Sulfur Quarry";
+        }
+        if (lower.Contains("mining quarry stone") || lower.Contains("mining_quarry_stone"))
+        {
+            return "Stone Quarry";
+        }
+        if (lower.Contains("mining quarry hqm") || lower.Contains("mining_quarry_hqm"))
+        {
+            return "HQM Quarry";
+        }
+        if (lower.Contains("arctic base") || lower.Contains("arctic_base"))
+        {
+            return "Arctic Research Base";
+        }
+        if (lower.Contains("launchsite"))
+        {
+            return "Launch Site";
+        }
+        if (lower.Contains("supermarket") || lower.Contains("supermarket_1")) return "Abandoned Supermarket";
 
         if (lower.Contains("harbor_2") || lower.Contains("harbor 2")) return "Harbor";
         if (lower.Contains("harbor")) return "Harbor 2";
-        if (lower.Contains("apartmentscomplex") || lower.Contains("apartmentcomplex")) return "Apartments Complex";
+        if (lower.Contains("stables a") || lower.Contains("stables_a")) return "Ranch";
+        if (lower.Contains("stables b") || lower.Contains("stables_b")) return "Large Barn";
+        if (lower.Contains("excavator")) return "Large Excavator Pit";
+        if (lower.Contains("gas station") || lower.Contains("gas_station")) return "Oxum's Gas Station";
+        if (lower.Contains("sewer")) return "Sewer Branch";
+        if (lower.Contains("apartmentscomplex") || lower.Contains("apartmentcomplex") || lower.Contains("apartment complex") || lower.Contains("apartment_complex")) return "Apartments Complex";
 
         s = s.Replace('\\', '/');
         var last = s.LastIndexOf('/');
@@ -4353,7 +4545,6 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         if (s.Length <= max) return s;
         return s.Substring(0, Math.Max(1, max - 1)) + "ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦";
     }
-    private int _shopAutoSeq = 1; // Fallback-Sequenz, wenn ID fehlt
 
     // stabiler Fallback-Key-Hasher (aus X,Y,Label)
     private static uint ShopFallbackKey(double x, double y, string? label)
@@ -4666,7 +4857,9 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 case "CargoEgress": isSelected = TrackingService.AnnounceCargoEgress; break;
                 case "CargoArrival": 
                     isSelected = TrackingService.AnnounceCargoArrival; 
-                    mi.Header = hasTravelData ? "Arrival Warning (5m before Dock)" : "Arrival Warning (Unlearned)";
+                    mi.Header = hasTravelData
+                        ? (RustPlusDesk.Properties.Resources.ResourceManager.GetString("CargoArrival") ?? "Arrival Warning (5m before Dock)")
+                        : (RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiArrivalWarningUnlearned") ?? "Arrival Warning (Unlearned)");
                     mi.IsEnabled = masterOn && hasTravelData; 
                     break;
                 case "Heli": isSelected = TrackingService.AnnounceHeli; break;
@@ -5033,8 +5226,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 rule.Baseline.Add(new AlertSeenOrder
                 {
                     ShopId = shop.Id,
-                    ItemShort = o.ItemShortName,
-                    CurrencyShort = o.CurrencyShortName,
+                    ItemShort = o.ItemShortName ?? "",
+                    CurrencyShort = o.CurrencyShortName ?? "",
                     Stock = o.Stock,
                     Quantity = o.Quantity,
                     CurrencyAmount = o.CurrencyAmount
@@ -5166,14 +5359,14 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 // saved -> leicht grÃƒÆ’Ã‚Â¼n getÃƒÆ’Ã‚Â¶nt
                 btnSave.Background = new SolidColorBrush(Color.FromRgb(32, 48, 32));                // sehr dunkles GrÃƒÆ’Ã‚Â¼n
                 btnSave.BorderBrush = new SolidColorBrush(Color.FromRgb(64, 160, 64));              // sattes GrÃƒÆ’Ã‚Â¼n
-                btnSave.ToolTip = "Saved (click to unsave)";
+                btnSave.ToolTip = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiSavedClickToUnsave") ?? "Saved (click to unsave)";
             }
             else
             {
                 // nicht saved -> neutral dunkel
                 btnSave.Background = new SolidColorBrush(Color.FromRgb(40, 44, 48));                // dein Dark-UI
                 btnSave.BorderBrush = new SolidColorBrush(Color.FromArgb(80, 255, 255, 255));        // dezente helle Kontur
-                btnSave.ToolTip = "Save alert";
+                btnSave.ToolTip = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiSaveAlert") ?? "Save alert";
             }
 
             // Icon-Farbe (Diskette):
@@ -5308,8 +5501,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                         rule.Baseline.Add(new AlertSeenOrder
                         {
                             ShopId = shop.Id,
-                            ItemShort = o.ItemShortName,
-                            CurrencyShort = o.CurrencyShortName,
+                            ItemShort = o.ItemShortName ?? "",
+                            CurrencyShort = o.CurrencyShortName ?? "",
                             Stock = o.Stock,
                             Quantity = o.Quantity,
                             CurrencyAmount = o.CurrencyAmount
@@ -5332,8 +5525,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     public class AlertSeenOrder
     {
         public uint ShopId;
-        public string ItemShort;
-        public string CurrencyShort;
+        public string ItemShort = "";
+        public string CurrencyShort = "";
         public int Quantity;
         public float CurrencyAmount;
         public int Stock;
@@ -5407,8 +5600,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                     baseline = new AlertSeenOrder
                     {
                         ShopId        = shop.Id,
-                        ItemShort     = order.ItemShortName,
-                        CurrencyShort = order.CurrencyShortName,
+                        ItemShort     = order.ItemShortName ?? "",
+                        CurrencyShort = order.CurrencyShortName ?? "",
                         Quantity      = order.Quantity,
                         CurrencyAmount= order.CurrencyAmount,
                         Stock         = curStock
@@ -5522,8 +5715,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                     rule.Baseline.Add(new AlertSeenOrder
                     {
                         ShopId = shop.Id,
-                        ItemShort = o.ItemShortName,
-                        CurrencyShort = o.CurrencyShortName,
+                        ItemShort = o.ItemShortName ?? "",
+                        CurrencyShort = o.CurrencyShortName ?? "",
                         Quantity = o.Quantity,
                         CurrencyAmount = o.CurrencyAmount,
                         Stock = o.Stock
@@ -5992,7 +6185,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
         snackbar = new WpfUi.Snackbar(RootSnackbar)
         {
-            Title = "Update Required",
+            Title = RustPlusDesk.Properties.Resources.ResourceManager.GetString("UpdateRequiredTitle") ?? "Update Required",
             Content = stack,
             Appearance = WpfUi.ControlAppearance.Danger,
             Icon = new WpfUi.SymbolIcon(WpfUi.SymbolRegular.ArrowDownload24),
@@ -6070,7 +6263,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             return;
         }
 
-        bool isListening = TxtPairingState.Text != null && TxtPairingState.Text.Contains("listening");
+        bool isListening = _vm.IsPairingBusy;
 
         string title = isListening ? "Pairing Active" : "Action Required";
         string msg = isListening 
@@ -6426,11 +6619,12 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         LogicEnginePanel.Visibility = Visibility.Collapsed;
         DeviceAutomationPanel.RefreshListBindings();
         DeviceAutomationPanel.Visibility = Visibility.Visible;
+        _ = OfferNewFeatureTutorialOnceAsync("device-automation");
     }
 
     private void BtnLanguageSettings_Click(object sender, RoutedEventArgs e)
     {
-        BtnSettings_Click(sender, e);
+        OpenSettingsCategory("general");
     }
 
     public void UpdateLanguageFlag()
@@ -6455,9 +6649,13 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 string imageUri = $"pack://application:,,,/Assets/Flags/{candidate}.png";
                 try
                 {
-                    ImgLanguageFlag.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(imageUri));
-                    loaded = true;
-                    break;
+                    var streamInfo = System.Windows.Application.GetResourceStream(new Uri(imageUri));
+                    if (streamInfo != null)
+                    {
+                        ImgLanguageFlag.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(imageUri));
+                        loaded = true;
+                        break;
+                    }
                 }
                 catch { }
             }
@@ -6713,13 +6911,19 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     }
 
 
+    private void UpdateAppTitle()
+    {
+        string title = $"RUST+ DESKTOP v{_updateService.VersionRaw}";
+        if (AppTitleBar != null) AppTitleBar.Title = title;
+        this.Title = title;
+    }
+
     protected override void OnSourceInitialized(EventArgs e)
     {
         base.OnSourceInitialized(e);
 
-        // SpÃƒÆ’Ã‚Â¤testens hier sollte Windows den Titel im Rahmen akzeptieren
-        if (AppTitleBar != null) AppTitleBar.Title = $"RUST+ DESKTOP v{_updateService.VersionRaw}";
-        this.Title = $"RUST+ DESKTOP v{_updateService.VersionRaw}";
+        // Spätestens hier sollte Windows den Titel im Rahmen akzeptieren
+        UpdateAppTitle();
 
         var hwnd = new WindowInteropHelper(this).Handle;
         _hotkeyMgr = new GlobalHotkeyManager(hwnd);
@@ -7097,7 +7301,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
         if (_hotkeysActive)
         {
-            TxtBtnHotkeys.Text = "Hotkeys active";
+            TxtBtnHotkeys.Text = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiHotkeysActive", RustPlusDesk.Properties.Resources.Culture) ?? "Hotkeys active";
             if (BtnHotkeys.IsMouseOver)
             {
                 BtnHotkeys.Background = Brushes.Transparent;
@@ -7113,7 +7317,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         }
         else
         {
-            TxtBtnHotkeys.Text = "Hotkeys";
+            TxtBtnHotkeys.Text = RustPlusDesk.Properties.Resources.ResourceManager.GetString("Hotkeys", RustPlusDesk.Properties.Resources.Culture) ?? "Hotkeys";
             BtnHotkeys.ClearValue(Button.BackgroundProperty);
             BtnHotkeys.ClearValue(Button.BorderBrushProperty);
             BtnHotkeys.ClearValue(Button.ForegroundProperty);
@@ -7200,10 +7404,10 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
 public class RenameDialog : Window
 {
-    public string InputText { get; private set; }
+    public string InputText { get; private set; } = string.Empty;
     public RenameDialog(string defaultText)
     {
-        Title = "Rename Custom Crosshair";
+        Title = RustPlusDesk.Properties.Resources.ResourceManager.GetString("RenameCustomCrosshair") ?? "Rename Custom Crosshair";
         Width = 300; SizeToContent = SizeToContent.Height;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         ResizeMode = ResizeMode.NoResize;

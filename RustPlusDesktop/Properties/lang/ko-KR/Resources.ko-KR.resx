@@ -3801,4 +3801,49 @@
   <data name="ResumeUpdate" xml:space="preserve">
     <value>이력서</value>
   </data>
+  <data name="UiSells" xml:space="preserve">
+    <value>Sells</value>
+  </data>
+  <data name="UiBuys" xml:space="preserve">
+    <value>Buys</value>
+  </data>
+  <data name="UiCategory" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="UiHideMonuments" xml:space="preserve">
+    <value>Hide Monuments</value>
+  </data>
+  <data name="UiCategoryBadge" xml:space="preserve">
+    <value>CATEGORY</value>
+  </data>
+  <data name="UiHideMonumentShopsTooltip" xml:space="preserve">
+    <value>Hide shops inside Outpost, Bandit Town, Fishing Villages &amp; Monuments</value>
+  </data>
+  <data name="CodeUiAllCategories" xml:space="preserve">
+    <value>All Categories</value>
+  </data>
+  <data name="CodeUiAllResources" xml:space="preserve">
+    <value>All Resources</value>
+  </data>
+  <data name="CodeUiNoShopsLoadedYet" xml:space="preserve">
+    <value>No shops loaded yet...</value>
+  </data>
+  <data name="CodeUiNoMatchingShopsFound" xml:space="preserve">
+    <value>No matching shops found.</value>
+  </data>
+  <data name="CodeUiNoAlertsConfiguredYet" xml:space="preserve">
+    <value>No alerts configured yet.</value>
+  </data>
+  <data name="CodeUiSendToTeamChat" xml:space="preserve">
+    <value>Send to team chat</value>
+  </data>
+  <data name="CodeUiPlaySoundAlert" xml:space="preserve">
+    <value>Play sound alert</value>
+  </data>
+  <data name="CodeUiRemoveAlert" xml:space="preserve">
+    <value>Remove Alert</value>
+  </data>
+  <data name="CodeUiNoShopsMatch" xml:space="preserve">
+    <value>No shops match &quot;{0}&quot;</value>
+  </data>
 </root>

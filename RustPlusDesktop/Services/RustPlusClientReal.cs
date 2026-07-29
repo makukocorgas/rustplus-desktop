@@ -156,7 +156,7 @@ public sealed class RustPlusClientReal : IRustPlusClient, IDisposable
     public void EnsureEventsHooked() => HookEventsIfNeeded();
     private readonly Dictionary<uint, RustPlusDesk.Models.StorageSnapshot> _storageCache
     = new Dictionary<uint, RustPlusDesk.Models.StorageSnapshot>();
-    public bool TryGetCachedStorage(uint id, out RustPlusDesk.Models.StorageSnapshot snap)
+    public bool TryGetCachedStorage(uint id, out RustPlusDesk.Models.StorageSnapshot? snap)
      => _storageCache.TryGetValue(id, out snap);
     public event Action<uint, StorageSnapshot>? StorageSnapshotReceived;
 
@@ -167,11 +167,40 @@ public sealed class RustPlusClientReal : IRustPlusClient, IDisposable
         _storageCache[id] = snap;
     }
 
-    private bool _chatHooked;
     public event EventHandler<TeamChatMessage>? TeamChatReceived;
+    public event EventHandler<TeamChatMessage>? ClanChatReceived;
     // Overload ohne Token (falls irgendwo so aufgerufen wird)
     public Task ConnectAsync(ServerProfile profile) =>
     ConnectAsync(profile, CancellationToken.None);
+
+    // RustPlusApi v2's SendRequestAsync grew extra optional parameters (broadcastReplyMatcher,
+    // cancellationToken) on top of the original single-AppRequest overload. A plain
+    // GetMethod("SendRequestAsync", new[] { reqType }) no longer matches (reflection's
+    // GetMethod(name, Type[]) requires the FULL declared parameter list, defaults or not),
+    // so every raw-AppRequest fallback path silently found nothing. These two helpers find the
+    // method regardless of its arity and fill any extra parameters with their declared defaults.
+    private static MethodInfo? FindSendRequestAsync(Type apiType, Type reqType)
+        => apiType.GetMethods()
+            .Where(mi => mi.Name == "SendRequestAsync")
+            .FirstOrDefault(mi =>
+            {
+                var ps = mi.GetParameters();
+                return ps.Length >= 1 && ps[0].ParameterType.IsAssignableFrom(reqType);
+            });
+
+    private static object?[] BuildSendRequestArgs(MethodInfo m, object req)
+    {
+        var ps = m.GetParameters();
+        var args = new object?[ps.Length];
+        args[0] = req;
+        for (int i = 1; i < ps.Length; i++)
+        {
+            args[i] = ps[i].HasDefaultValue
+                ? ps[i].DefaultValue
+                : (ps[i].ParameterType.IsValueType ? Activator.CreateInstance(ps[i].ParameterType) : null);
+        }
+        return args;
+    }
 
     private static T ReadProp<T>(object src, params string[] names)
     {
@@ -235,10 +264,10 @@ public sealed class RustPlusClientReal : IRustPlusClient, IDisposable
 
         promoteProp.SetValue(req, body);
 
-        var send = _api.GetType().GetMethod("SendRequestAsync", new[] { reqType });
+        var send = FindSendRequestAsync(_api.GetType(), reqType);
         if (send is null) return false;
 
-        var taskObj = send.Invoke(_api, new object[] { req });
+        var taskObj = send.Invoke(_api, BuildSendRequestArgs(send, req));
         if (taskObj is Task t) await t.ConfigureAwait(false);
         return true;
     }
@@ -279,10 +308,10 @@ public sealed class RustPlusClientReal : IRustPlusClient, IDisposable
 
         kickProp.SetValue(req, body);
 
-        var send = _api.GetType().GetMethod("SendRequestAsync", new[] { reqType });
+        var send = FindSendRequestAsync(_api.GetType(), reqType);
         if (send is null) return false;
 
-        var taskObj = send.Invoke(_api, new object[] { req });
+        var taskObj = send.Invoke(_api, BuildSendRequestArgs(send, req));
         if (taskObj is Task t) await t.ConfigureAwait(false);
         return true;
     }
@@ -374,10 +403,10 @@ public sealed class RustPlusClientReal : IRustPlusClient, IDisposable
                 BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public)
                    ?.SetValue(req, Activator.CreateInstance(emptyType)!);
 
-            var send = _api.GetType().GetMethod("SendRequestAsync", new[] { reqType });
+            var send = FindSendRequestAsync(_api.GetType(), reqType);
             if (send == null) { L("SendRequestAsync not found"); return; }
 
-            var call = send.Invoke(_api, new object[] { req });
+            var call = send.Invoke(_api, BuildSendRequestArgs(send, req));
             object? resp = call;
             if (call is Task t) { await t.ConfigureAwait(false); resp = t.GetType().GetProperty("Result")?.GetValue(t); }
 
@@ -607,10 +636,10 @@ public sealed class RustPlusClientReal : IRustPlusClient, IDisposable
                     System.Reflection.BindingFlags.Public)
                    ?.SetValue(req, Activator.CreateInstance(emptyTyp)!);
 
-            var send = _api.GetType().GetMethod("SendRequestAsync", new[] { reqType });
+            var send = FindSendRequestAsync(_api.GetType(), reqType);
             if (send == null) return resultList;
 
-            var call = send.Invoke(_api, new object[] { req });
+            var call = send.Invoke(_api, BuildSendRequestArgs(send, req));
             object? resp = call;
             if (call is Task t)
             {
@@ -1354,7 +1383,6 @@ function _serr(e) {
     }
 
     // universeller Event-Slot: wir versuchen, CameraFrames aus beliebigen EventArgs zu lesen
-    private int _anyEvCount;
     private void OnAnyApiEvent(object? sender, object e)
     {
         try
@@ -1519,10 +1547,10 @@ function _serr(e) {
 
         try
         {
-            var send = _api.GetType().GetMethod("SendRequestAsync", new[] { req.GetType() });
+            var send = FindSendRequestAsync(_api.GetType(), req.GetType());
             if (send == null) { _log?.Invoke("[cam] SendRequestAsync not found"); _camAwaitOnce.Remove(cameraId); return null; }
 
-            var taskObj = send.Invoke(_api, new object[] { req });
+            var taskObj = send.Invoke(_api, BuildSendRequestArgs(send, req));
             if (taskObj is Task t) await t.ConfigureAwait(false);
         }
         catch (Exception ex)
@@ -1559,9 +1587,9 @@ function _serr(e) {
         if (req == null) return;
         try
         {
-            var send = _api.GetType().GetMethod("SendRequestAsync", new[] { req.GetType() });
+            var send = FindSendRequestAsync(_api.GetType(), req.GetType());
             if (send == null) return;
-            var taskObj = send.Invoke(_api, new object[] { req });
+            var taskObj = send.Invoke(_api, BuildSendRequestArgs(send, req));
             if (taskObj is Task t) await t.ConfigureAwait(false);
         }
         catch { /* tolerant */ }
@@ -1621,10 +1649,10 @@ function _serr(e) {
             }
 
             // Send via SendRequestAsync
-            var send = _api.GetType().GetMethod("SendRequestAsync", new[] { appReqType });
+            var send = FindSendRequestAsync(_api.GetType(), appReqType);
             if (send != null)
             {
-                var taskObj = send.Invoke(_api, new object[] { req });
+                var taskObj = send.Invoke(_api, BuildSendRequestArgs(send, req));
                 if (taskObj is Task t) await t.ConfigureAwait(false);
             }
         }
@@ -1635,7 +1663,6 @@ function _serr(e) {
     }
 
     private readonly HashSet<string> _camBusy = new(StringComparer.OrdinalIgnoreCase);
-    private int _camThumbIndex = 0; // rotiert über die Tiles, damit alle mal dran kommen
 
     public async Task<CameraFrame?> GetCameraFrameAsync(string identifier, CancellationToken ct = default)
     {
@@ -1656,7 +1683,7 @@ function _serr(e) {
         sub.Value.idProp.SetValue(child, identifier);
         sub.Value.reqProp.SetValue(req, child);
 
-        var send = _api.GetType().GetMethod("SendRequestAsync", new[] { appReqType });
+        var send = FindSendRequestAsync(_api.GetType(), appReqType);
         if (send == null) { L("SendRequestAsync not found"); return null; }
 
         // 2) attach a one-shot tap to the websocket "message" event
@@ -1711,7 +1738,7 @@ function _serr(e) {
         try
         {
             // send subscribe (push frames will follow)
-            var call = send.Invoke(_api, new object[] { req });
+            var call = send.Invoke(_api, BuildSendRequestArgs(send, req));
             if (call is Task t) await t.ConfigureAwait(false);
 
             using (cts.Token.Register(() => tcs.TrySetResult(null)))
@@ -1735,7 +1762,7 @@ function _serr(e) {
                     var ch = Activator.CreateInstance(un.Value.reqProp.PropertyType)!;
                     un.Value.idProp.SetValue(ch, identifier);
                     un.Value.reqProp.SetValue(req, ch);
-                    var ucall = send.Invoke(_api, new object[] { req });
+                    var ucall = send.Invoke(_api, BuildSendRequestArgs(send, req));
                     if (ucall is Task ut) await ut.ConfigureAwait(false);
                 }
             }
@@ -2043,6 +2070,7 @@ function _serr(e) {
 
     private bool _eventsHooked;
     private bool _isChatPrimed;
+    private bool _isClanChatPrimed;
 
     // Rust+ feuert dieses Event, sobald der Chat „geprimed“ wurde.
     // Wir mappen es auf unser eigenes DTO und reichen es weiter.
@@ -2065,6 +2093,28 @@ function _serr(e) {
 
             // Hier übergeben wir jetzt die SteamId
             TeamChatReceived?.Invoke(this, new TeamChatMessage(tsUtc, author, steamId, text));
+        }
+        catch
+        {
+            // Chat darf nichts reißen
+        }
+    }
+
+    private void Api_OnClanChatReceived(object? sender, ClanMessageEventArg e)
+    {
+        try
+        {
+            string author = TryGetStringProp(e, "Username", "Name", "User") ?? "Unbekannt";
+            string text = TryGetStringProp(e, "Message", "Body", "Text") ?? string.Empty;
+
+            long? unix = TryGetLongishProp(e, "Time", "Timestamp");
+            ulong steamId = (ulong)(TryGetLongishProp(e, "SteamId", "UserId", "PlayerId") ?? 0);
+
+            var tsUtc = unix.HasValue
+                ? DateTimeOffset.FromUnixTimeSeconds(unix.Value).UtcDateTime
+                : DateTime.UtcNow;
+
+            ClanChatReceived?.Invoke(this, new TeamChatMessage(tsUtc, author, steamId, text));
         }
         catch
         {
@@ -2156,8 +2206,8 @@ function _serr(e) {
         }
         */
 
-        _api.OnSmartSwitchTriggered -= Api_OnSmartSwitchTriggered;
-        _api.OnSmartSwitchTriggered += Api_OnSmartSwitchTriggered;
+        _api.OnSmartDeviceTriggered -= Api_OnSmartSwitchTriggered;
+        _api.OnSmartDeviceTriggered += Api_OnSmartSwitchTriggered;
 
         _api.OnStorageMonitorTriggered -= Api_OnStorageMonitorTriggered;
         _api.OnStorageMonitorTriggered += Api_OnStorageMonitorTriggered;
@@ -2232,7 +2282,7 @@ function _serr(e) {
                        TryGetProp(envelope, "StorageMonitor", "storageMonitor",
                                                 "Storage", "Container", "Box",
                                                 "ToolCupboard", "Cupboard");
-                storDirect = UnpackAnyRecursive(storDirect) ?? storDirect;
+                storDirect = storDirect != null ? UnpackAnyRecursive(storDirect) ?? storDirect : null;
 
                 if (storDirect != null)
                 {
@@ -2259,7 +2309,7 @@ function _serr(e) {
                     return;
 
                 var payload = TryGetProp(entityInfoOrInfo, "Payload");
-                payload = UnpackAnyRecursive(payload) ?? payload ?? entityInfoOrInfo;
+                payload = payload != null ? UnpackAnyRecursive(payload) ?? payload : entityInfoOrInfo;
 
                 var typeStr =
                        TryReadStringN(entityInfoOrInfo, "Type", "EntityType")
@@ -2704,11 +2754,32 @@ function _serr(e) {
         catch { /* tolerant */ }
 
         // Einmaliger „Prime“-Call, damit Events danach geliefert werden
-        try 
-        { 
-            _ = await GetTeamChatHistoryAsync(ct: ct).ConfigureAwait(false); 
-            _isChatPrimed = true; 
-        } 
+        try
+        {
+            _ = await GetTeamChatHistoryAsync(ct: ct).ConfigureAwait(false);
+            _isChatPrimed = true;
+        }
+        catch { /* egal */ }
+    }
+
+    // Einmalige Anfrage senden, damit die Lib den Clan-Chat-Stream aktiviert
+    public async Task PrimeClanChatAsync(CancellationToken ct = default)
+    {
+        if (_api is null) throw new InvalidOperationException("Nicht verbunden.");
+        if (_isClanChatPrimed) return; // Bereits geprimed für diese Verbindung
+
+        try
+        {
+            _api.OnClanChatReceived -= Api_OnClanChatReceived;
+            _api.OnClanChatReceived += Api_OnClanChatReceived;
+        }
+        catch { /* tolerant */ }
+
+        try
+        {
+            _ = await GetClanChatHistoryAsync(ct: ct).ConfigureAwait(false);
+            _isClanChatPrimed = true;
+        }
         catch { /* egal */ }
     }
 
@@ -2950,6 +3021,73 @@ function _serr(e) {
         catch (Exception ex)
         {
             _log("[chat-history:error] " + ex.Message);
+            return result;
+        }
+    }
+
+    public async Task<List<TeamChatMessage>> GetClanChatHistoryAsync(
+      DateTime? sinceUtc = null, int? limit = null, CancellationToken ct = default)
+    {
+        var result = new List<TeamChatMessage>();
+        if (_api is null) return result;
+
+        try
+        {
+            object? resObj = null;
+            var apiType = _api.GetType();
+
+            var mHist = apiType.GetMethod("GetClanChatHistoryAsync")
+                       ?? apiType.GetMethod("GetClanChatAsync");
+            if (mHist != null)
+            {
+                var ps = mHist.GetParameters();
+                object?[] args = Array.Empty<object?>();
+
+                if (ps.Length == 2 && ps[0].ParameterType == typeof(int) && ps[1].ParameterType == typeof(CancellationToken))
+                    args = new object?[] { limit ?? 100, ct };
+                else if (ps.Length == 1 && ps[0].ParameterType == typeof(int))
+                    args = new object?[] { limit ?? 100 };
+                else if (ps.Length == 1 && ps[0].ParameterType.Name.Contains("CancellationToken"))
+                    args = new object?[] { ct };
+
+                resObj = await UnwrapTaskAsync(mHist.Invoke(_api, args), ct);
+            }
+            else
+            {
+                var mInfo = apiType.GetMethod("GetClanInfoAsync");
+                if (mInfo != null)
+                {
+                    var ps = mInfo.GetParameters();
+                    object?[] args = (ps.Length == 1 && ps[0].ParameterType == typeof(CancellationToken))
+                                     ? new object?[] { ct } : Array.Empty<object?>();
+                    resObj = await UnwrapTaskAsync(mInfo.Invoke(_api, args), ct);
+                }
+            }
+
+            if (resObj is null)
+            {
+                return result;
+            }
+
+            var dataProp = resObj.GetType().GetProperty("Data");
+            var root = dataProp?.GetValue(resObj) ?? resObj;
+
+            var chatRoot = TryGet(root, "ClanChat")
+                        ?? TryGet(root, "Chat")
+                        ?? TryGet(root, "Messages")
+                        ?? root;
+
+            var mapped = ExtractChatCandidates(chatRoot);
+            var filtered = sinceUtc.HasValue
+                ? mapped.Where(m => m.Timestamp > sinceUtc.Value).ToList()
+                : mapped;
+
+            _log($"[clan-chat-history] mapped={mapped.Count} afterFilter={filtered.Count} since={(sinceUtc?.ToString("u") ?? "null")}");
+            return filtered.OrderBy(m => m.Timestamp).ToList();
+        }
+        catch (Exception ex)
+        {
+            _log("[clan-chat-history:error] " + ex.Message);
             return result;
         }
     }
@@ -3474,10 +3612,10 @@ function _serr(e) {
                 reqType.GetProperty("GetMap", System.Reflection.BindingFlags.IgnoreCase | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public)
                        ?.SetValue(req, Activator.CreateInstance(emptyType)!);
 
-                var send = _api.GetType().GetMethod("SendRequestAsync", new[] { reqType });
+                var send = FindSendRequestAsync(_api.GetType(), reqType);
                 if (send != null)
                 {
-                    var taskObj = send.Invoke(_api, new object[] { req });
+                    var taskObj = send.Invoke(_api, BuildSendRequestArgs(send, req));
                     object? resultObj = taskObj;
 
                     if (taskObj is Task t)
@@ -3711,11 +3849,11 @@ function _serr(e) {
                 BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public)
             ?.SetValue(req, Activator.CreateInstance(emptyType)!);
 
-        var send   = _api.GetType().GetMethod("SendRequestAsync", new[] { reqType });
+        var send   = FindSendRequestAsync(_api.GetType(), reqType);
         if (send == null) return null;
 
         await AcquireTokenAsync(ct);
-        var taskObj = send.Invoke(_api, new object[] { req });
+        var taskObj = send.Invoke(_api, BuildSendRequestArgs(send, req));
         object? resp = taskObj;
         if (taskObj is Task tsk)
         {
@@ -4022,11 +4160,11 @@ function _serr(e) {
                     System.Reflection.BindingFlags.Public)
                 ?.SetValue(req, Activator.CreateInstance(emptyType)!);
 
-            var send = _api.GetType().GetMethod("SendRequestAsync", new[] { reqType });
+            var send = FindSendRequestAsync(_api.GetType(), reqType);
             if (send == null) return list;
 
             await AcquireTokenAsync(ct);
-            var taskObj = send.Invoke(_api, new object[] { req });
+            var taskObj = send.Invoke(_api, BuildSendRequestArgs(send, req));
             object? resp = taskObj;
             if (taskObj is Task tsk)
             {
@@ -4138,7 +4276,7 @@ function _serr(e) {
     sealed class ReferenceEqualityComparer : IEqualityComparer<object>
     {
         public static readonly ReferenceEqualityComparer Instance = new();
-        public new bool Equals(object x, object y) => ReferenceEquals(x, y);
+        public new bool Equals(object? x, object? y) => ReferenceEquals(x, y);
         public int GetHashCode(object obj) => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
     }
 
@@ -4392,11 +4530,11 @@ function _serr(e) {
                         System.Reflection.BindingFlags.Public)
                        ?.SetValue(req, Activator.CreateInstance(emptyTyp)!);
 
-                    var send = _api.GetType().GetMethod("SendRequestAsync", new[] { reqType });
+                    var send = FindSendRequestAsync(_api.GetType(), reqType);
                     if (send != null)
                     {
                         await AcquireTokenAsync(ct);
-                        var taskObj = send.Invoke(_api, new object[] { req });
+                        var taskObj = send.Invoke(_api, BuildSendRequestArgs(send, req));
                         object? resp = taskObj;
                         if (taskObj is Task tsk)
                         {
@@ -4406,7 +4544,7 @@ function _serr(e) {
 
                         if (!IsResponseValid(resp))
                         {
-                            return null;
+                            return shops;
                         }
 
                         {
@@ -4436,7 +4574,7 @@ function _serr(e) {
             {
                 CheckConnectionLost(ex);
                 L("Error in GetVendingShopsAsync: " + ex.Message);
-                return null;
+                return shops;
             }
         }
 
@@ -4450,7 +4588,7 @@ function _serr(e) {
 
 
 
-    public sealed record ServerStatus(int Players, int MaxPlayers, int Queue, string TimeString);
+    public sealed record ServerStatus(int Players, int MaxPlayers, int Queue, string? TimeString);
 
     public async Task<ServerStatus?> GetServerStatusAsync(CancellationToken ct = default)
     {
@@ -4708,11 +4846,11 @@ function _serr(e) {
                             System.Reflection.BindingFlags.Public)
                            ?.SetValue(reqInfo, Activator.CreateInstance(emptyTyp)!);
 
-                        var send = _api.GetType().GetMethod("SendRequestAsync", new[] { reqType });
+                        var send = FindSendRequestAsync(_api.GetType(), reqType);
                         if (send != null)
                         {
                             await AcquireTokenAsync(ct);
-                            var taskObj = send.Invoke(_api, new object[] { reqInfo });
+                            var taskObj = send.Invoke(_api, BuildSendRequestArgs(send, reqInfo));
                             object? resp = taskObj;
                             if (taskObj is Task tsk) 
                             { 
@@ -4743,11 +4881,11 @@ function _serr(e) {
                             System.Reflection.BindingFlags.Public)
                            ?.SetValue(reqTime, Activator.CreateInstance(emptyTyp)!);
 
-                        var send = _api.GetType().GetMethod("SendRequestAsync", new[] { reqType });
+                        var send = FindSendRequestAsync(_api.GetType(), reqType);
                         if (send != null)
                         {
                             await AcquireTokenAsync(ct);
-                            var taskObj = send.Invoke(_api, new object[] { reqTime });
+                            var taskObj = send.Invoke(_api, BuildSendRequestArgs(send, reqTime));
                             object? resp = taskObj;
                             if (taskObj is Task tsk) { await tsk.ConfigureAwait(false); resp = tsk.GetType().GetProperty("Result")?.GetValue(tsk); }
 
@@ -4809,7 +4947,7 @@ function _serr(e) {
             try { await task; }
             catch (NullReferenceException nre) when (nre.StackTrace?.Contains("SendTeamMessageAsync") == true)
             {
-                // Internal library bug during response processing. 
+                // Internal library bug during response processing.
                 // Since the message usually goes through anyway, we suppress this to allow the verification loop to check for the echo.
                 _log?.Invoke("[Chat] Library internal NRE (response handling), proceeding to verification...");
             }
@@ -4818,6 +4956,50 @@ function _serr(e) {
         else if (taskObj == null)
         {
             _log?.Invoke("[Chat] Send method returned null task.");
+        }
+    }
+
+    public async Task SendClanMessageAsync(string text, CancellationToken ct = default)
+    {
+        if (text == null) throw new ArgumentNullException(nameof(text));
+        if (_api is null) throw new InvalidOperationException("Nicht verbunden.");
+
+        var t = _api.GetType();
+        var m = t.GetMethod("SendClanMessageAsync", new[] { typeof(string), typeof(CancellationToken) }) ??
+                t.GetMethod("SendClanMessageAsync", new[] { typeof(string) }) ??
+                t.GetMethod("SendClanMessage", new[] { typeof(string) });
+
+        if (m is null) throw new NotSupportedException("SendClanMessage* nicht gefunden.");
+
+        await AcquireTokenAsync(ct);
+
+        if (_api is null) throw new InvalidOperationException("Verbindung wurde während der Wartezeit getrennt.");
+
+        var args = m.GetParameters().Length == 2 ? new object[] { text, ct } : new object[] { text };
+
+        object? taskObj;
+        try
+        {
+            taskObj = m.Invoke(_api, args);
+        }
+        catch (Exception ex)
+        {
+            _log?.Invoke($"[ClanChat] Invoke error: {ex.Message}");
+            throw;
+        }
+
+        if (taskObj is Task task2)
+        {
+            try { await task2; }
+            catch (NullReferenceException nre) when (nre.StackTrace?.Contains("SendClanMessageAsync") == true)
+            {
+                _log?.Invoke("[ClanChat] Library internal NRE (response handling), proceeding to verification...");
+            }
+            catch (Exception ex) { CheckConnectionLost(ex); throw; }
+        }
+        else if (taskObj == null)
+        {
+            _log?.Invoke("[ClanChat] Send method returned null task.");
         }
     }
 
@@ -5006,11 +5188,11 @@ function _serr(e) {
 
             pGetTeam.SetValue(req, Activator.CreateInstance(empty)!);
 
-            var send = _api.GetType().GetMethod("SendRequestAsync", new[] { reqType });
+            var send = FindSendRequestAsync(_api.GetType(), reqType);
             if (send is null) return null;
 
             await AcquireTokenAsync(CancellationToken.None);
-            var taskObj = send.Invoke(_api, new object[] { req });
+            var taskObj = send.Invoke(_api, BuildSendRequestArgs(send, req));
             object? resp = taskObj;
             if (taskObj is Task t) { await t.ConfigureAwait(false); resp = t.GetType().GetProperty("Result")?.GetValue(t); }
 
@@ -5125,11 +5307,11 @@ function _serr(e) {
             reqType.GetProperty("EntityId")?.SetValue(req, entityId);
             reqType.GetProperty("GetEntityInfo")?.SetValue(req, empty);
 
-            var send = _api.GetType().GetMethod("SendRequestAsync", new[] { reqType });
+            var send = FindSendRequestAsync(_api.GetType(), reqType);
             if (send == null) return new EntityProbeResult(false, null, null);
 
             await AcquireTokenAsync(ct);
-            var taskObj = send.Invoke(_api, new object[] { req });
+            var taskObj = send.Invoke(_api, BuildSendRequestArgs(send, req));
             if (taskObj is not Task task) return new EntityProbeResult(false, null, null);
 
             await task; // kurzer Timeout ist durch CT abgedeckt
@@ -5185,7 +5367,7 @@ function _serr(e) {
                 progress?.Invoke(done, ids.Count, id);
                 using var itemCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
                 itemCts.CancelAfter(TimeSpan.FromSeconds(5));
-                await EnsureSubOnceAsync(id).WaitAsync(itemCts.Token);
+                await EnsureSubOnceAsync(id, itemCts.Token);
                 done++;
                 progress?.Invoke(done, ids.Count, id);
                 // A small gap avoids flooding Rust+ while keeping startup responsive.
@@ -5202,6 +5384,7 @@ function _serr(e) {
         await DisconnectAsync();
 
         _isChatPrimed = false; // Reset bei Neuverbindung
+        _isClanChatPrimed = false;
         if (profile is null) throw new ArgumentNullException(nameof(profile));
         if (!ulong.TryParse(profile.SteamId64, NumberStyles.Any, CultureInfo.InvariantCulture, out var steamId))
             throw new ArgumentException("Ungültige SteamID64.", nameof(profile));
@@ -5221,7 +5404,7 @@ function _serr(e) {
 
         async Task<(bool ok, string? err)> TryAsync(bool useProxy)
         {
-            _api = new RustPlus(profile.Host, profile.Port, steamId, playerToken, useProxy);
+            _api = new RustPlus(new RustPlusConnection(profile.Host, profile.Port, steamId, playerToken, useProxy));
 
             // optionales ConnectAsync aufrufen, falls vorhanden
             try
@@ -5345,140 +5528,6 @@ function _serr(e) {
     }
 
 
-    // ---- Helper: Timeout-Wrapper ums Legacy-Senden
-    private async Task<(bool ok, string? err)> TrySetViaLegacyWithResultAsync_Timeout(uint id, bool on, int timeoutMs)
-    {
-        var work = TrySetViaLegacyWithResultAsync(id, on);
-        var delay = Task.Delay(timeoutMs);
-        var done = await Task.WhenAny(work, delay);
-        return done == work ? await work : (false, "Timeout");
-    }
-
-
-
-   
-
-#pragma warning disable 618
-    private async Task<(bool ok, string? err)> TrySetViaLegacyWithResultAsync(uint entityId, bool on)
-    {
-        try
-        {
-            if (_host is null) return (false, "keine Verbindung");
-
-            var legacy = new RustPlusLegacy(_host, _port, _steamId, _playerToken, _useProxyCurrent);
-
-            var mConn = legacy.GetType().GetMethod("ConnectAsync", Type.EmptyTypes)
-                       ?? legacy.GetType().GetMethod("ConnectAsync", new[] { typeof(CancellationToken) });
-            if (mConn != null)
-            {
-                var r = mConn.GetParameters().Length == 0
-                    ? mConn.Invoke(legacy, Array.Empty<object>())
-                    : mConn.Invoke(legacy, new object[] { CancellationToken.None });
-                if (r is Task t) await t;
-            }
-
-            var asm = typeof(RustPlusLegacy).Assembly;
-
-            var appRequestType =
-                asm.GetTypes().FirstOrDefault(t => t.Name.Equals("AppRequest", StringComparison.OrdinalIgnoreCase)) ??
-                asm.GetTypes().FirstOrDefault(t => t.Name.EndsWith("AppRequest", StringComparison.OrdinalIgnoreCase));
-            var actionType = asm.GetTypes().FirstOrDefault(t => t.Name.IndexOf("SetEntityValue", StringComparison.OrdinalIgnoreCase) >= 0);
-
-            if (appRequestType == null || actionType == null)
-            {
-                DumpLegacyShapeOnce();
-                return (false, "Legacy-Typen nicht gefunden (AppRequest/AppSetEntityValue)");
-            }
-
-            var req = Activator.CreateInstance(appRequestType)!;
-            var action = Activator.CreateInstance(actionType)!;
-
-            // >>> In DEINER Version sitzt EntityId auf dem REQUEST
-            var idOnReq = FindNumericIdMember(appRequestType);
-            if (idOnReq.prop == null && idOnReq.field == null)
-            {
-                DumpLegacyShapeOnce();
-                return (false, "Legacy-EntityId-Member nicht gefunden");
-            }
-            SetMember(req, idOnReq, entityId);
-
-            // Bool (Value) auf der Action setzen
-            var boolMember = FindBoolMember(actionType);
-            if (boolMember.prop == null && boolMember.field == null)
-            {
-                DumpLegacyShapeOnce();
-                return (false, "Legacy-Bool-Member nicht gefunden");
-            }
-            SetMember(action, boolMember, on);
-
-            // Bonus:Id/PlayerToken am Request setzen (falls vorhanden)
-            appRequestType.GetProperty("PlayerId")?.SetValue(req, _steamId);
-            appRequestType.GetProperty("PlayerToken")?.SetValue(req, _playerToken);
-
-            // Action in Request hängen (Property „SetEntityValue“)
-            var attachProp = appRequestType.GetProperties().FirstOrDefault(p =>
-                p.PropertyType == actionType ||
-                p.PropertyType.IsAssignableFrom(actionType) ||
-                p.Name.IndexOf("SetEntityValue", StringComparison.OrdinalIgnoreCase) >= 0);
-            if (attachProp == null)
-            {
-                DumpLegacyShapeOnce();
-                return (false, "Legacy-Request-Property zum Anhängen der Action nicht gefunden");
-            }
-            attachProp.SetValue(req, action);
-
-            // senden
-            var mSend = legacy.GetType().GetMethod("SendRequestAsync", new[] { appRequestType });
-            if (mSend == null) return (false, "SendRequestAsync nicht gefunden");
-
-            var sendObj = mSend.Invoke(legacy, new object[] { req });
-            if (sendObj is not Task sendTask) return (false, "SendRequestAsync Rückgabewert kein Task");
-            await sendTask;
-
-            // --- ACK auswerten: Success ist ein Objekt (AppSuccess), nicht bool ---
-            bool? ok = null; string? msg = null;
-            try
-            {
-                var resultProp = sendTask.GetType().GetProperty("Result");
-                var result = resultProp?.GetValue(sendTask);
-                var resp = result?.GetType().GetProperty("Response")?.GetValue(result)
-                        ?? result?.GetType().GetProperty("AppResponse")?.GetValue(result)
-                        ?? result;
-
-                if (resp != null)
-                {
-                    var successProp = resp.GetType().GetProperty("Success");
-                    var successVal = successProp?.GetValue(resp);
-
-                    if (successVal is bool b) ok = b; // (für manche Builds)
-                    else if (successVal != null)
-                    {
-                        // AppSuccess-Objekt: versuche .Ok / .Success / .Value
-                        var okProp = successVal.GetType().GetProperty("Ok")
-                                  ?? successVal.GetType().GetProperty("Success")
-                                  ?? successVal.GetType().GetProperty("Value");
-                        if (okProp?.GetValue(successVal) is bool bb) ok = bb;
-                        else ok = true; // Presence von Success => als OK werten
-                    }
-
-                    var errProp = resp.GetType().GetProperty("Error") ?? resp.GetType().GetProperty("ErrorInfo");
-                    var errObj = errProp?.GetValue(resp);
-                    var msgProp = errObj?.GetType().GetProperty("Message") ?? errObj?.GetType().GetProperty("ErrorMessage");
-                    msg = msgProp?.GetValue(errObj) as string;
-                }
-            }
-            catch { /* tolerant */ }
-
-            try { legacy.GetType().GetMethod("DisconnectAsync")?.Invoke(legacy, Array.Empty<object>()); } catch { }
-
-            return (ok == true ? (true, null) : (false, msg ?? "Server hat nicht bestätigt"));
-        }
-        catch (Exception ex)
-        {
-            return (false, ex.Message);
-        }
-    }
-#pragma warning restore 618
     // exakt zur Interface-Signatur
     public async Task ToggleSmartSwitchAsync(long entityId, bool on, CancellationToken ct = default)
     {
@@ -5501,9 +5550,6 @@ function _serr(e) {
                 else
                 {
                     _log($"[toggle:{id}] path=contracts ✗ ({e3})");
-                    var (okLegacy, e4) = await TrySetViaLegacyWithResultAsync_Timeout(id, on, RequestTimeoutMs);
-                    _log(okLegacy ? $"[toggle:{id}] path=legacy ✔" : $"[toggle:{id}] path=legacy ✗ ({e4})");
-                    sent = okLegacy;
                 }
             }
         }
@@ -5535,7 +5581,7 @@ function _serr(e) {
         var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         // korrekt typisierter Handler für das API-Event
-        EventHandler<SmartSwitchEventArg>? handler = null;
+        EventHandler<SmartDeviceEventArg>? handler = null;
         handler = (sender, sw) =>
         {
             try
@@ -5550,7 +5596,7 @@ function _serr(e) {
             catch { /* ignore */ }
         };
 
-        _api!.OnSmartSwitchTriggered += handler;
+        _api!.OnSmartDeviceTriggered += handler;
         try
         {
             // kleiner Polling-Fallback, falls kein Event kommt
@@ -5578,7 +5624,7 @@ function _serr(e) {
         }
         finally
         {
-            try { if (handler != null) _api.OnSmartSwitchTriggered -= handler; } catch { }
+            try { if (handler != null) _api.OnSmartDeviceTriggered -= handler; } catch { }
         }
     }
 
@@ -5589,89 +5635,6 @@ function _serr(e) {
      t == typeof(UInt32) || t == typeof(Int32) || t == typeof(Int64);
 
    
-
-    private static (PropertyInfo? prop, FieldInfo? field) FindNumericIdMember(Type t)
-    {
-        // 1) bevorzugte Namen
-        var p = t.GetProperties().FirstOrDefault(x =>
-            ParamIsEntityId(x.PropertyType) &&
-           (x.Name.Equals("EntityId", StringComparison.OrdinalIgnoreCase) ||
-            x.Name.Equals("Id", StringComparison.OrdinalIgnoreCase) ||
-            x.Name.Equals("EntityID", StringComparison.OrdinalIgnoreCase)));
-        if (p != null) return (p, null);
-
-        // 2) beliebige *Id*-Property mit Zahlentyp
-        p = t.GetProperties().FirstOrDefault(x =>
-            ParamIsEntityId(x.PropertyType) &&
-            x.Name.IndexOf("id", StringComparison.OrdinalIgnoreCase) >= 0);
-        if (p != null) return (p, null);
-
-        // 3) FIELDS: bevorzugte Namen
-        var f = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                 .FirstOrDefault(x => ParamIsEntityId(x.FieldType) &&
-                     (x.Name.Equals("EntityId", StringComparison.OrdinalIgnoreCase) ||
-                      x.Name.Equals("Id", StringComparison.OrdinalIgnoreCase) ||
-                      x.Name.Equals("EntityID", StringComparison.OrdinalIgnoreCase)));
-        if (f != null) return (null, f);
-
-        // 4) FIELD mit *id*
-        f = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-             .FirstOrDefault(x => ParamIsEntityId(x.FieldType) &&
-                  x.Name.IndexOf("id", StringComparison.OrdinalIgnoreCase) >= 0);
-        return (null, f);
-    }
-
-    private static (PropertyInfo? prop, FieldInfo? field) FindBoolMember(Type t)
-    {
-        // Bevorzugte Namen
-        var p = t.GetProperties().FirstOrDefault(x =>
-            x.PropertyType == typeof(bool) &&
-           (x.Name.Equals("TurnOn", StringComparison.OrdinalIgnoreCase) ||
-            x.Name.Equals("Value", StringComparison.OrdinalIgnoreCase) ||
-            x.Name.Equals("On", StringComparison.OrdinalIgnoreCase) ||
-            x.Name.Equals("Active", StringComparison.OrdinalIgnoreCase) ||
-            x.Name.Equals("IsOn", StringComparison.OrdinalIgnoreCase)));
-        if (p != null) return (p, null);
-
-        // irgendein Bool
-        p = t.GetProperties().FirstOrDefault(x => x.PropertyType == typeof(bool));
-        if (p != null) return (p, null);
-
-        var f = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                 .FirstOrDefault(x => x.FieldType == typeof(bool) &&
-                    (x.Name.IndexOf("on", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                     x.Name.IndexOf("value", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                     x.Name.IndexOf("active", StringComparison.OrdinalIgnoreCase) >= 0));
-        if (f != null) return (null, f);
-
-        f = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-             .FirstOrDefault(x => x.FieldType == typeof(bool));
-        return (null, f);
-    }
-
-    private static void SetMember(object target, (PropertyInfo? prop, FieldInfo? field) m, object val)
-    {
-        if (m.prop != null) { var v = Convert.ChangeType(val, m.prop.PropertyType); m.prop.SetValue(target, v); return; }
-        if (m.field != null) { var v = Convert.ChangeType(val, m.field.FieldType); m.field.SetValue(target, v); return; }
-        throw new InvalidOperationException("Member zum Setzen nicht gefunden.");
-    }
-
-    private void DumpLegacyShapeOnce()
-    {
-        if (_dumpedLegacy) return;
-        _dumpedLegacy = true;
-
-        var asm = typeof(RustPlusLegacy).Assembly;
-        var names = new[] { "AppRequest", "AppTurnSmartSwitch", "AppSetEntityValue", "AppResponse", "AppMessage" };
-        foreach (var ty in asm.GetTypes().Where(t => names.Any(n => t.Name.IndexOf(n, StringComparison.OrdinalIgnoreCase) >= 0)))
-        {
-            _log($"[legacy-type] {ty.FullName}");
-            foreach (var p in ty.GetProperties()) _log($"  prop  {p.PropertyType.Name} {p.Name}");
-            foreach (var f in ty.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
-                _log($"  field {f.FieldType.Name} {f.Name}");
-        }
-    }
-    private bool _dumpedLegacy = false;
 
     private async Task<bool> TryToggleExplicitAsync(uint id, bool on, CancellationToken ct)
     {
@@ -5842,10 +5805,10 @@ function _serr(e) {
                 appRequestType.GetProperty("TurnSmartSwitch")?.SetValue(req, turn);
             }
 
-            var send = _api!.GetType().GetMethod("SendRequestAsync", new[] { appRequestType });
+            var send = FindSendRequestAsync(_api!.GetType(), appRequestType);
             if (send == null) return (false, "SendRequestAsync not found");
 
-            var taskObj = send.Invoke(_api, new object[] { req });
+            var taskObj = send.Invoke(_api, BuildSendRequestArgs(send, req));
             if (taskObj is not Task task) return (false, "SendRequestAsync returned no Task");
 
             var done = await Task.WhenAny(task, Task.Delay(timeoutMs));
@@ -5913,11 +5876,11 @@ function _serr(e) {
             reqType.GetProperty("GetMap", BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public)
                    ?.SetValue(req, Activator.CreateInstance(emptyType)!);
 
-            var send = _api.GetType().GetMethod("SendRequestAsync", new[] { reqType });
+            var send = FindSendRequestAsync(_api.GetType(), reqType);
             if (send == null) return list;
 
             await AcquireTokenAsync(ct);
-            var taskObj = send.Invoke(_api, new object[] { req });
+            var taskObj = send.Invoke(_api, BuildSendRequestArgs(send, req));
             object? resp = taskObj;
             if (taskObj is Task tsk)
             {
@@ -6037,10 +6000,10 @@ function _serr(e) {
                 reqType.GetProperty("EntityId")?.SetValue(req, entityId);
                 reqType.GetProperty("GetEntityInfo")?.SetValue(req, empty);
 
-                var send = _api.GetType().GetMethod("SendRequestAsync", new[] { reqType });
+                var send = FindSendRequestAsync(_api.GetType(), reqType);
                 if (send != null)
                 {
-                    var call = send.Invoke(_api, new object[] { req });
+                    var call = send.Invoke(_api, BuildSendRequestArgs(send, req));
                     if (call is Task task)
                     {
                         await task.ConfigureAwait(false);
@@ -6196,7 +6159,7 @@ function _serr(e) {
 
         // ✳️ AppEntityInfo → Payload (Any) auspacken
         var payload = TryGetProp(ent, "Payload");
-        payload = UnpackAnyRecursive(payload) ?? payload;
+        payload = payload != null ? UnpackAnyRecursive(payload) ?? payload : null;
         DumpShapeLog(payload, "pull.payload");
 
         // Optional: Info-Feld tolerant
@@ -6397,7 +6360,7 @@ function _serr(e) {
                 continue;
 
             object? val = null; try { val = p.GetValue(src); } catch { }
-            val = UnpackAnyRecursive(val) ?? val;
+            val = val != null ? UnpackAnyRecursive(val) ?? val : null;
             if (val == null || val is string) continue;
 
             if (TryReadUpkeepSeconds(val, out seconds)) return true;
@@ -6634,20 +6597,20 @@ function _serr(e) {
     private readonly HashSet<uint> _subscribed = new();
     private readonly HashSet<uint> _subOnce = new();
 
-    public async Task EnsureSubOnceAsync(uint entityId)
+    public async Task EnsureSubOnceAsync(uint entityId, CancellationToken ct = default)
     {
         bool doWire;
         lock (_subOnce) doWire = _subOnce.Add(entityId); // nur einmal pro Entity
         if (!doWire) return;
 
-        await SubscribeEntityAsync(entityId);
+        await SubscribeEntityAsync(entityId, ct);
 
         // Der Rust-Server scheint den Poke zu brauchen, um die aktive Event-Benachrichtigung für diese Session zu starten.
-        await PokeEntityAsync(entityId);
+        await PokeEntityAsync(entityId, ct);
         _log?.Invoke($"[stor/sub+poke] #{entityId} queued");
     }
 
-    public async Task SubscribeEntityAsync(uint entityId)
+    public async Task SubscribeEntityAsync(uint entityId, CancellationToken ct = default)
     {
         HookEventsIfNeeded();
         if (_api is null) return;
@@ -6658,7 +6621,7 @@ function _serr(e) {
         if (m != null)
         {
             var call = m.Invoke(_api, new object[] { entityId });
-            if (call is Task t) await t;
+            if (call is Task t) await t.WaitAsync(TimeSpan.FromSeconds(5), ct);
             _subscribed.Add(entityId);
             _log?.Invoke($"[storage/sub] native subscribed {entityId}");
             return;
@@ -6677,11 +6640,11 @@ function _serr(e) {
             if (flag != null)
             {
                 flag.SetValue(req, Activator.CreateInstance(emptyType)!);
-                var send = _api.GetType().GetMethod("SendRequestAsync", new[] { reqType });
+                var send = FindSendRequestAsync(_api.GetType(), reqType);
                 if (send != null)
                 {
-                    var call = send.Invoke(_api, new object[] { req });
-                    if (call is Task t) await t;
+                    var call = send.Invoke(_api, BuildSendRequestArgs(send, req));
+                    if (call is Task t) await t.WaitAsync(TimeSpan.FromSeconds(5), ct);
                     _subscribed.Add(entityId);
                     _log?.Invoke($"[storage/sub] contract subscribed {entityId}");
                 }
@@ -6735,11 +6698,11 @@ function _serr(e) {
                 {
                     _log?.Invoke($"[poke/contracts] using {flag.Name} for {entityId}");
                     flag.SetValue(req, Activator.CreateInstance(emptyType)!);
-                    var send = _api.GetType().GetMethod("SendRequestAsync", new[] { reqType });
+                    var send = FindSendRequestAsync(_api.GetType(), reqType);
                     if (send != null)
                     {
-                        var call = send.Invoke(_api, new object[] { req });
-                        if (call is Task t) await t;
+                        var call = send.Invoke(_api, BuildSendRequestArgs(send, req));
+                        if (call is Task t) await t.WaitAsync(TimeSpan.FromSeconds(5), ct);
                         return;
                     }
                 }
@@ -6749,6 +6712,7 @@ function _serr(e) {
                 }
             }
         }
+        catch (OperationCanceledException) { throw; }
         catch { /* tolerant */ }
     }
 

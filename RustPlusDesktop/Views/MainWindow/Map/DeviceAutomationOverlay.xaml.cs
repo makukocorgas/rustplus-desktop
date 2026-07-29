@@ -41,9 +41,10 @@ public partial class DeviceAutomationOverlay : UserControl
     private void BtnAddRule_Click(object sender, RoutedEventArgs e)
     {
         if (_vm?.Selected == null) return;
+        string nameFormat = Properties.Resources.ResourceManager.GetString("CodeUiAutomationDefaultNameFormat") ?? "Automation {0}";
         _vm.Selected.DeviceAutomationRules.Add(new DeviceAutomationRule
         {
-            Name = $"Automation {_vm.Selected.DeviceAutomationRules.Count + 1}"
+            Name = string.Format(nameFormat, _vm.Selected.DeviceAutomationRules.Count + 1)
         });
         _vm.Save();
         RefreshListBindings();

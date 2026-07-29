@@ -295,31 +295,31 @@ public partial class MainWindow
         if (_isReconnecting) return;
         _isReconnecting = true;
 
-        CancelConnectionPolling();
-        try { StopDynPolling(clearKnown: false); } catch { }
-
-        if (_vm?.Selected != null)
-        {
-            _vm.Selected.IsConnected = false;
-            _vm.Selected.IsFullConnected = false;
-            _vm.NotifyDevicesChanged();
-        }
-
         try
         {
-            // Suppress errors if the socket is already completely dead
-            await _rust.DisconnectAsync();
-        }
-        catch { /* Ignore */ }
+            CancelConnectionPolling();
+            try { StopDynPolling(clearKnown: false); } catch { }
 
-        Dispatcher.Invoke(() => ChkShops.IsChecked = false);
-        AppendLog("[auto-reconnect] Connection lost detected. Starting recovery...");
+            if (_vm?.Selected != null)
+            {
+                _vm.Selected.IsConnected = false;
+                _vm.Selected.IsFullConnected = false;
+                _vm.NotifyDevicesChanged();
+            }
 
-        int delay = 2000;
-        int maxDelay = 60000;
+            try
+            {
+                // Suppress errors if the socket is already completely dead
+                await _rust.DisconnectAsync();
+            }
+            catch { /* Ignore */ }
 
-        try
-        {
+            Dispatcher.Invoke(() => ChkShops.IsChecked = false);
+            AppendLog("[auto-reconnect] Connection lost detected. Starting recovery...");
+
+            int delay = 2000;
+            int maxDelay = 60000;
+
             while (_isReconnecting)
             {
                 AppendLog($"[auto-reconnect] Retrying in {delay / 1000}s...");
@@ -329,7 +329,6 @@ public partial class MainWindow
                 if (success)
                 {
                     AppendLog("[auto-reconnect] Reconnected successfully!");
-                    _isReconnecting = false;
                     return;
                 }
 
@@ -339,6 +338,9 @@ public partial class MainWindow
         catch (Exception ex)
         {
             AppendLog("[auto-reconnect] Loop error: " + ex.Message);
+        }
+        finally
+        {
             _isReconnecting = false;
         }
     }

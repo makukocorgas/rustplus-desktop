@@ -73,6 +73,13 @@ public partial class MainWindow
                 }
             }
             _deepSeaActive = true;
+            Dispatcher.Invoke(() =>
+            {
+                if (BtnDeepSeaToggle != null && BtnDeepSeaToggle.Visibility != Visibility.Visible)
+                {
+                    BtnDeepSeaToggle.Visibility = Visibility.Visible;
+                }
+            });
         }
         else if (_deepSeaActive) // State change: active → inactive
         {
@@ -90,6 +97,11 @@ public partial class MainWindow
             }
             _deepSeaActive = false;
             _deepSeaMidEvent = false;
+            Dispatcher.Invoke(() =>
+            {
+                if (BtnDeepSeaToggle != null) BtnDeepSeaToggle.Visibility = Visibility.Collapsed;
+                SetShowingDeepSeaMap(false);
+            });
         }
     }
 
@@ -123,7 +135,7 @@ public partial class MainWindow
     {
         if (sender is FrameworkElement fe)
         {
-            List<RustPlusClientReal.ShopMarker> cluster = null;
+            List<RustPlusClientReal.ShopMarker>? cluster = null;
             if (fe.Tag is RustPlusClientReal.ShopMarker s) cluster = new List<RustPlusClientReal.ShopMarker> { s };
             else if (fe.Tag is IEnumerable<RustPlusClientReal.ShopMarker> c) cluster = c.ToList();
 
@@ -194,7 +206,7 @@ public partial class MainWindow
                 return;
             }
 
-            List<RustPlusClientReal.ShopMarker> shops = null;
+            List<RustPlusClientReal.ShopMarker>? shops = null;
             int retries = 0;
             while (retries < 3)
             {
@@ -478,7 +490,8 @@ public partial class MainWindow
 
                 _shopEls[clusterId] = grid;
                 Overlay.Children.Add(grid);
-                Panel.SetZIndex(grid, 850);
+                Panel.SetZIndex(grid, 910);
+                grid.Visibility = (_isShowingDeepSeaMap == (avgX < 0)) ? Visibility.Visible : Visibility.Collapsed;
                 el = grid;
                 _shopIconSet.Add(grid);
                 ApplyCurrentOverlayScale(el);
@@ -518,6 +531,8 @@ public partial class MainWindow
 
                     var tb = g.Children.OfType<TextBlock>().FirstOrDefault();
                     if (tb != null) tb.Text = cluster.Count > 1 ? cluster.Count.ToString() : "";
+
+                    g.Visibility = (_isShowingDeepSeaMap == (avgX < 0)) ? Visibility.Visible : Visibility.Collapsed;
                 }
                 if (el is FrameworkElement fe2) _shopIconSet.Add(fe2);
             }
@@ -541,8 +556,8 @@ public partial class MainWindow
         PrefetchShopIcons(shops);
     }
 
-    private DispatcherTimer _shopDetailHideTimer;
-    private DispatcherTimer _shopDetailShowTimer;
+    private DispatcherTimer? _shopDetailHideTimer;
+    private DispatcherTimer? _shopDetailShowTimer;
 
     private void ShopElement_MouseEnter(object sender, MouseEventArgs e)
     {
@@ -643,7 +658,7 @@ public partial class MainWindow
             }
             else
             {
-                shopContainer.Children.Add(new TextBlock { Text = "No offers available", Foreground = Brushes.Gray, FontSize = 12, FontStyle = FontStyles.Italic, Margin = new Thickness(4) });
+                shopContainer.Children.Add(new TextBlock { Text = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiNoOffersAvailable") ?? "No offers available", Foreground = Brushes.Gray, FontSize = 12, FontStyle = FontStyles.Italic, Margin = new Thickness(4) });
             }
 
             ShopDetailsContent.Children.Add(shopContainer);

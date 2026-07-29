@@ -8,9 +8,11 @@
              xmlns:p="clr-namespace:RustPlusDesk.Properties"
              xmlns:views="clr-namespace:RustPlusDesk.Views"
              xmlns:windows="clr-namespace:RustPlusDesk.Views.Windows"
+             xmlns:tutorials="clr-namespace:RustPlusDesk.Features.Tutorials"
              mc:Ignorable="d"
              Background="{DynamicResource Surface}"
-             Foreground="{DynamicResource TextPrimary}">
+             Foreground="{DynamicResource TextPrimary}"
+             tutorials:Tutorial.TargetId="Settings.Panel">
 
     <Grid ClipToBounds="True">
         <Grid.Resources>
@@ -87,7 +89,7 @@
                         <Border Style="{StaticResource Card}" MinHeight="58" Padding="12,9">
                             <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="32" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                 <ui:SymbolIcon Symbol="ChatBubblesQuestion24" Foreground="{DynamicResource Accent}" VerticalAlignment="Center" />
-                                <StackPanel Grid.Column="1"><TextBlock FontWeight="SemiBold" Text="{DynamicResource UiConnectedServices}" /><TextBlock Margin="0,2,0,0" FontSize="10.5" Foreground="{DynamicResource TextSubtle}" Text="Discord and chat" TextWrapping="Wrap" /></StackPanel>
+                                <StackPanel Grid.Column="1"><TextBlock FontWeight="SemiBold" Text="{DynamicResource UiConnectedServices}" /><TextBlock Margin="0,2,0,0" FontSize="10.5" Foreground="{DynamicResource TextSubtle}" Text="{DynamicResource UiDiscordAndChat}" TextWrapping="Wrap" /></StackPanel>
                                 <ui:SymbolIcon Grid.Column="2" Symbol="ChevronRight24" Foreground="{DynamicResource TextSubtle}" VerticalAlignment="Center" />
                             </Grid>
                         </Border>
@@ -96,7 +98,7 @@
                         <Border Style="{StaticResource Card}" MinHeight="58" Padding="12,9">
                             <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="32" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                 <ui:SymbolIcon Symbol="Chat24" Foreground="{DynamicResource Accent}" VerticalAlignment="Center" />
-                                <StackPanel Grid.Column="1"><TextBlock FontWeight="SemiBold" Text="{DynamicResource ChatCommandsSettings}" /><TextBlock Margin="0,2,0,0" FontSize="10.5" Foreground="{DynamicResource TextSubtle}" Text="Configure team chat commands and device bindings" TextWrapping="Wrap" /></StackPanel>
+                                <StackPanel Grid.Column="1"><TextBlock FontWeight="SemiBold" Text="{DynamicResource ChatCommandsSettings}" /><TextBlock Margin="0,2,0,0" FontSize="10.5" Foreground="{DynamicResource TextSubtle}" Text="{DynamicResource UiConfigureTeamChatCommandsAndDeviceBindings}" TextWrapping="Wrap" /></StackPanel>
                                 <ui:SymbolIcon Grid.Column="2" Symbol="ChevronRight24" Foreground="{DynamicResource TextSubtle}" VerticalAlignment="Center" />
                             </Grid>
                         </Border>
@@ -169,7 +171,7 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="{DynamicResource Language}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}"/>
-                            <ComboBox Grid.Column="1" x:Name="CmbLanguage" Width="150"
+                            <ComboBox Grid.Column="1" x:Name="CmbLanguage" tutorials:Tutorial.TargetId="Settings.Language" Width="150"
                                       SelectedValuePath="Code"
                                       SelectionChanged="CmbLanguage_SelectionChanged">
                                 <ComboBox.ItemTemplate>
@@ -361,8 +363,8 @@
                 </StackPanel>
 
                 <!-- Map Performance Section -->
-                <StackPanel x:Name="SectionMapPerformance">
-                <TextBlock Text="Map Performance &amp; Quality" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
+                <StackPanel x:Name="SectionMapPerformance" tutorials:Tutorial.TargetId="Settings.Map">
+                <TextBlock Text="{DynamicResource UiMapPerformanceQuality}" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
                 <Border Style="{StaticResource Card}" Margin="0,0,0,16">
                     <StackPanel>
                         <!-- Image Scaling Quality Dropdown -->
@@ -371,22 +373,22 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Image Scaling Quality" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" ToolTip="Controls map image scaling filtering mode."/>
+                            <TextBlock Text="{DynamicResource UiImageScalingQuality}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" ToolTip="{DynamicResource UiControlsMapImageScalingFilteringMode}"/>
                             <ComboBox Grid.Column="1" x:Name="CmbMapScalingMode" Width="200"
                                       SelectionChanged="OnSettingChanged">
-                                <ComboBoxItem Content="High Quality (Bicubic)" Tag="0"/>
-                                <ComboBoxItem Content="Balanced (Linear)" Tag="1"/>
-                                <ComboBoxItem Content="Performance (Nearest Neighbor)" Tag="2"/>
+                                <ComboBoxItem Content="{DynamicResource UiHighQualityBicubic}" Tag="0"/>
+                                <ComboBoxItem Content="{DynamicResource UiBalancedLinear}" Tag="1"/>
+                                <ComboBoxItem Content="{DynamicResource UiPerformanceNearestNeighbor}" Tag="2"/>
                             </ComboBox>
                         </Grid>
 
                         <!-- GPU Caching Toggle -->
                         <CheckBox x:Name="ChkMapUseCacheMode"
-                                  Content="Enable GPU Bitmap Caching"
+                                  Content="{DynamicResource UiEnableGPUBitmapCaching}"
                                   Margin="0,0,0,10"
                                   Style="{StaticResource DotCheckBox}"
                                   Checked="OnSettingChanged" Unchecked="OnSettingChanged"
-                                  ToolTip="Caches map rendering on the GPU. Extremely improves panning and zooming smoothness."/>
+                                  ToolTip="{DynamicResource UiCachesMapRenderingOnTheGPUExtremelyImprovesPanningAndZoomingSmoothness}"/>
 
                         <!-- GPU Rendering Scale Dropdown -->
                         <Grid Margin="0,0,0,12" x:Name="GridMapRenderScale" IsEnabled="{Binding IsChecked, ElementName=ChkMapUseCacheMode}">
@@ -394,34 +396,34 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="GPU Rendering Scale" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" ToolTip="Resolution scale of the cached GPU bitmap. Lower scales improve performance on slower GPUs."/>
+                            <TextBlock Text="{DynamicResource UiGPURenderingScale}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" ToolTip="{DynamicResource UiResolutionScaleOfTheCachedGPUBitmapLowerScalesImprovePerfo767E03E084}"/>
                             <ComboBox Grid.Column="1" x:Name="CmbMapRenderScale" Width="200"
                                       SelectionChanged="OnSettingChanged">
-                                <ComboBoxItem Content="50% (Fastest)" Tag="0.5"/>
-                                <ComboBoxItem Content="75% (Performance)" Tag="0.75"/>
-                                <ComboBoxItem Content="100% (Native)" Tag="1.0"/>
-                                <ComboBoxItem Content="125% (Sharp)" Tag="1.25"/>
-                                <ComboBoxItem Content="150% (High Resolution)" Tag="1.5"/>
-                                <ComboBoxItem Content="200% (Ultra High Resolution)" Tag="2.0"/>
+                                <ComboBoxItem Content="{DynamicResource UiText50Fastest}" Tag="0.5"/>
+                                <ComboBoxItem Content="{DynamicResource UiText75Performance}" Tag="0.75"/>
+                                <ComboBoxItem Content="{DynamicResource UiText100Native}" Tag="1.0"/>
+                                <ComboBoxItem Content="{DynamicResource UiText125Sharp}" Tag="1.25"/>
+                                <ComboBoxItem Content="{DynamicResource UiText150HighResolution}" Tag="1.5"/>
+                                <ComboBoxItem Content="{DynamicResource UiText200UltraHighResolution}" Tag="2.0"/>
                             </ComboBox>
                         </Grid>
 
                         <!-- Aliased Edge Mode Toggle -->
                         <CheckBox x:Name="ChkMapUseAliasedEdgeMode"
-                                  Content="Disable Grid Anti-Aliasing (Aliased Edge Mode)"
+                                  Content="{DynamicResource UiDisableGridAntiAliasingAliasedEdgeMode}"
                                   Style="{StaticResource DotCheckBox}"
                                   Checked="OnSettingChanged" Unchecked="OnSettingChanged"
-                                  ToolTip="Disables anti-aliasing on grid lines and markers. Improves rendering speed on low-end systems."/>
+                                  ToolTip="{DynamicResource UiDisablesAntiAliasingOnGridLinesAndMarkersImprovesRenderingC0D2589FE1}"/>
                     </StackPanel>
                 </Border>
 
                 <!-- Custom HD Map Image Card -->
-                <ui:TextBlock Text="Custom HD Map Image" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}" Margin="0,8,0,0" />
+                <ui:TextBlock Text="{DynamicResource UiCustomHDMapImage}" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}" Margin="0,8,0,0" />
                 <Border Style="{StaticResource Card}">
                     <StackPanel>
-                        <ui:TextBlock Text="Use a custom high-definition map image from a URL source instead of the map coming from the server. Cached locally and automatically wiped when a server wipe is detected." TextWrapping="Wrap" Foreground="{DynamicResource TextSubtle}" FontSize="11" Margin="0,0,0,10" />
+                        <ui:TextBlock Text="{DynamicResource UiUseCustomHDMapImageDesc}" TextWrapping="Wrap" Foreground="{DynamicResource TextSubtle}" FontSize="11" Margin="0,0,0,10" />
 
-                        <ui:TextBlock Text="Custom Map Image URL" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4" />
+                        <ui:TextBlock Text="{DynamicResource UiCustomMapImageURL}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4" />
                         <Grid Margin="0,0,0,8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -429,8 +431,8 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <ui:TextBox x:Name="TxtCustomMapUrl" Height="32" Padding="6,4" PlaceholderText="https://example.com/rust_map_hd.png" VerticalContentAlignment="Center" TextChanged="TxtCustomMapUrl_TextChanged" />
-                            <ui:Button Grid.Column="1" x:Name="BtnApplyCustomMapUrl" Content="Apply" Appearance="Primary" Height="32" Margin="6,0,0,0" Click="BtnApplyCustomMapUrl_Click" />
-                            <ui:Button Grid.Column="2" x:Name="BtnClearCustomMapUrl" Content="Clear" Appearance="Secondary" Height="32" Margin="6,0,0,0" Click="BtnClearCustomMapUrl_Click" />
+                            <ui:Button Grid.Column="1" x:Name="BtnApplyCustomMapUrl" Content="{DynamicResource UiApply}" Appearance="Primary" Height="32" Margin="6,0,0,0" Click="BtnApplyCustomMapUrl_Click" />
+                            <ui:Button Grid.Column="2" x:Name="BtnClearCustomMapUrl" Content="{DynamicResource Clear}" Appearance="Secondary" Height="32" Margin="6,0,0,0" Click="BtnClearCustomMapUrl_Click" />
                         </Grid>
                         <ui:TextBlock x:Name="TxtCustomMapStatus" FontSize="11" Foreground="{DynamicResource TextSubtle}" Margin="0,2,0,0" TextWrapping="Wrap" />
                     </StackPanel>
@@ -527,8 +529,8 @@
                 </StackPanel>
 
                 <!-- Discord Settings Section -->
-                <StackPanel x:Name="SectionDiscord">
-                <TextBlock Text="Discord Settings" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
+                <StackPanel x:Name="SectionDiscord" tutorials:Tutorial.TargetId="Settings.Discord">
+                <TextBlock Text="{DynamicResource UiDiscordSettings}" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
 
                 <!-- Invite Bot Button -->
                 <ui:Button x:Name="BtnDiscordConnect"
@@ -539,7 +541,7 @@
                     <ui:Button.Icon>
                         <ui:ImageIcon Source="pack://application:,,,/Assets/icons/discord.png"/>
                     </ui:Button.Icon>
-                    <TextBlock Text="Invite Bot to Discord Server"/>
+                    <TextBlock Text="{DynamicResource UiInviteBotToDiscordServer}"/>
                 </ui:Button>
 
                 <!-- Connection Status -->
@@ -554,17 +556,17 @@
                                Foreground="#888888"
                                VerticalAlignment="Center"
                                TextWrapping="Wrap"
-                               Text="Not connected - Please invite Discord Bot to your server and do /setup &lt;steamid64&gt;"/>
+                               Text="{DynamicResource UiDiscordNotConnectedStatus}"/>
                 </StackPanel>
 
                 <!-- Channel Notifications -->
                 <Border x:Name="BrdSupporterSettings" Style="{StaticResource Card}" Margin="0,0,0,16">
                     <StackPanel>
-                        <Expander Header="Discord Integrations" Margin="-4,0,0,10" Background="Transparent" BorderBrush="Transparent" Foreground="{DynamicResource TextPrimary}" Padding="0">
+                        <Expander Header="{DynamicResource UiDiscordIntegrations}" Margin="-4,0,0,10" Background="Transparent" BorderBrush="Transparent" Foreground="{DynamicResource TextPrimary}" Padding="0">
                             <StackPanel Margin="0,8,0,0">
 
                                 <!-- Raid -->
-                                <TextBlock Text="Raid Alerts" Foreground="{DynamicResource TextSubtle}" FontSize="11" Margin="0,4,0,2" />
+                                <TextBlock Text="{DynamicResource UiRaidAlerts}" Foreground="{DynamicResource TextSubtle}" FontSize="11" Margin="0,4,0,2" />
                                 <Grid Margin="0,0,0,6">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -574,12 +576,12 @@
                                     <TextBlock x:Name="TxtChannelRaid" Grid.Column="0" VerticalAlignment="Center" FontSize="11"
                                                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                                Text="—" TextTrimming="CharacterEllipsis"/>
-                                    <CheckBox x:Name="ChkRaidTTS"    Grid.Column="1" Content="TTS"   Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
-                                    <CheckBox x:Name="ChkRaidAudio"  Grid.Column="2" Content="Sound" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
+                                    <CheckBox x:Name="ChkRaidTTS"    Grid.Column="1" Content="{DynamicResource UiTTS}"   Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
+                                    <CheckBox x:Name="ChkRaidAudio"  Grid.Column="2" Content="{DynamicResource UiSound}" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
                                 </Grid>
 
                                 <!-- Events -->
-                                <TextBlock Text="Events" Foreground="{DynamicResource TextSubtle}" FontSize="11" Margin="0,4,0,2" />
+                                <TextBlock Text="{DynamicResource UiEventsLabel}" Foreground="{DynamicResource TextSubtle}" FontSize="11" Margin="0,4,0,2" />
                                 <Grid Margin="0,0,0,6">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -589,12 +591,12 @@
                                     <TextBlock x:Name="TxtChannelEvents" Grid.Column="0" VerticalAlignment="Center" FontSize="11"
                                                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                                Text="—" TextTrimming="CharacterEllipsis"/>
-                                    <CheckBox x:Name="ChkEventsTTS"   Grid.Column="1" Content="TTS"   Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
-                                    <CheckBox x:Name="ChkEventsAudio" Grid.Column="2" Content="Sound" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
+                                    <CheckBox x:Name="ChkEventsTTS"   Grid.Column="1" Content="{DynamicResource UiTTS}"   Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
+                                    <CheckBox x:Name="ChkEventsAudio" Grid.Column="2" Content="{DynamicResource UiSound}" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
                                 </Grid>
 
                                 <!-- Team Chat -->
-                                <TextBlock Text="Team Chat" Foreground="{DynamicResource TextSubtle}" FontSize="11" Margin="0,4,0,2" />
+                                <TextBlock Text="{DynamicResource TeamChat}" Foreground="{DynamicResource TextSubtle}" FontSize="11" Margin="0,4,0,2" />
                                 <Grid Margin="0,0,0,6">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -604,12 +606,12 @@
                                     <TextBlock x:Name="TxtChannelChat" Grid.Column="0" VerticalAlignment="Center" FontSize="11"
                                                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                                Text="—" TextTrimming="CharacterEllipsis"/>
-                                    <CheckBox x:Name="ChkChatTTS"   Grid.Column="1" Content="TTS"   Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
-                                    <CheckBox x:Name="ChkChatAudio" Grid.Column="2" Content="Sound" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
+                                    <CheckBox x:Name="ChkChatTTS"   Grid.Column="1" Content="{DynamicResource UiTTS}"   Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
+                                    <CheckBox x:Name="ChkChatAudio" Grid.Column="2" Content="{DynamicResource UiSound}" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
                                 </Grid>
 
                                 <!-- Shop -->
-                                <TextBlock Text="Shop" Foreground="{DynamicResource TextSubtle}" FontSize="11" Margin="0,4,0,2" />
+                                <TextBlock Text="{DynamicResource ShopWord}" Foreground="{DynamicResource TextSubtle}" FontSize="11" Margin="0,4,0,2" />
                                 <Grid Margin="0,0,0,6">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -619,12 +621,12 @@
                                     <TextBlock x:Name="TxtChannelShop" Grid.Column="0" VerticalAlignment="Center" FontSize="11"
                                                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                                Text="—" TextTrimming="CharacterEllipsis"/>
-                                    <CheckBox x:Name="ChkShopTTS"   Grid.Column="1" Content="TTS"   Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
-                                    <CheckBox x:Name="ChkShopAudio" Grid.Column="2" Content="Sound" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
+                                    <CheckBox x:Name="ChkShopTTS"   Grid.Column="1" Content="{DynamicResource UiTTS}"   Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
+                                    <CheckBox x:Name="ChkShopAudio" Grid.Column="2" Content="{DynamicResource UiSound}" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
                                 </Grid>
 
                                 <!-- Trackers -->
-                                <TextBlock Text="Trackers" Foreground="{DynamicResource TextSubtle}" FontSize="11" Margin="0,4,0,2" />
+                                <TextBlock Text="{DynamicResource UiTrackers}" Foreground="{DynamicResource TextSubtle}" FontSize="11" Margin="0,4,0,2" />
                                 <Grid Margin="0,0,0,6">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -634,8 +636,8 @@
                                     <TextBlock x:Name="TxtChannelTrackers" Grid.Column="0" VerticalAlignment="Center" FontSize="11"
                                                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                                Text="—" TextTrimming="CharacterEllipsis"/>
-                                    <CheckBox x:Name="ChkTrackersTTS"   Grid.Column="1" Content="TTS"   Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
-                                    <CheckBox x:Name="ChkTrackersAudio" Grid.Column="2" Content="Sound" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
+                                    <CheckBox x:Name="ChkTrackersTTS"   Grid.Column="1" Content="{DynamicResource UiTTS}"   Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
+                                    <CheckBox x:Name="ChkTrackersAudio" Grid.Column="2" Content="{DynamicResource UiSound}" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
                                 </Grid>
 
 
@@ -647,7 +649,7 @@
                 </StackPanel>
 
                 <!-- Chat Commands Section -->
-                <StackPanel x:Name="SectionChatCommands">
+                <StackPanel x:Name="SectionChatCommands" tutorials:Tutorial.TargetId="Settings.ChatCommands">
                 <TextBlock Text="{DynamicResource ChatCommandsSettings}" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
                 <views:ChatCommandsOverlay x:Name="ChatCommandsEditor" />
                 </StackPanel>
@@ -660,15 +662,15 @@
 
                 <!-- BattleMetrics Section -->
                 <StackPanel x:Name="SectionBattleMetrics">
-                <TextBlock Text="BattleMetrics" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
+                <TextBlock Text="{DynamicResource UiBattleMetrics}" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
                 <Border Style="{StaticResource Card}" Margin="0,0,0,16">
                     <StackPanel>
-                        <TextBlock Text="A BattleMetrics passou a exigir uma chave de API (conta paga) para consultar jogadores online. Sem isto, a lista de jogadores online e o Roster ficam vazios."
+                        <TextBlock Text="{DynamicResource UiBattleMetricsApiKeyWarning}"
                                    Foreground="{DynamicResource TextSubtle}"
                                    FontSize="11"
                                    Margin="0,0,0,10"
                                    TextWrapping="Wrap"/>
-                        <TextBlock Text="API Key" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4"/>
+                        <TextBlock Text="{DynamicResource UiApiKey}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4"/>
                         <PasswordBox x:Name="TxtBattleMetricsApiKey"
                                      Height="30"
                                      PasswordChanged="TxtBattleMetricsApiKey_PasswordChanged"/>
@@ -677,7 +679,7 @@
                 </StackPanel>
 
                 <!-- Maintenance Section -->
-                <StackPanel x:Name="SectionMaintenance">
+                <StackPanel x:Name="SectionMaintenance" tutorials:Tutorial.TargetId="Settings.Maintenance">
                 <TextBlock Text="{DynamicResource MaintenanceTitle}" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>
                 <Border Style="{StaticResource Card}" Margin="0,0,0,16">
                     <StackPanel>

@@ -69,7 +69,7 @@ namespace RustPlusDesk.Views
 
             var newRule = new LogicRule
             {
-                Name = $"Rule {(_vm.Selected.LogicRules.Count + 1)}",
+                Name = string.Format(Properties.Resources.ResourceManager.GetString("CodeUiRuleNumberFormat") ?? "Rule {0}", _vm.Selected.LogicRules.Count + 1),
                 IsEnabled = false,
                 IsExpanded = true,
                 TriggerType = "SmartAlarm",

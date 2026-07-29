@@ -122,7 +122,7 @@ namespace RustPlusDesk.Views
 
         private static string T(string key, string fallback)
         {
-            return Properties.Resources.ResourceManager.GetString(key) ?? fallback;
+            return Properties.Resources.ResourceManager.GetString(key, Properties.Resources.Culture) ?? fallback;
         }
 
         private void InitializeSettingsNavigation()
@@ -133,10 +133,10 @@ namespace RustPlusDesk.Views
                 Section("behavior", "general", T("Behavior", "Behavior"), "tray closing streamer privacy background tracking console cloud sync upload", SectionBehavior),
                 Section("offline-death", "alerts", T("OfflineDeathNotifications", "Offline Death Notifications"), "offline death raid alerts sound loop discord log", SectionOfflineDeath),
                 Section("notifications", "alerts", T("NotificationCenterSettings", "Notification Center"), "toast sound alerts retention days muted servers notification center", SectionNotifications),
-                Section("map-performance", "map", "Map Performance & Quality", "image scaling quality gpu bitmap cache rendering scale anti aliasing performance", SectionMapPerformance),
+                Section("map-performance", "map", T("UiMapPerformanceQuality", "Map Performance & Quality"), "image scaling quality gpu bitmap cache rendering scale anti aliasing performance", SectionMapPerformance),
                 Section("team-markers", "map", T("TeamMarkersSettings", "Team Markers"), "profile player direction arrows death markers streamer icon scale", SectionTeamMarkers),
                 Section("3d-map", "map", T("ThreeDMapSectionTitle", "3D Map"), "3d map delete data parse manually quality", SectionThreeDMap),
-                Section("discord", "connected", "Discord Settings", "discord bot invite channels raid events chat shop trackers tts sound integrations", SectionDiscord),
+                Section("discord", "connected", T("UiDiscordSettings", "Discord Settings"), "discord bot invite channels raid events chat shop trackers tts sound integrations", SectionDiscord),
                 Section("chat-commands", "chat-commands", T("ChatCommandsSettings", "Chat Commands"), "chat team commands prefix delay population time promote cargo oil rig heli vendor upkeep afk timers switches logic rules", SectionChatCommands),
                 Section("alert-templates", "alert-templates", T("CustomAlertsHeader", "Chat Alert Templates"), "chat alert templates messages oil rig crate alarm deep sea shop cargo event heli player tracking online offline death respawn", SectionChatAlertTemplates),
                 Section("battlemetrics", "system", "BattleMetrics", "battlemetrics api key online players roster", SectionBattleMetrics),
@@ -436,10 +436,13 @@ namespace RustPlusDesk.Views
 
         public void OpenCategory(string category)
         {
-            _isShowingSearchResults = false;
-            _returnToCategoryPageAfterSearch = false;
-            SettingsSearchBox.Clear();
-            ShowSettingsCategory(category);
+            Dispatcher.InvokeAsync(() =>
+            {
+                _isShowingSearchResults = false;
+                _returnToCategoryPageAfterSearch = false;
+                SettingsSearchBox.Clear();
+                ShowSettingsCategory(category);
+            });
         }
 
         private void SettingsSearchBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -483,10 +486,10 @@ namespace RustPlusDesk.Views
                 .ThenBy(option => option.Title)
                 .ToList();
             SettingsSearchResults.ItemsSource = matches.Select(option => CreateSettingsOptionResult(option, query)).ToList();
-            SettingsDetailTitle.Text = "Search results";
+            SettingsDetailTitle.Text = T("CodeUiSearchResults", "Search results");
             SettingsDetailSubtitle.Text = matches.Count == 0
-                ? $"No settings found for “{query}”"
-                : $"{matches.Count} setting{(matches.Count == 1 ? "" : "s")} found for “{query}”";
+                ? string.Format(T("CodeUiNoSettingsFoundForQuery", "No settings found for “{0}”"), query)
+                : string.Format(T("CodeUiSettingsFoundForQuery", "{0} setting{1} found for “{2}”"), matches.Count, matches.Count == 1 ? "" : "s", query);
             SettingsCategoryPage.Visibility = Visibility.Collapsed;
             SettingsDetailPage.Visibility = Visibility.Visible;
             SettingsSectionList.Visibility = Visibility.Collapsed;
@@ -554,7 +557,7 @@ namespace RustPlusDesk.Views
         {
             var langs = new List<LanguageOption>
             {
-                new() { Name = "System Default", Code = "", ImagePath = null },
+                new() { Name = T("CodeUiSystemDefaultLanguage", "System Default"), Code = "", ImagePath = null },
                 // Region-specific codes matching %locale% Crowdin-generated folders
                 new() { Name = "English",           Code = "en-US",  ImagePath = "pack://application:,,,/Assets/Flags/en.png" },
                 new() { Name = "Deutsch",            Code = "de-DE",  ImagePath = "pack://application:,,,/Assets/Flags/de.png" },
@@ -574,7 +577,7 @@ namespace RustPlusDesk.Views
                 new() { Name = "Čeština",            Code = "cs-CZ",  ImagePath = "pack://application:,,,/Assets/Flags/cs.png" },
                 new() { Name = "Magyar",             Code = "hu-HU",  ImagePath = "pack://application:,,,/Assets/Flags/hu.png" },
                 new() { Name = "Română",             Code = "ro-RO",  ImagePath = "pack://application:,,,/Assets/Flags/ro.png" },
-                new() { Name = "Srpski",             Code = "sr-SP",  ImagePath = "pack://application:,,,/Assets/Flags/sr.png" },
+                new() { Name = "Srpski",             Code = "sr-Latn-RS", ImagePath = "pack://application:,,,/Assets/Flags/sr.png" },
                 new() { Name = "Ελληνικά",           Code = "el-GR",  ImagePath = "pack://application:,,,/Assets/Flags/el.png" },
                 new() { Name = "Українська",         Code = "uk-UA",  ImagePath = "pack://application:,,,/Assets/Flags/uk.png" },
                 new() { Name = "Tiếng Việt",         Code = "vi-VN",  ImagePath = "pack://application:,,,/Assets/Flags/vi.png" },
@@ -630,11 +633,11 @@ namespace RustPlusDesk.Views
                 TxtCustomMapUrl.Text = selectedProfile.CustomMapUrl ?? "";
                 if (!string.IsNullOrWhiteSpace(selectedProfile.CustomMapUrl))
                 {
-                    TxtCustomMapStatus.Text = "Custom HD Map active. Map image is cached locally and will automatically reset on server wipe.";
+                    TxtCustomMapStatus.Text = T("CodeUiCustomHDMapActiveDesc", "Custom HD Map active. Map image is cached locally and will automatically reset on server wipe.");
                 }
                 else
                 {
-                    TxtCustomMapStatus.Text = "No custom map URL set. Standard server map image is currently in use.";
+                    TxtCustomMapStatus.Text = T("CodeUiNoCustomMapUrlSetDesc", "No custom map URL set. Standard server map image is currently in use.");
                 }
             }
 
@@ -825,8 +828,8 @@ namespace RustPlusDesk.Views
         {
             var owner = ParentWindow ?? Window.GetWindow(this);
             var result = MessageBox.Show(
-                "Delete all cached 3D map data for every server? This removes parsed map files and generated viewer JSON, but keeps app assets and icons.",
-                "Delete 3D Map Data",
+                T("CodeUiDeleteAllCached3DMapDataConfirm", "Delete all cached 3D map data for every server? This removes parsed map files and generated viewer JSON, but keeps app assets and icons."),
+                T("CodeUiDelete3DMapDataTitle", "Delete 3D Map Data"),
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning);
 
@@ -835,7 +838,7 @@ namespace RustPlusDesk.Views
             var deleted = Map3DLocalBuildService.DeleteAllCachedMapData();
             ParentWindow?.ResetBuildingBlockedZonesAfterCacheDelete();
             ParentWindow?.AppendLog($"[3D Map] Deleted cached 3D map data ({deleted.DeletedFiles} files, {deleted.DeletedDirectories} folders). Generated data will be rebuilt when needed.");
-            MessageBox.Show(owner, "Cached 3D map data deleted. It will be rebuilt when you open a 3D map again.", "3D Map Data", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(owner, T("CodeUiCached3DMapDataDeletedItWillBeRebuiltWhenYouOpenA3DMapAgain", "Cached 3D map data deleted. It will be rebuilt when you open a 3D map again."), T("CodeUi3DMapData", "3D Map Data"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
         private void BtnBackupData_Click(object sender, RoutedEventArgs e)
         {
@@ -1043,7 +1046,7 @@ namespace RustPlusDesk.Views
                 {
                     if (connected)
                     {
-                        TxtAuthStatus.Text = "Connected";
+                        TxtAuthStatus.Text = T("CodeUiConnected", "Connected");
                         TxtAuthStatus.Foreground = new System.Windows.Media.SolidColorBrush(
                             System.Windows.Media.Color.FromRgb(0x2E, 0xCC, 0x71));
                         DotBotStatus.Fill = new System.Windows.Media.SolidColorBrush(
@@ -1051,7 +1054,7 @@ namespace RustPlusDesk.Views
                     }
                     else
                     {
-                        TxtAuthStatus.Text = "Not connected - Please invite Discord Bot to your server and do /setup <steamid64>";
+                        TxtAuthStatus.Text = T("CodeUiDiscordNotConnectedStatus", "Not connected - Please invite Discord Bot to your server and do /setup <steamid64>");
                         TxtAuthStatus.Foreground = new System.Windows.Media.SolidColorBrush(
                             System.Windows.Media.Color.FromRgb(0x88, 0x88, 0x88));
                         DotBotStatus.Fill = new System.Windows.Media.SolidColorBrush(
@@ -1125,7 +1128,7 @@ namespace RustPlusDesk.Views
             var ofd = new Microsoft.Win32.OpenFileDialog
             {
                 Filter = "Audio Files (*.mp3, *.wav)|*.mp3;*.wav",
-                Title = "Select Custom Death Sound"
+                Title = T("SelectCustomDeathSound", "Select Custom Death Sound")
             };
             if (ofd.ShowDialog() == true)
             {
@@ -1256,14 +1259,14 @@ namespace RustPlusDesk.Views
             var selectedProf = ParentWindow?.ViewModel?.Selected;
             if (selectedProf == null)
             {
-                MessageBox.Show(ParentWindow, "No active server profile selected.", "Custom Map URL", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ParentWindow, T("CodeUiNoActiveServerProfileSelected", "No active server profile selected."), T("CodeUiCustomMapUrlTitle", "Custom Map URL"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             string url = TxtCustomMapUrl.Text.Trim();
             if (!string.IsNullOrEmpty(url) && !Uri.IsWellFormedUriString(url, UriKind.Absolute))
             {
-                MessageBox.Show(ParentWindow, "Please enter a valid absolute HTTP or HTTPS URL (e.g. https://example.com/rust_map.png).", "Invalid URL", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ParentWindow, T("CodeUiPleaseEnterValidAbsoluteUrl", "Please enter a valid absolute HTTP or HTTPS URL (e.g. https://example.com/rust_map.png)."), T("CodeUiInvalidUrlTitle", "Invalid URL"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -1278,11 +1281,11 @@ namespace RustPlusDesk.Views
                 string key = $"{host}_{port}";
                 MainWindow.DeleteCustomMapCache(key);
 
-                TxtCustomMapStatus.Text = "Custom HD Map URL updated. Reloading map image...";
+                TxtCustomMapStatus.Text = T("CodeUiCustomMapUrlUpdatedReloading", "Custom HD Map URL updated. Reloading map image...");
             }
             else
             {
-                TxtCustomMapStatus.Text = "Custom HD Map URL cleared. Reverting to standard server map...";
+                TxtCustomMapStatus.Text = T("CodeUiCustomMapUrlClearedReverting", "Custom HD Map URL cleared. Reverting to standard server map...");
             }
 
             _ = ParentWindow?.ReloadMapAsync();

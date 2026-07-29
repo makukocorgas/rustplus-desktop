@@ -62,7 +62,7 @@ namespace RustPlusDesk.Views
                         tempList.Add(new RowVM
                         {
                             EntityId = id,
-                            DisplayName = "Unknown Device",
+                            DisplayName = Properties.Resources.ResourceManager.GetString("CodeUiUnknownDevice") ?? "Unknown Device",
                             Status = "DELETED",
                             IsDeleted = true,
                             Hotkey = kv.Key,
@@ -86,7 +86,8 @@ namespace RustPlusDesk.Views
             CbMode.SelectedIndex = _options.ParallelMode ? 1 : 0;
             SldDelay.Value = _options.ToggleDelayMs;
             PanelDelay.Visibility = _options.ParallelMode ? Visibility.Collapsed : Visibility.Visible;
-            TxtDelayLabel.Text = $"Toggle Delay: {_options.ToggleDelayMs}ms";
+            string delayFormat = Properties.Resources.ResourceManager.GetString("CodeUiToggleDelayFormat") ?? "Toggle Delay: {0}ms";
+            TxtDelayLabel.Text = string.Format(delayFormat, _options.ToggleDelayMs);
         }
 
         private bool IsHotkeyWarningVisible(string? hotkey)
@@ -158,7 +159,8 @@ namespace RustPlusDesk.Views
         {
             if (TxtDelayLabel == null || _options == null) return;
             int val = (int)e.NewValue;
-            TxtDelayLabel.Text = $"Toggle Delay: {val}ms";
+            string delayFormat = Properties.Resources.ResourceManager.GetString("CodeUiToggleDelayFormat") ?? "Toggle Delay: {0}ms";
+            TxtDelayLabel.Text = string.Format(delayFormat, val);
             _options.ToggleDelayMs = val;
         }
 

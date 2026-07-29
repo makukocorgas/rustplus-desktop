@@ -29,7 +29,7 @@ public partial class MainWindow
         {
             ChkNoBuildZones.IsChecked = false;
             ChkNoBuildZones.IsEnabled = false;
-            ChkNoBuildZones.ToolTip = "Generate the 3D map to enable no-build zones.";
+            ChkNoBuildZones.ToolTip = RustPlusDesk.Properties.Resources.ResourceManager.GetString("UiGenerateThe3DMapToEnableNoBuildZones") ?? "Generate the 3D map to enable no-build zones.";
         }
 
         foreach (var shape in _buildingBlockedZoneEls)
@@ -70,7 +70,7 @@ public partial class MainWindow
         {
             ChkNoBuildZones.IsEnabled = false;
             ChkNoBuildZones.IsChecked = false;
-            ChkNoBuildZones.ToolTip = "Generate the 3D map to enable no-build zones.";
+            ChkNoBuildZones.ToolTip = RustPlusDesk.Properties.Resources.ResourceManager.GetString("UiGenerateThe3DMapToEnableNoBuildZones") ?? "Generate the 3D map to enable no-build zones.";
         }
 
         if (string.IsNullOrWhiteSpace(folderPath))
@@ -106,7 +106,9 @@ public partial class MainWindow
         if (ChkNoBuildZones != null)
         {
             ChkNoBuildZones.IsEnabled = hasData;
-            ChkNoBuildZones.ToolTip = hasData ? "Show no-build zones" : "Generate the 3D map to enable no-build zones.";
+            ChkNoBuildZones.ToolTip = hasData
+                ? (RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiShowNoBuildZones") ?? "Show no-build zones")
+                : (RustPlusDesk.Properties.Resources.ResourceManager.GetString("UiGenerateThe3DMapToEnableNoBuildZones") ?? "Generate the 3D map to enable no-build zones.");
             ChkNoBuildZones.IsChecked = false;
         }
         RedrawGrid();
@@ -119,6 +121,8 @@ public partial class MainWindow
             GridLayer.Children.Remove(shape);
         }
         _buildingBlockedZoneEls.Clear();
+
+        if (_isShowingDeepSeaMap) return;
 
         if (ChkNoBuildZones?.IsChecked != true || _buildingBlockedData == null || _worldSizeS <= 0 || _worldRectPx.Width <= 0)
             return;

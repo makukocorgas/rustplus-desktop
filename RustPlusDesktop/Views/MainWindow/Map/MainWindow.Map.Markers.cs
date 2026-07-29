@@ -127,7 +127,7 @@ public partial class MainWindow
             double h = fe.DesiredSize.Height > 0 ? fe.DesiredSize.Height : 28;
             Canvas.SetLeft(fe, p.X - w / 2);
             Canvas.SetTop(fe, p.Y - h / 2);
-            fe.Visibility = _showMonuments ? Visibility.Visible : Visibility.Collapsed;
+            fe.Visibility = (_showMonuments && !_isShowingDeepSeaMap) ? Visibility.Visible : Visibility.Collapsed;
         }
         PopulateMonumentList();
     }
@@ -175,17 +175,19 @@ public partial class MainWindow
         double eff = GetEffectiveZoom();
         double scale;
 
+        bool visible = _showMonuments && !_isShowingDeepSeaMap;
+
         if (TrackingService.MapUseMonumentText)
         {
             // Inverse scaling to make text labels appear larger/compensation on zoom outs!
             scale = CalcOverlayScale(eff, 0.45, 0.95) * TrackingService.MapMonumentScale;
-            el.Visibility = _showMonuments ? Visibility.Visible : Visibility.Collapsed;
+            el.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
         }
         else
         {
             // Standard icon mode: also respects custom scaling slider
             scale = CalcOverlayScale(eff, MON_SIZE_EXP, MON_BASE_MULT) * TrackingService.MapMonumentScale;
-            el.Visibility = _showMonuments ? Visibility.Visible : Visibility.Collapsed;
+            el.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
         }
 
         el.RenderTransformOrigin = new Point(0.5, 0.5);
@@ -789,7 +791,7 @@ public partial class MainWindow
             if ((DateTime.UtcNow - state.DockTime.Value).TotalSeconds >= 5)
             {
                 string grid = GetGridLabel(m.X, m.Y);
-                var msg = AlertTemplateService.GetFormattedAlert("AlertCargoDocked", state.HarborName, grid);
+                var msg = AlertTemplateService.GetFormattedAlert("AlertCargoDocked", state.HarborName ?? string.Empty, grid);
                 _ = SendTeamChatSafeAsync(msg, false, true);
                 _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDEA2 **Event Update:** {msg}");
                 if (RustPlusDesk.Services.TrackingService.NotificationsToastEnabled)
@@ -854,7 +856,7 @@ public partial class MainWindow
                 else
                 {
                     string grid = GetGridLabel(m.X, m.Y);
-                    var msg = AlertTemplateService.GetFormattedAlert("AlertCargoDeparting", state.HarborName, grid);
+                    var msg = AlertTemplateService.GetFormattedAlert("AlertCargoDeparting", state.HarborName ?? string.Empty, grid);
                     _ = SendTeamChatSafeAsync(msg, false, true);
                     _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDEA2 **Event Update:** {msg}");
                     if (RustPlusDesk.Services.TrackingService.NotificationsToastEnabled)
@@ -1244,7 +1246,7 @@ public partial class MainWindow
 
                 // Hover logic once
                 mainBorder.MouseEnter += (s, e) => {
-                    var items = stack.Children.OfType<Border>().Select(b => b.Child as Grid).Where(g => g != null).ToList();
+                    var items = stack.Children.OfType<Border>().Select(b => b.Child).OfType<Grid>().ToList();
                     foreach (var item in items) {
                         foreach (var lb in item.Children.OfType<TextBlock>()) {
                             lb.Visibility = Visibility.Visible;
@@ -1253,7 +1255,7 @@ public partial class MainWindow
                     }
                 };
                 mainBorder.MouseLeave += (s, e) => {
-                    var items = stack.Children.OfType<Border>().Select(b => b.Child as Grid).Where(g => g != null).ToList();
+                    var items = stack.Children.OfType<Border>().Select(b => b.Child).OfType<Grid>().ToList();
                     foreach (var item in items) {
                         foreach (var lb in item.Children.OfType<TextBlock>()) {
                             var anim = new DoubleAnimation(0, TimeSpan.FromMilliseconds(150));
@@ -1491,6 +1493,32 @@ public partial class MainWindow
                 itemRow.MouseLeftButtonDown -= EventItem_Click;
                 if (isClickable) itemRow.MouseLeftButtonDown += EventItem_Click;
             }
+
+            // Sync events to 3D map if it is active
+            if (_isMap3DActive && _map3DWebView?.CoreWebView2 != null)
+            {
+                try
+                {
+                    var clientEvents = activeEvents.Select(ev => new
+                    {
+                        name = ev.Name,
+                        active = ev.Active,
+                        id = ev.Id,
+                        x = ev.X,
+                        y = ev.Y,
+                        trackable = ev.Trackable,
+                        type = ev.Type,
+                        timerText = ev.TimerText,
+                        toolTip = ev.ToolTip,
+                        icon = ev.Icon.Replace("pack://application:,,,/Assets/icons/", "/Icons/", StringComparison.OrdinalIgnoreCase)
+                    }).ToList();
+
+                    string json = System.Text.Json.JsonSerializer.Serialize(clientEvents);
+                    string script = $"if (window.update3DEventDock) window.update3DEventDock({json});";
+                    _ = _map3DWebView.CoreWebView2.ExecuteScriptAsync(script);
+                }
+                catch { }
+            }
         });
     }
 
@@ -1541,6 +1569,21 @@ public partial class MainWindow
 
         _lastMarkers = markers;
         if (Overlay == null || _worldSizeS <= 0 || _worldRectPx.Width <= 0) return;
+
+        if (_mySteamId != 0)
+        {
+            var myMarker = System.Linq.Enumerable.FirstOrDefault(markers, m => m.Type == 1 && m.SteamId == _mySteamId);
+            if (myMarker.Id != 0 || myMarker.SteamId != 0)
+            {
+                bool inDeepSea = myMarker.X < -1000;
+                if (inDeepSea != _myPlayerWasInDeepSea)
+                {
+                    _myPlayerWasInDeepSea = inDeepSea;
+                    SetShowingDeepSeaMap(inDeepSea);
+                    return;
+                }
+            }
+        }
 
         var incoming = new HashSet<uint>();
 
@@ -1768,7 +1811,7 @@ public partial class MainWindow
                     }
 
                     Overlay.Children.Add(el);
-                    Panel.SetZIndex(el, m.Type == 150 ? 2000 : (isPlayer ? 950 : 920));
+                    Panel.SetZIndex(el, m.Type == 150 ? 2000 : (isPlayer ? 10000 : 920));
 
                     if (el.Tag is PlayerMarkerTag pmtNew)
                     {
@@ -1824,7 +1867,7 @@ public partial class MainWindow
                 if (el.Tag is PlayerMarkerTag pmt)
                 {
                     double targetRot;
-                    if (isPlayer)
+                    if (isPlayer || m.Type == 6)
                     {
                         double distSq = state.LastVX * state.LastVX + state.LastVY * state.LastVY;
                         if (state.History.Count > 1 && distSq > 0.0025)
@@ -1834,7 +1877,14 @@ public partial class MainWindow
                         }
                         else
                         {
-                            targetRot = isNew ? 0 : pmt.Rotation;
+                            if (isPlayer)
+                            {
+                                targetRot = isNew ? 0 : pmt.Rotation;
+                            }
+                            else
+                            {
+                                targetRot = isNew ? m.Rotation : pmt.Rotation;
+                            }
                         }
                     }
                     else if (m.Type == 5 || m.Type == 8 || m.Type == 4)
@@ -1843,7 +1893,7 @@ public partial class MainWindow
                     }
                     else
                     {
-                        double correction = (m.Type == 6 || m.Type == 3) ? 180 : 0;
+                        double correction = (m.Type == 3) ? 180 : 0;
                         targetRot = m.Rotation + correction;
                     }
                     
@@ -1864,6 +1914,15 @@ public partial class MainWindow
             if (m.Type == 150 || m.Type != 150) // All dynamic types
             {
                 var p = WorldToImagePx(m.X, m.Y);
+                if (_isShowingDeepSeaMap)
+                {
+                    el.Visibility = isPlayer ? Visibility.Visible : Visibility.Collapsed;
+                }
+                else
+                {
+                    el.Visibility = Visibility.Visible;
+                }
+
                 if (!(el.Tag is PlayerMarkerTag tag && tag.IsDeathPin))
                 {
                     double off = (el.Tag is PlayerMarkerTag t2 && t2.Radius > 0) ? t2.Radius : 5.0;
@@ -2162,7 +2221,7 @@ public partial class MainWindow
             if (cs.TimerLabel != null)
             {
                 int mins = (int)(DateTime.UtcNow - cs.CrashedAt).TotalMinutes;
-                cs.TimerLabel.Text = mins == 0 ? "just now" : $"{mins}m ago";
+                cs.TimerLabel.Text = mins == 0 ? (RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiJustNow") ?? "just now") : $"{mins}m ago";
             }
         }
     }

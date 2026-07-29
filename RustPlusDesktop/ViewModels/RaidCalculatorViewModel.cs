@@ -27,7 +27,7 @@ public sealed class RaidCalculatorViewModel : INotifyPropertyChanged
     private string _selectedCategory = "All targets";
     private RaidComparisonMode _comparisonMode = RaidComparisonMode.LowestSulfur;
     private RaidGlobalMethodChoice? _selectedGlobalMethod;
-    private string _statusMessage = "Loading raid data…";
+    private string _statusMessage = Properties.Resources.ResourceManager.GetString("RaidLoadingData") ?? "Loading raid data…";
     private bool _isLoading = true;
     private bool _showDetails = true;
     private CancellationTokenSource? _saveCancellation;
@@ -155,13 +155,13 @@ public sealed class RaidCalculatorViewModel : INotifyPropertyChanged
                 if (target is not null && entry.Quantity > 0)
                     AddPlanItem(target, entry.Quantity, entry.SourceId, save: false);
             }
-            StatusMessage = _allTargets.Count == 0 ? "No raid targets are available." : string.Empty;
+            StatusMessage = _allTargets.Count == 0 ? (Properties.Resources.ResourceManager.GetString("RaidNoTargetsAvailable") ?? "No raid targets are available.") : string.Empty;
             OnPropertyChanged(nameof(DataCaption));
             Recalculate(save: false);
         }
         catch (Exception exception)
         {
-            StatusMessage = $"Raid calculator unavailable: {exception.Message}";
+            StatusMessage = string.Format(Properties.Resources.ResourceManager.GetString("FormatRaidUnavailable") ?? "Raid calculator unavailable: {0}", exception.Message);
         }
         finally
         {
@@ -337,7 +337,7 @@ public sealed class RaidCalculatorViewModel : INotifyPropertyChanged
         catch (OperationCanceledException) { }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
-            StatusMessage = $"Could not save raid plan: {exception.Message}";
+            StatusMessage = string.Format(Properties.Resources.ResourceManager.GetString("FormatRaidSaveFailed") ?? "Could not save raid plan: {0}", exception.Message);
         }
     }
 

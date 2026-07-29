@@ -65,7 +65,8 @@ public partial class RaidCalculatorView : UserControl
     private void ClearPlan_Click(object sender, RoutedEventArgs e)
     {
         if (!_viewModel.HasPlan) return;
-        if (MessageBox.Show("Clear every target from this raid plan?", "Clear raid plan", MessageBoxButton.YesNo,
+        if (MessageBox.Show(RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiClearEveryTargetFromThisRaidPlan") ?? "Clear every target from this raid plan?",
+                RustPlusDesk.Properties.Resources.ResourceManager.GetString("UiClearRaidPlan") ?? "Clear raid plan", MessageBoxButton.YesNo,
                 MessageBoxImage.Question) == MessageBoxResult.Yes)
             _viewModel.Clear();
     }
@@ -76,7 +77,7 @@ public partial class RaidCalculatorView : UserControl
         try { await SetClipboardTextAsync(_viewModel.BuildSummary()); }
         catch (Exception exception)
         {
-            MessageBox.Show(exception.Message, "Could not copy summary", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(exception.Message, RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiCouldNotCopySummary") ?? "Could not copy summary", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 

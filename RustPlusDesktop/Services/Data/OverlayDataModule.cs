@@ -122,10 +122,10 @@ namespace RustPlusDesk.Services.Data
             var overlayOnlyData = new OverlaySaveData
             {
                 LastUpdatedUnix = data.LastUpdatedUnix,
-                Strokes = data.Strokes,
+                Strokes = data.Strokes ?? new List<SavedStroke>(),
                 Icons = nonBaseIcons,
-                Texts = data.Texts,
-                Devices = data.Devices
+                Texts = data.Texts ?? new List<SavedText>(),
+                Devices = data.Devices ?? new List<ExportedDeviceDto>()
             };
 
             // Size limit check (excluding bases/screenshots)

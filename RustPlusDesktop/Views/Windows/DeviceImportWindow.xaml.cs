@@ -134,9 +134,12 @@ namespace RustPlusDesk.Views
             _probe = probe;
 
             // Generate source description dynamically
-            var serverName = Devices.Select(d => d.ServerName).FirstOrDefault(s => !string.IsNullOrEmpty(s)) ?? "Current Server";
+            string currentServerFallback = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiCurrentServer") ?? "Current Server";
+            string teammatesFallback = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiTeammates") ?? "teammates";
+            string sourceDescriptionFormat = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiSourceDescriptionFormat") ?? "Source: Cloud sync / local backups for {0} on {1}";
+            var serverName = Devices.Select(d => d.ServerName).FirstOrDefault(s => !string.IsNullOrEmpty(s)) ?? currentServerFallback;
             var owners = Devices.Select(d => d.OwnerName).Where(o => !string.IsNullOrEmpty(o)).Distinct().ToList();
-            SourceDescription = $"Source: Cloud sync / local backups for " + (owners.Count > 0 ? string.Join(", ", owners) : "teammates") + $" on {serverName}";
+            SourceDescription = string.Format(sourceDescriptionFormat, (owners.Count > 0 ? string.Join(", ", owners) : teammatesFallback), serverName);
 
             // Setup collection view filter
             var view = CollectionViewSource.GetDefaultView(Devices);
@@ -160,7 +163,8 @@ namespace RustPlusDesk.Views
             int total = Devices.Count;
             int present = Devices.Count(d => d.AlreadyPresent);
             int selected = Devices.Count(d => d.IsSelected && !d.AlreadyPresent);
-            SummaryText = $"{total} devices found • {present} already present • {selected} selected for import";
+            string summaryFormat = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiDeviceImportSummaryFormat") ?? "{0} devices found • {1} already present • {2} selected for import";
+            SummaryText = string.Format(summaryFormat, total, present, selected);
         }
 
         private async void BtnCheckStatus_Click(object sender, RoutedEventArgs e)
@@ -187,10 +191,12 @@ namespace RustPlusDesk.Views
                     var id = group.Key;
                     
                     var firstItem = group.FirstOrDefault();
-                    var deviceName = firstItem != null 
-                        ? (!string.IsNullOrEmpty(firstItem.Alias) ? firstItem.Alias : firstItem.Name) 
+                    var deviceName = firstItem != null
+                        ? (!string.IsNullOrEmpty(firstItem.Alias) ? firstItem.Alias : firstItem.Name)
                         : id.ToString();
-                    ProbingStatus = $"Probing device #{id} ({deviceName ?? "Unknown"})...";
+                    string unknownFallback = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiUnknownWord") ?? "Unknown";
+                    string probingDeviceFormat = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiProbingDeviceFormat") ?? "Probing device #{0} ({1})...";
+                    ProbingStatus = string.Format(probingDeviceFormat, id, deviceName ?? unknownFallback);
 
                     EntityProbeResult result;
 

@@ -1,5 +1,8 @@
 using Microsoft.Win32;
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
 using System.Text;
@@ -26,13 +29,15 @@ public partial class App : Application
 
     private MainWindow? _main;
     private System.Windows.Forms.NotifyIcon? _trayIcon;
+    private static readonly ConcurrentDictionary<string, IReadOnlyDictionary<string, string>> _resourceCache = new();
+    private ResourceDictionary? _localizedResources;
+    private int _languageApplyVersion;
 
     [System.Runtime.InteropServices.DllImport("user32.dll")]
     private static extern bool SetForegroundWindow(IntPtr hWnd);
 
     protected override void OnStartup(StartupEventArgs e)
     {
-        SetLanguage();
         base.OnStartup(e);
         _ = StartupWithSplashAsync(e.Args);
     }
@@ -68,6 +73,9 @@ public partial class App : Application
 
         try
         {
+            // ── Slow synchronous init on the main thread (splash is already visible) ─
+            SetLanguage(applySynchronously: true);
+
             bool isBackgroundArg = args.Contains("--background");
             _single = new Mutex(initiallyOwned: true, name: SingleMutexName, createdNew: out bool createdNew);
 
@@ -113,6 +121,7 @@ public partial class App : Application
                 // invisible while WPF performs its full layout + render pass.
                 // ContentRendered fires after that first pass — the true "ready" signal.
                 _main = new MainWindow();
+                MainWindow = _main;
                 _main.Closed += (s, ev) => _main = null;
                 _main.ContentRendered += (_, _) => mainReadyTcs.TrySetResult(true);
 
@@ -349,53 +358,91 @@ public partial class App : Application
 
     private static async Task SendLinkToRunningInstanceAsync(string link) => await SendCommandToRunningInstanceAsync(link);
 
-    public void SetLanguage()
+    public void SetLanguage(bool applySynchronously = false)
     {
         try
         {
             string lang = TrackingService.SelectedLanguage;
-            System.Globalization.CultureInfo culture;
+            if (string.Equals(lang, "sr-SP", StringComparison.OrdinalIgnoreCase))
+            {
+                // Migrate the obsolete culture code used by older builds. Using a
+                // real Serbian Latin culture also allows MSBuild to emit a satellite.
+                lang = "sr-Latn-RS";
+                TrackingService.SelectedLanguage = lang;
+            }
+            CultureInfo culture;
 
             if (string.IsNullOrEmpty(lang))
-            {
-                culture = System.Globalization.CultureInfo.InstalledUICulture;
-            }
+                culture = CultureInfo.InstalledUICulture;
             else
-            {
-                culture = new System.Globalization.CultureInfo(lang);
-            }
+                culture = new CultureInfo(lang);
 
-            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-            System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
-            System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-            System.Threading.Thread.CurrentThread.CurrentUICulture = culture;
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentUICulture = culture;
 
             // Also set it for the generated Resources class
             RustPlusDesk.Properties.Resources.Culture = culture;
 
-            UpdateDynamicResources();
-            CultureChanged?.Invoke();
+            int version = Interlocked.Increment(ref _languageApplyVersion);
+
+            if (applySynchronously)
+            {
+                ApplyDynamicResources(GetDynamicResourceMap(culture));
+                CultureChanged?.Invoke();
+            }
+            else
+            {
+                _ = ApplyLanguageResourcesAsync(culture, version);
+            }
         }
         catch { }
     }
 
     public static event Action? CultureChanged;
 
-    private void UpdateDynamicResources()
+    private async Task ApplyLanguageResourcesAsync(CultureInfo culture, int version)
+    {
+        try
+        {
+            var resourceMap = await Task.Run(() => GetDynamicResourceMap(culture));
+            if (version != Volatile.Read(ref _languageApplyVersion))
+                return;
+
+            await Dispatcher.InvokeAsync(() =>
+            {
+                if (version != Volatile.Read(ref _languageApplyVersion))
+                    return;
+
+                ApplyDynamicResources(resourceMap);
+                CultureChanged?.Invoke();
+            }, DispatcherPriority.Background);
+        }
+        catch { }
+    }
+
+    private static IReadOnlyDictionary<string, string> GetDynamicResourceMap(CultureInfo culture)
+    {
+        string cacheKey = string.IsNullOrEmpty(culture.Name) ? "invariant" : culture.Name;
+        return _resourceCache.GetOrAdd(cacheKey, _ => BuildDynamicResourceMap(culture));
+    }
+
+    private static IReadOnlyDictionary<string, string> BuildDynamicResourceMap(CultureInfo culture)
     {
         var rm = RustPlusDesk.Properties.Resources.ResourceManager;
-        var culture = RustPlusDesk.Properties.Resources.Culture;
+        var values = new Dictionary<string, string>(StringComparer.Ordinal);
 
         // Step 1: load the base/neutral (invariant) resource set first so that keys
         // which exist only in Resources.resx (and haven't been added to satellite files yet)
         // are still registered as DynamicResources.
-        var neutralSet = rm.GetResourceSet(System.Globalization.CultureInfo.InvariantCulture, true, false);
+        var neutralSet = rm.GetResourceSet(CultureInfo.InvariantCulture, true, false);
         if (neutralSet != null)
         {
             foreach (System.Collections.DictionaryEntry entry in neutralSet)
             {
-                if (entry.Value is string s && !string.IsNullOrWhiteSpace(s))
-                    Resources[entry.Key] = s;
+                if (entry.Key is string key && entry.Value is string value && !string.IsNullOrWhiteSpace(value))
+                    values[key] = value;
             }
         }
 
@@ -405,22 +452,39 @@ public partial class App : Application
         {
             foreach (System.Collections.DictionaryEntry entry in resourceSet)
             {
-                if (entry.Value is string s)
+                if (entry.Key is string key && entry.Value is string value)
                 {
-                    if (string.IsNullOrWhiteSpace(s))
+                    if (string.IsNullOrWhiteSpace(value))
                     {
-                        var fallback = rm.GetString(entry.Key.ToString() ?? "", System.Globalization.CultureInfo.InvariantCulture);
+                        var fallback = rm.GetString(key, CultureInfo.InvariantCulture);
                         if (!string.IsNullOrWhiteSpace(fallback))
                         {
-                            Resources[entry.Key] = fallback;
+                            values[key] = fallback;
                             continue;
                         }
                     }
 
-                    Resources[entry.Key] = s;
+                    values[key] = value;
                 }
             }
         }
+
+        return values;
+    }
+
+    private void ApplyDynamicResources(IReadOnlyDictionary<string, string> resourceMap)
+    {
+        var replacement = new ResourceDictionary();
+        foreach (var entry in resourceMap)
+            replacement[entry.Key] = entry.Value;
+
+        // Replacing one merged dictionary causes a single resource-tree refresh.
+        // Updating ~1,800 Application resources individually made WPF re-evaluate
+        // DynamicResource bindings repeatedly and visibly froze the settings UI.
+        if (_localizedResources != null)
+            Resources.MergedDictionaries.Remove(_localizedResources);
+        _localizedResources = replacement;
+        Resources.MergedDictionaries.Add(replacement);
     }
 
     private async Task StartPipeServerAsync()
