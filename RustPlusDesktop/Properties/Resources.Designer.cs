@@ -132,6 +132,13 @@ namespace RustPlusDesk.Properties {
         public static string NoDevicesFound => GetString("NoDevicesFound");
         public static string PairDeviceToSee => GetString("PairDeviceToSee");
         public static string TeamTab => GetString("TeamTab");
+        public static string ClanTab => GetString("ClanTab");
+        public static string NoClanFound => GetString("NoClanFound");
+        public static string JoinClanToSeeMembers => GetString("JoinClanToSeeMembers");
+        public static string ClanRoleUnknown => GetString("ClanRoleUnknown");
+        public static string ClanNoMotd => GetString("ClanNoMotd");
+        public static string ClanMotdSetBy => GetString("ClanMotdSetBy");
+        public static string ClanMotdSetByOn => GetString("ClanMotdSetByOn");
         public static string CenterOnMap => GetString("CenterOnMap");
         public static string FollowOnMap => GetString("FollowOnMap");
         public static string OpenSteamProfile => GetString("OpenSteamProfile");
@@ -191,6 +198,7 @@ namespace RustPlusDesk.Properties {
         public static string Vendor => GetString("Vendor");
         public static string OilRig => GetString("OilRig");
         public static string DeepSea => GetString("DeepSea");
+        public static string SatelliteCrash => GetString("SatelliteCrash");
         public static string SmartAlerts => GetString("SmartAlerts");
         public static string PlayerOnline => GetString("PlayerOnline");
         public static string PlayerOffline => GetString("PlayerOffline");
@@ -438,6 +446,7 @@ namespace RustPlusDesk.Properties {
         public static string VendorActiveSpawnUnknown => GetString("VendorActiveSpawnUnknown");
         public static string VendorDespawnedAgo => GetString("VendorDespawnedAgo");
         public static string DeepSeaActiveRunningFor => GetString("DeepSeaActiveRunningFor");
+        public static string SatelliteCrashActiveRunningFor => GetString("SatelliteCrashActiveRunningFor");
         public static string DeepSeaActiveSpawnUnknown => GetString("DeepSeaActiveSpawnUnknown");
         public static string DeepSeaEndedAgo => GetString("DeepSeaEndedAgo");
         public static string TimerHoursMinutes => GetString("TimerHoursMinutes");

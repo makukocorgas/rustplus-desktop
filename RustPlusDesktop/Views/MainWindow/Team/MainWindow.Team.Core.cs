@@ -31,6 +31,9 @@ public partial class MainWindow
 
         public int MissingCount { get; set; }
         public ulong SteamId { get; init; }
+        private bool _afkAlertSent;
+        public bool HasReturnedFromAfk { get; set; }
+        public TimeSpan ReturnedAfkDuration { get; set; }
 
         private string _name = "(player)";
         public string Name
@@ -149,44 +152,60 @@ public partial class MainWindow
                 double dist = Math.Sqrt(dx * dx + dy * dy);
                 if (dist > 0.05)
                 {
+                    if (_afkAlertSent)
+                    {
+                        HasReturnedFromAfk = true;
+                        ReturnedAfkDuration = DateTime.UtcNow - _lastMoveTime;
+                        _afkAlertSent = false;
+                    }
                     _lastMoveTime = DateTime.UtcNow;
                 }
-            }
-            else
-            {
-                _lastMoveTime = DateTime.UtcNow;
             }
             X = x;
             Y = y;
         }
 
-        public bool UpdateAfkState(DateTime now)
+        public bool UpdateAfkState(DateTime now, int alertThresholdMinutes)
         {
             if (!IsOnline || IsDead)
             {
                 _lastMoveTime = now;
                 IsAfk = false;
                 AfkText = string.Empty;
+                _afkAlertSent = false;
+                HasReturnedFromAfk = false;
                 return false;
             }
 
             var elapsed = now - _lastMoveTime;
             if (elapsed.TotalMinutes >= 5)
             {
-                bool becameAfk = !_isAfk;
                 IsAfk = true;
                 int totalSecs = (int)elapsed.TotalSeconds;
                 int mins = totalSecs / 60;
                 int secs = totalSecs % 60;
                 AfkText = $"AFK: {mins}:{secs:D2}";
-                return becameAfk;
             }
             else
             {
                 IsAfk = false;
                 AfkText = string.Empty;
-                return false;
             }
+
+            if (elapsed.TotalMinutes >= alertThresholdMinutes)
+            {
+                if (!_afkAlertSent)
+                {
+                    _afkAlertSent = true;
+                    return true;
+                }
+            }
+            else
+            {
+                _afkAlertSent = false;
+            }
+
+            return false;
         }
 
         private ImageSource? _avatar;
@@ -216,6 +235,7 @@ public partial class MainWindow
 
     private void StartTeamPolling()
     {
+        _teamConnectionSessionId++;
         if (_teamTimer != null) return;
         _teamTimer = new System.Windows.Threading.DispatcherTimer
         {
@@ -235,7 +255,7 @@ public partial class MainWindow
 
     private void StopTeamPolling()
     {
-        NotifyTeamFeatureServerDisconnected();
+        NotifyTeamFeatureServerDisconnected(_teamConnectionSessionId);
 
         var t = _teamTimer;
         if (t != null)
@@ -263,13 +283,26 @@ public partial class MainWindow
         var now = DateTime.UtcNow;
         foreach (var m in TeamMembers)
         {
-            if (m.UpdateAfkState(now))
+            if (m.UpdateAfkState(now, TrackingService.AfkAlertMinutes))
             {
                 if (_announceSpawns && TrackingService.AnnouncePlayerAfk)
                 {
                     string dispName = GetDisplayPlayerName(m.Name);
-                    string chatText = $"{dispName} AFK: 5:00";
-                    string discordText = $"💤 {dispName} AFK: 5:00";
+                    string chatText = AlertTemplateService.GetFormattedAlert("AlertPlayerAfk", dispName, TrackingService.AfkAlertMinutes);
+                    string discordText = $"💤 {chatText}";
+                    _ = SendTeamChatSafeAsync(chatText, discordText: discordText);
+                }
+            }
+
+            if (m.HasReturnedFromAfk)
+            {
+                m.HasReturnedFromAfk = false;
+                if (_announceSpawns && TrackingService.AnnouncePlayerAfkReturn)
+                {
+                    string dispName = GetDisplayPlayerName(m.Name);
+                    string durationStr = $"{(int)m.ReturnedAfkDuration.TotalHours:D2}:{m.ReturnedAfkDuration.Minutes:D2}";
+                    string chatText = AlertTemplateService.GetFormattedAlert("AlertPlayerAfkReturn", dispName, durationStr);
+                    string discordText = $"🏃 {chatText}";
                     _ = SendTeamChatSafeAsync(chatText, discordText: discordText);
                 }
             }
@@ -285,6 +318,12 @@ public partial class MainWindow
         {
             await LoadTeamAsync();
             await EvaluateDeviceAutomationAsync();
+
+            if (DateTime.UtcNow - _lastClanPoll > TimeSpan.FromSeconds(15))
+            {
+                _lastClanPoll = DateTime.UtcNow;
+                await LoadClanAsync();
+            }
         }
         finally { System.Threading.Interlocked.Exchange(ref _teamPollBusy, 0); }
         CenterMiniMapOnPlayer();
@@ -412,6 +451,22 @@ public partial class MainWindow
                     TeamMembers.RemoveAt(i);
                     _hasCriticalPresenceChange = true;
                 }
+
+            if (_vm.FollowingSteamId.HasValue && !TeamMembers.Any(t => t.SteamId == _vm.FollowingSteamId.Value))
+            {
+                Dispatcher.Invoke(() => StopTracking());
+            }
+            else if (!_vm.FollowingSteamId.HasValue && !string.IsNullOrEmpty(GetServerKey()) &&
+                     Services.TrackingService.Settings.ServerFollowingSteamId.TryGetValue(GetServerKey(), out var savedSteamId))
+            {
+                var member = TeamMembers.FirstOrDefault(t => t.SteamId == savedSteamId);
+                if (member != null)
+                {
+                    _vm.FollowingSteamId = savedSteamId;
+                    _vm.FollowingPlayerName = member.Name;
+                    _vm.FollowingPlayerAvatar = member.Avatar;
+                }
+            }
 
             // Cleanup subscriptions of players who left the team on the UI thread
             var currentTeamIds = TeamMembers.Select(tm => tm.SteamId).ToHashSet();
@@ -717,14 +772,26 @@ public partial class MainWindow
 
     private void StartFollowing(ulong steamId, string name)
     {
+        if (_vm.FollowingSteamId == steamId)
+        {
+            StopTracking();
+            return;
+        }
+
         _vm.FollowingSteamId = steamId;
         _vm.FollowingPlayerName = name;
-        
+
         var member = TeamMembers.FirstOrDefault(t => t.SteamId == steamId);
         _vm.FollowingPlayerAvatar = member?.Avatar;
 
         AppendLog($"Following {name} on map.");
-        
+
+        if (!string.IsNullOrEmpty(GetServerKey()))
+        {
+            Services.TrackingService.Settings.ServerFollowingSteamId[GetServerKey()] = steamId;
+            Services.TrackingService.SaveDB();
+        }
+
         // Immediate center
         if (TryResolvePosFromDynMarkers(steamId, out var x, out var y))
         {
@@ -761,7 +828,7 @@ public partial class MainWindow
         if (vm == null) return;
         if (!IAmLeaderNow()) { AppendLog("Only Leader can promote."); return; }
         if (vm.SteamId == _mySteamId) return;
-        try { await (_real as RustPlusClientReal)?.PromoteToLeaderAsync(vm.SteamId); }
+        try { if (_real is RustPlusClientReal real) await real.PromoteToLeaderAsync(vm.SteamId); }
         catch (Exception ex) { AppendLog("[team] promote error: " + ex.Message); }
     }
 
@@ -798,7 +865,7 @@ public partial class MainWindow
         if (vm == null) return;
         if (!IAmLeaderNow()) { AppendLog("Only Leader can kick."); return; }
         if (vm.SteamId == _mySteamId) return;
-        try { await (_real as RustPlusClientReal)?.KickTeamMemberAsync(vm.SteamId); }
+        try { if (_real is RustPlusClientReal real) await real.KickTeamMemberAsync(vm.SteamId); }
         catch (Exception ex) { AppendLog("[team] kick error: " + ex.Message); }
     }
 
@@ -843,6 +910,14 @@ public partial class MainWindow
     {
         if (e.PropertyName == nameof(TeamMemberVM.ShowMarkers) || e.PropertyName == nameof(TeamMemberVM.Avatar))
         {
+            if (e.PropertyName == nameof(TeamMemberVM.Avatar) && sender is TeamMemberVM vm)
+            {
+                if (_vm.FollowingSteamId == vm.SteamId)
+                {
+                    _vm.FollowingPlayerAvatar = vm.Avatar;
+                }
+            }
+
             if (_lastTeamInfo != null)
             {
                 Dispatcher.Invoke(() => RedrawTeamMapNotes(_lastTeamInfo));

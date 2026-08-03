@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Media;
 
@@ -152,7 +153,7 @@ public class MainViewModel : INotifyPropertyChanged
     public bool IsBusy
     {
         get => _isBusy;
-        set { _isBusy = value; OnPropertyChanged(); OnPropertyChanged(nameof(CanStartPairing)); OnPropertyChanged(nameof(ShowLoginOverlay)); }
+        set { _isBusy = value; OnPropertyChanged(); OnPropertyChanged(nameof(CanStartPairing)); OnPropertyChanged(nameof(ShowLoginOverlay)); OnPropertyChanged(nameof(IsGlobalBusyOverlayVisible)); }
     }
 
     private bool _isConnectionLoading;
@@ -437,7 +438,7 @@ public class MainViewModel : INotifyPropertyChanged
         public List<StorageItemVM> Items { get; init; } = new();
     }
 
-    public sealed class StorageItemVM : INotifyPropertyChanged
+    public sealed class StorageItemVM
     {
         public int ItemId { get; init; }
         public string? ShortName { get; init; }
@@ -446,7 +447,6 @@ public class MainViewModel : INotifyPropertyChanged
 
         public string Display => MainWindow.ResolveItemName(ItemId, ShortName);
         public ImageSource? Icon => MainWindow.ResolveItemIcon(ItemId, ShortName, 32);
-        public event PropertyChangedEventHandler? PropertyChanged;
     }
 
     private string _serverPlayers = "-/-";
@@ -643,7 +643,12 @@ public class MainViewModel : INotifyPropertyChanged
 
         // WICHTIG: Vorauswahl, sonst bleibt CurrentDevices=null
         if (Servers.Count > 0 && Selected == null)
-            Selected = Servers[0];
+        {
+            var (lastHost, lastPort, _) = TrackingService.LastServer;
+            Selected = (!string.IsNullOrEmpty(lastHost)
+                ? Servers.FirstOrDefault(s => string.Equals(s.Host, lastHost, StringComparison.OrdinalIgnoreCase) && s.Port == lastPort)
+                : null) ?? Servers[0];
+        }
     }
 
 

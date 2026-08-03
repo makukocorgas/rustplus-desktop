@@ -224,7 +224,6 @@ namespace RustPlusDesk.Services
         }
         private readonly StringBuilder _jsonBuffer = new();
         private bool _collectingJson = false;
-        private int _braceDepth = 0;
 
         // Buffers an alarm until the FCM persistentId is parsed, then fires it.
         private void BufferAlarm(DateTime ts, string server, string deviceName, uint? entityId, string message, string? ip, int? port, string? title)
@@ -939,7 +938,7 @@ namespace RustPlusDesk.Services
         // CLI PROPER ERROR LOGGING
 
         // macht typische CLI-/Node-/Puppeteer-Fehler für Nutzer verständlich
-        private static string HumanizeCli(string s)
+        private static string HumanizeCli(string? s)
         {
             var l = s?.ToLowerInvariant() ?? "";
 
@@ -965,7 +964,7 @@ namespace RustPlusDesk.Services
                 return "❌ CLI-Module fehlen oder sind beschädigt. Bitte „rustplus-cli.zip“ korrekt entpacken.";
 
             // Fallback: Originalzeile beibehalten
-            return s;
+            return s ?? string.Empty;
         }
 
         private async Task<int> RunCliWithLoggingAsync(

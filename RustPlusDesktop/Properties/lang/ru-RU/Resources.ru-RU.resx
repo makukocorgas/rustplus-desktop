@@ -2455,10 +2455,10 @@
     <value>Игрок AFK</value>
   </data>
   <data name="AlertPlayerAfkDesc" xml:space="preserve">
-    <value>Отправляется, когда член команды слишком долго находится в AFK.</value>
+    <value>Отправляется, когда отслеживаемый участник команды отходит (становится неактивным).</value>
   </data>
   <data name="AlertPlayerAfkVars" xml:space="preserve">
-    <value>{0}: Имя игрока, {1}: Время</value>
+    <value>{0}: Имя игрока, {1}: Порог оповещения (минуты)</value>
   </data>
   <data name="ChangeDeviceIconSubtitle" xml:space="preserve">
     <value>Найдите и выберите значок предмета для этого устройства.</value>
@@ -4552,5 +4552,119 @@
   </data>
   <data name="CraftCalculatorPlanFormat" xml:space="preserve">
     <value>План крафта: {0} ×{1}</value>
+  </data>
+  <data name="UiSells" xml:space="preserve">
+    <value>Sells</value>
+  </data>
+  <data name="UiBuys" xml:space="preserve">
+    <value>Buys</value>
+  </data>
+  <data name="UiCategory" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="UiHideMonuments" xml:space="preserve">
+    <value>Hide Monuments</value>
+  </data>
+  <data name="UiCategoryBadge" xml:space="preserve">
+    <value>CATEGORY</value>
+  </data>
+  <data name="UiHideMonumentShopsTooltip" xml:space="preserve">
+    <value>Hide shops inside Outpost, Bandit Town, Fishing Villages &amp; Monuments</value>
+  </data>
+  <data name="CodeUiAllCategories" xml:space="preserve">
+    <value>All Categories</value>
+  </data>
+  <data name="CodeUiAllResources" xml:space="preserve">
+    <value>All Resources</value>
+  </data>
+  <data name="CodeUiNoShopsLoadedYet" xml:space="preserve">
+    <value>No shops loaded yet...</value>
+  </data>
+  <data name="CodeUiNoMatchingShopsFound" xml:space="preserve">
+    <value>No matching shops found.</value>
+  </data>
+  <data name="CodeUiNoAlertsConfiguredYet" xml:space="preserve">
+    <value>No alerts configured yet.</value>
+  </data>
+  <data name="CodeUiSendToTeamChat" xml:space="preserve">
+    <value>Send to team chat</value>
+  </data>
+  <data name="CodeUiPlaySoundAlert" xml:space="preserve">
+    <value>Play sound alert</value>
+  </data>
+  <data name="CodeUiRemoveAlert" xml:space="preserve">
+    <value>Remove Alert</value>
+  </data>
+  <data name="CodeUiNoShopsMatch" xml:space="preserve">
+    <value>No shops match &quot;{0}&quot;</value>
+  </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>ЧАТ КЛАНА</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>Падение спутника</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>Спутник падает!</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>Падение спутника активно – длится {0}</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>Клан</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>Клан не найден</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>Вступи в клан в игре, чтобы увидеть здесь его участников</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>Участник</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>Сообщение дня не задано.</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>Установлено {0}</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>Установлено {0}, {1}</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>Информация о клане</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>Очки</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>Участники</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>Создан</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>Основатель</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>Отслеживай участников клана, их статус, роли и заметки.</value>
+  </data>
+  <data name="AlertPlayerAfk" xml:space="preserve">
+    <value>{0} отошел (AFK): {1}:00</value>
+  </data>
+  <data name="AlertPlayerAfkReturn" xml:space="preserve">
+    <value>{0} больше не AFK. Был AFK в течение {1}</value>
+  </data>
+  <data name="AlertPlayerAfkReturnName" xml:space="preserve">
+    <value>Игрок вернулся из AFK</value>
+  </data>
+  <data name="AlertPlayerAfkReturnDesc" xml:space="preserve">
+    <value>Отправляется, когда отслеживаемый участник команды возвращается из AFK (снова становится активным).</value>
+  </data>
+  <data name="AlertPlayerAfkReturnVars" xml:space="preserve">
+    <value>{0}: Имя игрока, {1}: Длительность AFK (ЧЧ:ММ)</value>
+  </data>
+  <data name="UiTextAfkThreshold" xml:space="preserve">
+    <value>Порог AFK</value>
   </data>
 </root>

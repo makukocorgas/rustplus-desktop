@@ -18,7 +18,16 @@
       "Bash(cp \"/c/Users/marco/AppData/Local/Temp/claude/c--Users-marco-Desktop-rustplus-desktop-2/61e3dd91-b6bc-4eaa-9d40-144836f9f6c8/scratchpad/craft-data.new.json\" \"/c/Users/marco/Desktop/rustplus-desktop 2/RustPlusDesktop/Assets/Data/craft-data.json\" *)",
       "Bash(python \"/c/Users/marco/AppData/Local/Temp/claude/c--Users-marco-Desktop-rustplus-desktop-2/61e3dd91-b6bc-4eaa-9d40-144836f9f6c8/scratchpad/add_craft_translations.py\")",
       "Bash(python -c ' *)",
-      "Bash(node \"/c/Users/marco/AppData/Local/Temp/claude/c--Users-marco-Desktop-rustplus-desktop-2/61e3dd91-b6bc-4eaa-9d40-144836f9f6c8/scratchpad/build_craft_data_v2.js\")"
+      "Bash(node \"/c/Users/marco/AppData/Local/Temp/claude/c--Users-marco-Desktop-rustplus-desktop-2/61e3dd91-b6bc-4eaa-9d40-144836f9f6c8/scratchpad/build_craft_data_v2.js\")",
+      "Bash(python \"/c/Users/marco/AppData/Local/Temp/claude/c--Users-marco-Desktop-rustplus-desktop-2/61e3dd91-b6bc-4eaa-9d40-144836f9f6c8/scratchpad/resolve_resx_conflicts.py\")",
+      "Bash(git -C \"/c/Users/marco/Desktop/rustplus-desktop 2\" status --porcelain)",
+      "Bash(grep -rlE *)",
+      "Bash(grep -n *)",
+      "Bash(python -c *)",
+      "Bash(cp \"/c/Users/marco/AppData/Local/Temp/claude/c--Users-marco-Desktop-rustplus-desktop-2/61e3dd91-b6bc-4eaa-9d40-144836f9f6c8/scratchpad/clan_theirs.cs\" *)",
+      "Bash(sed -i 's#lib\\\\\\\\net8.0\\\\\\\\RustPlusApi.dll#lib\\\\\\\\netstandard2.0\\\\\\\\RustPlusApi.dll#' /c/Users/marco/AppData/Local/Temp/claude/c--Users-marco-Desktop-rustplus-desktop-2/61e3dd91-b6bc-4eaa-9d40-144836f9f6c8/scratchpad/symdump4/symdump4.csproj /c/Users/marco/AppData/Local/Temp/claude/c--Users-marco-Desktop-rustplus-desktop-2/61e3dd91-b6bc-4eaa-9d40-144836f9f6c8/scratchpad/symdump4/Program.cs)",
+      "Bash(dotnet run *)",
+      "Bash(curl -sL \"https://github.com/Pronwan/rustplus-desktop/commit/387bf140b21d3ee976b55313b305cda5f865f719.diff\" -o /c/Users/marco/AppData/Local/Temp/claude/commit_387bf14.diff)"
     ],
     "additionalDirectories": [
       "C:\\Users\\marco\\AppData\\Local\\Temp\\claude\\c--Users-marco-Desktop-rustplus-desktop-2\\61e3dd91-b6bc-4eaa-9d40-144836f9f6c8\\scratchpad"

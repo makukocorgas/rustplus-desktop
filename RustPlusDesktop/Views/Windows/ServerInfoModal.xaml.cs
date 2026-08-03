@@ -19,7 +19,6 @@ namespace RustPlusDesk.Views
         private readonly MainViewModel _vm;
         private readonly IRustPlusClient? _rustClient;
         private string? _websiteUrl;
-        private bool _isShowingMessageBox = false;
 
         public ServerInfoModal(ServerProfile profile, MainViewModel vm, IRustPlusClient? rustClient)
         {
@@ -47,7 +46,7 @@ namespace RustPlusDesk.Views
             }
 
             TxtDescription.Text = string.IsNullOrWhiteSpace(_profile.Description)
-                ? "No detailed description available for this server."
+                ? (Properties.Resources.ResourceManager.GetString("CodeUiNoDetailedDescriptionAvailable") ?? "No detailed description available for this server.")
                 : _profile.Description;
 
             // Apply WPF-UI Theme
@@ -84,7 +83,7 @@ namespace RustPlusDesk.Views
         {
             if (_rustClient == null)
             {
-                TxtDescription.Text = "No active connection to retrieve server info.";
+                TxtDescription.Text = Properties.Resources.ResourceManager.GetString("CodeUiNoActiveConnectionToRetrieveServerInfo") ?? "No active connection to retrieve server info.";
                 return;
             }
 
@@ -127,21 +126,23 @@ namespace RustPlusDesk.Views
 
                     if (!string.IsNullOrWhiteSpace(_websiteUrl))
                     {
-                        TxtDescription.Text = $"The Rust+ API does not provide a detailed description for this server.\n\nYou can find more information on the server's official website:\n{_websiteUrl}";
+                        string template = Properties.Resources.ResourceManager.GetString("CodeUiRustApiNoDescriptionWithWebsite") ?? "The Rust+ API does not provide a detailed description for this server.\n\nYou can find more information on the server's official website:\n{0}";
+                        TxtDescription.Text = string.Format(template, _websiteUrl);
                     }
                     else
                     {
-                        TxtDescription.Text = "The Rust+ API does not provide a detailed description for this server.";
+                        TxtDescription.Text = Properties.Resources.ResourceManager.GetString("CodeUiRustApiNoDescription") ?? "The Rust+ API does not provide a detailed description for this server.";
                     }
                 }
                 else
                 {
-                    TxtDescription.Text = "Could not retrieve details from the Rust+ connection. Make sure you are connected to the server.";
+                    TxtDescription.Text = Properties.Resources.ResourceManager.GetString("CodeUiCouldNotRetrieveServerDetails") ?? "Could not retrieve details from the Rust+ connection. Make sure you are connected to the server.";
                 }
             }
             catch (Exception ex)
             {
-                TxtDescription.Text = $"Failed to load server details: {ex.Message}";
+                string label = Properties.Resources.ResourceManager.GetString("CodeUiFailedToLoadServerDetailsLabel") ?? "Failed to load server details: ";
+                TxtDescription.Text = $"{label}{ex.Message}";
             }
         }
 
@@ -173,14 +174,11 @@ namespace RustPlusDesk.Views
             try
             {
                 Clipboard.SetText($"{_profile.Host}:{_profile.Port}");
-                _isShowingMessageBox = true;
-                MessageBox.Show("Server address copied to clipboard!", "Copied", MessageBoxButton.OK, MessageBoxImage.Information);
+                string copiedMsg = Properties.Resources.ResourceManager.GetString("CodeUiServerAddressCopiedToClipboard") ?? "Server address copied to clipboard!";
+                string copiedTitle = Properties.Resources.ResourceManager.GetString("CodeUiCopied") ?? "Copied";
+                MessageBox.Show(copiedMsg, copiedTitle, MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch { }
-            finally
-            {
-                _isShowingMessageBox = false;
-            }
         }
 
         private void BtnWebsite_Click(object sender, RoutedEventArgs e)

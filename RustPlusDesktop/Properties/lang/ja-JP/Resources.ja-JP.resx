@@ -3852,4 +3852,100 @@
   <data name="CraftCalculatorPlanFormat" xml:space="preserve">
     <value>クラフト計画: {0} ×{1}</value>
   </data>
+  <data name="UiSells" xml:space="preserve">
+    <value>Sells</value>
+  </data>
+  <data name="UiBuys" xml:space="preserve">
+    <value>Buys</value>
+  </data>
+  <data name="UiCategory" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="UiHideMonuments" xml:space="preserve">
+    <value>Hide Monuments</value>
+  </data>
+  <data name="UiCategoryBadge" xml:space="preserve">
+    <value>CATEGORY</value>
+  </data>
+  <data name="UiHideMonumentShopsTooltip" xml:space="preserve">
+    <value>Hide shops inside Outpost, Bandit Town, Fishing Villages &amp; Monuments</value>
+  </data>
+  <data name="CodeUiAllCategories" xml:space="preserve">
+    <value>All Categories</value>
+  </data>
+  <data name="CodeUiAllResources" xml:space="preserve">
+    <value>All Resources</value>
+  </data>
+  <data name="CodeUiNoShopsLoadedYet" xml:space="preserve">
+    <value>No shops loaded yet...</value>
+  </data>
+  <data name="CodeUiNoMatchingShopsFound" xml:space="preserve">
+    <value>No matching shops found.</value>
+  </data>
+  <data name="CodeUiNoAlertsConfiguredYet" xml:space="preserve">
+    <value>No alerts configured yet.</value>
+  </data>
+  <data name="CodeUiSendToTeamChat" xml:space="preserve">
+    <value>Send to team chat</value>
+  </data>
+  <data name="CodeUiPlaySoundAlert" xml:space="preserve">
+    <value>Play sound alert</value>
+  </data>
+  <data name="CodeUiRemoveAlert" xml:space="preserve">
+    <value>Remove Alert</value>
+  </data>
+  <data name="CodeUiNoShopsMatch" xml:space="preserve">
+    <value>No shops match &quot;{0}&quot;</value>
+  </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>クランチャット</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>衛星の墜落</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>衛星が墜落しています！</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>衛星墜落中 — 経過時間 {0}</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>クラン</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>クランが見つかりません</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>ゲーム内でクランに参加すると、ここにメンバーが表示されます</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>メンバー</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>今日のメッセージは設定されていません。</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>設定者：{0}</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>{0}が{1}に設定</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>クラン情報</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>スコア</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>メンバー</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>作成日</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>創設者</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>クランメンバーのステータス、役割、メモを追跡します。</value>
+  </data>
 </root>

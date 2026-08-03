@@ -30,6 +30,7 @@ public partial class MainWindow
     private bool _teamFeatureMasterWatchBusy;
     private bool _teamFeatureShutdownSent;
     private string? _lastTeamFeatureDisconnectReleaseSignature;
+    private int _teamConnectionSessionId;
     private DateTime _lastHeartbeatTime = DateTime.MinValue;
     private bool? _lastWantsAlerts;
     private bool? _lastWantsCommands;
@@ -39,7 +40,12 @@ public partial class MainWindow
 
     private bool ChatFeaturesBlockedByMaster => _chatFeaturesBlockedByMaster;
 
-    private TimeSpan TeamFeatureHeartbeatInterval => CloudTrafficPolicy.TeamHeartbeatInterval(WindowState == WindowState.Minimized);
+    private TimeSpan TeamFeatureHeartbeatInterval =>
+        CloudTrafficPolicy.TeamHeartbeatInterval(WindowState == WindowState.Minimized);
+
+    /// <summary>Exposed for TeamSyncWebSocketService to check master status without reflection.</summary>
+    public bool IsChatFeatureMasterPublic => _isChatFeatureMaster;
+
 
     private void ResetTeamFeatureMasterSyncState()
     {
@@ -172,7 +178,7 @@ public partial class MainWindow
 
     private void UpdateTeamFeatureMasterWatch()
     {
-        if (TeamMembers.Count <= 1 || _isChatFeatureMaster || TeamSyncWebSocketService.IsActive)
+        if (TeamMembers.Count == 0 || _isChatFeatureMaster || TeamSyncWebSocketService.IsActive)
         {
             StopTeamFeatureMasterWatch();
             return;
@@ -274,16 +280,18 @@ public partial class MainWindow
         }
     }
 
-    private void NotifyTeamFeatureServerDisconnected()
+    private void NotifyTeamFeatureServerDisconnected(int sessionId)
     {
-        _ = NotifyTeamFeatureServerDisconnectedAsync();
+        _ = NotifyTeamFeatureServerDisconnectedAsync(sessionId);
     }
 
-    private async Task NotifyTeamFeatureServerDisconnectedAsync()
+    private async Task NotifyTeamFeatureServerDisconnectedAsync(int sessionId)
     {
         try
         {
             StopTeamFeatureMasterWatch();
+
+            if (sessionId != _teamConnectionSessionId) return;
 
             if (_vm?.Selected == null || TeamMembers.Count == 0) return;
             if (!SupabaseAuthManager.IsAuthenticated) return;
@@ -300,6 +308,8 @@ public partial class MainWindow
             var myName = TeamMembers.FirstOrDefault(t => t.SteamId == _mySteamId)?.Name
                 ?? _vm.Selected?.Name
                 ?? mySteamId;
+
+            if (sessionId != _teamConnectionSessionId) return;
 
             await SupabaseAuthManager.HeartbeatTeamFeaturePresenceAsync(
                 mySteamId,
@@ -362,6 +372,9 @@ public partial class MainWindow
             ? (string.IsNullOrWhiteSpace(state!.MasterName) ? state.MasterSteamId ?? "" : state.MasterName)
             : "";
 
+        var teamSteamIds = TeamMembers.Select(tm => tm.SteamId.ToString()).ToList();
+        _ = DiscordBotListenerService.Instance.UpdateSubscriptionStateAsync(_isChatFeatureMaster, teamSteamIds);
+
         var currentMasterId = hasActiveMaster ? state!.MasterSteamId : null;
         if (_isChatFeatureMaster && (!previousIsMaster || _lastKnownTeamFeatureMasterId != currentMasterId))
         {
@@ -378,10 +391,6 @@ public partial class MainWindow
         {
             RequestTeamFeatureMasterSync();
         }
-
-        // Update Discord Bot Listener subscription state
-        var teamSteamIds = TeamMembers.Select(tm => tm.SteamId.ToString()).ToList();
-        _ = DiscordBotListenerService.Instance.UpdateSubscriptionStateAsync(_isChatFeatureMaster, teamSteamIds);
 
         if (_chatFeaturesBlockedByMaster && !previousBlocked)
         {
@@ -406,17 +415,17 @@ public partial class MainWindow
         if (ChatAnnounce != null)
         {
             ChatAnnounce.IsEnabled = !blocked;
-            ChatAnnounce.ToolTip = blocked ? message : FindResource("Alerts");
+            ChatAnnounce.ToolTip = blocked ? message : (TryFindResource("Alerts") ?? "Alerts");
         }
 
         if (ChatAlertsConfigureButton != null)
         {
             ChatAlertsConfigureButton.IsEnabled = !blocked;
-            ChatAlertsConfigureButton.ToolTip = blocked ? message : FindResource("Configure");
+            ChatAlertsConfigureButton.ToolTip = blocked ? message : (TryFindResource("Configure") ?? "Configure");
         }
 
         if (BtnOpenChatCommands != null)
-            BtnOpenChatCommands.ToolTip = blocked ? message : FindResource("ChatCommandsSettings");
+            BtnOpenChatCommands.ToolTip = blocked ? message : (TryFindResource("ChatCommandsSettings") ?? "Chat Commands Settings");
 
         if (ChatFeatureMasterWarningBadge != null)
             ChatFeatureMasterWarningBadge.Visibility = blocked ? Visibility.Visible : Visibility.Collapsed;

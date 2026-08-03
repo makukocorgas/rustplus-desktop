@@ -211,7 +211,7 @@
                             <TextBlock Text="{DynamicResource TimerCreateCmdLabel}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" />
                             <TextBlock Grid.Column="1" Text="{Binding ChatCommandPrefix}" VerticalAlignment="Center" Foreground="{DynamicResource TextSubtle}" FontWeight="Bold" Margin="0,0,4,0" />
                             <ui:TextBox Grid.Column="2" Text="{Binding CmdCustomTimer, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0" VerticalAlignment="Center" />
-                            <TextBlock Grid.Column="3" Text="[name],[minutes]" VerticalAlignment="Center" Foreground="{DynamicResource TextSubtle}" />
+                            <TextBlock Grid.Column="3" Text="{DynamicResource UiNameMinutes}" VerticalAlignment="Center" Foreground="{DynamicResource TextSubtle}" />
                         </Grid>
                         
                         <!-- Active Timers Check Commands -->
@@ -239,7 +239,7 @@
 
                         <!-- Logic Rules Section -->
                         <StackPanel Margin="0,15,0,0">
-                            <TextBlock Text="Logic Rules" Foreground="{DynamicResource Accent}" Margin="0,0,0,5" FontWeight="SemiBold" />
+                            <TextBlock Text="{DynamicResource UiLogicRules}" Foreground="{DynamicResource Accent}" Margin="0,0,0,5" FontWeight="SemiBold" />
                             <ItemsControl ItemsSource="{Binding LogicRules}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
@@ -263,7 +263,7 @@
                                             <TextBlock Text="{Binding Name, StringFormat='{}{0}:'}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Name}" />
                                             <TextBlock Grid.Column="1" Text="{Binding DataContext.ChatCommandPrefix, RelativeSource={RelativeSource AncestorType=StackPanel}}" VerticalAlignment="Center" Foreground="{DynamicResource TextSubtle}" FontWeight="Bold" Margin="0,0,4,0" />
                                             <ui:TextBox Grid.Column="2" Text="{Binding TriggerCommand, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0" VerticalAlignment="Center" />
-                                            <TextBlock Grid.Column="3" Text="[Logic Rule]" VerticalAlignment="Center" Foreground="{DynamicResource TextSubtle}" FontStyle="Italic" />
+                                            <TextBlock Grid.Column="3" Text="{DynamicResource UiLogicRule}" VerticalAlignment="Center" Foreground="{DynamicResource TextSubtle}" FontStyle="Italic" />
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>

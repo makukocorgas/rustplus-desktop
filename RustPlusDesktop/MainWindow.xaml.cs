@@ -59,7 +59,12 @@ public partial class MainWindow : WpfUi.FluentWindow
 {
     private readonly MainViewModel _vm = new();
     internal MainViewModel ViewModel => _vm;
+    internal string SteamDisplayName => !string.IsNullOrWhiteSpace(_steamDisplayName)
+        ? _steamDisplayName
+        : TxtSteamName?.Text ?? Properties.Resources.SteamAccount;
     private readonly UpdateService _updateService = new();
+    private string? _fetchedSteamId64;
+    private string? _steamDisplayName;
 
     private DateTime _lastPairingPingAt = DateTime.MinValue;
     private readonly IRustPlusClient _rust;  // Interface statt fester Klasse
@@ -112,12 +117,28 @@ public partial class MainWindow : WpfUi.FluentWindow
         _vm.FollowingSteamId = null;
         _vm.FollowingPlayerName = "";
         _vm.FollowingPlayerAvatar = null;
+
+        string serverKey = GetServerKey();
+        if (!string.IsNullOrEmpty(serverKey))
+        {
+            if (Services.TrackingService.Settings.ServerFollowingSteamId.ContainsKey(serverKey))
+            {
+                Services.TrackingService.Settings.ServerFollowingSteamId.Remove(serverKey);
+                Services.TrackingService.SaveDB();
+            }
+        }
     }
 
     private void BtnFollowPlayer_Click(object sender, RoutedEventArgs e)
     {
         if (_vm.IsFollowing)
         {
+            var serverKey = GetServerKey();
+            if (!string.IsNullOrEmpty(serverKey))
+            {
+                Services.TrackingService.Settings.ServerFollowingSteamId.Remove(serverKey);
+                Services.TrackingService.SaveDB();
+            }
             StopTracking();
             return;
         }
@@ -220,6 +241,22 @@ public partial class MainWindow : WpfUi.FluentWindow
     private BitmapSource? _mapBaseBmp; // Original-Map ohne Marker
     private readonly List<(double uPx, double vPx, string? label)> _staticMarkers = new();
     private bool _isShuttingDown = false;
+    private const double CompactSidebarWidth = 64;
+    private const double MinExpandedSidebarWidth = 360;
+    private const double MaxExpandedSidebarWidth = 480;
+    private const int SidebarAnimationDurationMs = 180;
+    private const int SidebarHoverExpandDelayMs = 200;
+    private double _expandedSidebarWidth = 420;
+    private bool _isSidebarExpanded;
+    private bool _isSidebarPinnedExpanded;
+    private bool _isSidebarTemporarilyExpandedForOverlay;
+    private bool _sidebarOverlayVisibilityUpdateQueued;
+    private System.Windows.Threading.DispatcherTimer? _sidebarAnimationTimer;
+    private System.Windows.Threading.DispatcherTimer? _sidebarHoverExpandTimer;
+    private DateTime _sidebarAnimationStartedAt;
+    private double _sidebarAnimationStartWidth;
+    private double _sidebarAnimationTargetWidth;
+    private Action? _sidebarAnimationCompleted;
 
     protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
     {
@@ -243,24 +280,6 @@ public partial class MainWindow : WpfUi.FluentWindow
 
         base.OnClosing(e);
     }
-
-    // --- Sidebar State ---
-    private const double CompactSidebarWidth = 64;
-    private const double MinExpandedSidebarWidth = 360;
-    private const double MaxExpandedSidebarWidth = 480;
-    private const int SidebarAnimationDurationMs = 180;
-    private const int SidebarHoverExpandDelayMs = 200;
-    private double _expandedSidebarWidth = 420;
-    private bool _isSidebarExpanded;
-    private bool _isSidebarPinnedExpanded;
-    private bool _isSidebarTemporarilyExpandedForOverlay;
-    private bool _sidebarOverlayVisibilityUpdateQueued;
-    private System.Windows.Threading.DispatcherTimer? _sidebarAnimationTimer;
-    private System.Windows.Threading.DispatcherTimer? _sidebarHoverExpandTimer;
-    private DateTime _sidebarAnimationStartedAt;
-    private double _sidebarAnimationStartWidth;
-    private double _sidebarAnimationTargetWidth;
-    private Action? _sidebarAnimationCompleted;
 
     // --- Overlay State ---
     private readonly List<(SmartDevice? Device, AlarmNotification Notification)> _overlayAlarms = new();
@@ -471,8 +490,7 @@ public partial class MainWindow : WpfUi.FluentWindow
         // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Wpf.Ui: Apply Fluent dark theme to all controls ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
         ApplicationThemeManager.Apply(ApplicationTheme.Dark, updateAccent: true);
         
-        if (AppTitleBar != null) AppTitleBar.Title = $"RUST+ DESKTOP v{_updateService.VersionRaw}";
-        this.Title = $"RUST+ DESKTOP v{_updateService.VersionRaw}";
+        UpdateAppTitle();
         this.LocationChanged += MainWindow_LocationChangedOrResized;
         this.SizeChanged += MainWindow_LocationChangedOrResized;
         if (FindName("TxtAppVersion") is TextBlock txt)
@@ -543,6 +561,8 @@ public partial class MainWindow : WpfUi.FluentWindow
         WebViewHost.Focusable = true;
         DataContext = _vm;
         _vm.Load();
+        InitializeTutorials();
+        TeamMembers.CollectionChanged += (s, e) => UpdateClanMembersTeamStatus();
         // NEU: einmalig auf die aktuell ausgewÃƒÆ’Ã‚Â¤hlte Server-Instanz ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾umsteckenÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ
         SwitchCameraSourceTo(_vm.Selected);
 
@@ -1317,8 +1337,11 @@ public partial class MainWindow : WpfUi.FluentWindow
                 _miniMap = null;
             }
 
-            // KontextmenÃƒÂ¼ sauber schlieÃƒÅ¸en (optional)
-            BtnCrosshair.ContextMenu?.IsOpen.Equals(false);
+            // Kontextmenü sauber schließen (optional)
+            if (BtnCrosshair.ContextMenu != null)
+            {
+                BtnCrosshair.ContextMenu.IsOpen = false;
+            }
 
             // Launch pending update installer if available
             if (!string.IsNullOrEmpty(_updateService.PendingInstallerPath))
@@ -1404,6 +1427,57 @@ public partial class MainWindow : WpfUi.FluentWindow
         catch (Exception ex) { AppendLog($"[CHAT-LOAD] {ex.Message}"); }
     }
 
+    private void SaveClanChatHistory(ServerProfile? p)
+    {
+        if (p == null) return;
+        try
+        {
+            var serverKey = $"{p.Host}_{p.Port}_clan";
+            var path = GetChatCachePath(serverKey);
+            lock (_clanChatHistoryLog)
+            {
+                while (_clanChatHistoryLog.Count > 500) _clanChatHistoryLog.RemoveAt(0);
+
+                var json = JsonSerializer.Serialize(_clanChatHistoryLog);
+                System.IO.File.WriteAllText(path, json);
+            }
+        }
+        catch (Exception ex) { AppendLog($"[CLAN-CHAT-SAVE] {ex.Message}"); }
+    }
+
+    private void LoadClanChatHistory(ServerProfile? p)
+    {
+        lock (_clanChatHistoryLog) { _clanChatHistoryLog.Clear(); }
+        _lastClanChatTsForCurrentServer = null;
+
+        if (p == null) return;
+
+        try
+        {
+            var serverKey = $"{p.Host}_{p.Port}_clan";
+            var path = GetChatCachePath(serverKey);
+            if (System.IO.File.Exists(path))
+            {
+                var json = System.IO.File.ReadAllText(path);
+                var loaded = JsonSerializer.Deserialize<List<TeamChatMessage>>(json);
+                if (loaded != null)
+                {
+                    lock (_clanChatHistoryLog)
+                    {
+                        foreach (var m in loaded)
+                        {
+                            _clanChatHistoryLog.Add(m);
+                            if (!_lastClanChatTsForCurrentServer.HasValue || m.Timestamp > _lastClanChatTsForCurrentServer.Value)
+                                _lastClanChatTsForCurrentServer = m.Timestamp;
+                        }
+                    }
+                }
+            }
+            AppendLog($"[CLAN-CHAT-LOAD] Loaded {_clanChatHistoryLog.Count} entries for {serverKey}");
+        }
+        catch (Exception ex) { AppendLog($"[CLAN-CHAT-LOAD] {ex.Message}"); }
+    }
+
     // Ersetzt deine bestehende SwitchCameraSourceTo Logic z.T.
     private void SwitchCameraSourceTo(ServerProfile? srv)
     {
@@ -1412,6 +1486,7 @@ public partial class MainWindow : WpfUi.FluentWindow
             // If srv is null, we are effectively disconnecting from a server.
             // Save chat for the last profile, then clear camera IDs.
             SaveChatHistory(_lastChatProfile);
+            SaveClanChatHistory(_lastChatProfile);
             _lastChatProfile = null; // No current server
             _cameraIds = new ObservableCollection<string>();
             RebuildCameraTiles();
@@ -1420,10 +1495,12 @@ public partial class MainWindow : WpfUi.FluentWindow
 
         // 1. Chat speichern (alter Server)
         SaveChatHistory(_lastChatProfile);
-        
+        SaveClanChatHistory(_lastChatProfile);
+
         // 2. Chat laden (neuer Server)
         LoadChatHistory(srv);
-        
+        LoadClanChatHistory(srv);
+
         _lastChatProfile = srv;
 
         // Reset state for specific server logic
@@ -2588,7 +2665,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         // Also add it to the chat UI if the server is current!
         if (_vm.Selected != null && _vm.Selected.Host == c.Ip && _vm.Selected.Port == c.Port)
         {
-            AppendChatIfNew(c, isHistorical: false);
+            AppendChatIfNew(c, ChatChannel.Team, isHistorical: false);
         }
     }
 
@@ -2603,6 +2680,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         bool recyclerSelected = MainTabs.SelectedItem == RecyclerCalculatorTab;
         RaidCalculatorPanel.Visibility = raidSelected ? Visibility.Visible : Visibility.Collapsed;
         CraftCalculatorPanel.Visibility = craftSelected ? Visibility.Visible : Visibility.Collapsed;
+        if (raidSelected) _ = OfferNewFeatureTutorialOnceAsync("raid-calculator");
         ServerContextPanel.Visibility = recyclerSelected ? Visibility.Collapsed : Visibility.Visible;
         if (!raidSelected && !craftSelected && !recyclerSelected)
             _lastWorkspaceTabIndex = MainTabs.SelectedIndex;
@@ -2610,6 +2688,11 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         if (MainTabs.SelectedItem == NotificationsTab)
         {
             NotificationCenterService.MarkAllAsRead();
+        }
+
+        if (MainTabs.SelectedItem == TabClan)
+        {
+            _ = LoadClanAsync();
         }
     }
 
@@ -2620,9 +2703,33 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     private void ReturnToLastWorkspace() =>
         MainTabs.SelectedIndex = Math.Clamp(_lastWorkspaceTabIndex, 0, MainTabs.Items.Count - 1);
 
+    private readonly Dictionary<string, DateTime> _lastOfflineDeathProcessed = new();
+
     private void HandleOfflineDeath(OfflineDeathNotification d)
     {
         if (!TrackingService.OfflineDeathAlertsEnabled) return;
+
+        // The FCM console dump for a single push gets parsed through more than one code path
+        // in PairingListenerRealProcess (raw key/value lines AND JSON blocks), which can fire
+        // this event twice for the same real death. Dedup the same attacker+server pair within
+        // a short window — mirrors the same fix already in place for Alarms (_lastAlarmProcessed).
+        string dedupKey = $"{d.ServerName}|{d.AttackerName}";
+        var nowUtc = DateTime.UtcNow;
+        if (_lastOfflineDeathProcessed.TryGetValue(dedupKey, out var lastProcessed) && (nowUtc - lastProcessed).TotalSeconds < 10)
+        {
+            AppendLog($"[FCM] Duplicate offline death notification ignored ({dedupKey}).");
+            return;
+        }
+        _lastOfflineDeathProcessed[dedupKey] = nowUtc;
+        if (_lastOfflineDeathProcessed.Count > 200)
+        {
+            foreach (var staleKey in _lastOfflineDeathProcessed
+                         .Where(kv => (nowUtc - kv.Value).TotalMinutes > 5)
+                         .Select(kv => kv.Key).ToList())
+            {
+                _lastOfflineDeathProcessed.Remove(staleKey);
+            }
+        }
 
         AppendLog($"[FCM] Offline Death Notification received: You were killed by {d.AttackerName} on {d.ServerName}");
 
@@ -3094,6 +3201,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     {
         try
         {
+            link = link.Trim().Trim('"', '\'').Trim();
+
             string host = "";
             int port = 28082; // Standard Rust+ Port
             string playerId = _vm.SteamId64 ?? "0";
@@ -3233,8 +3342,27 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
         Dispatcher.Invoke(() =>
         {
+            var keyHost = (e.Host ?? "").Trim();
+            var keyPort = e.Port;
+            // PREFER the SteamID from the pairing payload if it exists.
+            // Only fallback to _vm.SteamId64 if the payload is missing it.
+            var keySteam = !string.IsNullOrEmpty(e.SteamId64) ? e.SteamId64 : _vm.SteamId64;
+
+            // The phone keeps resending this pairing as an FCM keepalive as long as it's paired
+            // in-game, even after the user deletes it here — don't silently resurrect it, and
+            // don't show a "Pairing Successful" notification for something we're ignoring.
+            bool serverKnown = _vm.Servers.Any(s =>
+                s.Host.Equals(keyHost, StringComparison.OrdinalIgnoreCase) &&
+                s.Port == keyPort &&
+                s.SteamId64 == keySteam);
+            if (!serverKnown && TrackingService.IsPairingDismissed(keyHost, keyPort, keySteam))
+            {
+                AppendLog($"[pairing] Ignored — {keyHost}:{keyPort} was explicitly deleted by the user.");
+                return;
+            }
+
             // Add to Notification Center!
-            var pairedMsg = e.EntityId.HasValue 
+            var pairedMsg = e.EntityId.HasValue
                 ? $"Paired device: {e.EntityName ?? "Smart Device"} (ID: {e.EntityId.Value}, Type: {e.EntityType ?? "Unknown"})"
                 : $"Paired server: {e.ServerName ?? e.Host}:{e.Port}";
             var notif = new RustPlusNotification(
@@ -3251,12 +3379,6 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 Timestamp = DateTime.Now
             };
             NotificationCenterService.AddNotification(notif);
-
-            var keyHost = (e.Host ?? "").Trim();
-            var keyPort = e.Port;
-            // PREFER the SteamID from the pairing payload if it exists. 
-            // Only fallback to _vm.SteamId64 if the payload is missing it.
-            var keySteam = !string.IsNullOrEmpty(e.SteamId64) ? e.SteamId64 : _vm.SteamId64;
 
             // Save SteamID globally if we just received a new one
             if (!string.IsNullOrEmpty(e.SteamId64) && e.SteamId64 != TrackingService.SteamId64)
@@ -3323,6 +3445,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 prof.Devices ??= new ObservableCollection<SmartDevice>();
                 AppendLog($"Pairing updated → {prof.Name}");
             }
+
+            PersonalEventSyncService.SyncServer(prof.Host, prof.Port, prof.SteamId64, prof.PlayerToken, prof.Name);
 
             if (string.IsNullOrWhiteSpace(prof.Description) && !string.IsNullOrWhiteSpace(e.ServerDescription))
             {
@@ -3408,7 +3532,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 if (string.Equals(dev.Kind, "StorageMonitor", StringComparison.OrdinalIgnoreCase))
                 {
                     // 1) Cache → UI (falls vorhanden), sonst HÃƒÆ’Ã‚Â¼lle
-                    if (_rust is RustPlusClientReal rpc && rpc.TryGetCachedStorage(dev.EntityId, out var cached))
+                    if (_rust is RustPlusClientReal rpc && rpc.TryGetCachedStorage(dev.EntityId, out var cached) && cached != null)
                     {
                         dev.IsMissing = false;
                         Dispatcher.Invoke(() =>
@@ -3486,7 +3610,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
         _listenerStarting = true;
         _vm.IsPairingBusy = true; // Tell UI we are trying to start
-        TxtPairingState.Text = "Pairing: starting...";
+        TxtPairingState.Text = RustPlusDesk.Properties.Resources.ResourceManager.GetString("PairingStarting") ?? "Pairing: starting...";
         _ = Task.Run(async () =>
         {
             try { await _pairing.StartAsync(); }
@@ -3628,7 +3752,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         if (((FrameworkElement)sender).Tag is not ServerProfile prof) return;
         
         _serverToDelete = prof;
-        TxtDeleteConfirmation.Text = $"Are you sure you want to delete Server \"{prof.Name}\"? This action cannot be undone.";
+        TxtDeleteConfirmation.Text = string.Format(RustPlusDesk.Properties.Resources.ResourceManager.GetString("DeleteServerConfirmFormatted") ?? "Are you sure you want to delete Server \"{0}\"? This action cannot be undone.", prof.Name);
         DeleteConfirmationOverlay.Visibility = Visibility.Visible;
     }
 
@@ -3645,6 +3769,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             var prof = _serverToDelete;
             _vm.Servers.Remove(prof);
             _vm.Save();
+            TrackingService.AddDismissedPairing(prof.Host, prof.Port, prof.SteamId64);
+            PersonalEventSyncService.DeleteServer(prof.Host, prof.Port, prof.SteamId64);
             AppendLog($"Server deleted: {prof.Name}");
         }
 
@@ -3791,6 +3917,12 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     private static readonly List<string> sPendingLogs = new();
     public static event Action? IconsUpdated;
 
+    private const int MaxLogLines = 2000;
+    private const double CollapsedLogHeight = 200;
+    private const double ExpandedLogHeight = 420;
+    private bool _isLogExpanded;
+    private readonly List<string> _logLines = new();
+
     public void FlushPendingLogs()
     {
         if (TxtLog == null) return;
@@ -3798,12 +3930,9 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         {
             if (sPendingLogs.Count > 0)
             {
-                foreach (var pl in sPendingLogs)
-                {
-                    TxtLog.AppendText(pl + Environment.NewLine);
-                }
+                foreach (var pl in sPendingLogs) AddLogLine(pl);
                 sPendingLogs.Clear();
-                TxtLog.ScrollToEnd();
+                RefreshLogText();
             }
         }
     }
@@ -3824,10 +3953,61 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             else
             {
                 FlushPendingLogs();
-                TxtLog.AppendText(formatted + Environment.NewLine);
-                TxtLog.ScrollToEnd();
+                bool trimmed = AddLogLine(formatted);
+                if (trimmed || HasLogFilter())
+                {
+                    RefreshLogText();
+                }
+                else
+                {
+                    TxtLog.AppendText(formatted + Environment.NewLine);
+                    TxtLog.ScrollToEnd();
+                }
             }
         });
+    }
+
+    private bool AddLogLine(string line)
+    {
+        _logLines.Add(line);
+        int overflow = _logLines.Count - MaxLogLines;
+        if (overflow <= 0) return false;
+
+        _logLines.RemoveRange(0, overflow);
+        return true;
+    }
+
+    private bool HasLogFilter()
+        => !string.IsNullOrWhiteSpace(TxtLogFilter?.Text);
+
+    private void RefreshLogText()
+    {
+        if (TxtLog == null) return;
+
+        string filter = TxtLogFilter?.Text?.Trim() ?? "";
+        IEnumerable<string> lines = string.IsNullOrWhiteSpace(filter)
+            ? _logLines
+            : _logLines.Where(x => x.Contains(filter, StringComparison.OrdinalIgnoreCase));
+
+        TxtLog.Text = string.Join(Environment.NewLine, lines);
+        if (TxtLog.Text.Length > 0) TxtLog.AppendText(Environment.NewLine);
+        TxtLog.ScrollToEnd();
+    }
+
+    private void TxtLogFilter_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        RefreshLogText();
+    }
+
+    private void BtnToggleLogExpand_Click(object sender, RoutedEventArgs e)
+    {
+        _isLogExpanded = !_isLogExpanded;
+        if (LogPanel != null) LogPanel.Height = _isLogExpanded ? ExpandedLogHeight : CollapsedLogHeight;
+        if (BtnToggleLogExpand != null)
+            BtnToggleLogExpand.Content = _isLogExpanded
+                ? RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiCollapse", RustPlusDesk.Properties.Resources.Culture) ?? "Collapse"
+                : RustPlusDesk.Properties.Resources.ResourceManager.GetString("UiExpand", RustPlusDesk.Properties.Resources.Culture) ?? "Expand";
+        TxtLog?.ScrollToEnd();
     }
 
     static readonly JsonSerializerOptions JsonOpt = new()
@@ -3999,11 +4179,48 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         }
     }
 
+    private string GetOwnAvatarCachePath(string steamId64)
+    {
+        var dir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RustPlusDesk", "avatars");
+        if (!System.IO.Directory.Exists(dir))
+        {
+            System.IO.Directory.CreateDirectory(dir);
+        }
+        return System.IO.Path.Combine(dir, $"{steamId64}.png");
+    }
+
     private async Task TryLoadSteamAvatarAsync(string? steamId64)
     {
         if (string.IsNullOrWhiteSpace(steamId64))
         {
             _vm.MyAvatar = null;
+            return;
+        }
+
+        var cachePath = GetOwnAvatarCachePath(steamId64);
+
+        // Try load from local cache first on start
+        if (System.IO.File.Exists(cachePath) && _vm.MyAvatar == null)
+        {
+            try
+            {
+                var cachedBmp = new BitmapImage();
+                cachedBmp.BeginInit();
+                cachedBmp.CacheOption = BitmapCacheOption.OnLoad;
+                cachedBmp.UriSource = new Uri(cachePath);
+                cachedBmp.EndInit();
+                cachedBmp.Freeze();
+                _vm.MyAvatar = cachedBmp;
+            }
+            catch
+            {
+                // Ignore cache load failure, fallback to network
+            }
+        }
+
+        // Fetch once per session (skip if already fetched this steam ID this session)
+        if (_fetchedSteamId64 == steamId64)
+        {
             return;
         }
 
@@ -4019,14 +4236,18 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             if (avatarMatch.Success)
             {
                 var uri = new Uri(avatarMatch.Groups[1].Value);
+                var bytes = await http.GetByteArrayAsync(uri);
+                await System.IO.File.WriteAllBytesAsync(cachePath, bytes);
+
                 var bmp = new BitmapImage();
                 bmp.BeginInit();
                 bmp.CacheOption = BitmapCacheOption.OnLoad;
-                bmp.UriSource = uri;
+                bmp.UriSource = new Uri(cachePath);
                 bmp.EndInit();
                 bmp.Freeze();
 
                 _vm.MyAvatar = bmp;
+                _fetchedSteamId64 = steamId64;
             }
             if (nameMatch.Success)
             {
@@ -4037,8 +4258,11 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         }
         catch
         {
-            // Avatar optional ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ bei Fehlern still
-            _vm.MyAvatar = null;
+            // If network fails but cache exists, keep the cached version; otherwise clear it.
+            if (!System.IO.File.Exists(cachePath))
+            {
+                _vm.MyAvatar = null;
+            }
         }
     }
 
@@ -4071,24 +4295,26 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         // 1) Versuche Optimierte URL
         if (optimizedUrl != null)
         {
-            if (sIconCache.TryGetValue(optimizedUrl, out var ready)) return ready;
+            string cacheKey = $"{optimizedUrl}|{decodePx}";
+            if (sIconCache.TryGetValue(cacheKey, out var ready)) return ready;
             var path = GetIconCachePath(optimizedUrl);
             if (System.IO.File.Exists(path))
             {
                 var img = TryLoadBitmapFromFile(path, decodePx);
-                if (img != null) { sIconCache[optimizedUrl] = img; return img; }
+                if (img != null) { sIconCache[cacheKey] = img; return img; }
             }
         }
 
         // 2) Versuche Original URL (Fallback/DB)
         if (rusthelpUrl != null)
         {
-            if (sIconCache.TryGetValue(rusthelpUrl, out var ready)) return ready;
+            string cacheKey = $"{rusthelpUrl}|{decodePx}";
+            if (sIconCache.TryGetValue(cacheKey, out var ready)) return ready;
             var path = GetIconCachePath(rusthelpUrl);
             if (System.IO.File.Exists(path))
             {
                 var img = TryLoadBitmapFromFile(path, decodePx);
-                if (img != null) { sIconCache[rusthelpUrl] = img; return img; }
+                if (img != null) { sIconCache[cacheKey] = img; return img; }
             }
         }
 
@@ -4297,11 +4523,26 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     private static Image MakeIcon(string packUri, double size = 32)
     {
         var bi = new BitmapImage();
-        bi.BeginInit();
-        bi.UriSource = new Uri(packUri, UriKind.Absolute);
-        bi.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
-        bi.CacheOption = BitmapCacheOption.OnLoad;
-        bi.EndInit();
+        try
+        {
+            bi.BeginInit();
+            bi.UriSource = new Uri(packUri, UriKind.Absolute);
+            bi.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+            bi.CacheOption = BitmapCacheOption.OnLoad;
+            bi.EndInit();
+        }
+        catch when (packUri.StartsWith("pack://application:,,,/Assets/", StringComparison.OrdinalIgnoreCase))
+        {
+            bi = new BitmapImage();
+            string relativePath = packUri["pack://application:,,,/".Length..].Replace('/', System.IO.Path.DirectorySeparatorChar);
+            string filePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, relativePath);
+
+            bi.BeginInit();
+            bi.UriSource = new Uri(filePath, UriKind.Absolute);
+            bi.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+            bi.CacheOption = BitmapCacheOption.OnLoad;
+            bi.EndInit();
+        }
 
         var img = new Image
         {
@@ -4323,10 +4564,49 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         {
             return "Underwater Labs";
         }
+        if (lower.Contains("dome") || lower.Contains("dome monument"))
+        {
+            return "Dome";
+        }
+        if (lower.Contains("launch facility") || lower.Contains("launch_facility"))
+        {
+            return "Launch Site";
+        }
+        if (lower.Contains("missile silo monument") || lower.Contains("missile_silo_monument") ||
+            lower.Contains("missle silo monument") || lower.Contains("missle_silo_monument"))
+        {
+            return "Missile Silo";
+        }
+        if (lower.Contains("mining quarry sulfur") || lower.Contains("mining_quarry_sulfur"))
+        {
+            return "Sulfur Quarry";
+        }
+        if (lower.Contains("mining quarry stone") || lower.Contains("mining_quarry_stone"))
+        {
+            return "Stone Quarry";
+        }
+        if (lower.Contains("mining quarry hqm") || lower.Contains("mining_quarry_hqm"))
+        {
+            return "HQM Quarry";
+        }
+        if (lower.Contains("arctic base") || lower.Contains("arctic_base"))
+        {
+            return "Arctic Research Base";
+        }
+        if (lower.Contains("launchsite"))
+        {
+            return "Launch Site";
+        }
+        if (lower.Contains("supermarket") || lower.Contains("supermarket_1")) return "Abandoned Supermarket";
 
         if (lower.Contains("harbor_2") || lower.Contains("harbor 2")) return "Harbor";
         if (lower.Contains("harbor")) return "Harbor 2";
-        if (lower.Contains("apartmentscomplex") || lower.Contains("apartmentcomplex")) return "Apartments Complex";
+        if (lower.Contains("stables a") || lower.Contains("stables_a")) return "Ranch";
+        if (lower.Contains("stables b") || lower.Contains("stables_b")) return "Large Barn";
+        if (lower.Contains("excavator")) return "Large Excavator Pit";
+        if (lower.Contains("gas station") || lower.Contains("gas_station")) return "Oxum's Gas Station";
+        if (lower.Contains("sewer")) return "Sewer Branch";
+        if (lower.Contains("apartmentscomplex") || lower.Contains("apartmentcomplex") || lower.Contains("apartment complex") || lower.Contains("apartment_complex")) return "Apartments Complex";
 
         s = s.Replace('\\', '/');
         var last = s.LastIndexOf('/');
@@ -4357,7 +4637,6 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         if (s.Length <= max) return s;
         return s.Substring(0, Math.Max(1, max - 1)) + "ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦";
     }
-    private int _shopAutoSeq = 1; // Fallback-Sequenz, wenn ID fehlt
 
     // stabiler Fallback-Key-Hasher (aus X,Y,Label)
     private static uint ShopFallbackKey(double x, double y, string? label)
@@ -4442,9 +4721,11 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         TrackingService.AnnounceVendor = val;
         TrackingService.AnnounceOilRig = val;
         TrackingService.AnnounceDeepSea = val;
+        TrackingService.AnnounceSatelliteCrash = val;
         TrackingService.AnnouncePlayerOnline = val;
         TrackingService.AnnouncePlayerOffline = val;
         TrackingService.AnnouncePlayerAfk = val;
+        TrackingService.AnnouncePlayerAfkReturn = val;
         TrackingService.AnnouncePlayerDeathSelf = val;
         TrackingService.AnnouncePlayerDeathTeam = val;
         TrackingService.AnnouncePlayerRespawnSelf = val;
@@ -4474,7 +4755,9 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                !TrackingService.AnnounceCargoEgress && !TrackingService.AnnounceCargoArrival &&
                !TrackingService.AnnounceHeli && !TrackingService.AnnounceChinook &&
                !TrackingService.AnnounceVendor && !TrackingService.AnnounceOilRig && !TrackingService.AnnounceDeepSea &&
-               !TrackingService.AnnouncePlayerOnline && !TrackingService.AnnouncePlayerOffline && !TrackingService.AnnouncePlayerAfk &&
+               !TrackingService.AnnounceSatelliteCrash &&
+               !TrackingService.AnnouncePlayerOnline && !TrackingService.AnnouncePlayerOffline &&
+               !TrackingService.AnnouncePlayerAfk && !TrackingService.AnnouncePlayerAfkReturn &&
                !TrackingService.AnnouncePlayerDeathSelf && !TrackingService.AnnouncePlayerDeathTeam &&
                !TrackingService.AnnouncePlayerRespawnSelf && !TrackingService.AnnouncePlayerRespawnTeam &&
                !TrackingService.AnnounceTracking &&
@@ -4509,10 +4792,12 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 case "Vendor": TrackingService.AnnounceVendor = val; break;
                 case "OilRig": TrackingService.AnnounceOilRig = val; break;
                 case "DeepSea": TrackingService.AnnounceDeepSea = val; break;
+                case "SatelliteCrash": TrackingService.AnnounceSatelliteCrash = val; break;
                 case "SmartAlerts": TrackingService.AnnounceSmartAlerts = val; break;
                 case "PlayerOnline": TrackingService.AnnouncePlayerOnline = val; break;
                 case "PlayerOffline": TrackingService.AnnouncePlayerOffline = val; break;
                 case "PlayerAfk": TrackingService.AnnouncePlayerAfk = val; break;
+                case "PlayerAfkReturn": TrackingService.AnnouncePlayerAfkReturn = val; break;
                 case "AnnounceTracking": TrackingService.AnnounceTracking = val; break;
                 case "PlayerDeathSelf": TrackingService.AnnouncePlayerDeathSelf = val; break;
                 case "PlayerDeathTeam": TrackingService.AnnouncePlayerDeathTeam = val; break;
@@ -4544,6 +4829,18 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 RequestTeamFeatureMasterSync();
             }
         }
+     }
+
+    private void AfkMinutes_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem mi && mi.Tag is string tag && tag.StartsWith("Afk_"))
+        {
+            if (int.TryParse(tag.Substring(4), out int minutes))
+            {
+                TrackingService.AfkAlertMinutes = minutes;
+                SyncAlertMenuItems();
+            }
+        }
     }
 
     private void GenericAlarmSetting_Click(object sender, RoutedEventArgs e)
@@ -4570,6 +4867,57 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             "Audio" => TrackingService.GenericAlarmAudioEnabled,
             _ => false
         };
+    }
+
+    private void CmbAfkMinutes_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is ComboBox cmb)
+        {
+            cmb.Text = TrackingService.AfkAlertMinutes.ToString();
+        }
+    }
+
+    private void CmbAfkMinutes_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is ComboBox cmb && cmb.SelectedItem is ComboBoxItem item && int.TryParse(item.Content?.ToString(), out int val))
+        {
+            if (val > 0)
+            {
+                TrackingService.AfkAlertMinutes = val;
+            }
+        }
+    }
+
+    private void CmbAfkMinutes_LostFocus(object sender, RoutedEventArgs e)
+    {
+        SaveAfkMinutesFromText(sender as ComboBox);
+    }
+
+    private void CmbAfkMinutes_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            SaveAfkMinutesFromText(sender as ComboBox);
+            e.Handled = true;
+        }
+    }
+
+    private void SaveAfkMinutesFromText(ComboBox? cmb)
+    {
+        if (cmb == null) return;
+        if (int.TryParse(cmb.Text, out int val) && val > 0)
+        {
+            TrackingService.AfkAlertMinutes = val;
+        }
+        else
+        {
+            cmb.Text = TrackingService.AfkAlertMinutes.ToString();
+        }
+    }
+
+    private void ComboBox_MouseDownPreventClose(object sender, MouseButtonEventArgs e)
+    {
+        e.Handled = true;
     }
 
     private void GenericAlarmAudioMenu_Click(object sender, RoutedEventArgs e)
@@ -4609,9 +4957,11 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             TrackingService.AnnounceVendor,
             TrackingService.AnnounceOilRig,
             TrackingService.AnnounceDeepSea,
+            TrackingService.AnnounceSatelliteCrash,
             TrackingService.AnnouncePlayerOnline,
             TrackingService.AnnouncePlayerOffline,
             TrackingService.AnnouncePlayerAfk,
+            TrackingService.AnnouncePlayerAfkReturn,
             TrackingService.AnnouncePlayerDeathSelf,
             TrackingService.AnnouncePlayerDeathTeam,
             TrackingService.AnnouncePlayerRespawnSelf,
@@ -4655,22 +5005,45 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             bool isSelected = false;
             switch (tag)
             {
-                case "Cargo": 
+                case "Cargo":
+                case "PlayerAfkParent": 
                 case "Partial":
-                    bool cs = TrackingService.AnnounceCargo;
-                    bool cd = TrackingService.AnnounceCargoDocking;
-                    bool ce = TrackingService.AnnounceCargoEgress;
-                    bool ca = TrackingService.AnnounceCargoArrival;
-                    if (cs && cd && ce && ca) { isSelected = true; mi.Tag = "Cargo"; }
-                    else if (cs || cd || ce || ca) { isSelected = true; mi.Tag = "Partial"; }
-                    else { isSelected = false; mi.Tag = "Cargo"; }
+                    bool isCargo = false;
+                    foreach (var item in mi.Items)
+                    {
+                        if (item is MenuItem sub && sub.Tag is string subTag && subTag.StartsWith("Cargo"))
+                        {
+                            isCargo = true;
+                            break;
+                        }
+                    }
+                    if (isCargo || tag == "Cargo")
+                    {
+                        bool cs = TrackingService.AnnounceCargo;
+                        bool cd = TrackingService.AnnounceCargoDocking;
+                        bool ce = TrackingService.AnnounceCargoEgress;
+                        bool ca = TrackingService.AnnounceCargoArrival;
+                        if (cs && cd && ce && ca) { isSelected = true; mi.Tag = "Cargo"; }
+                        else if (cs || cd || ce || ca) { isSelected = true; mi.Tag = "Partial"; }
+                        else { isSelected = false; mi.Tag = "Cargo"; }
+                    }
+                    else
+                    {
+                        bool afk = TrackingService.AnnouncePlayerAfk;
+                        bool ret = TrackingService.AnnouncePlayerAfkReturn;
+                        if (afk && ret) { isSelected = true; mi.Tag = "PlayerAfkParent"; }
+                        else if (afk || ret) { isSelected = true; mi.Tag = "Partial"; }
+                        else { isSelected = false; mi.Tag = "PlayerAfkParent"; }
+                    }
                     break;
                 case "CargoSpawn": isSelected = TrackingService.AnnounceCargo; break;
                 case "CargoDock": isSelected = TrackingService.AnnounceCargoDocking; break;
                 case "CargoEgress": isSelected = TrackingService.AnnounceCargoEgress; break;
                 case "CargoArrival": 
                     isSelected = TrackingService.AnnounceCargoArrival; 
-                    mi.Header = hasTravelData ? "Arrival Warning (5m before Dock)" : "Arrival Warning (Unlearned)";
+                    mi.Header = hasTravelData
+                        ? (RustPlusDesk.Properties.Resources.ResourceManager.GetString("CargoArrival") ?? "Arrival Warning (5m before Dock)")
+                        : (RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiArrivalWarningUnlearned") ?? "Arrival Warning (Unlearned)");
                     mi.IsEnabled = masterOn && hasTravelData; 
                     break;
                 case "Heli": isSelected = TrackingService.AnnounceHeli; break;
@@ -4678,10 +5051,17 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 case "Vendor": isSelected = TrackingService.AnnounceVendor; break;
                 case "OilRig": isSelected = TrackingService.AnnounceOilRig; break;
                 case "DeepSea": isSelected = TrackingService.AnnounceDeepSea; break;
+                case "SatelliteCrash": isSelected = TrackingService.AnnounceSatelliteCrash; break;
                 case "SmartAlerts": isSelected = TrackingService.AnnounceSmartAlerts; break;
                 case "PlayerOnline": isSelected = TrackingService.AnnouncePlayerOnline; break;
                 case "PlayerOffline": isSelected = TrackingService.AnnouncePlayerOffline; break;
                 case "PlayerAfk": isSelected = TrackingService.AnnouncePlayerAfk; break;
+                case "PlayerAfkReturn": isSelected = TrackingService.AnnouncePlayerAfkReturn; break;
+                case "Afk_5": isSelected = TrackingService.AfkAlertMinutes == 5; break;
+                case "Afk_10": isSelected = TrackingService.AfkAlertMinutes == 10; break;
+                case "Afk_15": isSelected = TrackingService.AfkAlertMinutes == 15; break;
+                case "Afk_20": isSelected = TrackingService.AfkAlertMinutes == 20; break;
+                case "Afk_30": isSelected = TrackingService.AfkAlertMinutes == 30; break;
                 case "AnnounceTracking": isSelected = TrackingService.AnnounceTracking; break;
                 case "PlayerDeathSelf": isSelected = TrackingService.AnnouncePlayerDeathSelf; break;
                 case "PlayerDeathTeam": isSelected = TrackingService.AnnouncePlayerDeathTeam; break;
@@ -5037,8 +5417,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 rule.Baseline.Add(new AlertSeenOrder
                 {
                     ShopId = shop.Id,
-                    ItemShort = o.ItemShortName,
-                    CurrencyShort = o.CurrencyShortName,
+                    ItemShort = o.ItemShortName ?? "",
+                    CurrencyShort = o.CurrencyShortName ?? "",
                     Stock = o.Stock,
                     Quantity = o.Quantity,
                     CurrencyAmount = o.CurrencyAmount
@@ -5170,14 +5550,14 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 // saved -> leicht grÃƒÆ’Ã‚Â¼n getÃƒÆ’Ã‚Â¶nt
                 btnSave.Background = new SolidColorBrush(Color.FromRgb(32, 48, 32));                // sehr dunkles GrÃƒÆ’Ã‚Â¼n
                 btnSave.BorderBrush = new SolidColorBrush(Color.FromRgb(64, 160, 64));              // sattes GrÃƒÆ’Ã‚Â¼n
-                btnSave.ToolTip = "Saved (click to unsave)";
+                btnSave.ToolTip = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiSavedClickToUnsave") ?? "Saved (click to unsave)";
             }
             else
             {
                 // nicht saved -> neutral dunkel
                 btnSave.Background = new SolidColorBrush(Color.FromRgb(40, 44, 48));                // dein Dark-UI
                 btnSave.BorderBrush = new SolidColorBrush(Color.FromArgb(80, 255, 255, 255));        // dezente helle Kontur
-                btnSave.ToolTip = "Save alert";
+                btnSave.ToolTip = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiSaveAlert") ?? "Save alert";
             }
 
             // Icon-Farbe (Diskette):
@@ -5312,8 +5692,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                         rule.Baseline.Add(new AlertSeenOrder
                         {
                             ShopId = shop.Id,
-                            ItemShort = o.ItemShortName,
-                            CurrencyShort = o.CurrencyShortName,
+                            ItemShort = o.ItemShortName ?? "",
+                            CurrencyShort = o.CurrencyShortName ?? "",
                             Stock = o.Stock,
                             Quantity = o.Quantity,
                             CurrencyAmount = o.CurrencyAmount
@@ -5336,8 +5716,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     public class AlertSeenOrder
     {
         public uint ShopId;
-        public string ItemShort;
-        public string CurrencyShort;
+        public string ItemShort = "";
+        public string CurrencyShort = "";
         public int Quantity;
         public float CurrencyAmount;
         public int Stock;
@@ -5411,8 +5791,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                     baseline = new AlertSeenOrder
                     {
                         ShopId        = shop.Id,
-                        ItemShort     = order.ItemShortName,
-                        CurrencyShort = order.CurrencyShortName,
+                        ItemShort     = order.ItemShortName ?? "",
+                        CurrencyShort = order.CurrencyShortName ?? "",
                         Quantity      = order.Quantity,
                         CurrencyAmount= order.CurrencyAmount,
                         Stock         = curStock
@@ -5526,8 +5906,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                     rule.Baseline.Add(new AlertSeenOrder
                     {
                         ShopId = shop.Id,
-                        ItemShort = o.ItemShortName,
-                        CurrencyShort = o.CurrencyShortName,
+                        ItemShort = o.ItemShortName ?? "",
+                        CurrencyShort = o.CurrencyShortName ?? "",
                         Quantity = o.Quantity,
                         CurrencyAmount = o.CurrencyAmount,
                         Stock = o.Stock
@@ -5857,9 +6237,9 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
     public void ApplySettings()
     {
-        if (TxtLog != null)
+        if (LogPanel != null)
         {
-            TxtLog.Visibility = TrackingService.HideConsole ? Visibility.Collapsed : Visibility.Visible;
+            LogPanel.Visibility = TrackingService.HideConsole ? Visibility.Collapsed : Visibility.Visible;
         }
 
         if (ColSidebar != null)
@@ -5996,7 +6376,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
         snackbar = new WpfUi.Snackbar(RootSnackbar)
         {
-            Title = "Update Required",
+            Title = RustPlusDesk.Properties.Resources.ResourceManager.GetString("UpdateRequiredTitle") ?? "Update Required",
             Content = stack,
             Appearance = WpfUi.ControlAppearance.Danger,
             Icon = new WpfUi.SymbolIcon(WpfUi.SymbolRegular.ArrowDownload24),
@@ -6074,7 +6454,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             return;
         }
 
-        bool isListening = TxtPairingState.Text != null && TxtPairingState.Text.Contains("listening");
+        bool isListening = _vm.IsPairingBusy;
 
         string title = isListening ? "Pairing Active" : "Action Required";
         string msg = isListening 
@@ -6430,11 +6810,12 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         LogicEnginePanel.Visibility = Visibility.Collapsed;
         DeviceAutomationPanel.RefreshListBindings();
         DeviceAutomationPanel.Visibility = Visibility.Visible;
+        _ = OfferNewFeatureTutorialOnceAsync("device-automation");
     }
 
     private void BtnLanguageSettings_Click(object sender, RoutedEventArgs e)
     {
-        BtnSettings_Click(sender, e);
+        OpenSettingsCategory("general");
     }
 
     public void UpdateLanguageFlag()
@@ -6459,9 +6840,13 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 string imageUri = $"pack://application:,,,/Assets/Flags/{candidate}.png";
                 try
                 {
-                    ImgLanguageFlag.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(imageUri));
-                    loaded = true;
-                    break;
+                    var streamInfo = System.Windows.Application.GetResourceStream(new Uri(imageUri));
+                    if (streamInfo != null)
+                    {
+                        ImgLanguageFlag.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(imageUri));
+                        loaded = true;
+                        break;
+                    }
                 }
                 catch { }
             }
@@ -6717,13 +7102,19 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     }
 
 
+    private void UpdateAppTitle()
+    {
+        string title = $"RUST+ DESKTOP v{_updateService.VersionRaw}";
+        if (AppTitleBar != null) AppTitleBar.Title = title;
+        this.Title = title;
+    }
+
     protected override void OnSourceInitialized(EventArgs e)
     {
         base.OnSourceInitialized(e);
 
-        // SpÃƒÆ’Ã‚Â¤testens hier sollte Windows den Titel im Rahmen akzeptieren
-        if (AppTitleBar != null) AppTitleBar.Title = $"RUST+ DESKTOP v{_updateService.VersionRaw}";
-        this.Title = $"RUST+ DESKTOP v{_updateService.VersionRaw}";
+        // Spätestens hier sollte Windows den Titel im Rahmen akzeptieren
+        UpdateAppTitle();
 
         var hwnd = new WindowInteropHelper(this).Handle;
         _hotkeyMgr = new GlobalHotkeyManager(hwnd);
@@ -7101,7 +7492,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
         if (_hotkeysActive)
         {
-            TxtBtnHotkeys.Text = "Hotkeys active";
+            TxtBtnHotkeys.Text = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiHotkeysActive", RustPlusDesk.Properties.Resources.Culture) ?? "Hotkeys active";
             if (BtnHotkeys.IsMouseOver)
             {
                 BtnHotkeys.Background = Brushes.Transparent;
@@ -7117,7 +7508,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         }
         else
         {
-            TxtBtnHotkeys.Text = "Hotkeys";
+            TxtBtnHotkeys.Text = RustPlusDesk.Properties.Resources.ResourceManager.GetString("Hotkeys", RustPlusDesk.Properties.Resources.Culture) ?? "Hotkeys";
             BtnHotkeys.ClearValue(Button.BackgroundProperty);
             BtnHotkeys.ClearValue(Button.BorderBrushProperty);
             BtnHotkeys.ClearValue(Button.ForegroundProperty);
@@ -7204,10 +7595,10 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
 public class RenameDialog : Window
 {
-    public string InputText { get; private set; }
+    public string InputText { get; private set; } = string.Empty;
     public RenameDialog(string defaultText)
     {
-        Title = "Rename Custom Crosshair";
+        Title = RustPlusDesk.Properties.Resources.ResourceManager.GetString("RenameCustomCrosshair") ?? "Rename Custom Crosshair";
         Width = 300; SizeToContent = SizeToContent.Height;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         ResizeMode = ResizeMode.NoResize;

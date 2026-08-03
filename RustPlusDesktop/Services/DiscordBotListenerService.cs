@@ -126,14 +126,19 @@ public class DiscordBotListenerService
                 }
             });
 
+            // Mark the guild as subscribed before awaiting Subscribe() so that any command
+            // arriving in the race window between Subscribe() completing and this flag being
+            // set is not dropped by ProcessIncomingCommandAsync's active-guild filter.
+            lock (_subscribedGuildIds) { _subscribedGuildIds.Add(guildId); }
+
             await channel.Subscribe();
             _activeChannels.Add(channel);
-            lock (_subscribedGuildIds) { _subscribedGuildIds.Add(guildId); }
             Log($"[DiscordBotListener] Subscribed to command queue for Guild: {guildId}");
             await ProcessRecentPendingCommandsAsync(guildId);
         }
         catch (Exception ex)
         {
+            lock (_subscribedGuildIds) { _subscribedGuildIds.Remove(guildId); }
             Log($"[DiscordBotListener] Failed to subscribe to Guild {guildId}: {ex.Message}");
         }
     }

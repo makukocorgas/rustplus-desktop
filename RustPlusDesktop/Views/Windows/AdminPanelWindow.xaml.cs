@@ -27,12 +27,14 @@ namespace RustPlusDesk.Views.Windows
             var (isAdmin, error) = await SupabaseAuthManager.CheckIsAdminDetailedAsync();
             if (!isAdmin)
             {
-                string msg = "Admin access requires Discord auth and a developer/lead contributor role.";
+                string msg = Properties.Resources.ResourceManager.GetString("CodeUiAdminAccessRequiresDiscordAuthAndADeveloperLeadContributorRole") ?? "Admin access requires Discord auth and a developer/lead contributor role.";
                 if (!string.IsNullOrEmpty(error))
                 {
-                    msg += $"\n\nDetails: {error}";
+                    string detailsLabel = Properties.Resources.ResourceManager.GetString("CodeUiDetailsLabel") ?? "\n\nDetails: ";
+                    msg += $"{detailsLabel}{error}";
                 }
-                MessageBox.Show(msg, "Admin Panel", MessageBoxButton.OK, MessageBoxImage.Warning);
+                string title = Properties.Resources.ResourceManager.GetString("UiAdminPanel") ?? "Admin Panel";
+                MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Warning);
                 Close();
                 return;
             }
@@ -78,15 +80,15 @@ namespace RustPlusDesk.Views.Windows
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading users: {ex.Message}");
+                string errorLabel = Properties.Resources.ResourceManager.GetString("CodeUiErrorLoadingUsersLabel") ?? "Error loading users: ";
+                MessageBox.Show($"{errorLabel}{ex.Message}");
             }
         }
 
-        private async void Vm_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private async void Vm_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(AdminUserViewModel.IsManualSupporter))
+            if (e.PropertyName == nameof(AdminUserViewModel.IsManualSupporter) && sender is AdminUserViewModel vm)
             {
-                var vm = (AdminUserViewModel)sender;
                 try
                 {
                     var payload = new
@@ -100,7 +102,8 @@ namespace RustPlusDesk.Views.Windows
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error updating override: {ex.Message}");
+                    string errorLabel = Properties.Resources.ResourceManager.GetString("CodeUiErrorUpdatingOverrideLabel") ?? "Error updating override: ";
+                    MessageBox.Show($"{errorLabel}{ex.Message}");
                 }
             }
         }
@@ -117,22 +120,37 @@ namespace RustPlusDesk.Views.Windows
             if (UsersGrid.SelectedItem is not AdminUserViewModel vm) return;
 
             var team = vm.TeamMembers;
+            string noTeamSnapshot = Properties.Resources.ResourceManager.GetString("CodeUiNoTeamSnapshotAvailable") ?? "No team snapshot available.";
+            string leaderLabel = Properties.Resources.ResourceManager.GetString("CodeUiLeaderLabel") ?? "[Leader] ";
+            string onlineWord = Properties.Resources.ResourceManager.GetString("OnlineTab") ?? "Online";
+            string offlineWord = Properties.Resources.ResourceManager.GetString("CodeUiOfflineWord") ?? "Offline";
+            string deadSuffix = Properties.Resources.ResourceManager.GetString("CodeUiDeadSuffix") ?? ", Dead";
             var teamText = team.Count == 0
-                ? "No team snapshot available."
+                ? noTeamSnapshot
                 : string.Join(Environment.NewLine, team.ConvertAll(t =>
-                    $"- {t.Name} ({t.SteamId}) {(t.IsLeader ? "[Leader] " : "")}{(t.IsOnline ? "Online" : "Offline")}{(t.IsDead ? ", Dead" : "")}"));
+                    $"- {t.Name} ({t.SteamId}) {(t.IsLeader ? leaderLabel : "")}{(t.IsOnline ? onlineWord : offlineWord)}{(t.IsDead ? deadSuffix : "")}"));
+
+            string steamIdLabel = Properties.Resources.ResourceManager.GetString("CodeUiSteamIdLabel") ?? "Steam ID: ";
+            string discordLabel = Properties.Resources.ResourceManager.GetString("CodeUiDiscordLabel") ?? "Discord: ";
+            string tierLabel = Properties.Resources.ResourceManager.GetString("CodeUiTierLabel") ?? "Tier: ";
+            string lastActiveLabel = Properties.Resources.ResourceManager.GetString("CodeUiLastActiveLabel") ?? "Last Active: ";
+            string onlineLabel = Properties.Resources.ResourceManager.GetString("CodeUiOnlineLabel") ?? "Online: ";
+            string serverLabel = Properties.Resources.ResourceManager.GetString("CodeUiServerLabel") ?? "Server: ";
+            string serverKeyLabel = Properties.Resources.ResourceManager.GetString("CodeUiServerKeyLabel") ?? "Server Key: ";
+            string teamSizeLabel = Properties.Resources.ResourceManager.GetString("CodeUiTeamSizeLabel") ?? "Team Size: ";
+            string userActivityTitle = Properties.Resources.ResourceManager.GetString("CodeUiUserActivityTitle") ?? "User Activity";
 
             MessageBox.Show(
-                $"Steam ID: {vm.SteamId}\n" +
-                $"Discord: {vm.DiscordName}\n" +
-                $"Tier: {vm.SubscriptionTier}\n" +
-                $"Last Active: {vm.LastActiveDisplay}\n" +
-                $"Online: {vm.IsOnline}\n" +
-                $"Server: {vm.CurrentServerName}\n" +
-                $"Server Key: {vm.CurrentServerKey}\n" +
-                $"Team Size: {vm.TeamMemberCount}\n\n" +
+                $"{steamIdLabel}{vm.SteamId}\n" +
+                $"{discordLabel}{vm.DiscordName}\n" +
+                $"{tierLabel}{vm.SubscriptionTier}\n" +
+                $"{lastActiveLabel}{vm.LastActiveDisplay}\n" +
+                $"{onlineLabel}{vm.IsOnline}\n" +
+                $"{serverLabel}{vm.CurrentServerName}\n" +
+                $"{serverKeyLabel}{vm.CurrentServerKey}\n" +
+                $"{teamSizeLabel}{vm.TeamMemberCount}\n\n" +
                 teamText,
-                "User Activity",
+                userActivityTitle,
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
         }
@@ -140,9 +158,9 @@ namespace RustPlusDesk.Views.Windows
 
     public class AdminUserViewModel : INotifyPropertyChanged
     {
-        public string SteamId { get; set; }
-        public string DiscordName { get; set; }
-        public string SubscriptionTier { get; set; }
+        public string SteamId { get; set; } = string.Empty;
+        public string DiscordName { get; set; } = string.Empty;
+        public string SubscriptionTier { get; set; } = string.Empty;
         public bool SyncAccepted { get; set; }
         public DateTime LastActiveAt { get; set; }
         public string LastActiveDisplay => LastActiveAt == default
@@ -152,10 +170,10 @@ namespace RustPlusDesk.Views.Windows
         public bool DatabaseIsOnline { get; set; }
         public bool IsOnline => DatabaseIsOnline && (DateTime.UtcNow - LastActiveAt.ToUniversalTime()).TotalMinutes <= 5;
 
-        public string CurrentServerName { get; set; }
-        public string CurrentServerKey { get; set; }
+        public string CurrentServerName { get; set; } = string.Empty;
+        public string CurrentServerKey { get; set; } = string.Empty;
         public int TeamMemberCount { get; set; }
-        public string TeamMembersJson { get; set; }
+        public string TeamMembersJson { get; set; } = string.Empty;
         public DateTime? ManualPremiumAt { get; set; }
         public string ManualPremiumAtDisplay => ManualPremiumAt.HasValue
             ? ManualPremiumAt.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")
@@ -192,8 +210,8 @@ namespace RustPlusDesk.Views.Windows
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }

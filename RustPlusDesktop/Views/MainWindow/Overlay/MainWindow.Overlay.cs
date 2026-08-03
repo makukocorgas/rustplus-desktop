@@ -194,7 +194,7 @@ private bool _overlayToolsVisible = false;
             if (subCount >= 5)
             {
                 AppendLog("[overlay/subscription] Maximum of 5 active subscriptions reached. Please unsubscribe from another player first.");
-                MessageBox.Show("Maximum of 5 active teammate subscriptions reached. Please unsubscribe from someone else first.", "Subscription Limit", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiMaximumOf5ActiveTeammateSubscriptionsReachedPleaseUnsu9A1502FD52") ?? "Maximum of 5 active teammate subscriptions reached. Please unsubscribe from someone else first.", RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiSubscriptionLimit") ?? "Subscription Limit", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
         }
@@ -964,6 +964,12 @@ private bool _overlayToolsVisible = false;
 
     private void RegisterElementForOwner(ulong owner, FrameworkElement fe)
     {
+        if (_isShowingDeepSeaMap)
+        {
+            _deepSeaOverlayElements.Add(fe);
+            return;
+        }
+
         if (!_playerOverlayElements.TryGetValue(owner, out var list))
         {
             list = new List<FrameworkElement>();
@@ -1089,6 +1095,16 @@ private bool _overlayToolsVisible = false;
 
     private void ToolTrashButton_Click(object sender, RoutedEventArgs e)
     {
+        if (_isShowingDeepSeaMap)
+        {
+            foreach (var el in _deepSeaOverlayElements)
+            {
+                Overlay.Children.Remove(el);
+            }
+            _deepSeaOverlayElements.Clear();
+            return;
+        }
+
         // 1. Alle meine Elemente vom Overlay entfernen
         if (_playerOverlayElements.TryGetValue(_mySteamId, out var mine))
         {
@@ -1535,17 +1551,17 @@ private bool _overlayToolsVisible = false;
         };
 
         // Farbe aendern (nur ein Beispiel)
-        var miRed = new MenuItem { Header = "Red" };
+        var miRed = new MenuItem { Header = RustPlusDesk.Properties.Resources.ResourceManager.GetString("UiRed") ?? "Red" };
         miRed.Click += (_, __) => { _drawColor = Colors.Red; };
-        var miGreen = new MenuItem { Header = "Green" };
+        var miGreen = new MenuItem { Header = RustPlusDesk.Properties.Resources.ResourceManager.GetString("UiGreen") ?? "Green" };
         miGreen.Click += (_, __) => { _drawColor = Colors.Lime; };
-        var miBlue = new MenuItem { Header = "Blue" };
+        var miBlue = new MenuItem { Header = RustPlusDesk.Properties.Resources.ResourceManager.GetString("UiBlue") ?? "Blue" };
         miBlue.Click += (_, __) => { _drawColor = Colors.DeepSkyBlue; };
 
         // Stiftdicke
-        var miThin = new MenuItem { Header = "Thickness: 3px" };
+        var miThin = new MenuItem { Header = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiThickness3px") ?? "Thickness: 3px" };
         miThin.Click += (_, __) => { _drawThickness = 3.0; };
-        var miThick = new MenuItem { Header = "Thickness: 10px" };
+        var miThick = new MenuItem { Header = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiThickness10px") ?? "Thickness: 10px" };
         miThick.Click += (_, __) => { _drawThickness = 10.0; };
 
         m.Items.Add(miRed);
@@ -1563,14 +1579,14 @@ private bool _overlayToolsVisible = false;
     {
         var m = new ContextMenu() { Style = (Style)FindResource("DarkContextMenu") };
 
-        var miWhite = new MenuItem { Header = "White" };
+        var miWhite = new MenuItem { Header = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiWhite") ?? "White" };
         miWhite.Click += (_, __) => { _textColor = Colors.White; };
-        var miYellow = new MenuItem { Header = "Red" };
+        var miYellow = new MenuItem { Header = RustPlusDesk.Properties.Resources.ResourceManager.GetString("UiRed") ?? "Red" };
         miYellow.Click += (_, __) => { _textColor = Colors.Red; };
 
-        var miSmall = new MenuItem { Header = "Size: 14" };
+        var miSmall = new MenuItem { Header = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiSize14") ?? "Size: 14" };
         miSmall.Click += (_, __) => { _textSize = 14.0; };
-        var miBig = new MenuItem { Header = "Size: 40" };
+        var miBig = new MenuItem { Header = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiSize40") ?? "Size: 40" };
         miBig.Click += (_, __) => { _textSize = 40.0; };
 
         m.Items.Add(miWhite);
@@ -1612,9 +1628,9 @@ private bool _overlayToolsVisible = false;
     {
         var m = new ContextMenu() { Style = (Style)FindResource("DarkContextMenu") };
 
-        var miSmall = new MenuItem { Header = "Eraser small (5px)" };
+        var miSmall = new MenuItem { Header = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiEraserSmall5px") ?? "Eraser small (5px)" };
         miSmall.Click += (_, __) => { _eraserSize = 5.0; };
-        var miBig = new MenuItem { Header = "Eraser big (20px)" };
+        var miBig = new MenuItem { Header = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiEraserBig20px") ?? "Eraser big (20px)" };
         miBig.Click += (_, __) => { _eraserSize = 20.0; };
 
         m.Items.Add(miSmall);
@@ -2255,7 +2271,7 @@ private bool _overlayToolsVisible = false;
 
             return grid;
         }
-        catch (Exception ex)
+        catch
         {
             // Fail-safe fallback: Red ellipse to prevent crash
             var fallback = new Ellipse
@@ -2358,6 +2374,7 @@ private bool _overlayToolsVisible = false;
 
     private void SaveOwnOverlayToJson()
     {
+        if (_isShowingDeepSeaMap) return;
         try
         {
             // 1) aktuelles Overlay aus dem Canvas bauen
@@ -3575,8 +3592,8 @@ private bool _overlayToolsVisible = false;
 
     // --- BASE HOVER, GALLERY, LOUPE, & CONTEXT MENU LOGIC ---
 
-    private DispatcherTimer _baseDetailHideTimer;
-    private DispatcherTimer _baseDetailShowTimer;
+    private DispatcherTimer? _baseDetailHideTimer;
+    private DispatcherTimer? _baseDetailShowTimer;
     private FrameworkElement? _activeBaseHoverAnchor;
     private OverlayTag? _activeBaseHoverMeta;
     private FrameworkElement? _activeGalleryAnchor;
@@ -3914,6 +3931,7 @@ private bool _overlayToolsVisible = false;
             }
 
             SaveOwnOverlayToJson();
+            UploadOwnOverlayToTeam();
 
             // Reapply the zoom-based scale so the new element looks correct at the current map zoom
             RefreshUserOverlayIcons();
@@ -3950,6 +3968,7 @@ private bool _overlayToolsVisible = false;
                 if (iconEl is Grid g)
                     UpdateNoteVisibilityAndText(g, null);
                 SaveOwnOverlayToJson();
+                UploadOwnOverlayToTeam();
             };
             menu.Items.Add(miDelNote);
         }
@@ -3973,7 +3992,7 @@ private bool _overlayToolsVisible = false;
             catch { }
 
             // Change Icon – opens inline picker
-            var miChangeIcon = new MenuItem { Header = "Change Icon" };
+            var miChangeIcon = new MenuItem { Header = RustPlusDesk.Properties.Resources.ResourceManager.GetString("UiChangeIcon") ?? "Change Icon" };
             miChangeIcon.Click += (s, e) =>
             {
                 menu.IsOpen = false;
@@ -3983,7 +4002,7 @@ private bool _overlayToolsVisible = false;
             menu.Items.Add(miChangeIcon);
 
             // Change Color – opens inline picker
-            var miChangeColor = new MenuItem { Header = "Change Color" };
+            var miChangeColor = new MenuItem { Header = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiChangeColor") ?? "Change Color" };
             miChangeColor.Click += (s, e) =>
             {
                 menu.IsOpen = false;
@@ -4002,6 +4021,7 @@ private bool _overlayToolsVisible = false;
             if (_playerOverlayElements.TryGetValue(_mySteamId, out var mine))
                 mine.Remove(iconEl);
             SaveOwnOverlayToJson();
+            UploadOwnOverlayToTeam();
         };
         menu.Items.Add(miDelete);
 
@@ -4283,7 +4303,7 @@ private bool _overlayToolsVisible = false;
             FontSize = 13,
             Margin   = new Thickness(0, 0, 5, 0),
         });
-        saveBtnContent.Children.Add(new System.Windows.Controls.TextBlock { Text = "Save", VerticalAlignment = VerticalAlignment.Center });
+        saveBtnContent.Children.Add(new System.Windows.Controls.TextBlock { Text = Properties.Resources.Save, VerticalAlignment = VerticalAlignment.Center });
 
         var saveBtn = new Button
         {
@@ -4303,6 +4323,7 @@ private bool _overlayToolsVisible = false;
             if (iconEl is Grid g)
                 UpdateNoteVisibilityAndText(g, meta.Note);
             SaveOwnOverlayToJson();
+            UploadOwnOverlayToTeam();
             RemoveInlinePanel(panel!, dismissLayer!);
         };
 
@@ -4349,6 +4370,7 @@ private bool _overlayToolsVisible = false;
                 if (baseImg is Grid g)
                     UpdateNoteVisibilityAndText(g, meta.Note);
                 SaveOwnOverlayToJson();
+                UploadOwnOverlayToTeam();
             }
         };
         menu.Items.Add(miNote);
@@ -4362,6 +4384,7 @@ private bool _overlayToolsVisible = false;
                 if (baseImg is Grid g)
                     UpdateNoteVisibilityAndText(g, null);
                 SaveOwnOverlayToJson();
+                UploadOwnOverlayToTeam();
             };
             menu.Items.Add(miDelNote);
         }
@@ -4386,6 +4409,7 @@ private bool _overlayToolsVisible = false;
                 if (_activeGalleryAnchor == baseImg && BaseGalleryPopup != null)
                     BaseGalleryPopup.Visibility = Visibility.Collapsed;
                 SaveOwnOverlayToJson();
+                UploadOwnOverlayToTeam();
             };
             menu.Items.Add(miDelScreen);
         }
@@ -4401,6 +4425,7 @@ private bool _overlayToolsVisible = false;
                     meta.Screenshots.Add(dlg.Base64Result);
                     if (baseImg is Grid g3) UpdateScreenshotIndicator(g3, meta.Screenshots);
                     SaveOwnOverlayToJson();
+                    UploadOwnOverlayToTeam();
                 }
             };
             menu.Items.Add(miAddScreen);
@@ -4435,6 +4460,7 @@ private bool _overlayToolsVisible = false;
             if (_activeGalleryAnchor == baseImg && BaseGalleryPopup != null)
                 BaseGalleryPopup.Visibility = Visibility.Collapsed;
             SaveOwnOverlayToJson();
+            UploadOwnOverlayToTeam();
         };
         menu.Items.Add(miDeleteBase);
 

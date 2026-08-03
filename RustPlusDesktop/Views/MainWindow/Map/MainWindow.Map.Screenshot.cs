@@ -167,13 +167,13 @@ public partial class MainWindow
 
         BtnSendMapToDiscord.IsEnabled = false;
         var oldContent = BtnSendMapToDiscord.Content;
-        BtnSendMapToDiscord.Content = "Sending...";
+        BtnSendMapToDiscord.Content = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiSending") ?? "Sending...";
         
         try
         {
             // Get guild_id for this Steam ID
             string? guildId = null;
-            string? informationChannelId = null;
+            string? channelId = null;
 
             try
             {
@@ -188,11 +188,27 @@ public partial class MainWindow
 
                 if (!string.IsNullOrEmpty(guildId))
                 {
+                    // discord_guild_channels is the source of truth (one row per guild, always
+                    // refreshed by /setup) — prefer it over discord_channels_config, which can
+                    // accumulate stale duplicate rows from earlier setups and has no ordering
+                    // guarantee on which one FirstOrDefault picks.
                     var guildChannelsRes = await RustPlusDesk.Services.Auth.SupabaseAuthManager.Client
                         .From<RustPlusDesk.Models.DiscordGuildChannelsModel>()
                         .Filter("guild_id", Postgrest.Constants.Operator.Equals, guildId)
                         .Get();
-                    informationChannelId = guildChannelsRes.Models?.FirstOrDefault()?.InformationId;
+                    channelId = guildChannelsRes.Models?.FirstOrDefault()?.InformationId;
+
+                    if (string.IsNullOrEmpty(channelId))
+                    {
+                        var channelConfigsRes = await RustPlusDesk.Services.Auth.SupabaseAuthManager.Client
+                            .From<RustPlusDesk.Models.DiscordChannelsConfigModel>()
+                            .Filter("guild_id", Postgrest.Constants.Operator.Equals, guildId)
+                            .Get();
+                        var configs = channelConfigsRes.Models ?? new System.Collections.Generic.List<RustPlusDesk.Models.DiscordChannelsConfigModel>();
+                        channelId = configs.FirstOrDefault(c => c.NotificationType == "information" && !string.IsNullOrEmpty(c.ChannelId))?.ChannelId
+                            ?? configs.FirstOrDefault(c => c.NotificationType == "chat" && !string.IsNullOrEmpty(c.ChannelId))?.ChannelId
+                            ?? configs.FirstOrDefault(c => c.NotificationType == "events" && !string.IsNullOrEmpty(c.ChannelId))?.ChannelId;
+                    }
                 }
             }
             catch (Exception ex)
@@ -200,7 +216,7 @@ public partial class MainWindow
                 AppendLog($"[Screenshot] Error getting channel config: {ex.Message}");
             }
 
-            if (string.IsNullOrEmpty(guildId))
+            if (string.IsNullOrEmpty(guildId) || string.IsNullOrEmpty(channelId))
             {
                 MessageBox.Show("Discord bot not configured. Use /setup in your Discord server first.", "Bot Not Configured", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
@@ -214,25 +230,11 @@ public partial class MainWindow
                 return;
             }
 
-            // Queue map command with image data for the bot to pick up
-            var payload = new Newtonsoft.Json.Linq.JObject
-            {
-                ["image_base64"] = base64,
-                ["channel_id"] = informationChannelId ?? "",
-                ["server_name"] = _vm.Selected?.Name ?? "Rust Server"
-            };
-
-            await RustPlusDesk.Services.Auth.SupabaseAuthManager.Client
-                .From<RustPlusDesk.Models.BotCommandsQueueModel>()
-                .Insert(new RustPlusDesk.Models.BotCommandsQueueModel
-                {
-                    GuildId = guildId,
-                    CommandType = "map_screenshot",
-                    Payload = payload,
-                    Status = "pending"
-                });
-
-            AppendLog("Map screenshot queued for Discord — bot will post it shortly.");
+            bool ok = await UploadMapScreenshotToDiscordAsync(base64, null, null, channelId);
+            if (ok)
+                AppendLog("Map screenshot sent to Discord.");
+            else
+                AppendLog("[Screenshot] Failed to send map to Discord.");
         }
         catch (Exception ex)
         {

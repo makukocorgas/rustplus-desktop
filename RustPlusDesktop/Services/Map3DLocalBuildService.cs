@@ -417,7 +417,27 @@ public static class Map3DLocalBuildService
             Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "MapParser", "bin", "Release", "net9.0", "MapParser.exe"))
         };
 
-        return candidates.FirstOrDefault(File.Exists);
+        return candidates.FirstOrDefault(IsRunnableParserExecutable);
+    }
+
+    private static bool IsRunnableParserExecutable(string path)
+    {
+        if (!File.Exists(path)) return false;
+        try
+        {
+            if (new FileInfo(path).Length >= 5 * 1024 * 1024) return true;
+        }
+        catch
+        {
+            return false;
+        }
+
+        // Small exe (likely a stale/partial build) is still acceptable if its companion
+        // dependency DLL was published alongside it.
+        string? dir = Path.GetDirectoryName(path);
+        if (string.IsNullOrEmpty(dir)) return false;
+        string companionDll = Path.Combine(dir, Path.GetFileNameWithoutExtension(path) + ".dll");
+        return File.Exists(companionDll);
     }
 
     private static string? ExtractEmbeddedParserRuntime()

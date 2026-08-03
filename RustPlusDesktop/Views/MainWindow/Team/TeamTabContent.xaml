@@ -95,7 +95,7 @@
                                     VerticalAlignment="Center"
                                     Cursor="Hand"
                                     IsChecked="{Binding ShowMarkers}"
-                                    ToolTip="Show markers on map">
+                                    ToolTip="{DynamicResource UiShowMarkersOnMap}">
                                     <CheckBox.Style>
                                         <Style TargetType="CheckBox">
                                             <Setter Property="Template">
@@ -259,7 +259,7 @@
                             <Grid Width="20" Height="20" Margin="0,0,6,0">
                                 <Ellipse Visibility="{Binding IsChecked, ElementName=ChkProfileMarkers, Converter={StaticResource BoolToVisibility}}">
                                     <Ellipse.Fill>
-                                        <ImageBrush ImageSource="{Binding MyAvatar}" Stretch="UniformToFill" />
+                                        <ImageBrush ImageSource="{Binding MyAvatar}" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality" />
                                     </Ellipse.Fill>
                                     <Ellipse.Clip>
                                         <EllipseGeometry Center="10,10" RadiusX="10" RadiusY="10" />
@@ -397,7 +397,7 @@
                         FontSize="10"
                         FontWeight="Bold"
                         Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}"
-                        Text="A..." />
+                        Text="{DynamicResource UiA}" />
                 </ToggleButton>
 
                 <!-- Icon Size -->

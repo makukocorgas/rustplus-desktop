@@ -29,6 +29,7 @@ namespace RustPlusDesk.Views
         private bool _isHeatmapFetching = false;
         private CancellationTokenSource? _heatmapFetchCts;
         private WebView2? _map3DWebView;
+        private static CoreWebView2Environment? _map3DWebViewEnvironment;
         private string? _currentMapFolderPath;
         private EventHandler<CoreWebView2WebResourceRequestedEventArgs>? _map3DResourceRequestHandler;
         private static readonly Lazy<IReadOnlyDictionary<string, string>> Map3DResourceNameMap = new(() =>
@@ -484,7 +485,11 @@ namespace RustPlusDesk.Views
             LoadBuildingBlockedZonesForCurrentMap(result.FolderPath);
             string runtimeRoot = await PrepareMap3DViewerRuntimeAsync(result).ConfigureAwait(true);
             const string host = "rustplus3d.local";
-            string url = $"https://{host}/index.html?v={DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}&mapDataUrl=/maps/current/map_data_viewer.json&embedded=1&view=3d";
+            bool hasBuildings = System.IO.File.Exists(System.IO.Path.Combine(result.FolderPath, "map_buildings.json"));
+            bool hasBlocked = System.IO.File.Exists(System.IO.Path.Combine(result.FolderPath, "building_blocked.json"));
+            string url = $"https://{host}/index.html?v={DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}&mapDataUrl=/maps/current/map_data_viewer.json&embedded=1&view=3d" +
+                         $"{(hasBuildings ? "&hasBuildings=1" : "")}" +
+                         $"{(hasBlocked ? "&hasBlocked=1" : "")}";
 
             CloseMap3DView();
             _map3DWebView = new WebView2
@@ -492,6 +497,7 @@ namespace RustPlusDesk.Views
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Stretch
             };
+            _map3DWebView.NavigationCompleted += Map3DWebView_NavigationCompleted;
             Map3DHost.Children.Add(_map3DWebView);
             Map3DHost.Visibility = Visibility.Visible;
             ImgMap.Visibility = Visibility.Collapsed;
@@ -500,8 +506,10 @@ namespace RustPlusDesk.Views
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "RustPlusDesk", "WebView2");
             Directory.CreateDirectory(webViewDataFolder);
-            var webViewEnvironment = await CoreWebView2Environment.CreateAsync(userDataFolder: webViewDataFolder);
-            await _map3DWebView.EnsureCoreWebView2Async(webViewEnvironment);
+            // The CoreWebView2 environment (fixed user-data folder) is identical across opens, so
+            // create it once and reuse it to avoid the per-open initialization cost.
+            _map3DWebViewEnvironment ??= await CoreWebView2Environment.CreateAsync(userDataFolder: webViewDataFolder);
+            await _map3DWebView.EnsureCoreWebView2Async(_map3DWebViewEnvironment);
             _map3DWebView.CoreWebView2.WebMessageReceived += Map3DWebMessageReceived;
             _map3DResourceRequestHandler = (_, args) => HandleMap3DResourceRequest(args, runtimeRoot);
             _map3DWebView.CoreWebView2.AddWebResourceRequestedFilter($"https://{host}/*", CoreWebView2WebResourceContext.All);
@@ -517,6 +525,7 @@ namespace RustPlusDesk.Views
             {
                 try
                 {
+                    _map3DWebView.NavigationCompleted -= Map3DWebView_NavigationCompleted;
                     if (_map3DWebView.CoreWebView2 != null)
                     {
                         _map3DWebView.CoreWebView2.WebMessageReceived -= Map3DWebMessageReceived;
@@ -538,6 +547,34 @@ namespace RustPlusDesk.Views
             ImgMap.Visibility = Visibility.Visible;
             _isMap3DActive = false;
             UpdateRustMapsUi();
+
+            ReclaimMap3DProcessMemory();
+        }
+
+        // Opening the 3D view briefly allocates large map textures and asset buffers on the main
+        // process's managed heap (and any served FileStreams awaiting finalization). The Large
+        // Object Heap is not returned to the OS on a normal collection, so after tearing the view
+        // down we force a compacting collection to drop the main process footprint back down.
+        // Deferred to Background priority so it never stalls the close interaction.
+        private void ReclaimMap3DProcessMemory()
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                System.Runtime.GCSettings.LargeObjectHeapCompactionMode = System.Runtime.GCLargeObjectHeapCompactionMode.CompactOnce;
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+                GC.WaitForPendingFinalizers();
+                System.Runtime.GCSettings.LargeObjectHeapCompactionMode = System.Runtime.GCLargeObjectHeapCompactionMode.CompactOnce;
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+            }), System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        private void Map3DWebView_NavigationCompleted(object? sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
+        {
+            if (e.IsSuccess)
+            {
+                SyncLiveMarkersTo3DMap();
+                RefreshEventDock();
+            }
         }
 
         private async void Map3DWebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
@@ -577,17 +614,24 @@ namespace RustPlusDesk.Views
         private async Task<string> PrepareMap3DViewerRuntimeAsync(Map3DLocalBuildResult result)
         {
             string runtimeRoot = Path.Combine(RustPlusDesk.Services.Data.DataManager.AppDir, "Map3DViewer");
-            Directory.CreateDirectory(runtimeRoot);
-            Directory.CreateDirectory(Path.Combine(runtimeRoot, "maps", "current"));
-
-            string? iconsRoot = ResolveIconsSourceRoot();
-            if (iconsRoot != null) CopyDirectoryIfExists(iconsRoot, Path.Combine(runtimeRoot, "Icons"));
-
             string currentDir = Path.Combine(runtimeRoot, "maps", "current");
-            CopyFileIfExists(Path.Combine(result.FolderPath, "map_resolved.json"), Path.Combine(currentDir, "map_resolved.json"));
-            CopyFileIfExists(Path.Combine(result.FolderPath, "map_texture.png"), Path.Combine(currentDir, "map_texture.png"));
-            CopyFileIfExists(Path.Combine(result.FolderPath, "map_buildings.json"), Path.Combine(currentDir, "map_buildings.json"));
-            CopyFileIfExists(Path.Combine(result.FolderPath, "building_blocked.json"), Path.Combine(currentDir, "building_blocked.json"));
+
+            // This is all plain file IO (including the icon set copy), so offload it to a
+            // background thread to avoid blocking the UI on first open; CopyDirectoryIfExists'
+            // incremental skip makes every later open a cheap timestamp scan instead of a full copy.
+            await Task.Run(() =>
+            {
+                Directory.CreateDirectory(runtimeRoot);
+                Directory.CreateDirectory(currentDir);
+
+                string? iconsRoot = ResolveIconsSourceRoot();
+                if (iconsRoot != null) CopyDirectoryIfExists(iconsRoot, Path.Combine(runtimeRoot, "Icons"));
+
+                CopyFileIfExists(Path.Combine(result.FolderPath, "map_resolved.json"), Path.Combine(currentDir, "map_resolved.json"));
+                CopyFileIfExists(Path.Combine(result.FolderPath, "map_texture.png"), Path.Combine(currentDir, "map_texture.png"));
+                CopyFileIfExists(Path.Combine(result.FolderPath, "map_buildings.json"), Path.Combine(currentDir, "map_buildings.json"));
+                CopyFileIfExists(Path.Combine(result.FolderPath, "building_blocked.json"), Path.Combine(currentDir, "building_blocked.json"));
+            }).ConfigureAwait(true);
 
             double imgW = 0, imgH = 0;
             if (ImgMap?.Source is BitmapSource bmp)
@@ -617,26 +661,77 @@ namespace RustPlusDesk.Views
                     string root = Path.GetFullPath(runtimeRoot);
                     if (diskPath.StartsWith(root, StringComparison.OrdinalIgnoreCase) && File.Exists(diskPath))
                     {
-                        byte[] bytes = File.ReadAllBytes(diskPath);
-                        args.Response = CreateMap3DResponse(bytes, GetMap3DContentType(diskPath));
+                        // Stream the file straight to WebView2 instead of buffering it into a managed
+                        // byte[]/MemoryStream. Serving large assets (meshes/textures) as byte arrays
+                        // pushed hundreds of MB onto the Large Object Heap of THIS (main) process,
+                        // which the runtime never returns to the OS after the WebView closes.
+                        var fileStream = new FileStream(diskPath, FileMode.Open, FileAccess.Read, FileShare.Read,
+                            81920, FileOptions.SequentialScan | FileOptions.Asynchronous);
+                        args.Response = CreateMap3DResponse(fileStream, GetMap3DContentType(diskPath), IsCacheableStaticAsset(diskPath));
                         return;
                     }
-                    if (isMapRuntimeFile) return;
+                    if (isMapRuntimeFile)
+                    {
+                        args.Response = CreateMap3D404Response();
+                        return;
+                    }
                 }
 
                 string resourceName = "Map3DViewer/" + relativePath.Replace(Path.DirectorySeparatorChar, '/');
                 byte[]? resourceBytes = ReadEmbeddedResourceBytes(resourceName);
                 if (resourceBytes != null)
+                {
                     args.Response = CreateMap3DResponse(resourceBytes, GetMap3DContentType(resourceName));
+                    return;
+                }
+
+                args.Response = CreateMap3D404Response();
             }
-            catch { }
+            catch
+            {
+                // Let WebView2 surface a normal load failure for unexpected request errors.
+            }
         }
 
-        private CoreWebView2WebResourceResponse CreateMap3DResponse(byte[] bytes, string contentType)
+        private CoreWebView2WebResourceResponse CreateMap3DResponse(byte[] bytes, string contentType, bool cacheable = false)
         {
-            var stream = new MemoryStream(bytes);
+            return CreateMap3DResponse(new MemoryStream(bytes), contentType, cacheable);
+        }
+
+        private CoreWebView2WebResourceResponse CreateMap3DResponse(Stream content, string contentType, bool cacheable = false)
+        {
+            // Large static binary assets never change within a session (and are content-stable
+            // across builds), so let WebView2 cache them in its own process. That stops the main
+            // process from re-serving/re-allocating them on repeated requests. Dynamic per-map
+            // JSON and markup stay no-store so they always reflect the current server/map.
+            string cacheControl = cacheable
+                ? "Cache-Control: private, max-age=86400"
+                : "Cache-Control: no-store, no-cache, must-revalidate, max-age=0\r\nPragma: no-cache\r\nExpires: 0";
             return _map3DWebView!.CoreWebView2.Environment.CreateWebResourceResponse(
-                stream, 200, "OK", $"Content-Type: {contentType}\r\nCache-Control: no-cache");
+                content, 200, "OK", $"Content-Type: {contentType}\r\n{cacheControl}");
+        }
+
+        private static bool IsCacheableStaticAsset(string path)
+        {
+            // Only the heavy, content-stable binary assets (monument meshes, textures, decoder
+            // wasm) are cached. Never cache anything under maps/current — that is per-map data.
+            if (path.Replace('\\', '/').Contains("/maps/current/", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            return Path.GetExtension(path).ToLowerInvariant() switch
+            {
+                ".png" or ".jpg" or ".jpeg" or ".webp" => true,
+                ".obj" or ".mtl" or ".glb" or ".gltf" => true,
+                ".wasm" => true,
+                _ => false
+            };
+        }
+
+        private CoreWebView2WebResourceResponse CreateMap3D404Response()
+        {
+            var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("Not Found"));
+            return _map3DWebView!.CoreWebView2.Environment.CreateWebResourceResponse(
+                stream, 404, "Not Found", "Content-Type: text/plain; charset=utf-8\r\nCache-Control: no-store, no-cache, must-revalidate, max-age=0\r\nPragma: no-cache\r\nExpires: 0");
         }
 
         private static byte[]? ReadEmbeddedResourceBytes(string logicalName)
@@ -789,9 +884,54 @@ namespace RustPlusDesk.Views
                         deathsList.Add(new { name = m.CustomName ?? "Death", x = m.X, y = m.Y, avatar = myAvatarB64, isSelf = true });
                 }
 
+                // Cargo ship markers (Type 5) — forward id, world-coords and heading to the 3D viewer
+                var cargoList = new List<object>();
+                foreach (var m in (_lastDynMarkers ?? new List<RustPlusClientReal.DynMarker>()).Where(m => m.Type == 5))
+                {
+                    cargoList.Add(new
+                    {
+                        id = m.Id,
+                        x = m.X,
+                        y = m.Y,
+                        rotation = m.Rotation   // degrees, Rust convention (0 = north, CW)
+                    });
+                }
+
+                // Travelling vendor markers (Type 6) — direction is derived in 3D from movement between x/y updates
+                var vendorList = new List<object>();
+                foreach (var m in (_lastDynMarkers ?? new List<RustPlusClientReal.DynMarker>()).Where(m => m.Type == 6))
+                {
+                    vendorList.Add(new { id = m.Id, x = m.X, y = m.Y });
+                }
+
+                // Patrol helicopter markers (Type 8) — direction is derived in 3D from movement between x/y updates
+                var patrolHeliList = new List<object>();
+                foreach (var m in (_lastDynMarkers ?? new List<RustPlusClientReal.DynMarker>()).Where(m => m.Type == 8))
+                {
+                    patrolHeliList.Add(new { id = m.Id, x = m.X, y = m.Y });
+                }
+
+                // Chinook helicopter markers (Type 4) — direction is derived in 3D from movement between x/y updates
+                var chinookList = new List<object>();
+                foreach (var m in (_lastDynMarkers ?? new List<RustPlusClientReal.DynMarker>()).Where(m => m.Type == 4))
+                {
+                    chinookList.Add(new { id = m.Id, x = m.X, y = m.Y });
+                }
+
                 var data = new { players = playersList, deaths = deathsList };
                 string json = JsonSerializer.Serialize(data);
-                string script = $"if (window.updateLiveMarkers) window.updateLiveMarkers({json}.players, {json}.deaths);";
+                string cargoJson = JsonSerializer.Serialize(cargoList);
+                string vendorJson = JsonSerializer.Serialize(vendorList);
+                string patrolHeliJson = JsonSerializer.Serialize(patrolHeliList);
+                string chinookJson = JsonSerializer.Serialize(chinookList);
+
+                string script = $$"""
+                    if (window.updateLiveMarkers) window.updateLiveMarkers({{json}}.players, {{json}}.deaths);
+                    if (window.updateCargoMarkers) window.updateCargoMarkers({{cargoJson}});
+                    if (window.updateVendorMarkers) window.updateVendorMarkers({{vendorJson}});
+                    if (window.updatePatrolHeliMarkers) window.updatePatrolHeliMarkers({{patrolHeliJson}});
+                    if (window.updateChinookMarkers) window.updateChinookMarkers({{chinookJson}});
+                    """;
                 await _map3DWebView.CoreWebView2.ExecuteScriptAsync(script);
             }
             catch { }
@@ -817,9 +957,21 @@ namespace RustPlusDesk.Views
             {
                 string relative = Path.GetRelativePath(sourceDir, sourceFile);
                 string target = Path.Combine(targetDir, relative);
+                if (!RuntimeFileNeedsCopy(sourceFile, target)) continue;
                 Directory.CreateDirectory(Path.GetDirectoryName(target)!);
                 File.Copy(sourceFile, target, overwrite: true);
             }
+        }
+
+        // File.Copy preserves the source last-write time, so once a file has been copied its
+        // target matches on both length and timestamp and is skipped on later opens.
+        private static bool RuntimeFileNeedsCopy(string sourceFile, string targetFile)
+        {
+            var target = new FileInfo(targetFile);
+            if (!target.Exists) return true;
+            var source = new FileInfo(sourceFile);
+            return source.Length != target.Length
+                || source.LastWriteTimeUtc != target.LastWriteTimeUtc;
         }
 
         private async void BtnRefetchRustMaps_Click(object sender, RoutedEventArgs e)

@@ -164,7 +164,7 @@ public partial class MainWindow
             ScaleCenterY = 14.0
         };
 
-        Panel.SetZIndex(host, 905);
+        Panel.SetZIndex(host, 10000);
         ApplyCurrentOverlayScale(host);
         return host;
     }
@@ -249,7 +249,7 @@ public partial class MainWindow
                 ScaleCenterX = 14.0,
                 ScaleCenterY = 14.0,
             };
-            Panel.SetZIndex(host, 905);
+            Panel.SetZIndex(host, 10000);
             ToolTipService.SetToolTip(host, name);
             ApplyCurrentOverlayScale(host);
             return host;
@@ -327,7 +327,7 @@ public partial class MainWindow
                 ScaleCenterX = 14.0,
                 ScaleCenterY = 14.0,
             };
-            Panel.SetZIndex(host, 905);
+            Panel.SetZIndex(host, 10000);
             ToolTipService.SetToolTip(host, name);
             ApplyCurrentOverlayScale(host);
 
@@ -353,7 +353,7 @@ public partial class MainWindow
             Margin = new Thickness(0, 0, 4, 0),
         };
         ToolTipService.SetToolTip(dot, tooltip);
-        Panel.SetZIndex(dot, 905);
+        Panel.SetZIndex(dot, 10000);
         return dot;
     }
 
@@ -374,7 +374,7 @@ public partial class MainWindow
                 if (idx >= 0) { Overlay.Children.RemoveAt(idx); Overlay.Children.Insert(idx, newEl); }
                 else Overlay.Children.Add(newEl);
                 _dynEls[key] = newEl; el = newEl;
-                Panel.SetZIndex(newEl, 905);
+                Panel.SetZIndex(newEl, 10000);
             }
             else
             {
@@ -616,14 +616,14 @@ public partial class MainWindow
 
         root.Children.Add(new Ellipse
         {
-            Width = Circle + 6,
-            Height = Circle + 6,
+            Width = Circle + 4,
+            Height = Circle + 4,
             Stroke = Brushes.Black,
             StrokeThickness = 2,
             Fill = Brushes.Transparent,
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
-            Margin = new Thickness((PinW - (Circle + 6)) / 2.0, CircleTop - 3, 0, 0)
+            Margin = new Thickness((PinW - (Circle + 4)) / 2.0, CircleTop - 2, 0, 0)
         });
 
         FrameworkElement avatarEl;
@@ -672,19 +672,31 @@ public partial class MainWindow
     private void RedrawDeathPins()
     {
         ClearAllDeathPins();
-        
-        var hasMarkers = _vm?.Selected?.DeathMarkers?.Count > 0;
+
+        if (_vm?.Selected == null)
+        {
+            if (WipeDeathMarkersOverlay != null) WipeDeathMarkersOverlay.Visibility = Visibility.Collapsed;
+            SyncLiveMarkersTo3DMap();
+            return;
+        }
+
+        var filteredMarkers = _vm.Selected.DeathMarkers
+            .Where(m => _isShowingDeepSeaMap ? (m.X < -1000) : (m.X >= -1000))
+            .ToList();
+
+        var hasMarkers = filteredMarkers.Count > 0;
         if (WipeDeathMarkersOverlay != null)
         {
             WipeDeathMarkersOverlay.Visibility = _showDeathMarkers && hasMarkers ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        if (!_showDeathMarkers || _vm?.Selected == null) 
+        if (!_showDeathMarkers)
         {
             SyncLiveMarkersTo3DMap();
             return;
         }
-        var groups = _vm.Selected.DeathMarkers.GroupBy(m => m.SteamId);
+
+        var groups = filteredMarkers.GroupBy(m => m.SteamId);
         foreach (var group in groups)
         {
             var sorted = group.OrderBy(m => m.TimeOfDeath).ToList();
@@ -700,7 +712,7 @@ public partial class MainWindow
                 var el = BuildDeathPin(m.Id, m.SteamId, label);
                 _deathPins[m.Id] = el;
                 Overlay.Children.Add(el);
-                Panel.SetZIndex(el, 805);
+                Panel.SetZIndex(el, 9980);
                 ApplyCurrentOverlayScale(el);
                 var cx = px.X - (PinW / 2.0);
                 var cy = px.Y - PinH;
@@ -727,7 +739,7 @@ public partial class MainWindow
                 };
                 if (prompt.ShowDialog() == true)
                 {
-                    marker.CustomName = string.IsNullOrWhiteSpace(prompt.InputText) ? null : prompt.InputText;
+                    marker.CustomName = string.IsNullOrWhiteSpace(prompt.InputText) ? string.Empty : prompt.InputText;
                     _vm.Save();
                     RedrawDeathPins();
                 }
@@ -953,7 +965,7 @@ public partial class MainWindow
             if (!TrackingService.HideConsole)
             {
                 TrackingService.HideConsole = true;
-                if (TxtLog != null) TxtLog.Visibility = Visibility.Collapsed;
+                ApplySettings();
             }
         }
 
@@ -1214,7 +1226,7 @@ public partial class MainWindow
             }
             catch { }
 
-            string fgUri = isLeader 
+            string fgUri = isLeader
                 ? "pack://application:,,,/Assets/icons/map-markers/assets_markers_iconmappinfgleader.png"
                 : "pack://application:,,,/Assets/icons/map-markers/assets_markers_iconmappinfg.png";
             try
@@ -1249,7 +1261,7 @@ public partial class MainWindow
             }
             catch { }
 
-            string fgUri = isLeader 
+            string fgUri = isLeader
                 ? "pack://application:,,,/Assets/icons/map-markers/assets_markers_iconmapforegroundleader.png"
                 : "pack://application:,,,/Assets/icons/map-markers/assets_markers_iconmapforeground.png";
             try
@@ -1376,7 +1388,7 @@ public partial class MainWindow
                 var key = $"leader_{i}";
                 _teamNotesEls[key] = el;
                 Overlay.Children.Add(el);
-                Panel.SetZIndex(el, 908);
+                Panel.SetZIndex(el, 9991);
 
                 var p = WorldToImagePx(note.X, note.Y);
                 Canvas.SetLeft(el, p.X - 100.0);
@@ -1396,7 +1408,7 @@ public partial class MainWindow
                 var key = $"member_{i}";
                 _teamNotesEls[key] = el;
                 Overlay.Children.Add(el);
-                Panel.SetZIndex(el, 907);
+                Panel.SetZIndex(el, 9990);
 
                 var p = WorldToImagePx(note.X, note.Y);
                 Canvas.SetLeft(el, p.X - 100.0);

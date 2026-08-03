@@ -236,7 +236,7 @@ namespace RustPlusDesk.Views
                 var brush = isTeam ? Brushes.LimeGreen : Brushes.OrangeRed;
 
                 // Anzeige-Text: nur Name, kein Fallback für Umwelt
-                var text = string.IsNullOrWhiteSpace(e.Label) ? "player" : e.Label;
+                var text = string.IsNullOrWhiteSpace(e.Label) ? (RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiPlayerLabel") ?? "player") : e.Label;
                 if (!PlayerTypeIds.Contains(e.Type) && string.IsNullOrWhiteSpace(e.Label))
                     continue; // keine Umwelt beschriften
 
@@ -397,9 +397,11 @@ namespace RustPlusDesk.Views
                 Img.Source = bi;
 
                 _frameCount++;
+                string sizeFormat = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiCameraTitleWithSizeFormat") ?? "{0} ({1}×{2}, Frames: {3})";
+                string snapshotFormat = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiCameraTitleSnapshotFormat") ?? "{0} (snapshot, Frames: {1})";
                 TxtTitle.Text = (frame.Width > 0 && frame.Height > 0)
-                    ? $"{_cameraId} ({frame.Width}×{frame.Height}, Frames: {_frameCount})"
-                    : $"{_cameraId} (snapshot, Frames: {_frameCount})";
+                    ? string.Format(sizeFormat, _cameraId, frame.Width, frame.Height, _frameCount)
+                    : string.Format(snapshotFormat, _cameraId, _frameCount);
 
                 // Wenn du dennoch eine einfache Fallback-Liste willst:
                 if ((_lastEnts == null || _lastEnts.Count == 0) && frame.Entities != null && frame.Entities.Count > 0)

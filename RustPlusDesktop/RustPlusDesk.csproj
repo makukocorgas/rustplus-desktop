@@ -19,12 +19,12 @@
 
 	<PropertyGroup>
 		<!-- Produkt-/Paketversion (für Vergleich & Anzeige) -->
-		<Version>8.6.0</Version>
+		<Version>8.6.1</Version>
 		<Title>Rust+ Desk</Title>
 		<Authors>makukocorgas</Authors>
-		<AssemblyVersion>8.6.0</AssemblyVersion>
-		<FileVersion>8.6.0</FileVersion>
-		<InformationalVersion>8.6.0</InformationalVersion>
+		<AssemblyVersion>8.6.1</AssemblyVersion>
+		<FileVersion>8.6.1</FileVersion>
+		<InformationalVersion>8.6.1</InformationalVersion>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 		
 		<!-- (optional, hübsch im Datei-Eigenschaften-Dialog) -->
@@ -153,6 +153,8 @@
 	  <None Remove="Assets\icons\powerstation.png" />
 	  <None Remove="Assets\icons\radtown.png" />
 	  <None Remove="Assets\icons\rust-c4.mp3" />
+	  <None Remove="Assets\icons\satellite.png" />
+	  <None Remove="Assets\icons\satellitecrash.png" />
 	  <None Remove="Assets\icons\satellitedish.png" />
 	  <None Remove="Assets\icons\save.png" />
 	  <None Remove="Assets\icons\sewerbranch.png" />
@@ -237,6 +239,8 @@
 	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 	  </Resource>
 	  <Resource Include="Assets\icons\recycler.png" />
+	  <Resource Include="Assets\icons\satellite.png" />
+	  <Resource Include="Assets\icons\satellitecrash.png" />
 	  <Resource Include="Assets\icons\smartalarm.png" />
 	  <Resource Include="Assets\icons\smartswitch.png" />
 	  <Resource Include="Assets\icons\automation.png" />
@@ -263,7 +267,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3485.44" />
-    <PackageReference Include="RustPlusApi" Version="1.3.0" />
+    <PackageReference Include="RustPlusApi" Version="2.0.0-beta.6" />
     <PackageReference Include="supabase-csharp" Version="0.16.2" />
     <PackageReference Include="WPF-UI" Version="3.0.5" />
   </ItemGroup>
@@ -533,7 +537,7 @@
 		<CopyRetryDelayMilliseconds>250</CopyRetryDelayMilliseconds>
 	</PropertyGroup>
 
-	<Target Name="ObfuscateSecretsTarget" BeforeTargets="BeforeBuild">
+	<Target Name="ObfuscateSecretsTarget" BeforeTargets="CoreCompile">
 		<Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\obfuscate_secrets.ps1&quot; &quot;$(MSBuildProjectDirectory)&quot;" />
 		<ItemGroup>
 			<Compile Remove="$(MSBuildProjectDirectory)\Services\Data\ObfuscatedSecrets.cs" />

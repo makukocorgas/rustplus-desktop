@@ -4658,4 +4658,118 @@
   <data name="CraftCalculatorPlanFormat" xml:space="preserve">
     <value>制作计划：{0} ×{1}</value>
   </data>
+  <data name="UiSells" xml:space="preserve">
+    <value>Sells</value>
+  </data>
+  <data name="UiBuys" xml:space="preserve">
+    <value>Buys</value>
+  </data>
+  <data name="UiCategory" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="UiHideMonuments" xml:space="preserve">
+    <value>Hide Monuments</value>
+  </data>
+  <data name="UiCategoryBadge" xml:space="preserve">
+    <value>CATEGORY</value>
+  </data>
+  <data name="UiHideMonumentShopsTooltip" xml:space="preserve">
+    <value>Hide shops inside Outpost, Bandit Town, Fishing Villages &amp; Monuments</value>
+  </data>
+  <data name="CodeUiAllCategories" xml:space="preserve">
+    <value>All Categories</value>
+  </data>
+  <data name="CodeUiAllResources" xml:space="preserve">
+    <value>All Resources</value>
+  </data>
+  <data name="CodeUiNoShopsLoadedYet" xml:space="preserve">
+    <value>No shops loaded yet...</value>
+  </data>
+  <data name="CodeUiNoMatchingShopsFound" xml:space="preserve">
+    <value>No matching shops found.</value>
+  </data>
+  <data name="CodeUiNoAlertsConfiguredYet" xml:space="preserve">
+    <value>No alerts configured yet.</value>
+  </data>
+  <data name="CodeUiSendToTeamChat" xml:space="preserve">
+    <value>Send to team chat</value>
+  </data>
+  <data name="CodeUiPlaySoundAlert" xml:space="preserve">
+    <value>Play sound alert</value>
+  </data>
+  <data name="CodeUiRemoveAlert" xml:space="preserve">
+    <value>Remove Alert</value>
+  </data>
+  <data name="CodeUiNoShopsMatch" xml:space="preserve">
+    <value>No shops match &quot;{0}&quot;</value>
+  </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>帮派聊天</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>卫星坠毁</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>卫星正在坠毁！</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>卫星坠毁进行中 — 已持续 {0}</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>帮派</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>未找到帮派</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>在游戏中加入一个帮派以在此查看其成员</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>成员</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>尚未设置每日消息。</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>由 {0} 设置</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>由 {0} 于 {1} 设置</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>帮派信息</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>分数</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>成员</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>创建时间</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>创始人</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>追踪帮派成员及其状态、角色和备注。</value>
+  </data>
+  <data name="AlertPlayerAfk" xml:space="preserve">
+    <value>{0} 挂机 (AFK): {1}:00</value>
+  </data>
+  <data name="AlertPlayerAfkReturn" xml:space="preserve">
+    <value>{0} 已结束挂机。挂机时长 {1}</value>
+  </data>
+  <data name="AlertPlayerAfkReturnName" xml:space="preserve">
+    <value>玩家结束挂机</value>
+  </data>
+  <data name="AlertPlayerAfkReturnDesc" xml:space="preserve">
+    <value>当被追踪的队友结束挂机（重新开始活动）时发送。</value>
+  </data>
+  <data name="AlertPlayerAfkReturnVars" xml:space="preserve">
+    <value>{0}: 玩家名字, {1}: 挂机时长 (小时:分钟)</value>
+  </data>
+  <data name="UiTextAfkThreshold" xml:space="preserve">
+    <value>AFK 阈值</value>
+  </data>
 </root>

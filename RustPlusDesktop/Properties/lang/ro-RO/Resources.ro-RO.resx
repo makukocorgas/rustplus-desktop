@@ -3852,4 +3852,100 @@ Puteți găsi mai multe informații pe site-ul oficial al serverului:
   <data name="CraftCalculatorPlanFormat" xml:space="preserve">
     <value>Plan de crafting: {0} ×{1}</value>
   </data>
+  <data name="UiSells" xml:space="preserve">
+    <value>Sells</value>
+  </data>
+  <data name="UiBuys" xml:space="preserve">
+    <value>Buys</value>
+  </data>
+  <data name="UiCategory" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="UiHideMonuments" xml:space="preserve">
+    <value>Hide Monuments</value>
+  </data>
+  <data name="UiCategoryBadge" xml:space="preserve">
+    <value>CATEGORY</value>
+  </data>
+  <data name="UiHideMonumentShopsTooltip" xml:space="preserve">
+    <value>Hide shops inside Outpost, Bandit Town, Fishing Villages &amp; Monuments</value>
+  </data>
+  <data name="CodeUiAllCategories" xml:space="preserve">
+    <value>All Categories</value>
+  </data>
+  <data name="CodeUiAllResources" xml:space="preserve">
+    <value>All Resources</value>
+  </data>
+  <data name="CodeUiNoShopsLoadedYet" xml:space="preserve">
+    <value>No shops loaded yet...</value>
+  </data>
+  <data name="CodeUiNoMatchingShopsFound" xml:space="preserve">
+    <value>No matching shops found.</value>
+  </data>
+  <data name="CodeUiNoAlertsConfiguredYet" xml:space="preserve">
+    <value>No alerts configured yet.</value>
+  </data>
+  <data name="CodeUiSendToTeamChat" xml:space="preserve">
+    <value>Send to team chat</value>
+  </data>
+  <data name="CodeUiPlaySoundAlert" xml:space="preserve">
+    <value>Play sound alert</value>
+  </data>
+  <data name="CodeUiRemoveAlert" xml:space="preserve">
+    <value>Remove Alert</value>
+  </data>
+  <data name="CodeUiNoShopsMatch" xml:space="preserve">
+    <value>No shops match &quot;{0}&quot;</value>
+  </data>
+  <data name="ClanChatTitle" xml:space="preserve">
+    <value>CHAT CLAN</value>
+  </data>
+  <data name="SatelliteCrash" xml:space="preserve">
+    <value>Prăbușire satelit</value>
+  </data>
+  <data name="AlertSatelliteCrash" xml:space="preserve">
+    <value>Un satelit se prăbușește!</value>
+  </data>
+  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
+    <value>Prăbușire satelit activă – de {0}</value>
+  </data>
+  <data name="ClanTab" xml:space="preserve">
+    <value>Clan</value>
+  </data>
+  <data name="NoClanFound" xml:space="preserve">
+    <value>Niciun clan găsit</value>
+  </data>
+  <data name="JoinClanToSeeMembers" xml:space="preserve">
+    <value>Alătură-te unui clan în joc pentru a vedea membrii aici</value>
+  </data>
+  <data name="ClanRoleUnknown" xml:space="preserve">
+    <value>Membru</value>
+  </data>
+  <data name="ClanNoMotd" xml:space="preserve">
+    <value>Niciun mesaj al zilei setat.</value>
+  </data>
+  <data name="ClanMotdSetBy" xml:space="preserve">
+    <value>Setat de {0}</value>
+  </data>
+  <data name="ClanMotdSetByOn" xml:space="preserve">
+    <value>Setat de {0} pe {1}</value>
+  </data>
+  <data name="ClanInfoTitle" xml:space="preserve">
+    <value>Informații clan</value>
+  </data>
+  <data name="ClanScoreLabel" xml:space="preserve">
+    <value>Scor</value>
+  </data>
+  <data name="ClanMembersLabel" xml:space="preserve">
+    <value>Membri</value>
+  </data>
+  <data name="ClanCreatedLabel" xml:space="preserve">
+    <value>Creat</value>
+  </data>
+  <data name="ClanCreatorLabel" xml:space="preserve">
+    <value>Fondator</value>
+  </data>
+  <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
+    <value>Urmărește membrii clanului, starea, rolurile și notele lor.</value>
+  </data>
 </root>

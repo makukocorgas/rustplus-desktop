@@ -42,7 +42,8 @@ namespace RustPlusDesk.Views.Windows
 
         private void BtnClearHistory_Click(object sender, RoutedEventArgs e)
         {
-            var result = MessageBox.Show("Are you sure you want to clear the offline death log?", "Confirm Clear", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var result = MessageBox.Show(RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiAreYouSureYouWantToClearTheOfflineDeathLog") ?? "Are you sure you want to clear the offline death log?",
+                RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiConfirmClear") ?? "Confirm Clear", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
                 TrackingService.ClearOfflineDeathHistory();
