@@ -3871,6 +3871,11 @@ rp.connect();
             public bool Dead { get; set; }   // neu
             public double? X { get; set; }   // neu
             public double? Y { get; set; }   // neu
+
+            // Unix seconds from Rust+ team info. DeathTime is authoritative and
+            // identical across teammates, so the death log dedupes on it.
+            public long? DeathTime { get; set; }
+            public long? SpawnTime { get; set; }
         }
 
         public sealed class MapNote
@@ -3996,6 +4001,12 @@ rp.connect();
                 double? x = AsDouble(P(m, "X") ?? P(pos, "X"));
                 double? y = AsDouble(P(m, "Y") ?? P(pos, "Y"));
 
+                // Rust+ reports these as unix seconds; 0 means "not set".
+                double? deathRaw = AsDouble(P(m, "DeathTime") ?? P(m, "deathTime"));
+                long? deathTime = deathRaw.HasValue && deathRaw.Value > 0 ? (long)deathRaw.Value : null;
+                double? spawnRaw = AsDouble(P(m, "SpawnTime") ?? P(m, "spawnTime"));
+                long? spawnTime = spawnRaw.HasValue && spawnRaw.Value > 0 ? (long)spawnRaw.Value : null;
+
                 list.Members.Add(new TeamInfo.Member
                 {
                     SteamId = sid,
@@ -4003,7 +4014,9 @@ rp.connect();
                     Online = online,
                     Dead = dead,
                     X = x,
-                    Y = y
+                    Y = y,
+                    DeathTime = deathTime,
+                    SpawnTime = spawnTime
                 });
             }
         }
