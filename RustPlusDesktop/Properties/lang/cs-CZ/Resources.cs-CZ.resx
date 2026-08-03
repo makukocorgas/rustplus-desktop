@@ -3801,4 +3801,55 @@ Více informací naleznete na oficiálních stránkách serveru:
   <data name="ResumeUpdate" xml:space="preserve">
     <value>Pokračovat</value>
   </data>
+  <data name="CraftCalculatorTitle" xml:space="preserve">
+    <value>Kalkulačka craftingu</value>
+  </data>
+  <data name="CraftCalculatorRailHelpText" xml:space="preserve">
+    <value>Zobrazte kompletní stromy craftingu a součty základních surovin.</value>
+  </data>
+  <data name="CraftCalculatorSearchPlaceholder" xml:space="preserve">
+    <value>Hledat vyrobitelné předměty…</value>
+  </data>
+  <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
+    <value>Žádné vyrobitelné předměty neodpovídají hledání.</value>
+  </data>
+  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
+    <value>Vyberte předmět vlevo a zobrazte jeho kompletní strom craftingu.</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
+    <value>⚠ Čísla zatím neověřená v živé hře</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedBadge" xml:space="preserve">
+    <value>neověřeno</value>
+  </data>
+  <data name="CraftCalculatorBaseResourcesNeeded" xml:space="preserve">
+    <value>Potřebné základní suroviny</value>
+  </data>
+  <data name="CraftCalculatorCopySummary" xml:space="preserve">
+    <value>Kopírovat souhrn</value>
+  </data>
+  <data name="CraftCalculatorLoading" xml:space="preserve">
+    <value>Načítání dat craftingu…</value>
+  </data>
+  <data name="CraftCalculatorNoItemsAvailable" xml:space="preserve">
+    <value>Zatím nejsou k dispozici žádné vyrobitelné předměty.</value>
+  </data>
+  <data name="CraftCalculatorUnavailableFormat" xml:space="preserve">
+    <value>Kalkulačka craftingu není k dispozici: {0}</value>
+  </data>
+  <data name="CraftCalculatorWorkbenchFormat" xml:space="preserve">
+    <value>Pracovní stůl {0}</value>
+  </data>
+  <data name="CraftCalculatorNoWorkbench" xml:space="preserve">
+    <value>Bez pracovního stolu</value>
+  </data>
+  <data name="CraftCalculatorSummaryUnverifiedNote" xml:space="preserve">
+    <value>⚠ Tato čísla zatím nebyla ověřena v živé hře.</value>
+  </data>
+  <data name="CraftCalculatorCopySummaryErrorTitle" xml:space="preserve">
+    <value>Souhrn se nepodařilo zkopírovat</value>
+  </data>
+  <data name="CraftCalculatorPlanFormat" xml:space="preserve">
+    <value>Plán craftingu: {0} ×{1}</value>
+  </data>
 </root>

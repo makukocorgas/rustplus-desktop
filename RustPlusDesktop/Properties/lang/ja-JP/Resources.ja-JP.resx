@@ -3801,4 +3801,55 @@
   <data name="ResumeUpdate" xml:space="preserve">
     <value>再開</value>
   </data>
+  <data name="CraftCalculatorTitle" xml:space="preserve">
+    <value>クラフト計算機</value>
+  </data>
+  <data name="CraftCalculatorRailHelpText" xml:space="preserve">
+    <value>完全なクラフトツリーと基本資源の合計を確認できます。</value>
+  </data>
+  <data name="CraftCalculatorSearchPlaceholder" xml:space="preserve">
+    <value>作成可能なアイテムを検索…</value>
+  </data>
+  <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
+    <value>検索条件に一致する作成可能なアイテムがありません。</value>
+  </data>
+  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
+    <value>左のアイテムを選択すると、完全なクラフトツリーが表示されます。</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
+    <value>⚠ 実際のゲームではまだ確認されていない数値です</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedBadge" xml:space="preserve">
+    <value>未確認</value>
+  </data>
+  <data name="CraftCalculatorBaseResourcesNeeded" xml:space="preserve">
+    <value>必要な基本資源</value>
+  </data>
+  <data name="CraftCalculatorCopySummary" xml:space="preserve">
+    <value>概要をコピー</value>
+  </data>
+  <data name="CraftCalculatorLoading" xml:space="preserve">
+    <value>クラフトデータを読み込み中…</value>
+  </data>
+  <data name="CraftCalculatorNoItemsAvailable" xml:space="preserve">
+    <value>作成可能なアイテムはまだありません。</value>
+  </data>
+  <data name="CraftCalculatorUnavailableFormat" xml:space="preserve">
+    <value>クラフト計算機は利用できません: {0}</value>
+  </data>
+  <data name="CraftCalculatorWorkbenchFormat" xml:space="preserve">
+    <value>ワークベンチ {0}</value>
+  </data>
+  <data name="CraftCalculatorNoWorkbench" xml:space="preserve">
+    <value>ワークベンチ不要</value>
+  </data>
+  <data name="CraftCalculatorSummaryUnverifiedNote" xml:space="preserve">
+    <value>⚠ これらの数値は実際のゲームではまだ確認されていません。</value>
+  </data>
+  <data name="CraftCalculatorCopySummaryErrorTitle" xml:space="preserve">
+    <value>概要をコピーできませんでした</value>
+  </data>
+  <data name="CraftCalculatorPlanFormat" xml:space="preserve">
+    <value>クラフト計画: {0} ×{1}</value>
+  </data>
 </root>

@@ -3846,4 +3846,55 @@
   <data name="ResumeUpdate" xml:space="preserve">
     <value>קורות חיים</value>
   </data>
+  <data name="CraftCalculatorTitle" xml:space="preserve">
+    <value>מחשבון יצירה</value>
+  </data>
+  <data name="CraftCalculatorRailHelpText" xml:space="preserve">
+    <value>צפה בעצי יצירה מלאים ובסיכומי משאבי בסיס.</value>
+  </data>
+  <data name="CraftCalculatorSearchPlaceholder" xml:space="preserve">
+    <value>חיפוש פריטים ניתנים ליצירה…</value>
+  </data>
+  <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
+    <value>אין פריטים התואמים את החיפוש שלך.</value>
+  </data>
+  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
+    <value>בחר פריט משמאל כדי לראות את עץ היצירה המלא שלו.</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
+    <value>⚠ המספרים טרם אומתו במשחק החי</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedBadge" xml:space="preserve">
+    <value>לא מאומת</value>
+  </data>
+  <data name="CraftCalculatorBaseResourcesNeeded" xml:space="preserve">
+    <value>משאבי בסיס נדרשים</value>
+  </data>
+  <data name="CraftCalculatorCopySummary" xml:space="preserve">
+    <value>העתק סיכום</value>
+  </data>
+  <data name="CraftCalculatorLoading" xml:space="preserve">
+    <value>טוען נתוני יצירה…</value>
+  </data>
+  <data name="CraftCalculatorNoItemsAvailable" xml:space="preserve">
+    <value>אין עדיין פריטים ניתנים ליצירה זמינים.</value>
+  </data>
+  <data name="CraftCalculatorUnavailableFormat" xml:space="preserve">
+    <value>מחשבון היצירה אינו זמין: {0}</value>
+  </data>
+  <data name="CraftCalculatorWorkbenchFormat" xml:space="preserve">
+    <value>שולחן עבודה {0}</value>
+  </data>
+  <data name="CraftCalculatorNoWorkbench" xml:space="preserve">
+    <value>ללא שולחן עבודה</value>
+  </data>
+  <data name="CraftCalculatorSummaryUnverifiedNote" xml:space="preserve">
+    <value>⚠ מספרים אלו טרם אומתו במשחק החי.</value>
+  </data>
+  <data name="CraftCalculatorCopySummaryErrorTitle" xml:space="preserve">
+    <value>לא ניתן היה להעתיק את הסיכום</value>
+  </data>
+  <data name="CraftCalculatorPlanFormat" xml:space="preserve">
+    <value>תוכנית יצירה: {0} ×{1}</value>
+  </data>
 </root>

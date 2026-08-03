@@ -1,0 +1,206 @@
+<UserControl x:Class="RustPlusDesk.Views.CraftCalculatorView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:conv="clr-namespace:RustPlusDesk.Converters"
+    xmlns:vm="clr-namespace:RustPlusDesk.ViewModels"
+    Loaded="CraftCalculatorView_Loaded"
+    UseLayoutRounding="True"
+    KeyboardNavigation.TabNavigation="Continue">
+    <UserControl.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+        <conv:BoolToVisibilityConverter x:Key="InverseBoolToVis" Invert="True" />
+        <Style x:Key="CraftPanel" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SurfaceAlt}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="10" />
+        </Style>
+        <Style x:Key="CraftItemButton" TargetType="Button">
+            <Setter Property="Background" Value="#0FFFFFFF" />
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="8" />
+            <Setter Property="Margin" Value="0,0,0,6" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#1AFFFFFF" />
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Accent}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="CraftIconButton" TargetType="Button">
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="#171A20" />
+            <Setter Property="BorderBrush" Value="#36FFFFFF" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSubtle}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Accent}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!--  Header  -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,10">
+            <ui:Button DockPanel.Dock="Right" Content="{DynamicResource Close}" Icon="{ui:SymbolIcon Symbol=Dismiss24}" Click="Close_Click" />
+            <StackPanel Orientation="Horizontal">
+                <ui:SymbolIcon Symbol="Wrench24" FontSize="20" Margin="0,0,8,0" VerticalAlignment="Center" />
+                <TextBlock Text="{DynamicResource CraftCalculatorTitle}" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding DataCaption}" Margin="12,0,0,0" VerticalAlignment="Center" Opacity="0.6" FontSize="11" />
+            </StackPanel>
+        </DockPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="320" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!--  Left: item catalogue  -->
+            <Border Grid.Column="0" Style="{StaticResource CraftPanel}" Padding="10">
+                <DockPanel>
+                    <ui:TextBox DockPanel.Dock="Top" Margin="0,0,0,10" Padding="8" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             PlaceholderText="{DynamicResource CraftCalculatorSearchPlaceholder}" />
+                    <TextBlock DockPanel.Dock="Bottom" Text="{DynamicResource CraftCalculatorNoSearchResults}" Opacity="0.6" Margin="0,10,0,0"
+                               TextWrapping="Wrap" Visibility="{Binding IsCatalogueEmpty, Converter={StaticResource BoolToVis}}" />
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding FilteredItems}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:CraftItemCardViewModel}">
+                                    <Button Style="{StaticResource CraftItemButton}" Click="SelectItem_Click">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="{Binding Icon}" Width="28" Height="28" Margin="0,0,10,0" />
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding WorkbenchText}" FontSize="11" Opacity="0.6" />
+                                                    <StackPanel Orientation="Horizontal" Visibility="{Binding IsUnverified, Converter={StaticResource BoolToVis}}">
+                                                        <TextBlock Text=" · " FontSize="11" Foreground="#E0A030" />
+                                                        <TextBlock Text="{DynamicResource CraftCalculatorUnverifiedBadge}" FontSize="11" Foreground="#E0A030" />
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+
+            <!--  Right: recipe tree + totals  -->
+            <Border Grid.Column="2" Style="{StaticResource CraftPanel}" Padding="14">
+                <Grid>
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.6"
+                                Visibility="{Binding HasSelection, Converter={StaticResource InverseBoolToVis}}">
+                        <ui:SymbolIcon Symbol="Wrench24" FontSize="32" HorizontalAlignment="Center" Margin="0,0,0,8" />
+                        <TextBlock Text="{DynamicResource CraftCalculatorEmptySelectionHint}" TextWrapping="Wrap" TextAlignment="Center" />
+                    </StackPanel>
+
+                    <DockPanel Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}">
+                        <!--  Selected item + quantity stepper  -->
+                        <Grid DockPanel.Dock="Top" Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{Binding SelectedItem.Icon}" Width="32" Height="32" Margin="0,0,10,0" />
+                                <StackPanel>
+                                    <TextBlock Text="{Binding SelectedItem.DisplayName}" FontSize="16" FontWeight="SemiBold" />
+                                    <TextBlock Text="{DynamicResource CraftCalculatorUnverifiedWarning}" FontSize="11" Foreground="#E0A030"
+                                               Visibility="{Binding SelectedItemUnverified, Converter={StaticResource BoolToVis}}" />
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button Style="{StaticResource CraftIconButton}" Content="−" Click="Decrement_Click" />
+                                <TextBox Width="60" Margin="8,0" Padding="6" TextAlignment="Center"
+                                         Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button Style="{StaticResource CraftIconButton}" Content="+" Click="Increment_Click" />
+                                <ui:Button Margin="12,0,0,0" Content="{DynamicResource CraftCalculatorCopySummary}" Click="CopySummary_Click" />
+                            </StackPanel>
+                        </Grid>
+
+                        <!--  Base resource totals  -->
+                        <Border DockPanel.Dock="Bottom" Style="{StaticResource CraftPanel}" Padding="10" Margin="0,12,0,0" MaxHeight="180">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Text="{DynamicResource CraftCalculatorBaseResourcesNeeded}" FontWeight="SemiBold" Margin="0,0,0,8" />
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <ItemsControl ItemsSource="{Binding BaseResourceTotals}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type vm:CraftBaseResourceRowViewModel}">
+                                                <Border Background="#14FFFFFF" CornerRadius="6" Padding="8,5" Margin="0,0,8,8">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Image Source="{Binding Icon}" Width="20" Height="20" Margin="0,0,6,0" />
+                                                        <TextBlock Text="{Binding DisplayName}" Margin="0,0,6,0" />
+                                                        <TextBlock Text="{Binding AmountText}" FontWeight="SemiBold" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </DockPanel>
+                        </Border>
+
+                        <!--  Recursive ingredient tree, flattened with indentation  -->
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding TreeRows}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:CraftTreeRowViewModel}">
+                                        <StackPanel Orientation="Horizontal" Margin="0,3">
+                                            <Border Width="{Binding IndentWidth}" />
+                                            <Image Source="{Binding Icon}" Width="22" Height="22" Margin="0,0,8,0" />
+                                            <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding QuantityText}" Margin="8,0,0,0" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding WorkbenchText}" Margin="10,0,0,0" Opacity="0.5" FontSize="11" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </DockPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

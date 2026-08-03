@@ -2599,10 +2599,12 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         if (e.Source != MainTabs) return;
 
         bool raidSelected = MainTabs.SelectedItem == RaidCalculatorTab;
+        bool craftSelected = MainTabs.SelectedItem == CraftCalculatorTab;
         bool recyclerSelected = MainTabs.SelectedItem == RecyclerCalculatorTab;
         RaidCalculatorPanel.Visibility = raidSelected ? Visibility.Visible : Visibility.Collapsed;
+        CraftCalculatorPanel.Visibility = craftSelected ? Visibility.Visible : Visibility.Collapsed;
         ServerContextPanel.Visibility = recyclerSelected ? Visibility.Collapsed : Visibility.Visible;
-        if (!raidSelected && !recyclerSelected)
+        if (!raidSelected && !craftSelected && !recyclerSelected)
             _lastWorkspaceTabIndex = MainTabs.SelectedIndex;
 
         if (MainTabs.SelectedItem == NotificationsTab)
@@ -2612,6 +2614,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     }
 
     private void RaidCalculator_CloseRequested(object sender, RoutedEventArgs e) => ReturnToLastWorkspace();
+
+    private void CraftCalculator_CloseRequested(object sender, RoutedEventArgs e) => ReturnToLastWorkspace();
 
     private void ReturnToLastWorkspace() =>
         MainTabs.SelectedIndex = Math.Clamp(_lastWorkspaceTabIndex, 0, MainTabs.Items.Count - 1);

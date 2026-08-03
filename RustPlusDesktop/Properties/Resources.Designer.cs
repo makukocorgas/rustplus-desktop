@@ -730,6 +730,23 @@ namespace RustPlusDesk.Properties {
         public static string SearchIconsPlaceholder => GetString("SearchIconsPlaceholder");
         public static string ResetToDefaultIcon => GetString("ResetToDefaultIcon");
         public static string Rule => GetString("Rule");
+        public static string CraftCalculatorTitle => GetString("CraftCalculatorTitle");
+        public static string CraftCalculatorRailHelpText => GetString("CraftCalculatorRailHelpText");
+        public static string CraftCalculatorSearchPlaceholder => GetString("CraftCalculatorSearchPlaceholder");
+        public static string CraftCalculatorNoSearchResults => GetString("CraftCalculatorNoSearchResults");
+        public static string CraftCalculatorEmptySelectionHint => GetString("CraftCalculatorEmptySelectionHint");
+        public static string CraftCalculatorUnverifiedWarning => GetString("CraftCalculatorUnverifiedWarning");
+        public static string CraftCalculatorUnverifiedBadge => GetString("CraftCalculatorUnverifiedBadge");
+        public static string CraftCalculatorBaseResourcesNeeded => GetString("CraftCalculatorBaseResourcesNeeded");
+        public static string CraftCalculatorCopySummary => GetString("CraftCalculatorCopySummary");
+        public static string CraftCalculatorLoading => GetString("CraftCalculatorLoading");
+        public static string CraftCalculatorNoItemsAvailable => GetString("CraftCalculatorNoItemsAvailable");
+        public static string CraftCalculatorUnavailableFormat => GetString("CraftCalculatorUnavailableFormat");
+        public static string CraftCalculatorWorkbenchFormat => GetString("CraftCalculatorWorkbenchFormat");
+        public static string CraftCalculatorNoWorkbench => GetString("CraftCalculatorNoWorkbench");
+        public static string CraftCalculatorSummaryUnverifiedNote => GetString("CraftCalculatorSummaryUnverifiedNote");
+        public static string CraftCalculatorCopySummaryErrorTitle => GetString("CraftCalculatorCopySummaryErrorTitle");
+        public static string CraftCalculatorPlanFormat => GetString("CraftCalculatorPlanFormat");
     }
 }
 

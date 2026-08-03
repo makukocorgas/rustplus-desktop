@@ -3801,4 +3801,55 @@ Sunucunun resmi web sitesinde daha fazla bilgi bulabilirsiniz:
   <data name="ResumeUpdate" xml:space="preserve">
     <value>Devam et</value>
   </data>
+  <data name="CraftCalculatorTitle" xml:space="preserve">
+    <value>Üretim Hesaplayıcı</value>
+  </data>
+  <data name="CraftCalculatorRailHelpText" xml:space="preserve">
+    <value>Tam üretim ağaçlarını ve temel kaynak toplamlarını görüntüle.</value>
+  </data>
+  <data name="CraftCalculatorSearchPlaceholder" xml:space="preserve">
+    <value>Üretilebilir eşya ara…</value>
+  </data>
+  <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
+    <value>Aramanla eşleşen üretilebilir eşya yok.</value>
+  </data>
+  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
+    <value>Tam üretim ağacını görmek için soldan bir eşya seç.</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
+    <value>⚠ Rakamlar henüz canlı oyunda doğrulanmadı</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedBadge" xml:space="preserve">
+    <value>doğrulanmadı</value>
+  </data>
+  <data name="CraftCalculatorBaseResourcesNeeded" xml:space="preserve">
+    <value>Gereken temel kaynaklar</value>
+  </data>
+  <data name="CraftCalculatorCopySummary" xml:space="preserve">
+    <value>Özeti kopyala</value>
+  </data>
+  <data name="CraftCalculatorLoading" xml:space="preserve">
+    <value>Üretim verileri yükleniyor…</value>
+  </data>
+  <data name="CraftCalculatorNoItemsAvailable" xml:space="preserve">
+    <value>Henüz üretilebilir eşya yok.</value>
+  </data>
+  <data name="CraftCalculatorUnavailableFormat" xml:space="preserve">
+    <value>Üretim hesaplayıcı kullanılamıyor: {0}</value>
+  </data>
+  <data name="CraftCalculatorWorkbenchFormat" xml:space="preserve">
+    <value>Tezgah {0}</value>
+  </data>
+  <data name="CraftCalculatorNoWorkbench" xml:space="preserve">
+    <value>Tezgah gerekmiyor</value>
+  </data>
+  <data name="CraftCalculatorSummaryUnverifiedNote" xml:space="preserve">
+    <value>⚠ Bu rakamlar henüz canlı oyunda doğrulanmadı.</value>
+  </data>
+  <data name="CraftCalculatorCopySummaryErrorTitle" xml:space="preserve">
+    <value>Özet kopyalanamadı</value>
+  </data>
+  <data name="CraftCalculatorPlanFormat" xml:space="preserve">
+    <value>Üretim planı: {0} ×{1}</value>
+  </data>
 </root>

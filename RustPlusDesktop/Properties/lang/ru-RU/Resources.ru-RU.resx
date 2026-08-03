@@ -4502,4 +4502,55 @@
   <data name="ResumeUpdate" xml:space="preserve">
     <value>Резюме</value>
   </data>
+  <data name="CraftCalculatorTitle" xml:space="preserve">
+    <value>Калькулятор крафта</value>
+  </data>
+  <data name="CraftCalculatorRailHelpText" xml:space="preserve">
+    <value>Просмотр полных деревьев крафта и итогов по базовым ресурсам.</value>
+  </data>
+  <data name="CraftCalculatorSearchPlaceholder" xml:space="preserve">
+    <value>Поиск предметов для крафта…</value>
+  </data>
+  <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
+    <value>Нет предметов, соответствующих поиску.</value>
+  </data>
+  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
+    <value>Выберите предмет слева, чтобы увидеть полное дерево крафта.</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
+    <value>⚠ Цифры ещё не проверены в живой игре</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedBadge" xml:space="preserve">
+    <value>не проверено</value>
+  </data>
+  <data name="CraftCalculatorBaseResourcesNeeded" xml:space="preserve">
+    <value>Необходимые базовые ресурсы</value>
+  </data>
+  <data name="CraftCalculatorCopySummary" xml:space="preserve">
+    <value>Копировать сводку</value>
+  </data>
+  <data name="CraftCalculatorLoading" xml:space="preserve">
+    <value>Загрузка данных крафта…</value>
+  </data>
+  <data name="CraftCalculatorNoItemsAvailable" xml:space="preserve">
+    <value>Пока нет доступных предметов для крафта.</value>
+  </data>
+  <data name="CraftCalculatorUnavailableFormat" xml:space="preserve">
+    <value>Калькулятор крафта недоступен: {0}</value>
+  </data>
+  <data name="CraftCalculatorWorkbenchFormat" xml:space="preserve">
+    <value>Верстак {0}</value>
+  </data>
+  <data name="CraftCalculatorNoWorkbench" xml:space="preserve">
+    <value>Без верстака</value>
+  </data>
+  <data name="CraftCalculatorSummaryUnverifiedNote" xml:space="preserve">
+    <value>⚠ Эти цифры ещё не проверены в живой игре.</value>
+  </data>
+  <data name="CraftCalculatorCopySummaryErrorTitle" xml:space="preserve">
+    <value>Не удалось скопировать сводку</value>
+  </data>
+  <data name="CraftCalculatorPlanFormat" xml:space="preserve">
+    <value>План крафта: {0} ×{1}</value>
+  </data>
 </root>

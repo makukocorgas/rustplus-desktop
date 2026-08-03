@@ -3801,4 +3801,55 @@ Du kan finde mere information på serverens officielle hjemmeside:
   <data name="ResumeUpdate" xml:space="preserve">
     <value>Genoptag</value>
   </data>
+  <data name="CraftCalculatorTitle" xml:space="preserve">
+    <value>Craft-beregner</value>
+  </data>
+  <data name="CraftCalculatorRailHelpText" xml:space="preserve">
+    <value>Se komplette håndværkstræer og samlede grundressourcer.</value>
+  </data>
+  <data name="CraftCalculatorSearchPlaceholder" xml:space="preserve">
+    <value>Søg efter fremstillelige genstande…</value>
+  </data>
+  <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
+    <value>Ingen fremstillelige genstande matcher din søgning.</value>
+  </data>
+  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
+    <value>Vælg en genstand til venstre for at se hele håndværkstræet.</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
+    <value>⚠ Tal endnu ikke bekræftet i det live spil</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedBadge" xml:space="preserve">
+    <value>ubekræftet</value>
+  </data>
+  <data name="CraftCalculatorBaseResourcesNeeded" xml:space="preserve">
+    <value>Nødvendige grundressourcer</value>
+  </data>
+  <data name="CraftCalculatorCopySummary" xml:space="preserve">
+    <value>Kopiér resumé</value>
+  </data>
+  <data name="CraftCalculatorLoading" xml:space="preserve">
+    <value>Indlæser håndværksdata…</value>
+  </data>
+  <data name="CraftCalculatorNoItemsAvailable" xml:space="preserve">
+    <value>Ingen fremstillelige genstande tilgængelige endnu.</value>
+  </data>
+  <data name="CraftCalculatorUnavailableFormat" xml:space="preserve">
+    <value>Craft-beregneren er ikke tilgængelig: {0}</value>
+  </data>
+  <data name="CraftCalculatorWorkbenchFormat" xml:space="preserve">
+    <value>Arbejdsbænk {0}</value>
+  </data>
+  <data name="CraftCalculatorNoWorkbench" xml:space="preserve">
+    <value>Ingen arbejdsbænk</value>
+  </data>
+  <data name="CraftCalculatorSummaryUnverifiedNote" xml:space="preserve">
+    <value>⚠ Disse tal er endnu ikke bekræftet i det live spil.</value>
+  </data>
+  <data name="CraftCalculatorCopySummaryErrorTitle" xml:space="preserve">
+    <value>Kunne ikke kopiere resuméet</value>
+  </data>
+  <data name="CraftCalculatorPlanFormat" xml:space="preserve">
+    <value>Håndværksplan: {0} ×{1}</value>
+  </data>
 </root>

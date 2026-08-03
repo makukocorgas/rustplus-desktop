@@ -2883,6 +2883,16 @@
                             <Grid />
                         </TabItem>
 
+                        <TabItem x:Name="CraftCalculatorTab" Style="{StaticResource PrettyTabItem}">
+                            <TabItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Symbol="Wrench24" Margin="0,0,6,0" VerticalAlignment="Center" FontSize="14" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}" />
+                                    <TextBlock VerticalAlignment="Center" Text="{DynamicResource CraftCalculatorTitle}" />
+                                </StackPanel>
+                            </TabItem.Header>
+                            <Grid />
+                        </TabItem>
+
                         <TabItem x:Name="RecyclerCalculatorTab" Style="{StaticResource PrettyTabItem}">
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal">
@@ -3150,6 +3160,12 @@
                                 <ui:Button x:Name="RailRaidCalculatorButton" Style="{StaticResource SidebarRailButton}" AutomationProperties.Name="Raid calculator" AutomationProperties.HelpText="Calculate raid costs and required materials." Click="CompactSidebarTab_Click" Icon="{ui:SymbolIcon Symbol=Rocket24}" Tag="{Binding ElementName=RaidCalculatorTab}" />
                                 <Popup AllowsTransparency="True" HorizontalOffset="8" IsHitTestVisible="False" IsOpen="{Binding IsMouseOver, ElementName=RailRaidCalculatorButton, Mode=OneWay}" Opened="SidebarTabPopover_Opened" Placement="Right" PlacementTarget="{Binding ElementName=RailRaidCalculatorButton}" PopupAnimation="Fade" StaysOpen="True">
                                     <ContentControl Content="{Binding ElementName=RailRaidCalculatorButton}" ContentTemplate="{StaticResource SidebarTabPopoverTemplate}" />
+                                </Popup>
+                            </Grid>
+                            <Grid>
+                                <ui:Button x:Name="RailCraftCalculatorButton" Style="{StaticResource SidebarRailButton}" AutomationProperties.Name="{DynamicResource CraftCalculatorTitle}" AutomationProperties.HelpText="{DynamicResource CraftCalculatorRailHelpText}" Click="CompactSidebarTab_Click" Icon="{ui:SymbolIcon Symbol=Wrench24}" Tag="{Binding ElementName=CraftCalculatorTab}" />
+                                <Popup AllowsTransparency="True" HorizontalOffset="8" IsHitTestVisible="False" IsOpen="{Binding IsMouseOver, ElementName=RailCraftCalculatorButton, Mode=OneWay}" Opened="SidebarTabPopover_Opened" Placement="Right" PlacementTarget="{Binding ElementName=RailCraftCalculatorButton}" PopupAnimation="Fade" StaysOpen="True">
+                                    <ContentControl Content="{Binding ElementName=RailCraftCalculatorButton}" ContentTemplate="{StaticResource SidebarTabPopoverTemplate}" />
                                 </Popup>
                             </Grid>
                             <Grid>
@@ -7120,6 +7136,17 @@
                 Panel.ZIndex="9000"
                 Visibility="Collapsed">
                 <views:RaidCalculatorView CloseRequested="RaidCalculator_CloseRequested" />
+            </Border>
+
+            <!--  Craft Calculator Overlay  -->
+            <Border
+                x:Name="CraftCalculatorPanel"
+                Grid.ColumnSpan="3"
+                Padding="12"
+                Background="{DynamicResource AppBg}"
+                Panel.ZIndex="9000"
+                Visibility="Collapsed">
+                <views:CraftCalculatorView CloseRequested="CraftCalculator_CloseRequested" />
             </Border>
 
             <!--  Delete Confirmation Overlay  -->

@@ -3801,4 +3801,55 @@ Więcej informacji znajdziesz na oficjalnej stronie serwera:
   <data name="ResumeUpdate" xml:space="preserve">
     <value>Wznów</value>
   </data>
+  <data name="CraftCalculatorTitle" xml:space="preserve">
+    <value>Kalkulator craftingu</value>
+  </data>
+  <data name="CraftCalculatorRailHelpText" xml:space="preserve">
+    <value>Sprawdź pełne drzewa craftingu i sumy surowców bazowych.</value>
+  </data>
+  <data name="CraftCalculatorSearchPlaceholder" xml:space="preserve">
+    <value>Szukaj przedmiotów do wytworzenia…</value>
+  </data>
+  <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
+    <value>Brak przedmiotów pasujących do wyszukiwania.</value>
+  </data>
+  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
+    <value>Wybierz przedmiot po lewej, aby zobaczyć pełne drzewo craftingu.</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
+    <value>⚠ Wartości jeszcze niezweryfikowane w grze</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedBadge" xml:space="preserve">
+    <value>niezweryfikowane</value>
+  </data>
+  <data name="CraftCalculatorBaseResourcesNeeded" xml:space="preserve">
+    <value>Potrzebne surowce bazowe</value>
+  </data>
+  <data name="CraftCalculatorCopySummary" xml:space="preserve">
+    <value>Kopiuj podsumowanie</value>
+  </data>
+  <data name="CraftCalculatorLoading" xml:space="preserve">
+    <value>Ładowanie danych craftingu…</value>
+  </data>
+  <data name="CraftCalculatorNoItemsAvailable" xml:space="preserve">
+    <value>Brak dostępnych przedmiotów do wytworzenia.</value>
+  </data>
+  <data name="CraftCalculatorUnavailableFormat" xml:space="preserve">
+    <value>Kalkulator craftingu niedostępny: {0}</value>
+  </data>
+  <data name="CraftCalculatorWorkbenchFormat" xml:space="preserve">
+    <value>Stół warsztatowy {0}</value>
+  </data>
+  <data name="CraftCalculatorNoWorkbench" xml:space="preserve">
+    <value>Bez stołu warsztatowego</value>
+  </data>
+  <data name="CraftCalculatorSummaryUnverifiedNote" xml:space="preserve">
+    <value>⚠ Te wartości nie zostały jeszcze zweryfikowane w grze.</value>
+  </data>
+  <data name="CraftCalculatorCopySummaryErrorTitle" xml:space="preserve">
+    <value>Nie udało się skopiować podsumowania</value>
+  </data>
+  <data name="CraftCalculatorPlanFormat" xml:space="preserve">
+    <value>Plan craftingu: {0} ×{1}</value>
+  </data>
 </root>

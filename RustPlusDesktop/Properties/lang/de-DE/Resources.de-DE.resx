@@ -4667,4 +4667,55 @@ Weitere Informationen finden Sie auf der offiziellen Website des Servers:
   <data name="ResumeUpdate" xml:space="preserve">
     <value>Lebenslauf</value>
   </data>
+  <data name="CraftCalculatorTitle" xml:space="preserve">
+    <value>Crafting-Rechner</value>
+  </data>
+  <data name="CraftCalculatorRailHelpText" xml:space="preserve">
+    <value>Zeigt vollständige Crafting-Bäume und Grundressourcen-Summen an.</value>
+  </data>
+  <data name="CraftCalculatorSearchPlaceholder" xml:space="preserve">
+    <value>Herstellbare Gegenstände suchen…</value>
+  </data>
+  <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
+    <value>Keine herstellbaren Gegenstände entsprechen deiner Suche.</value>
+  </data>
+  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
+    <value>Wähle links einen Gegenstand, um den vollständigen Crafting-Baum zu sehen.</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
+    <value>⚠ Werte noch nicht am Live-Spiel überprüft</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedBadge" xml:space="preserve">
+    <value>nicht überprüft</value>
+  </data>
+  <data name="CraftCalculatorBaseResourcesNeeded" xml:space="preserve">
+    <value>Benötigte Grundressourcen</value>
+  </data>
+  <data name="CraftCalculatorCopySummary" xml:space="preserve">
+    <value>Zusammenfassung kopieren</value>
+  </data>
+  <data name="CraftCalculatorLoading" xml:space="preserve">
+    <value>Crafting-Daten werden geladen…</value>
+  </data>
+  <data name="CraftCalculatorNoItemsAvailable" xml:space="preserve">
+    <value>Noch keine herstellbaren Gegenstände verfügbar.</value>
+  </data>
+  <data name="CraftCalculatorUnavailableFormat" xml:space="preserve">
+    <value>Crafting-Rechner nicht verfügbar: {0}</value>
+  </data>
+  <data name="CraftCalculatorWorkbenchFormat" xml:space="preserve">
+    <value>Werkbank {0}</value>
+  </data>
+  <data name="CraftCalculatorNoWorkbench" xml:space="preserve">
+    <value>Keine Werkbank</value>
+  </data>
+  <data name="CraftCalculatorSummaryUnverifiedNote" xml:space="preserve">
+    <value>⚠ Diese Werte wurden noch nicht am Live-Spiel überprüft.</value>
+  </data>
+  <data name="CraftCalculatorCopySummaryErrorTitle" xml:space="preserve">
+    <value>Zusammenfassung konnte nicht kopiert werden</value>
+  </data>
+  <data name="CraftCalculatorPlanFormat" xml:space="preserve">
+    <value>Crafting-Plan: {0} ×{1}</value>
+  </data>
 </root>

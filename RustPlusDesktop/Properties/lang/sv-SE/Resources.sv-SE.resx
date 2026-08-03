@@ -3801,4 +3801,55 @@ Du kan hitta mer information på serverns officiella webbplats:
   <data name="ResumeUpdate" xml:space="preserve">
     <value>Återuppta</value>
   </data>
+  <data name="CraftCalculatorTitle" xml:space="preserve">
+    <value>Craft-kalkylator</value>
+  </data>
+  <data name="CraftCalculatorRailHelpText" xml:space="preserve">
+    <value>Se fullständiga tillverkningsträd och totala grundresurser.</value>
+  </data>
+  <data name="CraftCalculatorSearchPlaceholder" xml:space="preserve">
+    <value>Sök tillverkningsbara föremål…</value>
+  </data>
+  <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
+    <value>Inga tillverkningsbara föremål matchar din sökning.</value>
+  </data>
+  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
+    <value>Välj ett föremål till vänster för att se hela tillverkningsträdet.</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
+    <value>⚠ Siffror ännu inte verifierade i det live spelet</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedBadge" xml:space="preserve">
+    <value>overifierad</value>
+  </data>
+  <data name="CraftCalculatorBaseResourcesNeeded" xml:space="preserve">
+    <value>Nödvändiga grundresurser</value>
+  </data>
+  <data name="CraftCalculatorCopySummary" xml:space="preserve">
+    <value>Kopiera sammanfattning</value>
+  </data>
+  <data name="CraftCalculatorLoading" xml:space="preserve">
+    <value>Läser in tillverkningsdata…</value>
+  </data>
+  <data name="CraftCalculatorNoItemsAvailable" xml:space="preserve">
+    <value>Inga tillverkningsbara föremål tillgängliga än.</value>
+  </data>
+  <data name="CraftCalculatorUnavailableFormat" xml:space="preserve">
+    <value>Craft-kalkylatorn är inte tillgänglig: {0}</value>
+  </data>
+  <data name="CraftCalculatorWorkbenchFormat" xml:space="preserve">
+    <value>Arbetsbänk {0}</value>
+  </data>
+  <data name="CraftCalculatorNoWorkbench" xml:space="preserve">
+    <value>Ingen arbetsbänk</value>
+  </data>
+  <data name="CraftCalculatorSummaryUnverifiedNote" xml:space="preserve">
+    <value>⚠ Dessa siffror har ännu inte verifierats i det live spelet.</value>
+  </data>
+  <data name="CraftCalculatorCopySummaryErrorTitle" xml:space="preserve">
+    <value>Det gick inte att kopiera sammanfattningen</value>
+  </data>
+  <data name="CraftCalculatorPlanFormat" xml:space="preserve">
+    <value>Tillverkningsplan: {0} ×{1}</value>
+  </data>
 </root>

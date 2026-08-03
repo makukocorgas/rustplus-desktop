@@ -3801,4 +3801,55 @@ U kan meer inligting op die bediener se amptelike webwerf vind:
   <data name="ResumeUpdate" xml:space="preserve">
     <value>Hervat</value>
   </data>
+  <data name="CraftCalculatorTitle" xml:space="preserve">
+    <value>Vervaardigingsberekenaar</value>
+  </data>
+  <data name="CraftCalculatorRailHelpText" xml:space="preserve">
+    <value>Bekyk volledige vervaardigingsbome en basishulpbrontotale.</value>
+  </data>
+  <data name="CraftCalculatorSearchPlaceholder" xml:space="preserve">
+    <value>Soek vervaardigbare items…</value>
+  </data>
+  <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
+    <value>Geen vervaardigbare items pas by jou soektog nie.</value>
+  </data>
+  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
+    <value>Kies 'n item aan die linkerkant om die volledige vervaardigingsboom te sien.</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
+    <value>⚠ Syfers nog nie op die regstreekse speletjie geverifieer nie</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedBadge" xml:space="preserve">
+    <value>ongeverifieer</value>
+  </data>
+  <data name="CraftCalculatorBaseResourcesNeeded" xml:space="preserve">
+    <value>Nodige basishulpbronne</value>
+  </data>
+  <data name="CraftCalculatorCopySummary" xml:space="preserve">
+    <value>Kopieer opsomming</value>
+  </data>
+  <data name="CraftCalculatorLoading" xml:space="preserve">
+    <value>Laai vervaardigingsdata…</value>
+  </data>
+  <data name="CraftCalculatorNoItemsAvailable" xml:space="preserve">
+    <value>Geen vervaardigbare items nog beskikbaar nie.</value>
+  </data>
+  <data name="CraftCalculatorUnavailableFormat" xml:space="preserve">
+    <value>Vervaardigingsberekenaar nie beskikbaar nie: {0}</value>
+  </data>
+  <data name="CraftCalculatorWorkbenchFormat" xml:space="preserve">
+    <value>Werkbank {0}</value>
+  </data>
+  <data name="CraftCalculatorNoWorkbench" xml:space="preserve">
+    <value>Geen werkbank nodig nie</value>
+  </data>
+  <data name="CraftCalculatorSummaryUnverifiedNote" xml:space="preserve">
+    <value>⚠ Hierdie syfers is nog nie op die regstreekse speletjie geverifieer nie.</value>
+  </data>
+  <data name="CraftCalculatorCopySummaryErrorTitle" xml:space="preserve">
+    <value>Kon nie opsomming kopieer nie</value>
+  </data>
+  <data name="CraftCalculatorPlanFormat" xml:space="preserve">
+    <value>Vervaardigingsplan: {0} ×{1}</value>
+  </data>
 </root>

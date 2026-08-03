@@ -4589,4 +4589,55 @@
   <data name="ResumeUpdate" xml:space="preserve">
     <value>استئناف</value>
   </data>
+  <data name="CraftCalculatorTitle" xml:space="preserve">
+    <value>حاسبة التصنيع</value>
+  </data>
+  <data name="CraftCalculatorRailHelpText" xml:space="preserve">
+    <value>اطّلع على أشجار التصنيع الكاملة وإجماليات الموارد الأساسية.</value>
+  </data>
+  <data name="CraftCalculatorSearchPlaceholder" xml:space="preserve">
+    <value>البحث عن عناصر قابلة للتصنيع…</value>
+  </data>
+  <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
+    <value>لا توجد عناصر قابلة للتصنيع مطابقة لبحثك.</value>
+  </data>
+  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
+    <value>اختر عنصرًا من اليسار لرؤية شجرة التصنيع الكاملة الخاصة به.</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
+    <value>⚠ أرقام لم يتم التحقق منها بعد في اللعبة المباشرة</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedBadge" xml:space="preserve">
+    <value>غير موثّق</value>
+  </data>
+  <data name="CraftCalculatorBaseResourcesNeeded" xml:space="preserve">
+    <value>الموارد الأساسية المطلوبة</value>
+  </data>
+  <data name="CraftCalculatorCopySummary" xml:space="preserve">
+    <value>نسخ الملخص</value>
+  </data>
+  <data name="CraftCalculatorLoading" xml:space="preserve">
+    <value>جارٍ تحميل بيانات التصنيع…</value>
+  </data>
+  <data name="CraftCalculatorNoItemsAvailable" xml:space="preserve">
+    <value>لا توجد عناصر قابلة للتصنيع متاحة بعد.</value>
+  </data>
+  <data name="CraftCalculatorUnavailableFormat" xml:space="preserve">
+    <value>حاسبة التصنيع غير متاحة: {0}</value>
+  </data>
+  <data name="CraftCalculatorWorkbenchFormat" xml:space="preserve">
+    <value>منضدة العمل {0}</value>
+  </data>
+  <data name="CraftCalculatorNoWorkbench" xml:space="preserve">
+    <value>بدون منضدة عمل</value>
+  </data>
+  <data name="CraftCalculatorSummaryUnverifiedNote" xml:space="preserve">
+    <value>⚠ لم يتم التحقق من هذه الأرقام بعد في اللعبة المباشرة.</value>
+  </data>
+  <data name="CraftCalculatorCopySummaryErrorTitle" xml:space="preserve">
+    <value>تعذّر نسخ الملخص</value>
+  </data>
+  <data name="CraftCalculatorPlanFormat" xml:space="preserve">
+    <value>خطة التصنيع: {0} ×{1}</value>
+  </data>
 </root>

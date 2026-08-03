@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -sI -m 10 \"https://wiki.rustclash.com/group=itemlist\")",
+      "Bash(curl -sI -m 10 -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/124.0 Safari/537.36\" \"https://wiki.rustclash.com/group=itemlist\")",
+      "Bash(curl -sI -m 10 \"https://raw.githubusercontent.com/alexemanuelol/rustplusplus/master/src/util/utils.js\")",
+      "Bash(curl -sI -m 10 \"https://raw.githubusercontent.com/alexemanuelol/rustplusplus/master/src/staticFiles/items.json\")",
+      "Bash(curl -s -m 15 \"https://api.github.com/repos/alexemanuelol/rustplusplus/git/trees/master?recursive=1\")",
+      "Bash(find / -iname \"Wpf.Ui.dll\" 2>/dev/null | head -5)",
+      "Read(//c//**)",
+      "Bash(mkdir -p '/c/Users/marco/Desktop/rustplus-desktop 2/RustPlusDesktop/Models/Craft' '/c/Users/marco/Desktop/rustplus-desktop 2/RustPlusDesktop/Services/Craft' '/c/Users/marco/Desktop/rustplus-desktop 2/RustPlusDesktop/Views/MainWindow/Craft')",
+      "Bash(cp -v /c/Users/marco/Desktop/craft-calculator-new-files/RustPlusDesktop/Models/Craft/CraftDataModels.cs '/c/Users/marco/Desktop/rustplus-desktop 2/RustPlusDesktop/Models/Craft/')",
+      "Bash(cp -v /c/Users/marco/Desktop/craft-calculator-new-files/RustPlusDesktop/Services/Craft/CraftCalculatorEngine.cs '/c/Users/marco/Desktop/rustplus-desktop 2/RustPlusDesktop/Services/Craft/')",
+      "Bash(cp -v /c/Users/marco/Desktop/craft-calculator-new-files/RustPlusDesktop/Services/Craft/CraftDataService.cs '/c/Users/marco/Desktop/rustplus-desktop 2/RustPlusDesktop/Services/Craft/')",
+      "Bash(cp -v /c/Users/marco/Desktop/craft-calculator-new-files/RustPlusDesktop/Assets/Data/craft-data.json '/c/Users/marco/Desktop/rustplus-desktop 2/RustPlusDesktop/Assets/Data/')",
+      "Bash(node -e ' *)",
+      "Bash(node \"/c/Users/marco/AppData/Local/Temp/claude/c--Users-marco-Desktop-rustplus-desktop-2/61e3dd91-b6bc-4eaa-9d40-144836f9f6c8/scratchpad/build_craft_data.js\")",
+      "Bash(cp \"/c/Users/marco/AppData/Local/Temp/claude/c--Users-marco-Desktop-rustplus-desktop-2/61e3dd91-b6bc-4eaa-9d40-144836f9f6c8/scratchpad/craft-data.new.json\" \"/c/Users/marco/Desktop/rustplus-desktop 2/RustPlusDesktop/Assets/Data/craft-data.json\" *)",
+      "Bash(python \"/c/Users/marco/AppData/Local/Temp/claude/c--Users-marco-Desktop-rustplus-desktop-2/61e3dd91-b6bc-4eaa-9d40-144836f9f6c8/scratchpad/add_craft_translations.py\")",
+      "Bash(python -c ' *)",
+      "Bash(node \"/c/Users/marco/AppData/Local/Temp/claude/c--Users-marco-Desktop-rustplus-desktop-2/61e3dd91-b6bc-4eaa-9d40-144836f9f6c8/scratchpad/build_craft_data_v2.js\")"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\marco\\AppData\\Local\\Temp\\claude\\c--Users-marco-Desktop-rustplus-desktop-2\\61e3dd91-b6bc-4eaa-9d40-144836f9f6c8\\scratchpad"
+    ]
+  }
+}

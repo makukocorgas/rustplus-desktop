@@ -3801,4 +3801,55 @@
   <data name="ResumeUpdate" xml:space="preserve">
     <value>이력서</value>
   </data>
+  <data name="CraftCalculatorTitle" xml:space="preserve">
+    <value>제작 계산기</value>
+  </data>
+  <data name="CraftCalculatorRailHelpText" xml:space="preserve">
+    <value>전체 제작 트리와 기본 자원 총량을 확인하세요.</value>
+  </data>
+  <data name="CraftCalculatorSearchPlaceholder" xml:space="preserve">
+    <value>제작 가능한 아이템 검색…</value>
+  </data>
+  <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
+    <value>검색과 일치하는 제작 가능한 아이템이 없습니다.</value>
+  </data>
+  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
+    <value>왼쪽에서 아이템을 선택하면 전체 제작 트리가 표시됩니다.</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
+    <value>⚠ 실제 게임에서 아직 검증되지 않은 수치입니다</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedBadge" xml:space="preserve">
+    <value>미검증</value>
+  </data>
+  <data name="CraftCalculatorBaseResourcesNeeded" xml:space="preserve">
+    <value>필요한 기본 자원</value>
+  </data>
+  <data name="CraftCalculatorCopySummary" xml:space="preserve">
+    <value>요약 복사</value>
+  </data>
+  <data name="CraftCalculatorLoading" xml:space="preserve">
+    <value>제작 데이터를 불러오는 중…</value>
+  </data>
+  <data name="CraftCalculatorNoItemsAvailable" xml:space="preserve">
+    <value>아직 제작 가능한 아이템이 없습니다.</value>
+  </data>
+  <data name="CraftCalculatorUnavailableFormat" xml:space="preserve">
+    <value>제작 계산기를 사용할 수 없습니다: {0}</value>
+  </data>
+  <data name="CraftCalculatorWorkbenchFormat" xml:space="preserve">
+    <value>작업대 {0}</value>
+  </data>
+  <data name="CraftCalculatorNoWorkbench" xml:space="preserve">
+    <value>작업대 불필요</value>
+  </data>
+  <data name="CraftCalculatorSummaryUnverifiedNote" xml:space="preserve">
+    <value>⚠ 이 수치는 아직 실제 게임에서 검증되지 않았습니다.</value>
+  </data>
+  <data name="CraftCalculatorCopySummaryErrorTitle" xml:space="preserve">
+    <value>요약을 복사할 수 없습니다</value>
+  </data>
+  <data name="CraftCalculatorPlanFormat" xml:space="preserve">
+    <value>제작 계획: {0} ×{1}</value>
+  </data>
 </root>

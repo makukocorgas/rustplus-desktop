@@ -3801,4 +3801,55 @@ Open Releases page?</value>
   <data name="ResumeUpdate" xml:space="preserve">
     <value>Βιογραφικό</value>
   </data>
+  <data name="CraftCalculatorTitle" xml:space="preserve">
+    <value>Υπολογιστής κατασκευής</value>
+  </data>
+  <data name="CraftCalculatorRailHelpText" xml:space="preserve">
+    <value>Δες πλήρη δέντρα κατασκευής και συνολικούς βασικούς πόρους.</value>
+  </data>
+  <data name="CraftCalculatorSearchPlaceholder" xml:space="preserve">
+    <value>Αναζήτηση κατασκευάσιμων αντικειμένων…</value>
+  </data>
+  <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
+    <value>Κανένα κατασκευάσιμο αντικείμενο δεν ταιριάζει με την αναζήτηση.</value>
+  </data>
+  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
+    <value>Επίλεξε ένα αντικείμενο αριστερά για να δεις το πλήρες δέντρο κατασκευής.</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
+    <value>⚠ Οι αριθμοί δεν έχουν επαληθευτεί ακόμα στο ζωντανό παιχνίδι</value>
+  </data>
+  <data name="CraftCalculatorUnverifiedBadge" xml:space="preserve">
+    <value>μη επαληθευμένο</value>
+  </data>
+  <data name="CraftCalculatorBaseResourcesNeeded" xml:space="preserve">
+    <value>Απαιτούμενοι βασικοί πόροι</value>
+  </data>
+  <data name="CraftCalculatorCopySummary" xml:space="preserve">
+    <value>Αντιγραφή περίληψης</value>
+  </data>
+  <data name="CraftCalculatorLoading" xml:space="preserve">
+    <value>Φόρτωση δεδομένων κατασκευής…</value>
+  </data>
+  <data name="CraftCalculatorNoItemsAvailable" xml:space="preserve">
+    <value>Δεν υπάρχουν ακόμα διαθέσιμα κατασκευάσιμα αντικείμενα.</value>
+  </data>
+  <data name="CraftCalculatorUnavailableFormat" xml:space="preserve">
+    <value>Ο υπολογιστής κατασκευής δεν είναι διαθέσιμος: {0}</value>
+  </data>
+  <data name="CraftCalculatorWorkbenchFormat" xml:space="preserve">
+    <value>Πάγκος εργασίας {0}</value>
+  </data>
+  <data name="CraftCalculatorNoWorkbench" xml:space="preserve">
+    <value>Χωρίς πάγκο εργασίας</value>
+  </data>
+  <data name="CraftCalculatorSummaryUnverifiedNote" xml:space="preserve">
+    <value>⚠ Αυτοί οι αριθμοί δεν έχουν επαληθευτεί ακόμα στο ζωντανό παιχνίδι.</value>
+  </data>
+  <data name="CraftCalculatorCopySummaryErrorTitle" xml:space="preserve">
+    <value>Δεν ήταν δυνατή η αντιγραφή της περίληψης</value>
+  </data>
+  <data name="CraftCalculatorPlanFormat" xml:space="preserve">
+    <value>Σχέδιο κατασκευής: {0} ×{1}</value>
+  </data>
 </root>
