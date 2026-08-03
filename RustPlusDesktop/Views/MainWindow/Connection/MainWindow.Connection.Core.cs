@@ -551,7 +551,7 @@ public partial class MainWindow
                 }
             });
             
-            if (TrackingService.AutoLoadShops)
+            if (TrackingService.AutoLoadShops && !Services.RustApiFeatures.EventsAndShopsRemoved)
                 Dispatcher.Invoke(() => ChkShops.IsChecked = true);
 
             if (showBusy)
