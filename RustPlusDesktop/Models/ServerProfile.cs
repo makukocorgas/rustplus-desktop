@@ -259,6 +259,13 @@ public class ServerProfile : INotifyPropertyChanged
         set { _cmdUpkeepDetail = ValidateCommand(value, "upkeepdetail"); OnProp(); }
     }
 
+    private string _cmdCraft = "craft";
+    public string CmdCraft
+    {
+        get => _cmdCraft;
+        set { _cmdCraft = ValidateCommand(value, "craft"); OnProp(); }
+    }
+
     private int _chatCommandDelaySeconds = 2;
     public int ChatCommandDelaySeconds
     {

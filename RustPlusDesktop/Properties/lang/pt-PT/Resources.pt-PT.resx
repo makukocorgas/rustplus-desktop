@@ -3948,4 +3948,31 @@ Pode encontrar mais informações no site oficial do servidor:
   <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
     <value>Acompanha os membros do clã, o seu estado, funções e notas.</value>
   </data>
+  <data name="CraftCommand" xml:space="preserve">
+    <value>Fabricar</value>
+  </data>
+  <data name="ChatCmdCraftInstant" xml:space="preserve">
+    <value>instantâneo</value>
+  </data>
+  <data name="ChatCmdCraftTimeMinSec" xml:space="preserve">
+    <value>{0}m {1}s</value>
+  </data>
+  <data name="ChatCmdCraftTimeMin" xml:space="preserve">
+    <value>{0}m</value>
+  </data>
+  <data name="ChatCmdCraftTimeSec" xml:space="preserve">
+    <value>{0}s</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFound" xml:space="preserve">
+    <value>Uso: !craft &lt;item&gt; [quantidade]</value>
+  </data>
+  <data name="ChatCmdCraftUnavailable" xml:space="preserve">
+    <value>Dados de fabrico indisponíveis.</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFoundFormat" xml:space="preserve">
+    <value>Nenhum item encontrado para '{0}'.</value>
+  </data>
+  <data name="ChatCmdCraftNoRecipe" xml:space="preserve">
+    <value>{0} não tem receita de fabrico.</value>
+  </data>
 </root>

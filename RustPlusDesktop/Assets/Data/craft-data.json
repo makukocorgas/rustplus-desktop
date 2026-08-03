@@ -8,7 +8,7 @@
       "displayName": "12 Gauge Buckshot",
       "workbenchLevelRequired": 2,
       "craftTimeSeconds": 2.25,
-      "outputQuantity": 1,
+      "outputQuantity": 2,
       "ingredients": [
         {
           "itemId": 69511070,
@@ -33,7 +33,7 @@
       "displayName": "12 Gauge Incendiary Shell",
       "workbenchLevelRequired": 2,
       "craftTimeSeconds": 2.25,
-      "outputQuantity": 1,
+      "outputQuantity": 2,
       "ingredients": [
         {
           "itemId": 69511070,
@@ -64,7 +64,7 @@
       "displayName": "12 Gauge Slug",
       "workbenchLevelRequired": 2,
       "craftTimeSeconds": 2.25,
-      "outputQuantity": 1,
+      "outputQuantity": 2,
       "ingredients": [
         {
           "itemId": 69511070,
@@ -89,7 +89,7 @@
       "displayName": "5.56 Rifle Ammo",
       "workbenchLevelRequired": 2,
       "craftTimeSeconds": 2.25,
-      "outputQuantity": 1,
+      "outputQuantity": 3,
       "ingredients": [
         {
           "itemId": 69511070,
@@ -446,12 +446,6 @@
           "shortname": "metal.fragments",
           "displayName": "Metal Fragments",
           "quantity": 50
-        },
-        {
-          "itemId": 1414245522,
-          "shortname": "rope",
-          "displayName": "Rope",
-          "quantity": 1
         }
       ],
       "isBaseResource": false,
@@ -735,12 +729,6 @@
           "shortname": "metal.fragments",
           "displayName": "Metal Fragments",
           "quantity": 40
-        },
-        {
-          "itemId": 479143914,
-          "shortname": "gears",
-          "displayName": "Gears",
-          "quantity": 1
         }
       ],
       "isBaseResource": false,
@@ -890,7 +878,7 @@
       "displayName": "Bone Arrow",
       "workbenchLevelRequired": null,
       "craftTimeSeconds": 1.875,
-      "outputQuantity": 1,
+      "outputQuantity": 3,
       "ingredients": [
         {
           "itemId": -151838493,
@@ -1400,7 +1388,7 @@
       "displayName": "Cassette - Medium",
       "workbenchLevelRequired": null,
       "craftTimeSeconds": 3.125,
-      "outputQuantity": 1,
+      "outputQuantity": 3,
       "ingredients": [
         {
           "itemId": 69511070,
@@ -1419,7 +1407,7 @@
       "displayName": "Cassette - Short",
       "workbenchLevelRequired": null,
       "craftTimeSeconds": 3.125,
-      "outputQuantity": 1,
+      "outputQuantity": 5,
       "ingredients": [
         {
           "itemId": 69511070,
@@ -1933,12 +1921,6 @@
           "shortname": "metal.fragments",
           "displayName": "Metal Fragments",
           "quantity": 75
-        },
-        {
-          "itemId": 1414245522,
-          "shortname": "rope",
-          "displayName": "Rope",
-          "quantity": 2
         }
       ],
       "isBaseResource": false,
@@ -2077,12 +2059,6 @@
           "shortname": "metal.fragments",
           "displayName": "Metal Fragments",
           "quantity": 75
-        },
-        {
-          "itemId": 1414245522,
-          "shortname": "rope",
-          "displayName": "Rope",
-          "quantity": 2
         }
       ],
       "isBaseResource": false,
@@ -2604,7 +2580,7 @@
       "displayName": "Explosive 5.56 Rifle Ammo",
       "workbenchLevelRequired": 3,
       "craftTimeSeconds": 3,
-      "outputQuantity": 1,
+      "outputQuantity": 2,
       "ingredients": [
         {
           "itemId": 69511070,
@@ -2773,7 +2749,7 @@
       "displayName": "Fire Arrow",
       "workbenchLevelRequired": 1,
       "craftTimeSeconds": 1.875,
-      "outputQuantity": 1,
+      "outputQuantity": 2,
       "ingredients": [
         {
           "itemId": -151838493,
@@ -3136,7 +3112,7 @@
           "itemId": 69511070,
           "shortname": "metal.fragments",
           "displayName": "Metal Fragments",
-          "quantity": 75
+          "quantity": 150
         }
       ],
       "isBaseResource": false,
@@ -3494,7 +3470,7 @@
       "displayName": "Gun Powder",
       "workbenchLevelRequired": 1,
       "craftTimeSeconds": 1.25,
-      "outputQuantity": 1,
+      "outputQuantity": 10,
       "ingredients": [
         {
           "itemId": -1938052175,
@@ -3560,12 +3536,6 @@
       "outputQuantity": 1,
       "ingredients": [
         {
-          "itemId": 1414245522,
-          "shortname": "rope",
-          "displayName": "Rope",
-          "quantity": 2
-        },
-        {
           "itemId": -151838493,
           "shortname": "wood",
           "displayName": "Wood",
@@ -3582,7 +3552,7 @@
       "displayName": "Handmade Shell",
       "workbenchLevelRequired": null,
       "craftTimeSeconds": 1.875,
-      "outputQuantity": 1,
+      "outputQuantity": 2,
       "ingredients": [
         {
           "itemId": -2099697608,
@@ -3931,12 +3901,6 @@
       "outputQuantity": 1,
       "ingredients": [
         {
-          "itemId": -2099697608,
-          "shortname": "stones",
-          "displayName": "Stones",
-          "quantity": 3000
-        },
-        {
           "itemId": 479143914,
           "shortname": "gears",
           "displayName": "Gears",
@@ -3953,13 +3917,13 @@
       "displayName": "High External Stone Wall",
       "workbenchLevelRequired": 2,
       "craftTimeSeconds": 22.5,
-      "outputQuantity": 1,
+      "outputQuantity": 3,
       "ingredients": [
         {
-          "itemId": -2099697608,
-          "shortname": "stones",
-          "displayName": "Stones",
-          "quantity": 1500
+          "itemId": -1994909036,
+          "shortname": "sheetmetal",
+          "displayName": "Sheet Metal",
+          "quantity": 1
         }
       ],
       "isBaseResource": false,
@@ -3974,12 +3938,6 @@
       "craftTimeSeconds": 21.875,
       "outputQuantity": 1,
       "ingredients": [
-        {
-          "itemId": -151838493,
-          "shortname": "wood",
-          "displayName": "Wood",
-          "quantity": 3000
-        },
         {
           "itemId": 479143914,
           "shortname": "gears",
@@ -3997,16 +3955,9 @@
       "displayName": "High External Wooden Wall",
       "workbenchLevelRequired": 1,
       "craftTimeSeconds": 18.75,
-      "outputQuantity": 1,
-      "ingredients": [
-        {
-          "itemId": -151838493,
-          "shortname": "wood",
-          "displayName": "Wood",
-          "quantity": 1500
-        }
-      ],
-      "isBaseResource": false,
+      "outputQuantity": 3,
+      "ingredients": [],
+      "isBaseResource": true,
       "verified": true,
       "source": "rustlabs.wiki (scraped via rustplusplus process_rustlabs.js, items.json + rustlabsCraftData.json)"
     },
@@ -4130,7 +4081,7 @@
       "displayName": "High Velocity Arrow",
       "workbenchLevelRequired": 1,
       "craftTimeSeconds": 1.875,
-      "outputQuantity": 1,
+      "outputQuantity": 2,
       "ingredients": [
         {
           "itemId": -151838493,
@@ -4305,7 +4256,7 @@
       "displayName": "Homing Missile",
       "workbenchLevelRequired": 2,
       "craftTimeSeconds": 7.5,
-      "outputQuantity": 1,
+      "outputQuantity": 2,
       "ingredients": [
         {
           "itemId": 95950017,
@@ -4505,7 +4456,7 @@
       "displayName": "HV 5.56 Rifle Ammo",
       "workbenchLevelRequired": 3,
       "craftTimeSeconds": 3,
-      "outputQuantity": 1,
+      "outputQuantity": 3,
       "ingredients": [
         {
           "itemId": 69511070,
@@ -4530,7 +4481,7 @@
       "displayName": "HV Pistol Ammo",
       "workbenchLevelRequired": 2,
       "craftTimeSeconds": 2.25,
-      "outputQuantity": 1,
+      "outputQuantity": 4,
       "ingredients": [
         {
           "itemId": 69511070,
@@ -4593,7 +4544,7 @@
       "displayName": "Incendiary 5.56 Rifle Ammo",
       "workbenchLevelRequired": 3,
       "craftTimeSeconds": 3,
-      "outputQuantity": 1,
+      "outputQuantity": 2,
       "ingredients": [
         {
           "itemId": 69511070,
@@ -4624,7 +4575,7 @@
       "displayName": "Incendiary Pistol Bullet",
       "workbenchLevelRequired": 2,
       "craftTimeSeconds": 2.25,
-      "outputQuantity": 1,
+      "outputQuantity": 3,
       "ingredients": [
         {
           "itemId": 69511070,
@@ -5539,12 +5490,6 @@
           "shortname": "leather",
           "displayName": "Leather",
           "quantity": 20
-        },
-        {
-          "itemId": 1234880403,
-          "shortname": "sewingkit",
-          "displayName": "Sewing Kit",
-          "quantity": 1
         }
       ],
       "isBaseResource": false,
@@ -5645,7 +5590,7 @@
       "displayName": "Low Grade Fuel",
       "workbenchLevelRequired": null,
       "craftTimeSeconds": 3.125,
-      "outputQuantity": 1,
+      "outputQuantity": 4,
       "ingredients": [
         {
           "itemId": -1018587433,
@@ -6182,12 +6127,6 @@
       "outputQuantity": 1,
       "ingredients": [
         {
-          "itemId": 1414245522,
-          "shortname": "rope",
-          "displayName": "Rope",
-          "quantity": 2
-        },
-        {
           "itemId": 69511070,
           "shortname": "metal.fragments",
           "displayName": "Metal Fragments",
@@ -6668,7 +6607,7 @@
       "displayName": "Nailgun Nails",
       "workbenchLevelRequired": null,
       "craftTimeSeconds": 1.25,
-      "outputQuantity": 1,
+      "outputQuantity": 5,
       "ingredients": [
         {
           "itemId": 69511070,
@@ -6713,15 +6652,8 @@
       "workbenchLevelRequired": null,
       "craftTimeSeconds": 18.75,
       "outputQuantity": 1,
-      "ingredients": [
-        {
-          "itemId": 1414245522,
-          "shortname": "rope",
-          "displayName": "Rope",
-          "quantity": 1
-        }
-      ],
-      "isBaseResource": false,
+      "ingredients": [],
+      "isBaseResource": true,
       "verified": true,
       "source": "rustlabs.wiki (scraped via rustplusplus process_rustlabs.js, items.json + rustlabsCraftData.json)"
     },
@@ -7156,7 +7088,7 @@
       "displayName": "Pistol Bullet",
       "workbenchLevelRequired": 1,
       "craftTimeSeconds": 1.875,
-      "outputQuantity": 1,
+      "outputQuantity": 4,
       "ingredients": [
         {
           "itemId": 69511070,
@@ -8485,7 +8417,7 @@
       "displayName": "SAM Ammo",
       "workbenchLevelRequired": 2,
       "craftTimeSeconds": 7.5,
-      "outputQuantity": 1,
+      "outputQuantity": 6,
       "ingredients": [
         {
           "itemId": 95950017,
@@ -8566,12 +8498,6 @@
           "itemId": -369760990,
           "shortname": "stash.small",
           "displayName": "Small Stash",
-          "quantity": 1
-        },
-        {
-          "itemId": 1414245522,
-          "shortname": "rope",
-          "displayName": "Rope",
           "quantity": 1
         }
       ],
@@ -8760,12 +8686,6 @@
           "shortname": "cloth",
           "displayName": "Cloth",
           "quantity": 20
-        },
-        {
-          "itemId": 1414245522,
-          "shortname": "rope",
-          "displayName": "Rope",
-          "quantity": 3
         }
       ],
       "isBaseResource": false,
@@ -8891,12 +8811,6 @@
           "itemId": 479143914,
           "shortname": "gears",
           "displayName": "Gears",
-          "quantity": 2
-        },
-        {
-          "itemId": 1414245522,
-          "shortname": "rope",
-          "displayName": "Rope",
           "quantity": 2
         }
       ],
@@ -9725,7 +9639,7 @@
       "displayName": "Speargun Spear",
       "workbenchLevelRequired": 1,
       "craftTimeSeconds": 1.875,
-      "outputQuantity": 1,
+      "outputQuantity": 3,
       "ingredients": [
         {
           "itemId": 69511070,
@@ -10573,16 +10487,10 @@
           "quantity": 100
         },
         {
-          "itemId": 1414245522,
-          "shortname": "rope",
-          "displayName": "Rope",
-          "quantity": 1
-        },
-        {
-          "itemId": -1557377697,
-          "shortname": "can.tuna.empty",
-          "displayName": "Empty Tuna Can",
-          "quantity": 2
+          "itemId": 69511070,
+          "shortname": "metal.fragments",
+          "displayName": "Metal Fragments",
+          "quantity": 30
         }
       ],
       "isBaseResource": false,
@@ -10596,15 +10504,8 @@
       "workbenchLevelRequired": null,
       "craftTimeSeconds": 18.75,
       "outputQuantity": 1,
-      "ingredients": [
-        {
-          "itemId": -151838493,
-          "shortname": "wood",
-          "displayName": "Wood",
-          "quantity": 1000
-        }
-      ],
-      "isBaseResource": false,
+      "ingredients": [],
+      "isBaseResource": true,
       "verified": true,
       "source": "rustlabs.wiki (scraped via rustplusplus process_rustlabs.js, items.json + rustlabsCraftData.json)"
     },
@@ -10670,7 +10571,7 @@
       "displayName": "Torpedo",
       "workbenchLevelRequired": 2,
       "craftTimeSeconds": 7.5,
-      "outputQuantity": 1,
+      "outputQuantity": 5,
       "ingredients": [
         {
           "itemId": 95950017,
@@ -11408,7 +11309,7 @@
           "itemId": -151838493,
           "shortname": "wood",
           "displayName": "Wood",
-          "quantity": 200
+          "quantity": 150
         }
       ],
       "isBaseResource": false,
@@ -11424,16 +11325,16 @@
       "outputQuantity": 1,
       "ingredients": [
         {
-          "itemId": 1414245522,
-          "shortname": "rope",
-          "displayName": "Rope",
-          "quantity": 1
+          "itemId": -858312878,
+          "shortname": "cloth",
+          "displayName": "Cloth",
+          "quantity": 15
         },
         {
           "itemId": -151838493,
           "shortname": "wood",
           "displayName": "Wood",
-          "quantity": 200
+          "quantity": 150
         }
       ],
       "isBaseResource": false,
@@ -11449,16 +11350,16 @@
       "outputQuantity": 1,
       "ingredients": [
         {
-          "itemId": 1414245522,
-          "shortname": "rope",
-          "displayName": "Rope",
-          "quantity": 1
+          "itemId": -858312878,
+          "shortname": "cloth",
+          "displayName": "Cloth",
+          "quantity": 20
         },
         {
           "itemId": -151838493,
           "shortname": "wood",
           "displayName": "Wood",
-          "quantity": 300
+          "quantity": 250
         }
       ],
       "isBaseResource": false,
@@ -11528,7 +11429,7 @@
       "displayName": "Wooden Arrow",
       "workbenchLevelRequired": null,
       "craftTimeSeconds": 1.875,
-      "outputQuantity": 1,
+      "outputQuantity": 2,
       "ingredients": [
         {
           "itemId": -151838493,
@@ -11560,12 +11461,6 @@
           "shortname": "wood",
           "displayName": "Wood",
           "quantity": 300
-        },
-        {
-          "itemId": 1414245522,
-          "shortname": "rope",
-          "displayName": "Rope",
-          "quantity": 1
         }
       ],
       "isBaseResource": false,
@@ -11657,12 +11552,6 @@
       "outputQuantity": 1,
       "ingredients": [
         {
-          "itemId": 1414245522,
-          "shortname": "rope",
-          "displayName": "Rope",
-          "quantity": 2
-        },
-        {
           "itemId": -151838493,
           "shortname": "wood",
           "displayName": "Wood",
@@ -11686,12 +11575,6 @@
           "shortname": "wood",
           "displayName": "Wood",
           "quantity": 300
-        },
-        {
-          "itemId": 1414245522,
-          "shortname": "rope",
-          "displayName": "Rope",
-          "quantity": 3
         }
       ],
       "isBaseResource": false,
@@ -11755,12 +11638,6 @@
           "shortname": "metal.fragments",
           "displayName": "Metal Fragments",
           "quantity": 100
-        },
-        {
-          "itemId": -932201673,
-          "shortname": "scrap",
-          "displayName": "Scrap",
-          "quantity": 50
         }
       ],
       "isBaseResource": false,
@@ -11788,10 +11665,10 @@
           "quantity": 20
         },
         {
-          "itemId": -932201673,
-          "shortname": "scrap",
-          "displayName": "Scrap",
-          "quantity": 500
+          "itemId": -143481979,
+          "shortname": "basicblueprintfragment",
+          "displayName": "Basic Blueprint Fragment",
+          "quantity": 5
         }
       ],
       "isBaseResource": false,
@@ -11807,22 +11684,16 @@
       "outputQuantity": 1,
       "ingredients": [
         {
-          "itemId": 69511070,
-          "shortname": "metal.fragments",
-          "displayName": "Metal Fragments",
-          "quantity": 1000
-        },
-        {
           "itemId": 317398316,
           "shortname": "metal.refined",
           "displayName": "High Quality Metal",
           "quantity": 100
         },
         {
-          "itemId": -932201673,
-          "shortname": "scrap",
-          "displayName": "Scrap",
-          "quantity": 1250
+          "itemId": -1896395719,
+          "shortname": "advancedblueprintfragment",
+          "displayName": "Advanced Blueprint Fragment",
+          "quantity": 5
         }
       ],
       "isBaseResource": false,

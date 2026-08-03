@@ -3948,4 +3948,31 @@ További információkat a szerver hivatalos honlapján talál:
   <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
     <value>Kövesd nyomon a klán tagjait, állapotukat, szerepüket és megjegyzéseiket.</value>
   </data>
+  <data name="CraftCommand" xml:space="preserve">
+    <value>Kézművesség</value>
+  </data>
+  <data name="ChatCmdCraftInstant" xml:space="preserve">
+    <value>azonnali</value>
+  </data>
+  <data name="ChatCmdCraftTimeMinSec" xml:space="preserve">
+    <value>{0}p {1}mp</value>
+  </data>
+  <data name="ChatCmdCraftTimeMin" xml:space="preserve">
+    <value>{0}p</value>
+  </data>
+  <data name="ChatCmdCraftTimeSec" xml:space="preserve">
+    <value>{0}mp</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFound" xml:space="preserve">
+    <value>Használat: !craft &lt;tárgy&gt; [mennyiség]</value>
+  </data>
+  <data name="ChatCmdCraftUnavailable" xml:space="preserve">
+    <value>A gyártási adatok nem érhetők el.</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFoundFormat" xml:space="preserve">
+    <value>Nem található '{0}'-nak megfelelő tárgy.</value>
+  </data>
+  <data name="ChatCmdCraftNoRecipe" xml:space="preserve">
+    <value>{0}-nak nincs gyártási receptje.</value>
+  </data>
 </root>

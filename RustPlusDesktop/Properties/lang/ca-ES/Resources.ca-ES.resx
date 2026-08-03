@@ -3948,4 +3948,31 @@ Podeu trobar més informació al lloc web oficial del servidor:
   <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
     <value>Fes seguiment dels membres del clan, el seu estat, rols i notes.</value>
   </data>
+  <data name="CraftCommand" xml:space="preserve">
+    <value>Fabricació</value>
+  </data>
+  <data name="ChatCmdCraftInstant" xml:space="preserve">
+    <value>instantani</value>
+  </data>
+  <data name="ChatCmdCraftTimeMinSec" xml:space="preserve">
+    <value>{0}m {1}s</value>
+  </data>
+  <data name="ChatCmdCraftTimeMin" xml:space="preserve">
+    <value>{0}m</value>
+  </data>
+  <data name="ChatCmdCraftTimeSec" xml:space="preserve">
+    <value>{0}s</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFound" xml:space="preserve">
+    <value>Ús: !craft &lt;objecte&gt; [quantitat]</value>
+  </data>
+  <data name="ChatCmdCraftUnavailable" xml:space="preserve">
+    <value>Dades de fabricació no disponibles.</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFoundFormat" xml:space="preserve">
+    <value>No s'ha trobat cap objecte que coincideixi amb '{0}'.</value>
+  </data>
+  <data name="ChatCmdCraftNoRecipe" xml:space="preserve">
+    <value>{0} no té recepta de fabricació.</value>
+  </data>
 </root>

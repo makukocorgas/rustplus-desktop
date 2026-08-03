@@ -3948,4 +3948,31 @@ Více informací naleznete na oficiálních stránkách serveru:
   <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
     <value>Sleduj členy klanu, jejich stav, role a poznámky.</value>
   </data>
+  <data name="CraftCommand" xml:space="preserve">
+    <value>Crafting</value>
+  </data>
+  <data name="ChatCmdCraftInstant" xml:space="preserve">
+    <value>okamžité</value>
+  </data>
+  <data name="ChatCmdCraftTimeMinSec" xml:space="preserve">
+    <value>{0}m {1}s</value>
+  </data>
+  <data name="ChatCmdCraftTimeMin" xml:space="preserve">
+    <value>{0}m</value>
+  </data>
+  <data name="ChatCmdCraftTimeSec" xml:space="preserve">
+    <value>{0}s</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFound" xml:space="preserve">
+    <value>Použití: !craft &lt;předmět&gt; [množství]</value>
+  </data>
+  <data name="ChatCmdCraftUnavailable" xml:space="preserve">
+    <value>Data craftingu nejsou k dispozici.</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFoundFormat" xml:space="preserve">
+    <value>Nebyl nalezen žádný předmět odpovídající '{0}'.</value>
+  </data>
+  <data name="ChatCmdCraftNoRecipe" xml:space="preserve">
+    <value>{0} nemá recept na crafting.</value>
+  </data>
 </root>

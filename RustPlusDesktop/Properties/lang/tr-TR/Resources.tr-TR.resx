@@ -3948,4 +3948,31 @@ Sunucunun resmi web sitesinde daha fazla bilgi bulabilirsiniz:
   <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
     <value>Klan üyelerini, durumlarını, rollerini ve notlarını takip et.</value>
   </data>
+  <data name="CraftCommand" xml:space="preserve">
+    <value>Üretim</value>
+  </data>
+  <data name="ChatCmdCraftInstant" xml:space="preserve">
+    <value>anında</value>
+  </data>
+  <data name="ChatCmdCraftTimeMinSec" xml:space="preserve">
+    <value>{0}dk {1}sn</value>
+  </data>
+  <data name="ChatCmdCraftTimeMin" xml:space="preserve">
+    <value>{0}dk</value>
+  </data>
+  <data name="ChatCmdCraftTimeSec" xml:space="preserve">
+    <value>{0}sn</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFound" xml:space="preserve">
+    <value>Kullanım: !craft &lt;eşya&gt; [miktar]</value>
+  </data>
+  <data name="ChatCmdCraftUnavailable" xml:space="preserve">
+    <value>Üretim verileri kullanılamıyor.</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFoundFormat" xml:space="preserve">
+    <value>'{0}' ile eşleşen eşya bulunamadı.</value>
+  </data>
+  <data name="ChatCmdCraftNoRecipe" xml:space="preserve">
+    <value>{0} için üretim tarifi yok.</value>
+  </data>
 </root>

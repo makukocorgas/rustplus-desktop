@@ -6071,4 +6071,31 @@ Rust+ Desktop registers your local app with FCM so it can receive those same Rus
   <data name="Update800Title4" xml:space="preserve">
     <value>Logic Engine &amp; UI</value>
   </data>
+  <data name="CraftCommand" xml:space="preserve">
+    <value>Craft</value>
+  </data>
+  <data name="ChatCmdCraftInstant" xml:space="preserve">
+    <value>instant</value>
+  </data>
+  <data name="ChatCmdCraftTimeMinSec" xml:space="preserve">
+    <value>{0}m {1}s</value>
+  </data>
+  <data name="ChatCmdCraftTimeMin" xml:space="preserve">
+    <value>{0}m</value>
+  </data>
+  <data name="ChatCmdCraftTimeSec" xml:space="preserve">
+    <value>{0}s</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFound" xml:space="preserve">
+    <value>Usage: !craft &lt;item&gt; [quantity]</value>
+  </data>
+  <data name="ChatCmdCraftUnavailable" xml:space="preserve">
+    <value>Craft data unavailable.</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFoundFormat" xml:space="preserve">
+    <value>No item found matching '{0}'.</value>
+  </data>
+  <data name="ChatCmdCraftNoRecipe" xml:space="preserve">
+    <value>{0} has no crafting recipe.</value>
+  </data>
 </root>

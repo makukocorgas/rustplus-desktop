@@ -3948,4 +3948,31 @@ Du kan finne mer informasjon på serverens offisielle nettsted:
   <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
     <value>Følg med på klanmedlemmer, status, roller og notater.</value>
   </data>
+  <data name="CraftCommand" xml:space="preserve">
+    <value>Craft</value>
+  </data>
+  <data name="ChatCmdCraftInstant" xml:space="preserve">
+    <value>umiddelbar</value>
+  </data>
+  <data name="ChatCmdCraftTimeMinSec" xml:space="preserve">
+    <value>{0}m {1}s</value>
+  </data>
+  <data name="ChatCmdCraftTimeMin" xml:space="preserve">
+    <value>{0}m</value>
+  </data>
+  <data name="ChatCmdCraftTimeSec" xml:space="preserve">
+    <value>{0}s</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFound" xml:space="preserve">
+    <value>Bruk: !craft &lt;gjenstand&gt; [antall]</value>
+  </data>
+  <data name="ChatCmdCraftUnavailable" xml:space="preserve">
+    <value>Håndverksdata utilgjengelig.</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFoundFormat" xml:space="preserve">
+    <value>Ingen gjenstand samsvarer med '{0}'.</value>
+  </data>
+  <data name="ChatCmdCraftNoRecipe" xml:space="preserve">
+    <value>{0} har ingen håndverksoppskrift.</value>
+  </data>
 </root>

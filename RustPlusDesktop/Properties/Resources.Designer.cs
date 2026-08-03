@@ -756,6 +756,15 @@ namespace RustPlusDesk.Properties {
         public static string CraftCalculatorSummaryUnverifiedNote => GetString("CraftCalculatorSummaryUnverifiedNote");
         public static string CraftCalculatorCopySummaryErrorTitle => GetString("CraftCalculatorCopySummaryErrorTitle");
         public static string CraftCalculatorPlanFormat => GetString("CraftCalculatorPlanFormat");
+        public static string CraftCommand => GetString("CraftCommand");
+        public static string ChatCmdCraftInstant => GetString("ChatCmdCraftInstant");
+        public static string ChatCmdCraftTimeMinSec => GetString("ChatCmdCraftTimeMinSec");
+        public static string ChatCmdCraftTimeMin => GetString("ChatCmdCraftTimeMin");
+        public static string ChatCmdCraftTimeSec => GetString("ChatCmdCraftTimeSec");
+        public static string ChatCmdCraftNoItemFound => GetString("ChatCmdCraftNoItemFound");
+        public static string ChatCmdCraftUnavailable => GetString("ChatCmdCraftUnavailable");
+        public static string ChatCmdCraftNoItemFoundFormat => GetString("ChatCmdCraftNoItemFoundFormat");
+        public static string ChatCmdCraftNoRecipe => GetString("ChatCmdCraftNoRecipe");
     }
 }
 

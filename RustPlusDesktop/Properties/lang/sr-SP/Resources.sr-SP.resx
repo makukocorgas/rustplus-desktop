@@ -3852,4 +3852,31 @@
   <data name="CraftCalculatorPlanFormat" xml:space="preserve">
     <value>План израде: {0} ×{1}</value>
   </data>
+  <data name="CraftCommand" xml:space="preserve">
+    <value>Израда</value>
+  </data>
+  <data name="ChatCmdCraftInstant" xml:space="preserve">
+    <value>тренутно</value>
+  </data>
+  <data name="ChatCmdCraftTimeMinSec" xml:space="preserve">
+    <value>{0}м {1}с</value>
+  </data>
+  <data name="ChatCmdCraftTimeMin" xml:space="preserve">
+    <value>{0}м</value>
+  </data>
+  <data name="ChatCmdCraftTimeSec" xml:space="preserve">
+    <value>{0}с</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFound" xml:space="preserve">
+    <value>Употреба: !craft &lt;предмет&gt; [количина]</value>
+  </data>
+  <data name="ChatCmdCraftUnavailable" xml:space="preserve">
+    <value>Подаци о изради нису доступни.</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFoundFormat" xml:space="preserve">
+    <value>Није пронађен предмет који одговара '{0}'.</value>
+  </data>
+  <data name="ChatCmdCraftNoRecipe" xml:space="preserve">
+    <value>{0} нема рецепт за израду.</value>
+  </data>
 </root>

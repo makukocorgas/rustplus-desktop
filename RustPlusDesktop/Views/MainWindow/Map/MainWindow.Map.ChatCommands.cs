@@ -87,6 +87,7 @@ public partial class MainWindow
             if (!string.IsNullOrWhiteSpace(profile.CmdVendor)) standardCmds.Add(prefix + profile.CmdVendor);
             if (!string.IsNullOrWhiteSpace(profile.CmdUpkeepDetail)) standardCmds.Add(prefix + profile.CmdUpkeepDetail);
             if (!string.IsNullOrWhiteSpace(profile.CmdAfk)) standardCmds.Add(prefix + profile.CmdAfk);
+            if (!string.IsNullOrWhiteSpace(profile.CmdCraft)) standardCmds.Add(prefix + profile.CmdCraft);
 
             string standardMsg = string.Format(Properties.Resources.ChatCmdListHeader, string.Join(", ", standardCmds));
             if (standardMsg.Length > 128) standardMsg = standardMsg.Substring(0, 125) + "...";
@@ -641,6 +642,18 @@ public partial class MainWindow
             return;
         }
 
+        // Command: Craft (e.g. !craft rocket 5) — shows the direct recipe (one level, not the
+        // full base-resource tree) scaled to the requested quantity, matching what you'd
+        // actually need to have in inventory to hit "craft" that many times.
+        var craftCmd = profile.CmdCraft.ToLowerInvariant();
+        if (cmd.StartsWith(craftCmd + " "))
+        {
+            var argsText = cmd.Substring(craftCmd.Length + 1).Trim();
+            _ = HandleCraftCommandAsync(argsText);
+            AppendLog($"[ChatCommand] Craft '{argsText}' requested by {m.Author}");
+            return;
+        }
+
         // Command: Upkeep (Dynamic List)
         var matchedMappings = profile.UpkeepCommandMappings
             .Where(mapping => cmd == mapping.Command?.ToLowerInvariant() && mapping.EntityId != 0)
@@ -1054,5 +1067,111 @@ public partial class MainWindow
                 _ => MainWindow.ResolveItemName(item.ItemId, item.ShortName)
             }
         };
+    }
+
+    // --- Craft command: lazily-loaded, cached craft-data.json lookup ---------------------
+
+    private static RustPlusDesk.Models.Craft.CraftDataSet? _craftDataCache;
+    private static readonly SemaphoreSlim _craftDataLock = new(1, 1);
+
+    private static async Task<RustPlusDesk.Models.Craft.CraftDataSet?> GetCraftDataAsync()
+    {
+        if (_craftDataCache != null) return _craftDataCache;
+
+        await _craftDataLock.WaitAsync();
+        try
+        {
+            _craftDataCache ??= await new RustPlusDesk.Services.Craft.CraftDataService().LoadAsync();
+        }
+        catch { /* leave cache null; caller reports "unavailable" */ }
+        finally { _craftDataLock.Release(); }
+
+        return _craftDataCache;
+    }
+
+    /// <summary>
+    /// Parses "&lt;item name&gt; [quantity]" — the last word is treated as the quantity only
+    /// when it parses as a positive integer and isn't the entire input (so "!craft 5" is
+    /// still read as an item search for "5", not an empty name).
+    /// </summary>
+    private static (string itemSearch, int quantity) ParseCraftArgs(string argsText)
+    {
+        var words = argsText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length > 1 && int.TryParse(words[^1], out var qty) && qty > 0)
+        {
+            return (string.Join(' ', words[..^1]), qty);
+        }
+        return (argsText.Trim(), 1);
+    }
+
+    private static RustPlusDesk.Models.Craft.CraftItem? FindCraftItem(RustPlusDesk.Models.Craft.CraftDataSet data, string search)
+    {
+        var exact = data.Items.FirstOrDefault(i =>
+            string.Equals(i.Shortname, search, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(i.DisplayName, search, StringComparison.OrdinalIgnoreCase));
+        if (exact != null) return exact;
+
+        return data.Items
+            .Where(i => i.DisplayName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                        i.Shortname.Contains(search, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(i => i.DisplayName.Length)
+            .FirstOrDefault();
+    }
+
+    private static string FormatCraftTime(double seconds)
+    {
+        int total = (int)Math.Round(seconds);
+        if (total <= 0) return Properties.Resources.ChatCmdCraftInstant;
+        int m = total / 60, s = total % 60;
+        return m > 0
+            ? (s > 0 ? string.Format(Properties.Resources.ChatCmdCraftTimeMinSec, m, s) : string.Format(Properties.Resources.ChatCmdCraftTimeMin, m))
+            : string.Format(Properties.Resources.ChatCmdCraftTimeSec, s);
+    }
+
+    private async Task HandleCraftCommandAsync(string argsText)
+    {
+        var (itemSearch, quantity) = ParseCraftArgs(argsText);
+        if (string.IsNullOrWhiteSpace(itemSearch))
+        {
+            _ = SendChatCommandResponseAsync(Properties.Resources.ChatCmdCraftNoItemFound);
+            return;
+        }
+
+        var data = await GetCraftDataAsync();
+        if (data == null)
+        {
+            _ = SendChatCommandResponseAsync(Properties.Resources.ChatCmdCraftUnavailable);
+            return;
+        }
+
+        var item = FindCraftItem(data, itemSearch);
+        if (item == null)
+        {
+            _ = SendChatCommandResponseAsync(string.Format(Properties.Resources.ChatCmdCraftNoItemFoundFormat, itemSearch));
+            return;
+        }
+
+        if (item.Ingredients.Count == 0)
+        {
+            _ = SendChatCommandResponseAsync(string.Format(Properties.Resources.ChatCmdCraftNoRecipe, item.DisplayName));
+            return;
+        }
+
+        // Crafting only happens in whole batches (e.g. Gun Powder always crafts 10 at a time), so
+        // round the number of craft actions up to the nearest whole number rather than multiplying
+        // ingredient costs directly by the requested quantity — that undercounts/overcounts whenever
+        // OutputQuantity isn't 1. The actual amount produced can exceed what was requested.
+        int outputQuantity = Math.Max(1, item.OutputQuantity);
+        double craftActions = Math.Ceiling(quantity / (double)outputQuantity);
+        double actualQuantity = craftActions * outputQuantity;
+
+        string timeText = FormatCraftTime((item.CraftTimeSeconds ?? 0) * craftActions);
+        string header = actualQuantity == 1
+            ? $"{item.DisplayName} ({timeText}): "
+            : $"{item.DisplayName} x{actualQuantity.ToString("0.##")} ({timeText}): ";
+        string ingredientsText = string.Join(", ", item.Ingredients.Select(ing =>
+            $"{ing.DisplayName} x{(ing.Quantity * craftActions).ToString("0.##")}"));
+
+        _ = SendChatCommandResponseAsync(header + ingredientsText);
     }
 }

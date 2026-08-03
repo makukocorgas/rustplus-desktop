@@ -45,17 +45,25 @@ public sealed class CraftCalculatorEngine
         if (isLeaf)
             return new CraftTreeNode(item, shortname, displayName, quantity, depth, IsBaseResource: true, Children: []);
 
-        double perCraftMultiplier = quantity / Math.Max(1, item!.OutputQuantity);
+        // Crafting only happens in whole batches (you can't queue "half a craft"), so round the
+        // number of craft actions up to the nearest whole number. This means the actual amount
+        // produced can exceed what was requested (e.g. asking for 5 Ammo when OutputQuantity is 3
+        // requires 2 craft actions, yielding 6) — that rounded-up total is what actually gets
+        // crafted, so it's what we report and what drives the ingredient totals below.
+        int outputQuantity = Math.Max(1, item!.OutputQuantity);
+        double craftActions = Math.Ceiling(quantity / outputQuantity);
+        double actualQuantity = craftActions * outputQuantity;
+
         var children = new List<CraftTreeNode>(item.Ingredients.Count);
         foreach (CraftIngredient ingredient in item.Ingredients)
         {
             children.Add(BuildNode(
                 ingredient.ItemId, ingredient.Shortname, ingredient.DisplayName,
-                ingredient.Quantity * perCraftMultiplier, depth + 1, visitingStack));
+                ingredient.Quantity * craftActions, depth + 1, visitingStack));
         }
 
         visitingStack.Remove(itemId);
-        return new CraftTreeNode(item, shortname, displayName, quantity, depth, IsBaseResource: false, children);
+        return new CraftTreeNode(item, shortname, displayName, actualQuantity, depth, IsBaseResource: false, children);
     }
 
     /// <summary>Sums every leaf (base resource) in the tree by shortname/display name.</summary>

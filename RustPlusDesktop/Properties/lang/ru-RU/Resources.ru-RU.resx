@@ -4667,4 +4667,31 @@
   <data name="UiTextAfkThreshold" xml:space="preserve">
     <value>Порог AFK</value>
   </data>
+  <data name="CraftCommand" xml:space="preserve">
+    <value>Крафт</value>
+  </data>
+  <data name="ChatCmdCraftInstant" xml:space="preserve">
+    <value>мгновенно</value>
+  </data>
+  <data name="ChatCmdCraftTimeMinSec" xml:space="preserve">
+    <value>{0}м {1}с</value>
+  </data>
+  <data name="ChatCmdCraftTimeMin" xml:space="preserve">
+    <value>{0}м</value>
+  </data>
+  <data name="ChatCmdCraftTimeSec" xml:space="preserve">
+    <value>{0}с</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFound" xml:space="preserve">
+    <value>Использование: !craft &lt;предмет&gt; [количество]</value>
+  </data>
+  <data name="ChatCmdCraftUnavailable" xml:space="preserve">
+    <value>Данные крафта недоступны.</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFoundFormat" xml:space="preserve">
+    <value>Предмет, соответствующий '{0}', не найден.</value>
+  </data>
+  <data name="ChatCmdCraftNoRecipe" xml:space="preserve">
+    <value>У {0} нет рецепта крафта.</value>
+  </data>
 </root>

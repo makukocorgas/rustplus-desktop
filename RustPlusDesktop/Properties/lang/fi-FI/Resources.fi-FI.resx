@@ -3948,4 +3948,31 @@ Löydät lisätietoja palvelimen viralliselta verkkosivustolta:
   <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
     <value>Seuraa klaanin jäseniä, heidän tilaansa, rooleja ja muistiinpanoja.</value>
   </data>
+  <data name="CraftCommand" xml:space="preserve">
+    <value>Craft</value>
+  </data>
+  <data name="ChatCmdCraftInstant" xml:space="preserve">
+    <value>välitön</value>
+  </data>
+  <data name="ChatCmdCraftTimeMinSec" xml:space="preserve">
+    <value>{0}m {1}s</value>
+  </data>
+  <data name="ChatCmdCraftTimeMin" xml:space="preserve">
+    <value>{0}m</value>
+  </data>
+  <data name="ChatCmdCraftTimeSec" xml:space="preserve">
+    <value>{0}s</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFound" xml:space="preserve">
+    <value>Käyttö: !craft &lt;esine&gt; [määrä]</value>
+  </data>
+  <data name="ChatCmdCraftUnavailable" xml:space="preserve">
+    <value>Valmistustiedot eivät ole saatavilla.</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFoundFormat" xml:space="preserve">
+    <value>Hakusanaa '{0}' vastaavaa esinettä ei löytynyt.</value>
+  </data>
+  <data name="ChatCmdCraftNoRecipe" xml:space="preserve">
+    <value>{0}:lla ei ole valmistusreseptiä.</value>
+  </data>
 </root>

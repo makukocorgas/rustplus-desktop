@@ -3948,4 +3948,31 @@
   <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
     <value>클랜 멤버, 상태, 역할 및 메모를 추적합니다.</value>
   </data>
+  <data name="CraftCommand" xml:space="preserve">
+    <value>제작</value>
+  </data>
+  <data name="ChatCmdCraftInstant" xml:space="preserve">
+    <value>즉시</value>
+  </data>
+  <data name="ChatCmdCraftTimeMinSec" xml:space="preserve">
+    <value>{0}분 {1}초</value>
+  </data>
+  <data name="ChatCmdCraftTimeMin" xml:space="preserve">
+    <value>{0}분</value>
+  </data>
+  <data name="ChatCmdCraftTimeSec" xml:space="preserve">
+    <value>{0}초</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFound" xml:space="preserve">
+    <value>사용법: !craft &lt;아이템&gt; [수량]</value>
+  </data>
+  <data name="ChatCmdCraftUnavailable" xml:space="preserve">
+    <value>제작 데이터를 사용할 수 없습니다.</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFoundFormat" xml:space="preserve">
+    <value>'{0}'과(와) 일치하는 아이템을 찾을 수 없습니다.</value>
+  </data>
+  <data name="ChatCmdCraftNoRecipe" xml:space="preserve">
+    <value>{0}에는 제작 레시피가 없습니다.</value>
+  </data>
 </root>

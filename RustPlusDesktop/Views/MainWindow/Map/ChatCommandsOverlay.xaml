@@ -94,6 +94,7 @@
                                  <RowDefinition Height="Auto" />
                                  <RowDefinition Height="Auto" />
                                  <RowDefinition Height="Auto" />
+                                 <RowDefinition Height="Auto" />
                              </Grid.RowDefinitions>
 
                              <!-- Population -->
@@ -150,6 +151,11 @@
                              <TextBlock Grid.Row="10" Text="{DynamicResource ListCommandsCommand}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" />
                              <TextBlock Grid.Row="10" Grid.Column="1" Text="{Binding ChatCommandPrefix}" VerticalAlignment="Center" Foreground="{DynamicResource TextSubtle}" FontWeight="Bold" Margin="0,0,4,0" />
                              <ui:TextBox Grid.Row="10" Grid.Column="2" Text="{Binding CmdList}" Margin="0,4" VerticalAlignment="Center" />
+
+                             <!-- Craft -->
+                             <TextBlock Grid.Row="11" Text="{DynamicResource CraftCommand}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" />
+                             <TextBlock Grid.Row="11" Grid.Column="1" Text="{Binding ChatCommandPrefix}" VerticalAlignment="Center" Foreground="{DynamicResource TextSubtle}" FontWeight="Bold" Margin="0,0,4,0" />
+                             <ui:TextBox Grid.Row="11" Grid.Column="2" Text="{Binding CmdCraft}" Margin="0,4" VerticalAlignment="Center" />
                          </Grid>
                      </Border>
 

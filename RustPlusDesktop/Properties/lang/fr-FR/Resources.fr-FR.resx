@@ -4766,4 +4766,31 @@ Vous pouvez trouver plus d&apos;informations sur le site officiel du serveur :
   <data name="UiTextAfkThreshold" xml:space="preserve">
     <value>Seuil d'AFK</value>
   </data>
+  <data name="CraftCommand" xml:space="preserve">
+    <value>Fabrication</value>
+  </data>
+  <data name="ChatCmdCraftInstant" xml:space="preserve">
+    <value>instantané</value>
+  </data>
+  <data name="ChatCmdCraftTimeMinSec" xml:space="preserve">
+    <value>{0}m {1}s</value>
+  </data>
+  <data name="ChatCmdCraftTimeMin" xml:space="preserve">
+    <value>{0}m</value>
+  </data>
+  <data name="ChatCmdCraftTimeSec" xml:space="preserve">
+    <value>{0}s</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFound" xml:space="preserve">
+    <value>Utilisation : !craft &lt;objet&gt; [quantité]</value>
+  </data>
+  <data name="ChatCmdCraftUnavailable" xml:space="preserve">
+    <value>Données de fabrication indisponibles.</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFoundFormat" xml:space="preserve">
+    <value>Aucun objet trouvé correspondant à '{0}'.</value>
+  </data>
+  <data name="ChatCmdCraftNoRecipe" xml:space="preserve">
+    <value>{0} n'a pas de recette de fabrication.</value>
+  </data>
 </root>

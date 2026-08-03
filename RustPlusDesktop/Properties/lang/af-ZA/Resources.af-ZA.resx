@@ -3948,4 +3948,31 @@ U kan meer inligting op die bediener se amptelike webwerf vind:
   <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
     <value>Volg klanlede, hul status, rolle en notas.</value>
   </data>
+  <data name="CraftCommand" xml:space="preserve">
+    <value>Vervaardiging</value>
+  </data>
+  <data name="ChatCmdCraftInstant" xml:space="preserve">
+    <value>onmiddellik</value>
+  </data>
+  <data name="ChatCmdCraftTimeMinSec" xml:space="preserve">
+    <value>{0}m {1}s</value>
+  </data>
+  <data name="ChatCmdCraftTimeMin" xml:space="preserve">
+    <value>{0}m</value>
+  </data>
+  <data name="ChatCmdCraftTimeSec" xml:space="preserve">
+    <value>{0}s</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFound" xml:space="preserve">
+    <value>Gebruik: !craft &lt;item&gt; [hoeveelheid]</value>
+  </data>
+  <data name="ChatCmdCraftUnavailable" xml:space="preserve">
+    <value>Vervaardigingsdata nie beskikbaar nie.</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFoundFormat" xml:space="preserve">
+    <value>Geen item wat by '{0}' pas nie.</value>
+  </data>
+  <data name="ChatCmdCraftNoRecipe" xml:space="preserve">
+    <value>{0} het geen vervaardigingsresep nie.</value>
+  </data>
 </root>

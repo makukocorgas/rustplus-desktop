@@ -4832,4 +4832,31 @@ Weitere Informationen finden Sie auf der offiziellen Website des Servers:
   <data name="UiTextAfkThreshold" xml:space="preserve">
     <value>AFK-Schwellenwert</value>
   </data>
+  <data name="CraftCommand" xml:space="preserve">
+    <value>Crafting</value>
+  </data>
+  <data name="ChatCmdCraftInstant" xml:space="preserve">
+    <value>sofort</value>
+  </data>
+  <data name="ChatCmdCraftTimeMinSec" xml:space="preserve">
+    <value>{0}m {1}s</value>
+  </data>
+  <data name="ChatCmdCraftTimeMin" xml:space="preserve">
+    <value>{0}m</value>
+  </data>
+  <data name="ChatCmdCraftTimeSec" xml:space="preserve">
+    <value>{0}s</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFound" xml:space="preserve">
+    <value>Verwendung: !craft &lt;Gegenstand&gt; [Menge]</value>
+  </data>
+  <data name="ChatCmdCraftUnavailable" xml:space="preserve">
+    <value>Crafting-Daten nicht verfügbar.</value>
+  </data>
+  <data name="ChatCmdCraftNoItemFoundFormat" xml:space="preserve">
+    <value>Kein Gegenstand gefunden, der zu '{0}' passt.</value>
+  </data>
+  <data name="ChatCmdCraftNoRecipe" xml:space="preserve">
+    <value>{0} hat kein Crafting-Rezept.</value>
+  </data>
 </root>
