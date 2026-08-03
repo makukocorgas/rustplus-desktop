@@ -302,6 +302,17 @@
                     <ui:ImageIcon Source="pack://application:,,,/Assets/rustplus-desktop-icon.ico" />
                 </ui:TitleBar.Icon>
                 <ui:TitleBar.Header>
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                    <ui:Button
+                        x:Name="BtnDeaths"
+                        Width="36"
+                        Height="36"
+                        Margin="2,6"
+                        Padding="0"
+                        Appearance="Transparent"
+                        Click="BtnDeaths_Click"
+                        Icon="{ui:SymbolIcon Symbol=DataHistogram24}"
+                        ToolTip="Death stats" />
                     <Border
                         Height="36"
                         Margin="8,0"
