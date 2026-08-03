@@ -2620,10 +2620,10 @@ Bist du sicher, dass du fortfahren möchtest?</value>
     <value>Spieler AFK</value>
   </data>
   <data name="AlertPlayerAfkDesc" xml:space="preserve">
-    <value>Wird gesendet, wenn ein Teammitglied zu lange AFK ist.</value>
+    <value>Wird gesendet, wenn ein verfolgtes Teammitglied AFK (inaktiv) wird.</value>
   </data>
   <data name="AlertPlayerAfkVars" xml:space="preserve">
-    <value>{0}: Spielername, {1}: Zeit</value>
+    <value>{0}: Spielername, {1}: Alarm-Schwellenwert (Minuten)</value>
   </data>
   <data name="ChangeDeviceIconSubtitle" xml:space="preserve">
     <value>Suchen und wählen Sie ein Gegenstandssymbol für dieses Gerät aus.</value>
@@ -4763,4 +4763,25 @@ Weitere Informationen finden Sie auf der offiziellen Website des Servers:
   <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
     <value>Verfolge Clan-Mitglieder, ihren Status, ihre Rollen und Notizen.</value>
   </data>
+<<<<<<< Updated upstream
+=======
+  <data name="AlertPlayerAfk" xml:space="preserve">
+    <value>{0} ist AFK: {1}:00</value>
+  </data>
+  <data name="AlertPlayerAfkReturn" xml:space="preserve">
+    <value>{0} ist nicht mehr AFK. War AFK für {1}</value>
+  </data>
+  <data name="AlertPlayerAfkReturnName" xml:space="preserve">
+    <value>Spieler zurück von AFK</value>
+  </data>
+  <data name="AlertPlayerAfkReturnDesc" xml:space="preserve">
+    <value>Wird gesendet, wenn ein verfolgtes Teammitglied von AFK zurückkehrt (wieder aktiv wird).</value>
+  </data>
+  <data name="AlertPlayerAfkReturnVars" xml:space="preserve">
+    <value>{0}: Spielername, {1}: AFK-Dauer (HH:MM)</value>
+  </data>
+  <data name="UiTextAfkThreshold" xml:space="preserve">
+    <value>AFK-Schwellenwert</value>
+  </data>
+>>>>>>> Stashed changes
 </root>

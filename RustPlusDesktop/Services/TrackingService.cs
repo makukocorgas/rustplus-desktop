@@ -109,6 +109,8 @@ public class TrackingSettings
     public bool AnnouncePlayerOnline { get; set; } = false;
     public bool AnnouncePlayerOffline { get; set; } = false;
     public bool AnnouncePlayerAfk { get; set; } = false;
+    public bool AnnouncePlayerAfkReturn { get; set; } = false;
+    public int AfkAlertMinutes { get; set; } = 5;
     public bool AnnouncePlayerDeathSelf { get; set; } = false;
     public bool AnnouncePlayerDeathTeam { get; set; } = false;
     public bool AnnouncePlayerRespawnSelf { get; set; } = false;
@@ -1243,6 +1245,16 @@ public static class TrackingService
     {
         get => _settings.AnnouncePlayerAfk;
         set { _settings.AnnouncePlayerAfk = value; SaveSettings(); }
+    }
+    public static bool AnnouncePlayerAfkReturn
+    {
+        get => _settings.AnnouncePlayerAfkReturn;
+        set { _settings.AnnouncePlayerAfkReturn = value; SaveSettings(); }
+    }
+    public static int AfkAlertMinutes
+    {
+        get => _settings.AfkAlertMinutes;
+        set { _settings.AfkAlertMinutes = value; SaveSettings(); }
     }
     public static bool AnnouncePlayerDeathSelf
     {
@@ -2571,13 +2583,25 @@ function schedRender(pid) {
         }
     }
 
+<<<<<<< Updated upstream
     private static string PairingSignature(string host, int port, string steamId64) =>
         $"{(host ?? "").Trim().ToLowerInvariant()}:{port}|{steamId64 ?? ""}";
 
+=======
+    private static readonly TimeSpan DismissedPairingTtl = TimeSpan.FromMinutes(30);
+
+    private static string PairingSignature(string host, int port, string steamId64) =>
+        $"{(host ?? "").Trim().ToLowerInvariant()}:{port}|{steamId64 ?? ""}";
+
+    // Entries are stored as "signature::isoTimestamp" so a dismissal only suppresses the
+    // automatic FCM keepalive resend for a limited window, not forever — otherwise the
+    // user could never re-pair a server they deleted in a previous session.
+>>>>>>> Stashed changes
     public static void AddDismissedPairing(string host, int port, string steamId64)
     {
         _settings.DismissedPairingSignatures ??= new();
         var sig = PairingSignature(host, port, steamId64);
+<<<<<<< Updated upstream
         if (!_settings.DismissedPairingSignatures.Contains(sig))
         {
             _settings.DismissedPairingSignatures.Add(sig);
@@ -2587,4 +2611,41 @@ function schedRender(pid) {
 
     public static bool IsPairingDismissed(string host, int port, string steamId64) =>
         _settings.DismissedPairingSignatures?.Contains(PairingSignature(host, port, steamId64)) == true;
+=======
+        _settings.DismissedPairingSignatures.RemoveAll(e => SignaturePart(e) == sig);
+        _settings.DismissedPairingSignatures.Add($"{sig}::{DateTime.UtcNow:o}");
+        SaveSettings();
+    }
+
+    public static bool IsPairingDismissed(string host, int port, string steamId64)
+    {
+        var list = _settings.DismissedPairingSignatures;
+        if (list == null || list.Count == 0) return false;
+
+        var sig = PairingSignature(host, port, steamId64);
+        var match = list.FirstOrDefault(e => SignaturePart(e) == sig);
+        if (match == null) return false;
+
+        var idx = match.IndexOf("::", StringComparison.Ordinal);
+        DateTime dismissedAt = idx >= 0 && DateTime.TryParse(match[(idx + 2)..],
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.RoundtripKind, out var ts)
+            ? ts
+            : DateTime.MinValue; // legacy entries with no timestamp: treat as expired
+
+        if (DateTime.UtcNow - dismissedAt > DismissedPairingTtl)
+        {
+            list.Remove(match);
+            SaveSettings();
+            return false;
+        }
+        return true;
+    }
+
+    private static string SignaturePart(string entry)
+    {
+        var idx = entry.IndexOf("::", StringComparison.Ordinal);
+        return idx >= 0 ? entry[..idx] : entry;
+    }
+>>>>>>> Stashed changes
 }

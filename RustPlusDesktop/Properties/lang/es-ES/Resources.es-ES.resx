@@ -4487,4 +4487,25 @@ Puedes encontrar más información en el sitio web oficial del servidor:
   <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
     <value>Sigue a los miembros del clan, su estado, roles y notas.</value>
   </data>
+<<<<<<< Updated upstream
+=======
+  <data name="AlertPlayerAfk" xml:space="preserve">
+    <value>{0} está AFK: {1}:00</value>
+  </data>
+  <data name="AlertPlayerAfkReturn" xml:space="preserve">
+    <value>{0} ya no está AFK. Estuvo AFK por {1}</value>
+  </data>
+  <data name="AlertPlayerAfkReturnName" xml:space="preserve">
+    <value>Jugador volvió de AFK</value>
+  </data>
+  <data name="AlertPlayerAfkReturnDesc" xml:space="preserve">
+    <value>Enviado cuando un miembro del equipo vuelve de estar AFK (comienza a moverse).</value>
+  </data>
+  <data name="AlertPlayerAfkReturnVars" xml:space="preserve">
+    <value>{0}: Nombre del jugador, {1}: Duración AFK (HH:MM)</value>
+  </data>
+  <data name="UiTextAfkThreshold" xml:space="preserve">
+    <value>Umbral de AFK</value>
+  </data>
+>>>>>>> Stashed changes
 </root>

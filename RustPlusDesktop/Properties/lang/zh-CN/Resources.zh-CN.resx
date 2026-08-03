@@ -4703,4 +4703,25 @@
   <data name="UiTrackClanMembersStatusRolesNotes" xml:space="preserve">
     <value>追踪帮派成员及其状态、角色和备注。</value>
   </data>
+<<<<<<< Updated upstream
+=======
+  <data name="AlertPlayerAfk" xml:space="preserve">
+    <value>{0} 挂机 (AFK): {1}:00</value>
+  </data>
+  <data name="AlertPlayerAfkReturn" xml:space="preserve">
+    <value>{0} 已结束挂机。挂机时长 {1}</value>
+  </data>
+  <data name="AlertPlayerAfkReturnName" xml:space="preserve">
+    <value>玩家结束挂机</value>
+  </data>
+  <data name="AlertPlayerAfkReturnDesc" xml:space="preserve">
+    <value>当被追踪的队友结束挂机（重新开始活动）时发送。</value>
+  </data>
+  <data name="AlertPlayerAfkReturnVars" xml:space="preserve">
+    <value>{0}: 玩家名字, {1}: 挂机时长 (小时:分钟)</value>
+  </data>
+  <data name="UiTextAfkThreshold" xml:space="preserve">
+    <value>AFK 阈值</value>
+  </data>
+>>>>>>> Stashed changes
 </root>

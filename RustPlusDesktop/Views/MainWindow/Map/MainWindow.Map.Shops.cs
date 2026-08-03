@@ -70,6 +70,7 @@ public partial class MainWindow
                     _deepSeaMidEvent = true;
                     string dir = GetDeepSeaDirection(deepSeaShop.X, deepSeaShop.Y);
                     AppendLog($"[DEEPSEA] Active on first poll (mid-event) at {deepSeaShop.X:F0},{deepSeaShop.Y:F0} ({dir})");
+                    BackfillPersonalEventSpawnTime("deepsea_spawn", t => { _deepSeaSpawnTime = t; _deepSeaMidEvent = false; });
                 }
             }
             _deepSeaActive = true;

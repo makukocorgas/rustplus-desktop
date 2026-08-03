@@ -672,19 +672,31 @@ public partial class MainWindow
     private void RedrawDeathPins()
     {
         ClearAllDeathPins();
-        
-        var hasMarkers = _vm?.Selected?.DeathMarkers?.Count > 0;
+
+        if (_vm?.Selected == null)
+        {
+            if (WipeDeathMarkersOverlay != null) WipeDeathMarkersOverlay.Visibility = Visibility.Collapsed;
+            SyncLiveMarkersTo3DMap();
+            return;
+        }
+
+        var filteredMarkers = _vm.Selected.DeathMarkers
+            .Where(m => _isShowingDeepSeaMap ? (m.X < -1000) : (m.X >= -1000))
+            .ToList();
+
+        var hasMarkers = filteredMarkers.Count > 0;
         if (WipeDeathMarkersOverlay != null)
         {
             WipeDeathMarkersOverlay.Visibility = _showDeathMarkers && hasMarkers ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        if (!_showDeathMarkers || _vm?.Selected == null) 
+        if (!_showDeathMarkers)
         {
             SyncLiveMarkersTo3DMap();
             return;
         }
-        var groups = _vm.Selected.DeathMarkers.GroupBy(m => m.SteamId);
+
+        var groups = filteredMarkers.GroupBy(m => m.SteamId);
         foreach (var group in groups)
         {
             var sorted = group.OrderBy(m => m.TimeOfDeath).ToList();
@@ -727,7 +739,7 @@ public partial class MainWindow
                 };
                 if (prompt.ShowDialog() == true)
                 {
-                    marker.CustomName = string.IsNullOrWhiteSpace(prompt.InputText) ? null : prompt.InputText;
+                    marker.CustomName = string.IsNullOrWhiteSpace(prompt.InputText) ? string.Empty : prompt.InputText;
                     _vm.Save();
                     RedrawDeathPins();
                 }

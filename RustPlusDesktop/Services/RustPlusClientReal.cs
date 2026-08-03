@@ -14,7 +14,6 @@ using System.IO;
 using System.Linq;
 using StorageSnap = RustPlusDesk.Models.StorageSnapshot;
 using StorageItemVM = RustPlusDesk.Models.StorageItemVM;
-using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text; // <— hinzufügen
@@ -49,7 +48,6 @@ public sealed class RustPlusClientReal : IRustPlusClient, IDisposable
     private int _tokens = 50;
     private DateTime _lastRefill = DateTime.UtcNow;
     private int _consecutiveTimeouts = 0;
-    private DateTime? _lastTeamInfoSuccessUtc;
 
     private async Task AcquireTokenAsync(CancellationToken ct)
     {
@@ -169,7 +167,11 @@ public sealed class RustPlusClientReal : IRustPlusClient, IDisposable
 
     public event EventHandler<TeamChatMessage>? TeamChatReceived;
     public event EventHandler<TeamChatMessage>? ClanChatReceived;
+<<<<<<< Updated upstream
     public event EventHandler<RustPlusApi.Data.Clans.ClanInfo?>? ClanChanged;
+=======
+
+>>>>>>> Stashed changes
     // Overload ohne Token (falls irgendwo so aufgerufen wird)
     public Task ConnectAsync(ServerProfile profile) =>
     ConnectAsync(profile, CancellationToken.None);
@@ -213,6 +215,13 @@ public sealed class RustPlusClientReal : IRustPlusClient, IDisposable
             {
                 var v = p.GetValue(src);
                 if (v is T tv) return tv;
+
+                // Numeric type mismatch fallback (e.g. UInt64 → UInt32, Int64 → Int32)
+                if (v != null && typeof(T).IsPrimitive && v.GetType().IsPrimitive)
+                {
+                    try { return (T)Convert.ChangeType(v, typeof(T)); }
+                    catch { /* overflow or incompatible – fall through */ }
+                }
 
                 // z.B. Items ist IEnumerable → Count nehmen
                 if (typeof(T) == typeof(int) && v is System.Collections.IEnumerable en)
@@ -348,7 +357,7 @@ public sealed class RustPlusClientReal : IRustPlusClient, IDisposable
 
         static IEnumerable<object> AsEnum(object? o)
             => (o is System.Collections.IEnumerable en && o is not string)
-               ? en.Cast<object?>().Where(x => x != null)!
+               ? en.Cast<object>().Where(x => x != null)
                : Array.Empty<object>();
 
         // Reccy-Dumper (Properties + kindliche IEnumerables, begrenzt)
@@ -1036,24 +1045,18 @@ rp.on("connected", async () => {
     // Sicherheitsnetz
     timer = setTimeout(() => { console.error("TIMEOUT"); try { rp.disconnect(); } catch {} }, Math.max(1000, tmo));
   } catch (e) {
-    console.error("ERR:" + _serr(e));
+    console.error("ERR:" + (e && e.message ? e.message : String(e)));
     try { rp.disconnect(); } catch {}
   }
 });
 
-rp.on("error", (e) => { console.error("ERR:" + _serr(e)); });
-rp.connect();
-
-function _serr(e) {
-  if (!e) return "null";
-  if (typeof e === "string") return e;
-  if (e instanceof Error) return e.message || String(e);
-  if (e.response && e.response.error) return "server: " + JSON.stringify(e.response.error);
+rp.on("error", (e) => {
   try {
-    const s = JSON.stringify(e, Object.getOwnPropertyNames(e));
-    return (s && s !== "{}") ? s : "[object, keys=" + Object.keys(e).join(",") + "]";
-  } catch { return "[unserializable]"; }
-}
+    const msg = (e && (e.message || e.code)) ? `${e.message||e.code}` : JSON.stringify(e);
+    console.error("ERR:" + msg);
+  } catch { console.error("ERR:unknown"); }
+});
+rp.connect();
 """;
 
         var rustplusPkgDir = Path.Combine(pkgRoot, "node_modules", "@liamcottle", "rustplus.js");
@@ -1664,7 +1667,6 @@ function _serr(e) {
     }
 
     private readonly HashSet<string> _camBusy = new(StringComparer.OrdinalIgnoreCase);
-
     public async Task<CameraFrame?> GetCameraFrameAsync(string identifier, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(identifier)) throw new ArgumentException("identifier required");
@@ -1955,23 +1957,17 @@ rp.on("connected", async () => {
     });
     process.stdin.resume();
   } catch (e) {
-    console.error("ERR:" + _serr(e));
+    console.error("ERR:" + (e && e.message ? e.message : String(e)));
     process.exit(1);
   }
 });
-rp.on("error", (e) => { console.error("ERR:" + _serr(e)); });
-rp.connect();
-
-function _serr(e) {
-  if (!e) return "null";
-  if (typeof e === "string") return e;
-  if (e instanceof Error) return e.message || String(e);
-  if (e.response && e.response.error) return "server: " + JSON.stringify(e.response.error);
+rp.on("error", (e) => {
   try {
-    const s = JSON.stringify(e, Object.getOwnPropertyNames(e));
-    return (s && s !== "{}") ? s : "[object, keys=" + Object.keys(e).join(",") + "]";
-  } catch { return "[unserializable]"; }
-}
+    const msg = (e && (e.message || e.code)) ? `${e.message||e.code}` : JSON.stringify(e);
+    console.error("ERR:" + msg);
+  } catch { console.error("ERR:unknown"); }
+});
+rp.connect();
 """;
 
         var rustplusPkgDir = Path.Combine(pkgRoot, "node_modules", "@liamcottle", "rustplus.js");
@@ -2101,6 +2097,7 @@ function _serr(e) {
         }
     }
 
+<<<<<<< Updated upstream
     private void Api_OnClanChanged(object? sender, ClanChangedEventArg e)
     {
         try
@@ -2113,10 +2110,13 @@ function _serr(e) {
         }
     }
 
+=======
+>>>>>>> Stashed changes
     private void Api_OnClanChatReceived(object? sender, ClanMessageEventArg e)
     {
         try
         {
+<<<<<<< Updated upstream
             string author = TryGetStringProp(e, "Username", "Name", "User") ?? "Unbekannt";
             string text = TryGetStringProp(e, "Message", "Body", "Text") ?? string.Empty;
 
@@ -2126,6 +2126,17 @@ function _serr(e) {
             var tsUtc = unix.HasValue
                 ? DateTimeOffset.FromUnixTimeSeconds(unix.Value).UtcDateTime
                 : DateTime.UtcNow;
+=======
+            string author = e.Name ?? "Unbekannt";
+            string text = e.Message ?? string.Empty;
+            ulong steamId = e.SteamId;
+
+            // e.Time is a DateTime; convert to UTC if it isn't already
+            var tsUtc = e.Time.Kind == DateTimeKind.Unspecified
+                ? DateTime.SpecifyKind(e.Time, DateTimeKind.Utc)
+                : e.Time.ToUniversalTime();
+            if (tsUtc == default) tsUtc = DateTime.UtcNow;
+>>>>>>> Stashed changes
 
             ClanChatReceived?.Invoke(this, new TeamChatMessage(tsUtc, author, steamId, text));
         }
@@ -2797,6 +2808,204 @@ function _serr(e) {
             _isClanChatPrimed = true;
         }
         catch { /* egal */ }
+    }
+
+    private bool _isClanChatPrimed = false;
+
+    public async Task PrimeClanChatAsync(CancellationToken ct = default)
+    {
+        if (_api is null) throw new InvalidOperationException("Nicht verbunden.");
+        if (_isClanChatPrimed) return;
+
+        // Wire the strongly-typed event directly (no reflection needed).
+        _api.OnClanChatReceived -= Api_OnClanChatReceived;
+        _api.OnClanChatReceived += Api_OnClanChatReceived;
+
+        try
+        {
+            _ = await GetClanChatHistoryAsync(ct: ct).ConfigureAwait(false);
+            _isClanChatPrimed = true;
+        }
+        catch { }
+    }
+
+    public async Task<List<TeamChatMessage>> GetClanChatHistoryAsync(
+      DateTime? sinceUtc = null, int? limit = null, CancellationToken ct = default)
+    {
+        var result = new List<TeamChatMessage>();
+        if (_api is null) return result;
+
+        try
+        {
+            object? resObj = null;
+            var apiType = _api.GetType();
+
+            var mHist = apiType.GetMethod("GetClanChatHistoryAsync")
+                       ?? apiType.GetMethod("GetClanChatAsync");
+            if (mHist != null)
+            {
+                var ps = mHist.GetParameters();
+                object?[] args = Array.Empty<object?>();
+
+                if (ps.Length == 2 && ps[0].ParameterType == typeof(int) && ps[1].ParameterType == typeof(CancellationToken))
+                    args = new object?[] { limit ?? 100, ct };
+                else if (ps.Length == 1 && ps[0].ParameterType == typeof(int))
+                    args = new object?[] { limit ?? 100 };
+                else if (ps.Length == 1 && ps[0].ParameterType.Name.Contains("CancellationToken"))
+                    args = new object?[] { ct };
+
+                resObj = await UnwrapTaskAsync(mHist.Invoke(_api, args), ct);
+            }
+            else
+            {
+                var mInfo = apiType.GetMethod("GetClanInfoAsync");
+                if (mInfo != null)
+                {
+                    var ps = mInfo.GetParameters();
+                    object?[] args = (ps.Length == 1 && ps[0].ParameterType == typeof(CancellationToken))
+                                     ? new object?[] { ct } : Array.Empty<object?>();
+                    resObj = await UnwrapTaskAsync(mInfo.Invoke(_api, args), ct);
+                }
+            }
+
+            if (resObj is null)
+            {
+                return result;
+            }
+
+            var dataProp = resObj.GetType().GetProperty("Data");
+            var root = dataProp?.GetValue(resObj) ?? resObj;
+
+            var chatRoot = TryGet(root, "ClanChat")
+                        ?? TryGet(root, "Chat")
+                        ?? TryGet(root, "Messages")
+                        ?? root;
+
+            var mapped = ExtractChatCandidates(chatRoot);
+            var filtered = sinceUtc.HasValue
+                ? mapped.Where(m => m.Timestamp > sinceUtc.Value).ToList()
+                : mapped;
+
+            _log($"[clan-chat-history] mapped={mapped.Count} afterFilter={filtered.Count} since={(sinceUtc?.ToString("u") ?? "null")}");
+            return filtered.OrderBy(m => m.Timestamp).ToList();
+        }
+        catch (Exception ex)
+        {
+            _log("[clan-chat-history:error] " + ex.Message);
+            return result;
+        }
+    }
+
+    public async Task<ClanInfoModel?> GetClanInfoAsync(CancellationToken ct = default)
+    {
+        if (_api is null) return null;
+
+        try
+        {
+            var apiType = _api.GetType();
+            var mInfo = apiType.GetMethod("GetClanInfoAsync");
+            if (mInfo == null) return null;
+
+            var ps = mInfo.GetParameters();
+            object?[] args = (ps.Length == 1 && ps[0].ParameterType == typeof(CancellationToken))
+                             ? new object?[] { ct } : Array.Empty<object?>();
+
+            var resObj = await UnwrapTaskAsync(mInfo.Invoke(_api, args), ct);
+            if (resObj == null) return null;
+
+            // Extract Data from Response<T>
+            var dataProp = resObj.GetType().GetProperty("Data");
+            var root = dataProp?.GetValue(resObj) ?? resObj;
+            if (root == null) return null;
+
+            var model = new ClanInfoModel
+            {
+                ClanId = Read<long>(root, "ClanId"),
+                Name = Read<string>(root, "Name") ?? "",
+                Motd = Read<string>(root, "Motd") ?? "",
+                Created = Read<DateTime>(root, "Created"),
+                Creator = Read<ulong>(root, "Creator"),
+                MotdTimestamp = Read<DateTime?>(root, "MotdTimestamp"),
+                MotdAuthor = Read<ulong?>(root, "MotdAuthor"),
+                MaxMemberCount = Read<int?>(root, "MaxMemberCount"),
+                Score = Read<long?>(root, "Score")
+            };
+
+            // Roles Mapping
+            var rolesList = new List<(int roleId, string name, int rank)>();
+            var roles = Read<System.Collections.IEnumerable>(root, "Roles");
+            if (roles != null)
+            {
+                foreach (var r in roles)
+                {
+                    int roleId = Read<int>(r, "RoleId");
+                    string name = Read<string>(r, "Name") ?? "";
+                    int rank = Read<int>(r, "Rank");
+                    rolesList.Add((roleId, name, rank));
+                }
+            }
+
+            // Members Mapping
+            var members = Read<System.Collections.IEnumerable>(root, "Members");
+            if (members != null)
+            {
+                foreach (var m in members)
+                {
+                    ulong steamId = Read<ulong>(m, "SteamId");
+                    int roleId = Read<int>(m, "RoleId");
+                    var role = rolesList.FirstOrDefault(x => x.roleId == roleId);
+
+                    var member = new ClanMemberModel
+                    {
+                        SteamId = steamId,
+                        RoleId = roleId,
+                        RoleName = role.name ?? $"Role {roleId}",
+                        Rank = role.rank,
+                        Joined = Read<DateTime>(m, "Joined"),
+                        LastSeen = Read<DateTime>(m, "LastSeen"),
+                        Notes = Read<string>(m, "Notes") ?? "",
+                        IsOnline = Read<bool>(m, "Online")
+                    };
+                    model.Members.Add(member);
+                }
+            }
+
+            return model;
+        }
+        catch (Exception ex)
+        {
+            _log?.Invoke("[get-clan-info:error] " + ex.Message);
+            return null;
+        }
+    }
+
+    public async Task SendClanMessageAsync(string text, CancellationToken ct = default)
+    {
+        if (_api is null) throw new InvalidOperationException("Nicht verbunden.");
+
+        try
+        {
+            var mSend = _api.GetType().GetMethods().FirstOrDefault(m => m.Name == "SendClanMessageAsync" || m.Name == "SendClanChatAsync");
+            if (mSend != null)
+            {
+                var p = mSend.GetParameters();
+                var args = new object?[p.Length];
+                args[0] = text;
+                for (int i = 1; i < p.Length; i++)
+                {
+                    if (p[i].ParameterType == typeof(CancellationToken)) args[i] = ct;
+                    else args[i] = p[i].HasDefaultValue ? p[i].DefaultValue : null;
+                }
+
+                var taskObj = mSend.Invoke(_api, args);
+                if (taskObj is Task t) await t.ConfigureAwait(false);
+            }
+        }
+        catch (Exception ex)
+        {
+            _log?.Invoke("[clan-chat-send:error] " + ex.Message);
+            throw;
+        }
     }
 
     // Kleiner Helfer wie an anderer Stelle bereits genutzt:
@@ -3897,12 +4106,7 @@ function _serr(e) {
             resp = tsk.GetType().GetProperty("Result")?.GetValue(tsk);
         }
 
-        if (!IsResponseValid(resp))
-        {
-            var staleAge = _lastTeamInfoSuccessUtc.HasValue ? (DateTime.UtcNow - _lastTeamInfoSuccessUtc.Value) : (TimeSpan?)null;
-            _log?.Invoke($"[team] GetTeamInfoAsync got an invalid response — falling back to cached team info (age: {(staleAge.HasValue ? $"{staleAge.Value.TotalSeconds:0}s" : "unknown")}).");
-            return LoadFromCache<TeamInfo>("team");
-        }
+        if (!IsResponseValid(resp)) return LoadFromCache<TeamInfo>("team");
 
         var r  = P(resp, "Response") ?? resp;
         var ti = P(r, "TeamInfo") ?? r;
@@ -4007,15 +4211,12 @@ function _serr(e) {
         list.LeaderMapNotes.AddRange(ParseNotes(leaderMapNotes));
 
         _consecutiveTimeouts = 0;
-        _lastTeamInfoSuccessUtc = DateTime.UtcNow;
         SaveToCache("team", list);
         return list;
     }
     catch (Exception ex)
     {
         CheckConnectionLost(ex);
-        var staleAge = _lastTeamInfoSuccessUtc.HasValue ? (DateTime.UtcNow - _lastTeamInfoSuccessUtc.Value) : (TimeSpan?)null;
-        _log?.Invoke($"[team] GetTeamInfoAsync failed ({ex.GetType().Name}: {ex.Message}) — falling back to cached team info (age: {(staleAge.HasValue ? $"{staleAge.Value.TotalSeconds:0}s" : "unknown")}).");
         return LoadFromCache<TeamInfo>("team");
     }
 }
@@ -5562,8 +5763,12 @@ function _serr(e) {
         var team = await _api.GetTeamInfoAsync();
         _log(team?.IsSuccess == true ? "Teaminfo abgefragt." : $"Teaminfo: Fehler: {team?.Error?.Message}");
     }
+<<<<<<< Updated upstream
 
 
+=======
+#pragma warning restore 618
+>>>>>>> Stashed changes
     // exakt zur Interface-Signatur
     public async Task ToggleSmartSwitchAsync(long entityId, bool on, CancellationToken ct = default)
     {
@@ -5665,12 +5870,14 @@ function _serr(e) {
     }
 
 
-    // ---- (leicht erweitert) TryToggleExplicitAsync: zusätzlich Timeout + klarere Logs
     private static bool ParamIsEntityId(Type t) =>
-     t == typeof(uint) || t == typeof(int) || t == typeof(long) ||
-     t == typeof(UInt32) || t == typeof(Int32) || t == typeof(Int64);
+        t == typeof(uint) || t == typeof(int) || t == typeof(long) ||
+        t == typeof(UInt32) || t == typeof(Int32) || t == typeof(Int64);
 
+<<<<<<< Updated upstream
    
+=======
+>>>>>>> Stashed changes
 
     private async Task<bool> TryToggleExplicitAsync(uint id, bool on, CancellationToken ct)
     {

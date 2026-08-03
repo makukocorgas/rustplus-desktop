@@ -58,6 +58,34 @@ public partial class MainWindow
     private int _pollFailCount = 0;
     private bool _isAutoReconnecting = false;
 
+    /// <summary>
+    /// Best-effort lookup against the personal event history (see PersonalEventSyncService) to
+    /// replace a "??:??" mid-event placeholder with the real spawn time. No-ops for anyone but
+    /// the developer's own account, and simply leaves the placeholder in place on any failure
+    /// (no bot running, no network, event not seen yet, etc).
+    /// </summary>
+    private void BackfillPersonalEventSpawnTime(string eventType, Action<DateTime> apply)
+    {
+        var host = _vm?.Selected?.Host;
+        var port = _vm?.Selected?.Port ?? 0;
+        var steamId = _vm?.Selected?.SteamId64;
+        if (string.IsNullOrEmpty(host) || string.IsNullOrEmpty(steamId)) return;
+
+        _ = Task.Run(async () =>
+        {
+            var t = await PersonalEventSyncService.GetLastEventTimeAsync(host, port, steamId, eventType);
+            if (t.HasValue)
+            {
+                apply(t.Value);
+                AppendLog($"[PersonalEvents] Backfilled {eventType} spawn time from Supabase: {t.Value:u}");
+            }
+            else
+            {
+                AppendLog($"[PersonalEvents] No backfill found for {eventType} — leaving placeholder.");
+            }
+        });
+    }
+
     private class HeliCrashSite
     {
         public uint HeliId;
@@ -895,7 +923,7 @@ public partial class MainWindow
             if ((now - state.LastSeen).TotalSeconds > 60)
             {
                 _cargoLastDespawnUtc = now;
-                AppendLog($"[cargo] Despawn detected â€“ last seen {(now - state.LastSeen).TotalSeconds:F0}s ago.");
+                AppendLog($"[cargo] Despawn detected - last seen {(now - state.LastSeen).TotalSeconds:F0}s ago.");
 
                 if (state.FirstSeen.HasValue && state.HarborCount >= 1 && state.SeenAtEdge) 
                 {
@@ -1772,6 +1800,7 @@ public partial class MainWindow
                             {
                                 _heliMidEvent = true;
                                 _heliSpawnTime = null;
+                                BackfillPersonalEventSpawnTime("heli_spawn", t => { _heliSpawnTime = t; _heliMidEvent = false; });
                             }
                             else
                             {
@@ -1786,6 +1815,7 @@ public partial class MainWindow
                                 _vendorMidEvent = true;
                                 _vendorSpawnTime = null;
                                 _vendorDespawnTime = null;
+                                BackfillPersonalEventSpawnTime("vendor_spawn", t => { _vendorSpawnTime = t; _vendorMidEvent = false; });
                             }
                             else
                             {
