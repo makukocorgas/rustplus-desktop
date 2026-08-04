@@ -73,14 +73,9 @@ public partial class MainWindow
                     BackfillPersonalEventSpawnTime("deepsea_spawn", t => { _deepSeaSpawnTime = t; _deepSeaMidEvent = false; });
                 }
             }
+            // The toggle button is always visible (see MainWindow.xaml) — spawn/despawn only
+            // drives the event state, not the button.
             _deepSeaActive = true;
-            Dispatcher.Invoke(() =>
-            {
-                if (BtnDeepSeaToggle != null && BtnDeepSeaToggle.Visibility != Visibility.Visible)
-                {
-                    BtnDeepSeaToggle.Visibility = Visibility.Visible;
-                }
-            });
         }
         else if (_deepSeaActive) // State change: active → inactive
         {
@@ -98,11 +93,8 @@ public partial class MainWindow
             }
             _deepSeaActive = false;
             _deepSeaMidEvent = false;
-            Dispatcher.Invoke(() =>
-            {
-                if (BtnDeepSeaToggle != null) BtnDeepSeaToggle.Visibility = Visibility.Collapsed;
-                SetShowingDeepSeaMap(false);
-            });
+            // Event is over — drop back to the main map, but leave the toggle available.
+            Dispatcher.Invoke(() => SetShowingDeepSeaMap(false));
         }
     }
 
@@ -164,7 +156,7 @@ public partial class MainWindow
         if (ChkShops.IsChecked == true && _worldSizeS > 0 && _worldRectPx.Width > 0)
         {
             _shopTimer?.Stop();
-            _shopTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(20) };
+            _shopTimer = new DispatcherTimer { Interval = _shopDataAvailable ? ShopPollInterval : ShopProbeInterval };
             _shopTimer.Tick += async (_, __) => await PollShopsOnceAsync();
             _shopTimer.Start();
 
@@ -249,6 +241,9 @@ public partial class MainWindow
 
             UpdateShopsUI(shops);
             _lastShops = shops;
+
+            // Does this server still deliver vending data at all?
+            TrackShopDataAvailability(shops.Count > 0);
 
             UpdateShopLifetimes(shops);
 

@@ -107,6 +107,14 @@ public class TrackingSettings
     // shape is known — see MainWindow.Map.SatelliteCrash.cs. This toggle is prepared ahead of
     // time so it only needs the detection logic filled in later.
     public bool AnnounceSatelliteCrash { get; set; } = false;
+
+    /// <summary>
+    /// Listen to the game's audio for server-wide monument cues on servers that no longer
+    /// send event markers over Rust+. On by default: without it those servers show nothing at
+    /// all, and the listener only runs while Rust itself is running.
+    /// </summary>
+    public bool ListenForServerEvents { get; set; } = true;
+
     public bool AnnouncePlayerOnline { get; set; } = false;
     public bool AnnouncePlayerOffline { get; set; } = false;
     public bool AnnouncePlayerAfk { get; set; } = false;
@@ -1196,6 +1204,11 @@ public static class TrackingService
     {
         get => _settings.AnnounceCargo;
         set { _settings.AnnounceCargo = value; SaveSettings(); }
+    }
+    public static bool ListenForServerEvents
+    {
+        get => _settings.ListenForServerEvents;
+        set { _settings.ListenForServerEvents = value; SaveDB(); }
     }
     public static bool AnnounceHeli
     {

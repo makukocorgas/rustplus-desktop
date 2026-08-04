@@ -569,6 +569,8 @@ public partial class MainWindow
             _ = SearchRustMapsAsync(false, connectedProfile.WipeTime);
             AppendLog($"Connection initialization complete. Server: {connectedProfile.Name}");
 
+            _ = StartServerEventTrackingAsync();
+
             // Prime subscriptions for all devices to receive real-time updates.
             if (real != null && connectedProfile.Devices?.Any() == true)
             {
