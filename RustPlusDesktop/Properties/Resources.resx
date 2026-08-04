@@ -6110,6 +6110,12 @@ Rust+ Desktop registers your local app with FCM so it can receive those same Rus
   <data name="ListenForServerEventsDesc" xml:space="preserve">
     <value>Detects Oil Rig, Cargo and Deep Sea from the game audio on servers that no longer send events. Only active while Rust is running.</value>
   </data>
+  <data name="TrustOwnDetections" xml:space="preserve">
+    <value>Trust my own detections</value>
+  </data>
+  <data name="TrustOwnDetectionsDesc" xml:space="preserve">
+    <value>Shows an event as soon as this PC hears it, without waiting for another player to confirm it. Reporting is unaffected — what other players see still needs their own confirmations.</value>
+  </data>
   <data name="ServerEventsSection" xml:space="preserve">
     <value>Server Events</value>
   </data>
