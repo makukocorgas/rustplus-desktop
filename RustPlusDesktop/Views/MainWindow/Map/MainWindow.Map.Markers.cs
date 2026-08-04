@@ -1265,6 +1265,12 @@ public partial class MainWindow
         }
         activeEvents.Add(new EventDockItem { Name = Properties.Resources.SatelliteCrash, Icon = "pack://application:,,,/Assets/icons/satellite.png", Active = _satelliteCrashActive, Id = 0, X = 0, Y = 0, Trackable = false, Type = SatelliteCrashMarkerType, TimerText = satTimer, ToolTip = satTip });
 
+        // On a server without event markers everything above was built from data that no
+        // longer arrives. Replace it wholesale rather than patching each entry: the two
+        // sources have nothing in common but the item shape.
+        if (Services.EventCapabilities.IsCloudSourced)
+            activeEvents = BuildCloudEventDockItems();
+
         Dispatcher.Invoke(() =>
         {
             // Try to find existing dock or create one

@@ -269,6 +269,17 @@
                 </Border>
                 </StackPanel>
 
+                <!-- Server Events Section -->
+                <StackPanel x:Name="SectionServerEvents">
+                <ui:TextBlock Text="{DynamicResource ServerEventsSection}" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}" />
+                <ui:Card Style="{StaticResource SettingsNativeCard}">
+                    <StackPanel>
+                        <ui:ToggleSwitch x:Name="ChkListenForServerEvents" Content="{DynamicResource ListenForServerEvents}" Margin="0,0,0,6" Checked="OnSettingChanged" Unchecked="OnSettingChanged" />
+                        <ui:TextBlock Text="{DynamicResource ListenForServerEventsDesc}" FontSize="11" Foreground="{DynamicResource TextSubtle}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </ui:Card>
+                </StackPanel>
+
                 <!-- Offline Death Section -->
                 <StackPanel x:Name="SectionOfflineDeath">
                 <TextBlock Text="{DynamicResource OfflineDeathNotifications}" Style="{StaticResource SectionTitle}" Foreground="{DynamicResource Accent}"/>

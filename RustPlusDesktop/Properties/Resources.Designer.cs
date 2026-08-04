@@ -2040,6 +2040,29 @@ namespace RustPlusDesk.Properties {
         public static string OilRigCrateStatus => GetString("OilRigCrateStatus");
         public static string ListenForServerEvents => GetString("ListenForServerEvents");
         public static string ListenForServerEventsDesc => GetString("ListenForServerEventsDesc");
+        public static string ServerEventsSection => GetString("ServerEventsSection");
+        public static string OilRigCrateSeen => GetString("OilRigCrateSeen");
+        public static string EventNotDetected => GetString("EventNotDetected");
+        public static string EventUnconfirmed => GetString("EventUnconfirmed");
+        public static string AlertUnavailableOnServer => GetString("AlertUnavailableOnServer");
+        public static string CargoSpawnedAgo => GetString("CargoSpawnedAgo");
+        public static string CargoGoneAgo => GetString("CargoGoneAgo");
+        public static string DeepSeaUpFor => GetString("DeepSeaUpFor");
+        public static string AlertCargoSpawnedAudio => GetString("AlertCargoSpawnedAudio");
+        public static string AlertOilRigCrateUp => GetString("AlertOilRigCrateUp");
+        public static string ChatCmdCargoCloudActive => GetString("ChatCmdCargoCloudActive");
+        public static string ChatCmdCargoCloudGone => GetString("ChatCmdCargoCloudGone");
+        public static string ChatCmdCargoCloudUnknown => GetString("ChatCmdCargoCloudUnknown");
+        public static string ChatCmdDeepSeaCloudActive => GetString("ChatCmdDeepSeaCloudActive");
+        public static string ChatCmdDeepSeaCloudEnded => GetString("ChatCmdDeepSeaCloudEnded");
+        public static string ChatCmdDeepSeaCloudUnknown => GetString("ChatCmdDeepSeaCloudUnknown");
+        public static string ChatCmdOilRigCloudSeen => GetString("ChatCmdOilRigCloudSeen");
+        public static string ChatCmdOilRigCloudNone => GetString("ChatCmdOilRigCloudNone");
+        public static string AlertCargoSpawnedAudioName => GetString("AlertCargoSpawnedAudioName");
+        public static string AlertCargoSpawnedAudioDesc => GetString("AlertCargoSpawnedAudioDesc");
+        public static string AlertOilRigCrateUpName => GetString("AlertOilRigCrateUpName");
+        public static string AlertOilRigCrateUpDesc => GetString("AlertOilRigCrateUpDesc");
+        public static string EventNotTrackableOnServer => GetString("EventNotTrackableOnServer");
 
     }
 }
