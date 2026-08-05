@@ -439,7 +439,9 @@ public sealed class CloudEventWatcher
             var client = SupabaseAuthManager.Client;
             if (client?.Realtime == null) return;
 
-            string channelName = $"server_events:{serverKey}";
+            // serverKey is "{Host}-{Port}" and Host is usually a dotted IP — encode the dots so
+            // they can't be mistaken for a channel-name delimiter.
+            string channelName = $"server_events:{serverKey.Replace('.', '_')}";
             _channel = client.Realtime.Channel(channelName);
             _broadcast = _channel.Register<BaseBroadcast<JObject>>();
             _broadcast.AddBroadcastEventHandler((sender, args) =>
