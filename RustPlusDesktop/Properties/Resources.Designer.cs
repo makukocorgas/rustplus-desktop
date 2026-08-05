@@ -2077,6 +2077,9 @@ namespace RustPlusDesk.Properties {
         public static string UiSmallOilRigTrigger => GetString("UiSmallOilRigTrigger");
         public static string UiShowCrateOnMap => GetString("UiShowCrateOnMap");
         public static string UiTimerNamePlaceholder => GetString("UiTimerNamePlaceholder");
+        public static string UiBadgeSmallOil => GetString("UiBadgeSmallOil");
+        public static string UiBadgeLargeOil => GetString("UiBadgeLargeOil");
+        public static string UiBadgeOilRigTooltip => GetString("UiBadgeOilRigTooltip");
 
     }
 }
