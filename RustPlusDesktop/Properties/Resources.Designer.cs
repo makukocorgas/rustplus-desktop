@@ -2065,6 +2065,18 @@ namespace RustPlusDesk.Properties {
         public static string AlertOilRigCrateUpName => GetString("AlertOilRigCrateUpName");
         public static string AlertOilRigCrateUpDesc => GetString("AlertOilRigCrateUpDesc");
         public static string EventNotTrackableOnServer => GetString("EventNotTrackableOnServer");
+        public static string AlertCrateUnlocksIn15Min => GetString("AlertCrateUnlocksIn15Min");
+        public static string AlertCrateUnlocksIn15MinName => GetString("AlertCrateUnlocksIn15MinName");
+        public static string AlertCrateUnlocksIn15MinDesc => GetString("AlertCrateUnlocksIn15MinDesc");
+        public static string AlertCrateUnlocksIn15MinVars => GetString("AlertCrateUnlocksIn15MinVars");
+        public static string ChatCmdOilRigHackRunning => GetString("ChatCmdOilRigHackRunning");
+        public static string UiStartTimer => GetString("UiStartTimer");
+        public static string UiMinutes => GetString("UiMinutes");
+        public static string UiTimerTargetCustom => GetString("UiTimerTargetCustom");
+        public static string UiLargeOilRigTrigger => GetString("UiLargeOilRigTrigger");
+        public static string UiSmallOilRigTrigger => GetString("UiSmallOilRigTrigger");
+        public static string UiShowCrateOnMap => GetString("UiShowCrateOnMap");
+        public static string UiTimerNamePlaceholder => GetString("UiTimerNamePlaceholder");
 
     }
 }
