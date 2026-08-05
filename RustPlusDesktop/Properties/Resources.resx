@@ -6260,7 +6260,13 @@ Rust+ Desktop registers your local app with FCM so it can receive those same Rus
   <data name="UiSetAsSmallOilRigTrigger" xml:space="preserve">
     <value>Set as Small Oil Rig Trigger</value>
   </data>
+  <data name="UiRemoveAsSmallOilRigTrigger" xml:space="preserve">
+    <value>Remove as Small Oil Rig Trigger</value>
+  </data>
   <data name="UiSetAsLargeOilRigTrigger" xml:space="preserve">
     <value>Set as Large Oil Rig Trigger</value>
+  </data>
+  <data name="UiRemoveAsLargeOilRigTrigger" xml:space="preserve">
+    <value>Remove as Large Oil Rig Trigger</value>
   </data>
 </root>
