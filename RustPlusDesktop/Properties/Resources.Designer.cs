@@ -2080,6 +2080,16 @@ namespace RustPlusDesk.Properties {
         public static string UiBadgeSmallOil => GetString("UiBadgeSmallOil");
         public static string UiBadgeLargeOil => GetString("UiBadgeLargeOil");
         public static string UiBadgeOilRigTooltip => GetString("UiBadgeOilRigTooltip");
+        public static string Tutorials_oilrig_crate_alerts_Title => GetString("Tutorials.oilrig-crate-alerts.Title");
+        public static string Tutorials_oilrig_crate_alerts_Description => GetString("Tutorials.oilrig-crate-alerts.Description");
+        public static string Tutorials_Step_oilrigcrate_intro_Title => GetString("Tutorials.Step.oilrigcrate.intro.Title");
+        public static string Tutorials_Step_oilrigcrate_intro_Description => GetString("Tutorials.Step.oilrigcrate.intro.Description");
+        public static string Tutorials_Step_oilrigcrate_wiring_Title => GetString("Tutorials.Step.oilrigcrate.wiring.Title");
+        public static string Tutorials_Step_oilrigcrate_wiring_Description => GetString("Tutorials.Step.oilrigcrate.wiring.Description");
+        public static string Tutorials_Step_oilrigcrate_rule_Title => GetString("Tutorials.Step.oilrigcrate.rule.Title");
+        public static string Tutorials_Step_oilrigcrate_rule_Description => GetString("Tutorials.Step.oilrigcrate.rule.Description");
+        public static string Tutorials_Step_oilrigcrate_silence_Title => GetString("Tutorials.Step.oilrigcrate.silence.Title");
+        public static string Tutorials_Step_oilrigcrate_silence_Description => GetString("Tutorials.Step.oilrigcrate.silence.Description");
 
     }
 }
