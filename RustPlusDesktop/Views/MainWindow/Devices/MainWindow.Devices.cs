@@ -1320,7 +1320,7 @@ private async void BtnDeviceRefresh_Click(object sender, RoutedEventArgs e)
         {
             if (isThisSmall)
             {
-                menuSmall.Header = Properties.Resources.UiRemoveAsSmallOilRigTrigger;
+                menuSmall.Header = Properties.Resources.GetString("UiRemoveAsSmallOilRigTrigger");
                 menuSmall.Tag = "REMOVE";
                 menuSmall.Visibility = Visibility.Visible;
             }
@@ -1330,7 +1330,7 @@ private async void BtnDeviceRefresh_Click(object sender, RoutedEventArgs e)
             }
             else
             {
-                menuSmall.Header = Properties.Resources.UiSetAsSmallOilRigTrigger;
+                menuSmall.Header = Properties.Resources.GetString("UiSetAsSmallOilRigTrigger");
                 menuSmall.Tag = "SET";
                 menuSmall.Visibility = Visibility.Visible;
             }
@@ -1340,7 +1340,7 @@ private async void BtnDeviceRefresh_Click(object sender, RoutedEventArgs e)
         {
             if (isThisLarge)
             {
-                menuLarge.Header = Properties.Resources.UiRemoveAsLargeOilRigTrigger;
+                menuLarge.Header = Properties.Resources.GetString("UiRemoveAsLargeOilRigTrigger");
                 menuLarge.Tag = "REMOVE";
                 menuLarge.Visibility = Visibility.Visible;
             }
@@ -1350,7 +1350,7 @@ private async void BtnDeviceRefresh_Click(object sender, RoutedEventArgs e)
             }
             else
             {
-                menuLarge.Header = Properties.Resources.UiSetAsLargeOilRigTrigger;
+                menuLarge.Header = Properties.Resources.GetString("UiSetAsLargeOilRigTrigger");
                 menuLarge.Tag = "SET";
                 menuLarge.Visibility = Visibility.Visible;
             }
