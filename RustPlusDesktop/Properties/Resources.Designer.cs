@@ -23,7 +23,7 @@ namespace RustPlusDesk.Properties {
             set => resourceCulture = value;
         }
 
-        private static string GetString(string key)
+        public static string GetString(string key)
         {
             var val = ResourceManager.GetString(key, resourceCulture);
             if (string.IsNullOrWhiteSpace(val))
@@ -2087,6 +2087,13 @@ namespace RustPlusDesk.Properties {
         public static string Tutorials_Step_oilrigcrate_rule_Description => GetString("Tutorials.Step.oilrigcrate.rule.Description");
         public static string Tutorials_Step_oilrigcrate_silence_Title => GetString("Tutorials.Step.oilrigcrate.silence.Title");
         public static string Tutorials_Step_oilrigcrate_silence_Description => GetString("Tutorials.Step.oilrigcrate.silence.Description");
+        public static string UiAlarmTextHint => GetString("UiAlarmTextHint");
+        public static string UiAlarmTextHintTooltip => GetString("UiAlarmTextHintTooltip");
+        public static string UiSetAsSmallOilRigTrigger => GetString("UiSetAsSmallOilRigTrigger");
+        public static string UiRemoveAsSmallOilRigTrigger => GetString("UiRemoveAsSmallOilRigTrigger");
+        public static string UiSetAsLargeOilRigTrigger => GetString("UiSetAsLargeOilRigTrigger");
+        public static string UiRemoveAsLargeOilRigTrigger => GetString("UiRemoveAsLargeOilRigTrigger");
+        public static string UiInGameAlarmTitle => GetString("UiInGameAlarmTitle");
 
     }
 }

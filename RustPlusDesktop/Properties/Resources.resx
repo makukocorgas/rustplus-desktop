@@ -6269,4 +6269,7 @@ Rust+ Desktop registers your local app with FCM so it can receive those same Rus
   <data name="UiRemoveAsLargeOilRigTrigger" xml:space="preserve">
     <value>Remove as Large Oil Rig Trigger</value>
   </data>
+  <data name="UiInGameAlarmTitle" xml:space="preserve">
+    <value>In-game alarm text (upper line)</value>
+  </data>
 </root>
