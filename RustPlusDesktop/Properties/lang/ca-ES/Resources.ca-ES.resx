@@ -3900,15 +3900,6 @@ Podeu trobar més informació al lloc web oficial del servidor:
   <data name="ClanChatTitle" xml:space="preserve">
     <value>XAT DEL CLAN</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>Caiguda de satèl·lit</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>Un satèl·lit està caient!</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>Caiguda de satèl·lit activa – fa {0}</value>
-  </data>
   <data name="ClanTab" xml:space="preserve">
     <value>Clan</value>
   </data>

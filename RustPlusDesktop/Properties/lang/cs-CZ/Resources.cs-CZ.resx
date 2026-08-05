@@ -3900,15 +3900,6 @@ Více informací naleznete na oficiálních stránkách serveru:
   <data name="ClanChatTitle" xml:space="preserve">
     <value>KLANOVÝ CHAT</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>Pád satelitu</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>Satelit padá!</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>Pád satelitu aktivní – běží {0}</value>
-  </data>
   <data name="ClanTab" xml:space="preserve">
     <value>Klan</value>
   </data>

@@ -3900,15 +3900,6 @@ Löydät lisätietoja palvelimen viralliselta verkkosivustolta:
   <data name="ClanChatTitle" xml:space="preserve">
     <value>KLAANIKESKUSTELU</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>Satelliittitörmäys</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>Satelliitti syöksyy alas!</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>Satelliittitörmäys käynnissä – kestänyt {0}</value>
-  </data>
   <data name="ClanTab" xml:space="preserve">
     <value>Klaani</value>
   </data>

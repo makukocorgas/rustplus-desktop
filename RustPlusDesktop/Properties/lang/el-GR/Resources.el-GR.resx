@@ -3900,15 +3900,6 @@ Open Releases page?</value>
   <data name="ClanChatTitle" xml:space="preserve">
     <value>ΣΥΝΟΜΙΛΙΑ ΚΛΑΝ</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>Συντριβή δορυφόρου</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>Ένας δορυφόρος συντρίβεται!</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>Συντριβή δορυφόρου ενεργή – διαρκεί {0}</value>
-  </data>
   <data name="ClanTab" xml:space="preserve">
     <value>Κλαν</value>
   </data>

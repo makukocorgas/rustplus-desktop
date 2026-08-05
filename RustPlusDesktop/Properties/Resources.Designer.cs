@@ -237,7 +237,6 @@ namespace RustPlusDesk.Properties {
         public static string Vendor => GetString("Vendor");
         public static string OilRig => GetString("OilRig");
         public static string DeepSea => GetString("DeepSea");
-        public static string SatelliteCrash => GetString("SatelliteCrash");
         public static string SmartAlerts => GetString("SmartAlerts");
         public static string PlayerOnline => GetString("PlayerOnline");
         public static string PlayerOffline => GetString("PlayerOffline");
@@ -453,7 +452,6 @@ namespace RustPlusDesk.Properties {
         public static string VendorActiveSpawnUnknown => GetString("VendorActiveSpawnUnknown");
         public static string VendorDespawnedAgo => GetString("VendorDespawnedAgo");
         public static string DeepSeaActiveRunningFor => GetString("DeepSeaActiveRunningFor");
-        public static string SatelliteCrashActiveRunningFor => GetString("SatelliteCrashActiveRunningFor");
         public static string DeepSeaActiveSpawnUnknown => GetString("DeepSeaActiveSpawnUnknown");
         public static string DeepSeaEndedAgo => GetString("DeepSeaEndedAgo");
         public static string TimerHoursMinutes => GetString("TimerHoursMinutes");
@@ -528,7 +526,6 @@ namespace RustPlusDesk.Properties {
         public static string AlertCrateUnlocksIn10Min => GetString("AlertCrateUnlocksIn10Min");
         public static string AlertCrateUnlocksIn5Min => GetString("AlertCrateUnlocksIn5Min");
         public static string AlertDeepSeaUp => GetString("AlertDeepSeaUp");
-        public static string AlertSatelliteCrash => GetString("AlertSatelliteCrash");
         public static string AlertNewShop => GetString("AlertNewShop");
         public static string AlertSuspiciousShop => GetString("AlertSuspiciousShop");
         public static string AlertCargoSpawned => GetString("AlertCargoSpawned");

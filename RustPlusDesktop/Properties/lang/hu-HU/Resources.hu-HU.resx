@@ -3900,15 +3900,6 @@ További információkat a szerver hivatalos honlapján talál:
   <data name="ClanChatTitle" xml:space="preserve">
     <value>KLÁN CSEVEGÉS</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>Műholdzuhanás</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>Egy műhold zuhan!</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>Műholdzuhanás aktív – {0} óta tart</value>
-  </data>
   <data name="ClanTab" xml:space="preserve">
     <value>Klán</value>
   </data>

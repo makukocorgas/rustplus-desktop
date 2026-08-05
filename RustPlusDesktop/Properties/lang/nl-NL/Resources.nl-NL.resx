@@ -3900,15 +3900,6 @@ Meer informatie vindt u op de officiële website van de server:
   <data name="ClanChatTitle" xml:space="preserve">
     <value>CLANCHAT</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>Satellietcrash</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>Een satelliet stort neer!</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>Satellietcrash actief – loopt al {0}</value>
-  </data>
   <data name="ClanTab" xml:space="preserve">
     <value>Clan</value>
   </data>

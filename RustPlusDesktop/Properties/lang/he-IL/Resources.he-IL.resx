@@ -3945,15 +3945,6 @@
   <data name="ClanChatTitle" xml:space="preserve">
     <value>צ'אט השבט</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>התרסקות לוויין</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>לוויין מתרסק!</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>התרסקות לוויין פעילה – נמשכת {0}</value>
-  </data>
   <data name="ClanTab" xml:space="preserve">
     <value>שבט</value>
   </data>

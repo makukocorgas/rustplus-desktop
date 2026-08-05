@@ -408,6 +408,7 @@
                             </Grid>
                         </ui:Button>
                     </Border>
+                    </StackPanel>
                 </ui:TitleBar.Header>
             </ui:TitleBar>
         </Border>
@@ -4595,13 +4596,6 @@
                                                              StaysOpenOnClick="True"
                                                              Style="{StaticResource DarkMenuItem}"
                                                              Tag="DeepSea" />
-                                                         <MenuItem
-                                                             Click="Alert_MenuItem_Click"
-                                                             Header="{DynamicResource SatelliteCrash}"
-                                                             IsCheckable="True"
-                                                             StaysOpenOnClick="True"
-                                                             Style="{StaticResource DarkMenuItem}"
-                                                             Tag="SatelliteCrash" />
                                                          <MenuItem
                                                              Click="Alert_MenuItem_Click"
                                                              Header="{DynamicResource SmartAlerts}"

@@ -3900,15 +3900,6 @@ Du kan finne mer informasjon på serverens offisielle nettsted:
   <data name="ClanChatTitle" xml:space="preserve">
     <value>KLAN-CHAT</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>Satellittkrasj</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>En satellitt styrter ned!</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>Satellittkrasj aktivt – har pågått i {0}</value>
-  </data>
   <data name="ClanTab" xml:space="preserve">
     <value>Klan</value>
   </data>

@@ -4706,15 +4706,6 @@
   <data name="ClanChatTitle" xml:space="preserve">
     <value>帮派聊天</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>卫星坠毁</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>卫星正在坠毁！</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>卫星坠毁进行中 — 已持续 {0}</value>
-  </data>
   <data name="ClanTab" xml:space="preserve">
     <value>帮派</value>
   </data>

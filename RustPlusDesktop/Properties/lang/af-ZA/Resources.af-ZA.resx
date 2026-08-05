@@ -3900,15 +3900,6 @@ U kan meer inligting op die bediener se amptelike webwerf vind:
   <data name="ClanChatTitle" xml:space="preserve">
     <value>KLAN-GESELS</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>Satelliet-ongeluk</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>'n Satelliet stort neer!</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>Satelliet-ongeluk aktief – loop vir {0}</value>
-  </data>
   <data name="ClanTab" xml:space="preserve">
     <value>Klan</value>
   </data>

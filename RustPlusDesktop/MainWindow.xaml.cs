@@ -4763,7 +4763,6 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         TrackingService.AnnounceVendor = val;
         TrackingService.AnnounceOilRig = val;
         TrackingService.AnnounceDeepSea = val;
-        TrackingService.AnnounceSatelliteCrash = val;
         TrackingService.AnnouncePlayerOnline = val;
         TrackingService.AnnouncePlayerOffline = val;
         TrackingService.AnnouncePlayerAfk = val;
@@ -4797,7 +4796,6 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                !TrackingService.AnnounceCargoEgress && !TrackingService.AnnounceCargoArrival &&
                !TrackingService.AnnounceHeli && !TrackingService.AnnounceChinook &&
                !TrackingService.AnnounceVendor && !TrackingService.AnnounceOilRig && !TrackingService.AnnounceDeepSea &&
-               !TrackingService.AnnounceSatelliteCrash &&
                !TrackingService.AnnouncePlayerOnline && !TrackingService.AnnouncePlayerOffline &&
                !TrackingService.AnnouncePlayerAfk && !TrackingService.AnnouncePlayerAfkReturn &&
                !TrackingService.AnnouncePlayerDeathSelf && !TrackingService.AnnouncePlayerDeathTeam &&
@@ -4834,7 +4832,6 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 case "Vendor": TrackingService.AnnounceVendor = val; break;
                 case "OilRig": TrackingService.AnnounceOilRig = val; break;
                 case "DeepSea": TrackingService.AnnounceDeepSea = val; break;
-                case "SatelliteCrash": TrackingService.AnnounceSatelliteCrash = val; break;
                 case "SmartAlerts": TrackingService.AnnounceSmartAlerts = val; break;
                 case "PlayerOnline": TrackingService.AnnouncePlayerOnline = val; break;
                 case "PlayerOffline": TrackingService.AnnouncePlayerOffline = val; break;
@@ -4999,7 +4996,6 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             TrackingService.AnnounceVendor,
             TrackingService.AnnounceOilRig,
             TrackingService.AnnounceDeepSea,
-            TrackingService.AnnounceSatelliteCrash,
             TrackingService.AnnouncePlayerOnline,
             TrackingService.AnnouncePlayerOffline,
             TrackingService.AnnouncePlayerAfk,
@@ -5093,7 +5089,6 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 case "Vendor": isSelected = TrackingService.AnnounceVendor; break;
                 case "OilRig": isSelected = TrackingService.AnnounceOilRig; break;
                 case "DeepSea": isSelected = TrackingService.AnnounceDeepSea; break;
-                case "SatelliteCrash": isSelected = TrackingService.AnnounceSatelliteCrash; break;
                 case "SmartAlerts": isSelected = TrackingService.AnnounceSmartAlerts; break;
                 case "PlayerOnline": isSelected = TrackingService.AnnouncePlayerOnline; break;
                 case "PlayerOffline": isSelected = TrackingService.AnnouncePlayerOffline; break;

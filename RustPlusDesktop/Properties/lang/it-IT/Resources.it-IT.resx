@@ -3900,15 +3900,6 @@ Puoi trovare maggiori informazioni sul sito ufficiale del server:
   <data name="ClanChatTitle" xml:space="preserve">
     <value>CHAT DEL CLAN</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>Schianto del satellite</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>Un satellite sta precipitando!</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>Schianto del satellite attivo – in corso da {0}</value>
-  </data>
   <data name="ClanTab" xml:space="preserve">
     <value>Clan</value>
   </data>

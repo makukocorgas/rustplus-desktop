@@ -4490,14 +4490,6 @@ Puedes encontrar más información en el sitio web oficial del servidor:
   <data name="ClanChatTitle" xml:space="preserve">
     <value>CHAT DEL CLAN</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>Caída de satélite</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>¡Un satélite está cayendo!</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>Caída de satélite activa – lleva {0}</value>
   <data name="Tutorials.Status.NotStarted" xml:space="preserve">
     <value>No iniciado</value>
   </data>

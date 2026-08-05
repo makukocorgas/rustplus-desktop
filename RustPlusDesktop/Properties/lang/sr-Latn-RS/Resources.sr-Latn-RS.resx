@@ -3849,15 +3849,6 @@
   <data name="ClanChatTitle" xml:space="preserve">
     <value>KLAN ĆASKANJE</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>Pad satelita</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>Satelit se ruši!</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>Pad satelita aktivan – traje {0}</value>
-  </data>
   <data name="ClanTab" xml:space="preserve">
     <value>Klan</value>
   </data>

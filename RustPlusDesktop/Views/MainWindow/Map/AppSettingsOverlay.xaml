@@ -24,6 +24,13 @@
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="BorderThickness" Value="0" />
             </Style>
+            <Style x:Key="SettingsNativeCard" TargetType="ui:Card">
+                <Setter Property="Margin" Value="0,0,0,16" />
+                <Setter Property="Padding" Value="14,12" />
+                <Setter Property="Background" Value="{DynamicResource SurfaceAlt}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource CardBorder}" />
+                <Setter Property="BorderThickness" Value="1" />
+            </Style>
         </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="36" />
@@ -623,9 +630,10 @@
                                     <CheckBox x:Name="ChkChatAudio" Grid.Column="2" Content="{DynamicResource UiSound}" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource DotCheckBox}" Checked="OnChannelSettingChanged" Unchecked="OnChannelSettingChanged"/>
                                 </Grid>
 
-                                <!-- Shop -->
-                                <TextBlock Text="{DynamicResource ShopWord}" Foreground="{DynamicResource TextSubtle}" FontSize="11" Margin="0,4,0,2" />
-                                <Grid Margin="0,0,0,6">
+                                <!--  Shop — disabled on servers that no longer deliver vending data,
+                                      so it is visibly dead rather than silently unused.  -->
+                                <TextBlock x:Name="ShopChannelLabel" Text="{DynamicResource ShopWord}" Foreground="{DynamicResource TextSubtle}" FontSize="11" Margin="0,4,0,2" />
+                                <Grid x:Name="ShopChannelRow" Margin="0,0,0,6">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />

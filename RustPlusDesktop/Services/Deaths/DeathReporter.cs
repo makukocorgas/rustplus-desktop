@@ -2,9 +2,11 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using RustPlusDesk.Services.Auth;
 
 namespace RustPlusDesk.Services.Deaths
 {
@@ -22,14 +24,15 @@ namespace RustPlusDesk.Services.Deaths
         /// <summary>Flush the team's cloud death log for a server (called on wipe). Premium-only.</summary>
         public static async Task ClearCloudAsync(string? serverKey)
         {
-            if (string.IsNullOrEmpty(serverKey) || !CloudBackend.UsePlatform || !SupabaseAuthManager.IsPremium)
+            if (string.IsNullOrEmpty(serverKey) || !SupabaseAuthManager.IsPremium)
                 return;
 
             try
             {
-                await CloudApiClient.TryCallApiAsync(
-                    "sync/deaths?server_key=" + Uri.EscapeDataString(serverKey),
-                    HttpMethod.Delete);
+                await SupabaseAuthManager.CallEdgeFunctionAsync(
+                    "sync/deaths",
+                    HttpMethod.Delete,
+                    queryParams: new System.Collections.Generic.Dictionary<string, string> { ["server_key"] = serverKey });
             }
             catch
             {

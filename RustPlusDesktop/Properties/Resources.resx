@@ -670,9 +670,6 @@ Download and install now?</value>
   <data name="DeepSea" xml:space="preserve">
     <value>Deep Sea Event</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>Satellite Crash</value>
-  </data>
   <data name="SmartAlerts" xml:space="preserve">
     <value>Smart Alerts</value>
   </data>
@@ -1318,9 +1315,6 @@ Download and install now?</value>
   <data name="DeepSeaActiveRunningFor" xml:space="preserve">
     <value>Deep Sea active – running for {0}</value>
   </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>Satellite crash active – running for {0}</value>
-  </data>
   <data name="DeepSeaActiveSpawnUnknown" xml:space="preserve">
     <value>Deep Sea active (spawn time unknown)</value>
   </data>
@@ -1542,9 +1536,6 @@ Download and install now?</value>
   </data>
   <data name="AlertDeepSeaUp" xml:space="preserve">
     <value>Deep Sea is up (detected by audio)</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>A satellite is crashing!</value>
   </data>
   <data name="AlertNewShop" xml:space="preserve">
     <value>New shop {0} [{1}]: {2}</value>

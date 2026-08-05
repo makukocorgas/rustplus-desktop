@@ -4688,14 +4688,6 @@
   <data name="ClanChatTitle" xml:space="preserve">
     <value>دردشة العشيرة</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>تحطم القمر الصناعي</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>قمر صناعي يتحطم!</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>تحطم القمر الصناعي نشط – مستمر منذ {0}</value>
   <data name="Tutorials.Status.NotStarted" xml:space="preserve">
     <value>لم يبدأ</value>
   </data>

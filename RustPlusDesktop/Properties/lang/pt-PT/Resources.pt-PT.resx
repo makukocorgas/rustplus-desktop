@@ -3900,15 +3900,6 @@ Pode encontrar mais informações no site oficial do servidor:
   <data name="ClanChatTitle" xml:space="preserve">
     <value>CHAT DO CLÃ</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>Queda de satélite</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>Um satélite está a cair!</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>Queda de satélite ativa – há {0}</value>
-  </data>
   <data name="ClanTab" xml:space="preserve">
     <value>Clã</value>
   </data>

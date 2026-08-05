@@ -3900,15 +3900,6 @@ Bạn có thể tìm thêm thông tin trên trang web chính thức của máy c
   <data name="ClanChatTitle" xml:space="preserve">
     <value>TRÒ CHUYỆN BANG HỘI</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>Vệ tinh rơi</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>Một vệ tinh đang rơi!</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>Vệ tinh rơi đang diễn ra – đã {0}</value>
-  </data>
   <data name="ClanTab" xml:space="preserve">
     <value>Bang hội</value>
   </data>

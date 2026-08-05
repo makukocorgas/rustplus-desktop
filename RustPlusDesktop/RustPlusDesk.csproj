@@ -153,8 +153,6 @@
 	  <None Remove="Assets\icons\powerstation.png" />
 	  <None Remove="Assets\icons\radtown.png" />
 	  <None Remove="Assets\icons\rust-c4.mp3" />
-	  <None Remove="Assets\icons\satellite.png" />
-	  <None Remove="Assets\icons\satellitecrash.png" />
 	  <None Remove="Assets\icons\satellitedish.png" />
 	  <None Remove="Assets\icons\save.png" />
 	  <None Remove="Assets\icons\sewerbranch.png" />
@@ -239,8 +237,6 @@
 	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 	  </Resource>
 	  <Resource Include="Assets\icons\recycler.png" />
-	  <Resource Include="Assets\icons\satellite.png" />
-	  <Resource Include="Assets\icons\satellitecrash.png" />
 	  <Resource Include="Assets\icons\smartalarm.png" />
 	  <Resource Include="Assets\icons\smartswitch.png" />
 	  <Resource Include="Assets\icons\automation.png" />

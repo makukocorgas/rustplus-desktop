@@ -101,12 +101,6 @@ public class TrackingSettings
     public bool AnnounceVendor { get; set; } = false;
     public bool AnnounceOilRig { get; set; } = false;
     public bool AnnounceDeepSea { get; set; } = false;
-    // "Satellite Crash" — a Rust event announced but not yet shipped (Naval Update follow-up,
-    // still on staging branch as of July 2026). Rust+ has no confirmed marker type or trigger
-    // for it yet, so detection cannot be wired up until the update ships and the protocol
-    // shape is known — see MainWindow.Map.SatelliteCrash.cs. This toggle is prepared ahead of
-    // time so it only needs the detection logic filled in later.
-    public bool AnnounceSatelliteCrash { get; set; } = false;
 
     /// <summary>
     /// Listen to the game's audio for server-wide monument cues on servers that no longer
@@ -1250,11 +1244,6 @@ public static class TrackingService
     {
         get => _settings.AnnounceDeepSea;
         set { _settings.AnnounceDeepSea = value; SaveSettings(); }
-    }
-    public static bool AnnounceSatelliteCrash
-    {
-        get => _settings.AnnounceSatelliteCrash;
-        set { _settings.AnnounceSatelliteCrash = value; SaveSettings(); }
     }
     public static bool AnnouncePlayerOnline
     {

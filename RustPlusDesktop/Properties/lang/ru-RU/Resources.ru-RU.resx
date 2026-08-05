@@ -4601,14 +4601,6 @@
   <data name="ClanChatTitle" xml:space="preserve">
     <value>ЧАТ КЛАНА</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>Падение спутника</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>Спутник падает!</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>Падение спутника активно – длится {0}</value>
   <data name="Tutorials.Status.NotStarted" xml:space="preserve">
     <value>Не начато</value>
   </data>

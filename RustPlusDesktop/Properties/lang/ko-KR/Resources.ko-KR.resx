@@ -3900,15 +3900,6 @@
   <data name="ClanChatTitle" xml:space="preserve">
     <value>클랜 채팅</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>위성 추락</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>위성이 추락하고 있습니다!</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>위성 추락 진행 중 – {0} 경과</value>
-  </data>
   <data name="ClanTab" xml:space="preserve">
     <value>클랜</value>
   </data>

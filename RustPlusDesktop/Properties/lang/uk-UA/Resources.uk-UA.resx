@@ -3900,15 +3900,6 @@
   <data name="ClanChatTitle" xml:space="preserve">
     <value>ЧАТ КЛАНУ</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>Падіння супутника</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>Супутник падає!</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>Падіння супутника активне – триває {0}</value>
-  </data>
   <data name="ClanTab" xml:space="preserve">
     <value>Клан</value>
   </data>

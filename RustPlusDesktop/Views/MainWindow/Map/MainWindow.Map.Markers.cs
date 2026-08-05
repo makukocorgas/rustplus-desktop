@@ -1020,7 +1020,6 @@ public partial class MainWindow
             _lastDynMarkers = combinedList;
             UpdateDynUI(combinedList);
             UpdateEventDock(combinedList);
-            CheckSatelliteCrashEvent(combinedList);
 
             _firstMarkerPollDone = true;
             _pollFailCount = 0; // Connection is healthy
@@ -1253,25 +1252,6 @@ public partial class MainWindow
             dsTip = string.Format(Properties.Resources.DeepSeaEndedAgo, FormatAgo(dsInactive));
         }
         activeEvents.Add(new EventDockItem { Name = Properties.Resources.DeepSea, Icon = "pack://application:,,,/Assets/icons/ds_event.png", Active = _deepSeaActive, Id = 0, X = 0, Y = 0, Trackable = false, Type = 0, TimerText = dsTimer, ToolTip = dsTip });
-
-        // 6. Satellite Crash — not yet shipped by Facepunch, see MainWindow.Map.SatelliteCrash.cs.
-        // Stays permanently inactive until TryDetectSatelliteCrash is implemented for real.
-        string? satTimer = null;
-        string? satTip = null;
-        if (_satelliteCrashActive && _satelliteCrashSpawnTime.HasValue)
-        {
-            var satElapsed = DateTime.UtcNow - _satelliteCrashSpawnTime.Value;
-            satTimer = satElapsed.TotalHours >= 1
-                ? string.Format(Properties.Resources.TimerHoursMinutes, (int)satElapsed.TotalHours, satElapsed.Minutes)
-                : string.Format(Properties.Resources.TimerMinutesSeconds, (int)satElapsed.TotalMinutes, satElapsed.Seconds);
-            satTip = string.Format(Properties.Resources.SatelliteCrashActiveRunningFor, FormatAgo(satElapsed));
-        }
-        else if (_satelliteCrashDespawnTime.HasValue)
-        {
-            var satAgo = DateTime.UtcNow - _satelliteCrashDespawnTime.Value;
-            satTimer = $"-{(int)satAgo.TotalMinutes}:{satAgo.Seconds:D2}";
-        }
-        activeEvents.Add(new EventDockItem { Name = Properties.Resources.SatelliteCrash, Icon = "pack://application:,,,/Assets/icons/satellite.png", Active = _satelliteCrashActive, Id = 0, X = 0, Y = 0, Trackable = false, Type = SatelliteCrashMarkerType, TimerText = satTimer, ToolTip = satTip });
 
         // On a server without event markers everything above was built from data that no
         // longer arrives. Replace it wholesale rather than patching each entry: the two
@@ -2228,7 +2208,6 @@ public partial class MainWindow
 
         CleanupCargoDockStates();
         UpdateHeliCrashSites();
-        UpdateSatelliteCrashSites();
         SyncLiveMarkersTo3DMap();
     }
 

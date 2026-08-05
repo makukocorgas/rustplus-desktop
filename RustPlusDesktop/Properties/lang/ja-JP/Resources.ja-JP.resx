@@ -3900,15 +3900,6 @@
   <data name="ClanChatTitle" xml:space="preserve">
     <value>クランチャット</value>
   </data>
-  <data name="SatelliteCrash" xml:space="preserve">
-    <value>衛星の墜落</value>
-  </data>
-  <data name="AlertSatelliteCrash" xml:space="preserve">
-    <value>衛星が墜落しています！</value>
-  </data>
-  <data name="SatelliteCrashActiveRunningFor" xml:space="preserve">
-    <value>衛星墜落中 — 経過時間 {0}</value>
-  </data>
   <data name="ClanTab" xml:space="preserve">
     <value>クラン</value>
   </data>
