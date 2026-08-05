@@ -212,6 +212,13 @@ public sealed class TutorialRegistry : ITutorialRegistry
             Step("deviceautomation.open", "DeviceAutomation.Open", "devices", TutorialPlacement.Top),
             Step("deviceautomation.actions", "DeviceAutomation.Actions", "device-automation", TutorialPlacement.Right),
             Step("deviceautomation.rules", "DeviceAutomation.Rules", "device-automation", TutorialPlacement.Right),
-            Step("deviceautomation.safety", placement: TutorialPlacement.Center))
+            Step("deviceautomation.safety", placement: TutorialPlacement.Center)),
+
+        Def("alarm-in-game-names", 225, "Automation", false, true,
+            // Two short steps rather than one long one: the first says what to do in Rust, the
+            // second what the app does with it. Both point at the device list, because that is
+            // where the result becomes visible.
+            Step("offlinealerts.alarmnames", "Devices.List", "devices", TutorialPlacement.Right),
+            Step("offlinealerts.alarmlearn", "Devices.Item.FirstAvailable", "devices", TutorialPlacement.Right))
     ];
 }
