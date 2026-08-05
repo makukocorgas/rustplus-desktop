@@ -1541,7 +1541,7 @@ Download and install now?</value>
     <value>[{0}] Crate unlocks in 5 minutes!</value>
   </data>
   <data name="AlertDeepSeaUp" xml:space="preserve">
-    <value>Deep Sea is up</value>
+    <value>Deep Sea is up (detected by audio)</value>
   </data>
   <data name="AlertSatelliteCrash" xml:space="preserve">
     <value>A satellite is crashing!</value>

@@ -1475,7 +1475,7 @@ Download og installer nu?</value>
     <value>[{0}] Kassen låses op om 5 minutter!</value>
   </data>
   <data name="AlertDeepSeaUp" xml:space="preserve">
-    <value>Deep Sea er oppe</value>
+    <value>Deep Sea er oppe (detected by audio)</value>
   </data>
   <data name="AlertNewShop" xml:space="preserve">
     <value>Ny butik {0} [{1}]: {2}</value>
