@@ -19,12 +19,12 @@
 
 	<PropertyGroup>
 		<!-- Produkt-/Paketversion (für Vergleich & Anzeige) -->
-		<Version>8.6.1</Version>
+		<Version>8.7.0</Version>
 		<Title>Rust+ Desk</Title>
 		<Authors>makukocorgas</Authors>
-		<AssemblyVersion>8.6.1</AssemblyVersion>
-		<FileVersion>8.6.1</FileVersion>
-		<InformationalVersion>8.6.1</InformationalVersion>
+		<AssemblyVersion>8.7.0</AssemblyVersion>
+		<FileVersion>8.7.0</FileVersion>
+		<InformationalVersion>8.7.0</InformationalVersion>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 		
 		<!-- (optional, hübsch im Datei-Eigenschaften-Dialog) -->
