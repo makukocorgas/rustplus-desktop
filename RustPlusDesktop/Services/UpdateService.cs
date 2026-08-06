@@ -96,12 +96,23 @@ namespace RustPlusDesk.Services
             }
         }
 
+        /// <summary>Why the last download failed, or empty. "Download failed" alone is useless
+        /// to whoever has to work out whether it was the network, the disk or a timeout.</summary>
+        public string LastDownloadError { get; private set; } = string.Empty;
+
         public async Task<string?> DownloadInstallerAsync(string url, IProgress<DownloadReport>? progress = null)
         {
             var target = Path.Combine(Path.GetTempPath(), InstallerAssetName);
             try
             {
-                using var http = new HttpClient();
+                using var http = new HttpClient
+                {
+                    // No wall-clock limit. The default is 100 seconds and it covers the whole
+                    // transfer, not just the connect — so a 500 MB installer needed roughly
+                    // 40 Mbit/s sustained just to avoid being cancelled mid-download. Anyone
+                    // slower could never finish, however long they waited.
+                    Timeout = System.Threading.Timeout.InfiniteTimeSpan
+                };
                 http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("RustPlusDesk", VersionForCompare.ToString()));
 
                 using var resp = await http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
@@ -140,8 +151,10 @@ namespace RustPlusDesk.Services
                 }
                 return target;
             }
-            catch
+            catch (Exception ex)
             {
+                LastDownloadError = ex.Message;
+                Debug.WriteLine($"Update download failed: {ex}");
                 return null;
             }
         }
