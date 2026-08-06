@@ -361,6 +361,27 @@ public static class TrackingService
                 var json = File.ReadAllText(_settingsPath);
                 _settings = JsonSerializer.Deserialize<TrackingSettings>(json) ?? new();
             }
+
+            // Local-only pass, independent of the team/guild cloud sync below: catches
+            // "{Host}:{Port}" left over from a past tracking add where the profile's name
+            // wasn't resolved yet, using whatever's saved on this PC right now. Doesn't need
+            // a team at all, so it runs for solo players too.
+            if (_trackedPlayers.Count > 0)
+            {
+                var localProfiles = StorageService.LoadProfiles();
+                bool backfilled = false;
+                foreach (var p in _trackedPlayers.Values)
+                {
+                    if (!LooksLikeRawServerKey(p.LastServerName)) continue;
+                    var resolved = ResolveServerDisplayName(p.LastServerName, EmptyServerNameMap, localProfiles);
+                    if (!string.Equals(resolved, p.LastServerName, StringComparison.Ordinal))
+                    {
+                        p.LastServerName = resolved;
+                        backfilled = true;
+                    }
+                }
+                if (backfilled) SaveDB();
+            }
         }
         catch { }
     }
@@ -570,7 +591,20 @@ public static class TrackingService
                 .Get();
 
             var cloudPlayers = res.Models ?? new List<BmTrackedPlayerModel>();
-            if (cloudPlayers.Count == 0) { _cloudRosterSyncedThisSession = true; return; }
+
+            // The player row only stores "{Host}:{Port}" (see PublishTrackedServerToSupabaseAsync
+            // and TrackPlayer's push), never a display name — a teammate's watchlist entry has
+            // no name to send on its own. bm_tracked_servers is where any team member's resolved
+            // BattleMetrics lookup publishes the real name for that same key, so check there
+            // first; this PC's own saved profiles are the fallback for servers only it knows.
+            var serverNamesRes = await SupabaseAuthManager.Client
+                .From<BmTrackedServerModel>()
+                .Where(x => x.GuildId == guildId)
+                .Get();
+            var cloudServerNames = (serverNamesRes.Models ?? new List<BmTrackedServerModel>())
+                .Where(s => !string.IsNullOrWhiteSpace(s.ServerName))
+                .ToDictionary(s => s.ServerKey, s => s.ServerName!, StringComparer.OrdinalIgnoreCase);
+            var savedProfiles = StorageService.LoadProfiles();
 
             bool changed = false;
             lock (_dbLock)
@@ -582,12 +616,26 @@ public static class TrackingService
                     {
                         BMId = cp.BmId,
                         Name = cp.Name ?? "Unknown Player",
-                        LastServerName = cp.ServerKey,
+                        LastServerName = ResolveServerDisplayName(cp.ServerKey, cloudServerNames, savedProfiles),
                         GroupName = cp.GroupName ?? "",
                         GroupColor = cp.GroupColor ?? "",
                         IsBMOnly = cp.IsBmOnly,
                     };
                     changed = true;
+                }
+
+                // Backfill: earlier syncs (or older builds) could have stored the raw key
+                // verbatim before a name was ever known. Re-resolve those in place too, now
+                // that bm_tracked_servers / local profiles may have caught up.
+                foreach (var p in _trackedPlayers.Values)
+                {
+                    if (!LooksLikeRawServerKey(p.LastServerName)) continue;
+                    var resolved = ResolveServerDisplayName(p.LastServerName, cloudServerNames, savedProfiles);
+                    if (!string.Equals(resolved, p.LastServerName, StringComparison.Ordinal))
+                    {
+                        p.LastServerName = resolved;
+                        changed = true;
+                    }
                 }
             }
 
@@ -602,6 +650,38 @@ public static class TrackingService
         {
             Log($"[BM/Supabase] Erro ao sincronizar watchlist da equipa: {ex.Message}");
         }
+    }
+
+    private static readonly System.Text.RegularExpressions.Regex RawServerKeyPattern =
+        new(@"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}[:\-]\d{1,5}$", System.Text.RegularExpressions.RegexOptions.Compiled);
+
+    private static readonly Dictionary<string, string> EmptyServerNameMap = new();
+
+    /// <summary>True for an unresolved "{IPv4}:{Port}" (or legacy "{IPv4}-{Port}") key, as
+    /// opposed to a real server display name — used to find backfill candidates.</summary>
+    private static bool LooksLikeRawServerKey(string? value) =>
+        !string.IsNullOrEmpty(value) && RawServerKeyPattern.IsMatch(value);
+
+    /// <summary>Resolves a "{Host}:{Port}" server key to a display name: the team's shared
+    /// bm_tracked_servers entry first, then this PC's own saved profiles, then the key itself
+    /// if neither side has ever seen it.</summary>
+    private static string ResolveServerDisplayName(
+        string serverKey, IReadOnlyDictionary<string, string> cloudServerNames, List<ServerProfile> savedProfiles)
+    {
+        if (string.IsNullOrEmpty(serverKey)) return serverKey;
+
+        if (cloudServerNames.TryGetValue(serverKey, out var cloudName) && !string.IsNullOrWhiteSpace(cloudName))
+            return cloudName;
+
+        int sep = serverKey.LastIndexOfAny(new[] { ':', '-' });
+        if (sep <= 0 || sep == serverKey.Length - 1) return serverKey;
+
+        string host = serverKey[..sep];
+        if (!int.TryParse(serverKey[(sep + 1)..], out int port)) return serverKey;
+
+        var match = savedProfiles.FirstOrDefault(p =>
+            string.Equals(p.Host, host, StringComparison.OrdinalIgnoreCase) && p.Port == port);
+        return !string.IsNullOrWhiteSpace(match?.Name) ? match!.Name : serverKey;
     }
 
     private static async Task PublishTrackedServerToSupabaseAsync(string battlemetricsServerId)

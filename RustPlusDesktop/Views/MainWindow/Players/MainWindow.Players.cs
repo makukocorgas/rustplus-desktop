@@ -254,7 +254,7 @@ public partial class MainWindow
     {
         if (sender is Button b && b.Name == "BtnShowOnline")
         {
-            MainTabs.SelectedIndex = 3; // Players tab
+            MainTabs.SelectedIndex = 4; // Players tab
         }
 
         if (_vm.Selected == null || string.IsNullOrEmpty(_vm.Selected.Host))
@@ -1111,12 +1111,12 @@ public partial class MainWindow
     {
         var win = new Window
         {
-            Title = "Players",
             Width = 500,
             Height = 700,
             WindowStartupLocation = WindowStartupLocation.CenterScreen,
             Background = new SolidColorBrush(Color.FromRgb(30, 32, 36)),
         };
+        win.SetResourceReference(Window.TitleProperty, "Players");
 
         var tabControl = new TabControl
         {
@@ -1146,7 +1146,8 @@ public partial class MainWindow
         var onlineForegroundBinding = new System.Windows.Data.Binding("Foreground") { Source = onlineTab };
         onlineIcon.SetBinding(Control.ForegroundProperty, onlineForegroundBinding);
 
-        var onlineText = new TextBlock { Text = "Online", VerticalAlignment = VerticalAlignment.Center };
+        var onlineText = new TextBlock { VerticalAlignment = VerticalAlignment.Center };
+        onlineText.SetResourceReference(TextBlock.TextProperty, "OnlineTab");
         onlineHeaderPanel.Children.Add(onlineIcon);
         onlineHeaderPanel.Children.Add(onlineText);
         onlineTab.Header = onlineHeaderPanel;
@@ -1172,7 +1173,8 @@ public partial class MainWindow
         var trackedForegroundBinding = new System.Windows.Data.Binding("Foreground") { Source = trackedTab };
         trackedIcon.SetBinding(Control.ForegroundProperty, trackedForegroundBinding);
 
-        var trackedText = new TextBlock { Text = RustPlusDesk.Properties.Resources.ResourceManager.GetString("TrackedTab") ?? "Tracked", VerticalAlignment = VerticalAlignment.Center };
+        var trackedText = new TextBlock { VerticalAlignment = VerticalAlignment.Center };
+        trackedText.SetResourceReference(TextBlock.TextProperty, "TrackedTab");
         trackedHeaderPanel.Children.Add(trackedIcon);
         trackedHeaderPanel.Children.Add(trackedText);
         trackedTab.Header = trackedHeaderPanel;
