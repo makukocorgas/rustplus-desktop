@@ -2094,6 +2094,11 @@ namespace RustPlusDesk.Properties {
         public static string UiSetAsLargeOilRigTrigger => GetString("UiSetAsLargeOilRigTrigger");
         public static string UiRemoveAsLargeOilRigTrigger => GetString("UiRemoveAsLargeOilRigTrigger");
         public static string UiInGameAlarmTitle => GetString("UiInGameAlarmTitle");
+        public static string Tutorials_Step_offlinealerts_alarmnames_Title => GetString("Tutorials.Step.offlinealerts.alarmnames.Title");
+        public static string Tutorials_Step_offlinealerts_alarmnames_Description => GetString("Tutorials.Step.offlinealerts.alarmnames.Description");
+        public static string Tutorials_Step_offlinealerts_alarmlearn_Title => GetString("Tutorials.Step.offlinealerts.alarmlearn.Title");
+        public static string Tutorials_Step_offlinealerts_alarmlearn_Description => GetString("Tutorials.Step.offlinealerts.alarmlearn.Description");
+        public static string ImportFromPreviousWipe => GetString("ImportFromPreviousWipe");
 
     }
 }
