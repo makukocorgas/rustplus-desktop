@@ -2810,11 +2810,13 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         bool raidSelected = MainTabs.SelectedItem == RaidCalculatorTab;
         bool craftSelected = MainTabs.SelectedItem == CraftCalculatorTab;
         bool recyclerSelected = MainTabs.SelectedItem == RecyclerCalculatorTab;
+        bool geneticsSelected = MainTabs.SelectedItem == GeneticsLabTab;
         RaidCalculatorPanel.Visibility = raidSelected ? Visibility.Visible : Visibility.Collapsed;
         CraftCalculatorPanel.Visibility = craftSelected ? Visibility.Visible : Visibility.Collapsed;
+        GeneticsLabPanel.Visibility = geneticsSelected ? Visibility.Visible : Visibility.Collapsed;
         if (raidSelected) _ = OfferNewFeatureTutorialOnceAsync("raid-calculator");
-        ServerContextPanel.Visibility = recyclerSelected ? Visibility.Collapsed : Visibility.Visible;
-        if (!raidSelected && !craftSelected && !recyclerSelected)
+        ServerContextPanel.Visibility = (recyclerSelected || geneticsSelected) ? Visibility.Collapsed : Visibility.Visible;
+        if (!raidSelected && !craftSelected && !recyclerSelected && !geneticsSelected)
             _lastWorkspaceTabIndex = MainTabs.SelectedIndex;
 
         if (MainTabs.SelectedItem == NotificationsTab)
@@ -2831,6 +2833,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     private void RaidCalculator_CloseRequested(object sender, RoutedEventArgs e) => ReturnToLastWorkspace();
 
     private void CraftCalculator_CloseRequested(object sender, RoutedEventArgs e) => ReturnToLastWorkspace();
+
+    private void GeneticsLab_CloseRequested(object sender, RoutedEventArgs e) => ReturnToLastWorkspace();
 
     private void ReturnToLastWorkspace() =>
         MainTabs.SelectedIndex = Math.Clamp(_lastWorkspaceTabIndex, 0, MainTabs.Items.Count - 1);

@@ -3301,6 +3301,17 @@
                             <views:NotificationsTabContent x:Name="NotificationsTabControl" />
                         </TabItem>
 
+                        <!--  ===== GENETICS LAB =====  -->
+                        <TabItem x:Name="GeneticsLabTab" Style="{StaticResource PrettyTabItem}" tutorials:Tutorial.TargetId="Navigation.GeneticsLab">
+                            <TabItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Symbol="LeafTwo24" Margin="0,0,6,0" VerticalAlignment="Center" FontSize="14" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}" />
+                                    <TextBlock VerticalAlignment="Center" Text="Genetics Lab" />
+                                </StackPanel>
+                            </TabItem.Header>
+                            <Grid />
+                        </TabItem>
+
                         <TabItem x:Name="RaidCalculatorTab" Style="{StaticResource PrettyTabItem}">
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal">
@@ -3588,6 +3599,12 @@
                                 <ui:Button x:Name="RailNotificationsButton" Style="{StaticResource SidebarRailButton}" AutomationProperties.Name="{DynamicResource NotificationsTab}" AutomationProperties.HelpText="{DynamicResource UiReviewAlertsAndRecentServerEvents}" Click="CompactSidebarTab_Click" Icon="{ui:SymbolIcon Symbol=Alert24}" Tag="{Binding ElementName=NotificationsTab}" />
                                 <Popup AllowsTransparency="True" HorizontalOffset="8" IsHitTestVisible="False" IsOpen="{Binding IsMouseOver, ElementName=RailNotificationsButton, Mode=OneWay}" Opened="SidebarTabPopover_Opened" Placement="Right" PlacementTarget="{Binding ElementName=RailNotificationsButton}" PopupAnimation="Fade" StaysOpen="True">
                                     <ContentControl Content="{Binding ElementName=RailNotificationsButton}" ContentTemplate="{StaticResource SidebarTabPopoverTemplate}" />
+                                </Popup>
+                            </Grid>
+                            <Grid>
+                                <ui:Button x:Name="RailGeneticsLabButton" Style="{StaticResource SidebarRailButton}" AutomationProperties.Name="Genetics Lab" AutomationProperties.HelpText="Calculate plant genetics, crossbreeding, and recipes" Click="CompactSidebarTab_Click" Icon="{ui:SymbolIcon Symbol=LeafTwo24}" Tag="{Binding ElementName=GeneticsLabTab}" />
+                                <Popup AllowsTransparency="True" HorizontalOffset="8" IsHitTestVisible="False" IsOpen="{Binding IsMouseOver, ElementName=RailGeneticsLabButton, Mode=OneWay}" Opened="SidebarTabPopover_Opened" Placement="Right" PlacementTarget="{Binding ElementName=RailGeneticsLabButton}" PopupAnimation="Fade" StaysOpen="True">
+                                    <ContentControl Content="{Binding ElementName=RailGeneticsLabButton}" ContentTemplate="{StaticResource SidebarTabPopoverTemplate}" />
                                 </Popup>
                             </Grid>
                             <Grid>
@@ -7758,6 +7775,17 @@
                 Panel.ZIndex="9000"
                 Visibility="Collapsed">
                 <views:CraftCalculatorView CloseRequested="CraftCalculator_CloseRequested" />
+            </Border>
+
+            <!--  Genetics Lab Overlay  -->
+            <Border
+                x:Name="GeneticsLabPanel"
+                Grid.ColumnSpan="3"
+                Padding="12"
+                Background="{DynamicResource AppBg}"
+                Panel.ZIndex="9000"
+                Visibility="Collapsed">
+                <views:GeneticsLabTabContent x:Name="GeneticsLabTabControl" CloseRequested="GeneticsLab_CloseRequested" />
             </Border>
 
             <!--  Delete Confirmation Overlay  -->
