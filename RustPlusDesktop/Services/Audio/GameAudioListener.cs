@@ -537,6 +537,12 @@ public sealed class GameAudioListener : IDisposable
 
     private static void Log(string message)
     {
+        // Persisted first: the in-app TextBox is invisible whenever the window is hidden/tray'd,
+        // which is the normal state for this listener's whole reason to exist (unattended
+        // background tracking) — without this sink there is no way to tell afterwards whether
+        // the listener ever started, calibrated, or matched anything.
+        TrackingService.LogExternal(message);
+
         try
         {
             var app = System.Windows.Application.Current;

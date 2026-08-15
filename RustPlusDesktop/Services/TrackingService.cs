@@ -431,6 +431,11 @@ public static class TrackingService
         catch { }
     }
 
+    /// <summary>Lets other services (e.g. the audio event listener) write into the same
+    /// persistent tracking_log.txt used here — the only sink that survives a hidden/tray
+    /// session, where nobody is watching the in-app log TextBox.</summary>
+    public static void LogExternal(string message) => Log(message);
+
     private static void Log(string message)
     {
         try
