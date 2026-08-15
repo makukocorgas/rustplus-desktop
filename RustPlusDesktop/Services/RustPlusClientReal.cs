@@ -168,6 +168,12 @@ public sealed class RustPlusClientReal : IRustPlusClient, IDisposable
     public event EventHandler<TeamChatMessage>? TeamChatReceived;
     public event EventHandler<TeamChatMessage>? ClanChatReceived;
 
+    // Real Rust+ push broadcasts (team roster/leader/notes changed; clan roster/MOTD changed).
+    // Fired the moment the server pushes a change — consumers that want live updates instead of
+    // waiting on the next poll can subscribe to these.
+    public event EventHandler? TeamInfoPushed;
+    public event EventHandler? ClanInfoPushed;
+
     // Overload ohne Token (falls irgendwo so aufgerufen wird)
     public Task ConnectAsync(ServerProfile profile) =>
     ConnectAsync(profile, CancellationToken.None);
@@ -2520,10 +2526,17 @@ rp.connect();
         }
     }
 
-    // Nothing currently subscribes to clan roster/MOTD push updates — MainWindow.Clan.Core.cs
-    // refreshes via LoadClanAsync() (manual refresh / periodic poll) instead. Wiring this up is
-    // required so the library actually enables the underlying subscription with the server.
-    private void Api_OnClanChanged(object? sender, RustPlusApi.Data.Events.ClanChangedEventArg e) { }
+    private void Api_OnClanChanged(object? sender, RustPlusApi.Data.Events.ClanChangedEventArg e)
+    {
+        try { ClanInfoPushed?.Invoke(this, EventArgs.Empty); }
+        catch { /* listener misbehaving must not take down the receive loop */ }
+    }
+
+    private void Api_OnTeamChanged(object? sender, RustPlusApi.Data.Events.TeamChangedEventArg e)
+    {
+        try { TeamInfoPushed?.Invoke(this, EventArgs.Empty); }
+        catch { /* listener misbehaving must not take down the receive loop */ }
+    }
 
 
     // --- Helper: in derselben Klasse einfügen -----------------------------------
@@ -2617,6 +2630,9 @@ rp.connect();
 
         _api.OnClanChanged -= Api_OnClanChanged;
         _api.OnClanChanged += Api_OnClanChanged;
+
+        _api.OnTeamChanged -= Api_OnTeamChanged;
+        _api.OnTeamChanged += Api_OnTeamChanged;
 
         _api.RequestSent += (_, reqObj) =>
         {
@@ -4154,85 +4170,6 @@ rp.connect();
         public List<ShopOrder> Orders { get; init; } = new();
     }
 
-    // -------- reflection helpers (in der Klasse) --------
-    private static object? Prop(object? o, string name)
-        => o?.GetType().GetProperty(
-               name,
-               System.Reflection.BindingFlags.Instance |
-               System.Reflection.BindingFlags.Public |
-               System.Reflection.BindingFlags.IgnoreCase
-           )?.GetValue(o);
-
-    private static string? ReadString(object? o, params string[] names)
-    {
-        foreach (var n in names)
-        {
-            var v = Prop(o, n);
-            if (v is string s && !string.IsNullOrWhiteSpace(s)) return s;
-        }
-        return null;
-    }
-
-    private static bool ReadBool(object? o, params string[] names)
-    {
-        foreach (var n in names)
-        {
-            var v = Prop(o, n);
-            if (v is bool b) return b;
-            if (v is int i) return i != 0;
-            if (bool.TryParse(v?.ToString(), out var bb)) return bb;
-        }
-        return false;
-    }
-
-    private static int ReadInt(object? o, params string[] names)
-    {
-        foreach (var n in names)
-        {
-            var v = Prop(o, n);
-            if (v is int i) return i;
-            if (v is long l) return (int)l;
-            if (v is double d) return (int)Math.Round(d);
-            if (int.TryParse(v?.ToString(), out var ii)) return ii;
-        }
-        return 0;
-    }
-
-    private static uint ReadUInt(object? o, params string[] names)
-    {
-        foreach (var n in names)
-        {
-            var v = Prop(o, n);
-            if (v is uint u) return u;
-            if (v is int i && i >= 0) return (uint)i;
-            if (uint.TryParse(v?.ToString(), out var uu)) return uu;
-            if (long.TryParse(v?.ToString(), out var ll) && ll >= 0) return (uint)ll;
-        }
-        return 0;
-    }
-
-    private static double ReadDouble(object? o, params string[] names)
-    {
-        foreach (var n in names)
-        {
-            var v = Prop(o, n);
-            if (v is double d) return d;
-            if (v is float f) return f;
-            if (v is int i) return i;
-            if (v is long l) return l;
-            if (double.TryParse(v?.ToString(), out var dd)) return dd;
-        }
-        return 0.0;
-    }
-
-    private static bool TryGetXY(object it, out double x, out double y)
-    {
-        var pos = Prop(it, "Position") ?? Prop(it, "Pos");
-        x = ReadDouble(pos ?? it, "X", "x", "Lon", "Longitude");
-        y = ReadDouble(pos ?? it, "Y", "y", "Lat", "Latitude");
-        return true;
-    }
-
     // NEW: dynamic marker bag
     public readonly struct DynMarker
     {
@@ -4474,274 +4411,67 @@ rp.connect();
     }
 }
 
+    // Real map markers via the typed RustPlusApi surface: each marker type lands in its own
+    // dictionary already classified server-side, so no Type-guessing/reflection is needed here
+    // any more. Norm codes kept identical to the pre-existing contract (1=Player, 4=CH47,
+    // 5=CargoShip, 6=TravellingVendor, 8=PatrolHelicopter) since the whole map-rendering pipeline
+    // (MainWindow.Map.Markers.cs and friends) branches on these exact values.
     public async Task<List<DynMarker>> GetDynamicMapMarkersAsync(CancellationToken ct = default)
     {
         if (_api is null) return LoadFromCache<List<DynMarker>>("markers") ?? new List<DynMarker>();
         void L(string s) => _log?.Invoke("[dyn] " + s);
 
-        // ---------- helpers (lokal, konfliktfrei benannt) ----------
-        static object? RProp(object? o, string name)
-            => o?.GetType().GetProperty(name,
-                   System.Reflection.BindingFlags.Instance |
-                   System.Reflection.BindingFlags.Public |
-                   System.Reflection.BindingFlags.IgnoreCase)
-                 ?.GetValue(o);
-
-        static string? RStr(object? o, params string[] names)
-        {
-            foreach (var n in names)
-            {
-                var v = RProp(o, n);
-                if (v is string s && !string.IsNullOrWhiteSpace(s)) return s;
-            }
-            return null;
-        }
-
-        static int RInt(object? o, params string[] names)
-        {
-            foreach (var n in names)
-            {
-                var v = RProp(o, n);
-                if (v is int i) return i;
-                if (v is uint u) return unchecked((int)u);
-                if (v is long l) return unchecked((int)l);
-                if (v is short s) return s;
-                if (v is byte b) return b;
-                if (v != null && v.GetType().IsEnum) return Convert.ToInt32(v);
-                if (int.TryParse(v?.ToString(), out var ii)) return ii;
-            }
-            return 0;
-        }
-
-        static uint RUInt(object? o, params string[] names)
-        {
-            foreach (var n in names)
-            {
-                var v = RProp(o, n);
-                if (v is uint u) return u;
-                if (v is int i && i >= 0) return (uint)i;
-                if (v is long l && l >= 0) return (uint)l;
-                if (uint.TryParse(v?.ToString(), out var uu)) return uu;
-            }
-            return 0u;
-        }
-
-        static ulong RULong(object? o, params string[] names)
-        {
-            foreach (var n in names)
-            {
-                var v = RProp(o, n);
-                if (v is ulong u) return u;
-                if (v is long l && l >= 0) return (ulong)l;
-                if (v is uint ui) return ui;
-                if (ulong.TryParse(v?.ToString(), out var uu)) return uu;
-            }
-            return 0UL;
-        }
-
-        static double RDbl(object? o, params string[] names)
-        {
-            foreach (var n in names)
-            {
-                var v = RProp(o, n);
-                if (v is double d) return d;
-                if (v is float f) return f;
-                if (v is int i) return i;
-                if (v is long l) return l;
-                if (double.TryParse(v?.ToString(), out var dd)) return dd;
-            }
-            return 0.0;
-        }
-
-        static bool TryXY(object it, out double x, out double y)
-        {
-            var pos = RProp(it, "Position") ?? RProp(it, "Pos");
-            x = RDbl(pos ?? it, "X", "x", "Lon", "Longitude");
-            y = RDbl(pos ?? it, "Y", "y", "Lat", "Latitude");
-            if (x == 0 && y == 0)
-            {
-                foreach (var p in it.GetType().GetProperties())
-                {
-                    var v = p.GetValue(it);
-                    if (v == null || v is string) continue;
-                    var px = v.GetType().GetProperty("X");
-                    var py = v.GetType().GetProperty("Y");
-                    if (px != null && py != null)
-                    {
-                        x = RDbl(v, "X");
-                        y = RDbl(v, "Y");
-                        break;
-                    }
-                }
-            }
-            return !(double.IsNaN(x) || double.IsNaN(y));
-        }
-
-        static bool LooksLikeShop(object it, int rawType)
-        {
-            // hard rule: MapMarker Type 3 ist VendingMachine => Shop
-            if (rawType == 3) return true;
-            var so = RProp(it, "SellOrders") ?? RProp(it, "Orders");
-            if (so is System.Collections.IEnumerable en)
-            {
-                foreach (var _ in en) return true; // hat mind. 1 Order
-            }
-            // Manche Builds hängen Orders in Child "Vending"/"Sales"
-            var vend = RProp(it, "Vending") ?? RProp(it, "Sales") ?? RProp(it, "Shop");
-            var so2 = RProp(vend, "SellOrders") ?? RProp(vend, "Orders");
-            if (so2 is System.Collections.IEnumerable en2)
-            {
-                foreach (var _ in en2) return true;
-            }
-            return false;
-        }
-
-        static (string kind, int norm) MapType(int rawType, string? label, string? typeName, ulong steamId)
-        {
-            // harte Matches
-            if (rawType == 1) return ("Player", 1);
-            if (rawType == 5) return ("Cargo Ship", 5);
-            if (rawType == 6) return ("Travelling Vendor", 6);
-            if (rawType == 4) return ("CH47", 4);
-            if (rawType == 8) return ("Patrol Helicopter", 8);
-            if (rawType == 9) return ("Travelling Vendor", 6); // alternative id
-            if (rawType == 2) return ("Explosion", 2);
-
-            // viele Server schicken die Kiste als GenericRadius
-            // -> wenn Label/TypeName "crate/hack/locked" enthält: als Locked Crate behandeln
-            var s = (label ?? "").ToLowerInvariant();
-            var tn = (typeName ?? "").ToLowerInvariant();
-
-            // Einige Implementierungen geben 0 + leer aus. Versuche dann den TypeName.
-            bool looksLikeCrateToken =
-                s.Contains("crate") || s.Contains("hack") || s.Contains("locked") ||
-                tn.Contains("crate") || tn.Contains("hack") || tn.Contains("locked");
-
-            if (rawType == 7 && looksLikeCrateToken) return ("Travelling Vendor", 6);
-            if (rawType == 0 && looksLikeCrateToken) return ("Travelling Vendor", 6);
-
-            // restliche Heuristik
-            if (steamId != 0 || s.Contains("player") || tn.Contains("player")) return ("Player", 1);
-            if (s.Contains("cargo") || tn.Contains("cargo")) return ("Cargo Ship", 5);
-            if (s.Contains("patrol") || tn.Contains("patrol")) return ("Patrol Helicopter", 8);
-            if (s.Contains("ch47") || s.Contains("chinook") || tn.Contains("ch47") || tn.Contains("chinook"))
-                return ("CH47", 4);
-            if (s.Contains("explosion") || s.Contains("debris") || tn.Contains("explosion") || tn.Contains("debris"))
-                return ("explosion", 2);
-
-            return ("Other", rawType != 0 ? rawType : 0);
-        }
-        // ------------------------------------------------------------
-
         var list = new List<DynMarker>();
 
         try
         {
-            // Nur PATH B (roh, enum-sicher)
-            var asm = typeof(RustPlus).Assembly;
-            var reqType = asm.GetTypes().FirstOrDefault(x => x.Name.Equals("AppRequest", StringComparison.OrdinalIgnoreCase));
-            var emptyType = asm.GetTypes().FirstOrDefault(x => x.Name.Equals("AppEmpty", StringComparison.OrdinalIgnoreCase));
-            if (reqType == null || emptyType == null) return list;
-
-            var req = Activator.CreateInstance(reqType)!;
-            reqType.GetProperty("GetMapMarkers",
-                    System.Reflection.BindingFlags.IgnoreCase |
-                    System.Reflection.BindingFlags.Instance |
-                    System.Reflection.BindingFlags.Public)
-                ?.SetValue(req, Activator.CreateInstance(emptyType)!);
-
-            var send = FindSendRequestAsync(_api.GetType(), reqType);
-            if (send == null) return list;
-
             await AcquireTokenAsync(ct);
-            var taskObj = send.Invoke(_api, BuildSendRequestArgs(send, req));
-            object? resp = taskObj;
-            if (taskObj is Task tsk)
+            var resp = await _api.GetMapMarkersAsync(ct).ConfigureAwait(false);
+
+            if (!resp.IsSuccess || resp.Data is null)
             {
-                await tsk.WaitAsync(ct).ConfigureAwait(false);
-                resp = tsk.GetType().GetProperty("Result")?.GetValue(tsk);
+                L(resp.Error?.Message is { } err ? $"error: {err}" : "empty response");
+                return LoadFromCache<List<DynMarker>>("markers") ?? list;
             }
 
-            if (!IsResponseValid(resp)) return LoadFromCache<List<DynMarker>>("markers") ?? list;
+            var mm = resp.Data;
 
-            var r = RProp(resp, "Response") ?? resp;
-            var mm = RProp(r, "MapMarkers");
-            
-            if (mm == null)
+            foreach (var kv in mm.PlayerMarkers)
             {
-                if (RProp(r, "Markers") != null || RProp(r, "Marker") != null || RProp(r, "Crates") != null)
-                    mm = r;
-                else
-                    return LoadFromCache<List<DynMarker>>("markers") ?? list;
+                var m = kv.Value;
+                var steamId = m.SteamId ?? 0;
+                var x = m.X ?? 0;
+                var y = m.Y ?? 0;
+
+                // "Bottom-left ghost" filter: an unidentified player-ish marker sitting at the
+                // map origin is noise, not a real teammate.
+                if (steamId == 0 && string.IsNullOrEmpty(m.Name) && x < 10 && y < 10) continue;
+
+                list.Add(new DynMarker((uint)(m.Id ?? kv.Key), 1, "Player", x, y, m.Name, m.Name, steamId));
             }
 
-            // Primärliste: "Markers" (alle dynamischen, inkl. Player/Events)
-            object? markers = RProp(mm, "Markers") ?? RProp(mm, "Marker");
-
-            var pool = new List<object>();
-            var seenLists = new HashSet<object>(ReferenceEqualityComparer.Instance); // dedup per Referenz
-
-            void AddEnum(object? maybe)
+            foreach (var kv in mm.CargoShipMarkers)
             {
-                if (maybe is System.Collections.IEnumerable en && maybe is not string)
-                {
-                    // Liste selbst deduplizieren (falls zweimal erreichbar)
-                    if (!seenLists.Add(en)) return;
-                    foreach (var it in en) if (it != null) pool.Add(it);
-                }
+                var m = kv.Value;
+                list.Add(new DynMarker((uint)(m.Id ?? kv.Key), 5, "Cargo Ship", m.X ?? 0, m.Y ?? 0, null, null, 0, m.Rotation ?? 0));
             }
 
-            // 1) Standard-Container
-            if (markers != null) AddEnum(markers);
-
-            // 2) explizite Crate-Container
-            AddEnum(RProp(mm, "Crates"));
-            AddEnum(RProp(mm, "HackableCrates"));
-            AddEnum(RProp(mm, "LockedCrates"));
-
-            // 3) generischer Fallback – bekannte Namen überspringen
-            var skipNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-{ "Markers", "Marker", "Crates", "HackableCrates", "LockedCrates" };
-
-            foreach (var p in (mm ?? r)!.GetType().GetProperties())
+            foreach (var kv in mm.Ch47Markers)
             {
-                if (skipNames.Contains(p.Name)) continue;
-                var v = p.GetValue(mm ?? r);
-                AddEnum(v);
+                var m = kv.Value;
+                list.Add(new DynMarker((uint)(m.Id ?? kv.Key), 4, "CH47", m.X ?? 0, m.Y ?? 0, null, null, 0, m.Rotation ?? 0));
             }
 
-            foreach (var it in pool)
+            foreach (var kv in mm.PatrolHelicopterMarkers)
             {
-                var id = RUInt(it, "Id", "ID", "EntityId", "Identifier", "Uid", "UID", "MarkerId");
-                var label = RStr(it, "Name", "Label", "Alias", "Token", "Note");
-                var pname = RStr(it, "PlayerName", "DisplayName", "UserName", "SteamName");
-                var rawType = RInt(it, "Type", "MarkerType", "TypeId", "TypeID", "type");
-                var typeNm = it.GetType().Name;
-                var steamId = RULong(it, "SteamId", "SteamID", "Steamid", "PlayerId", "UserId", "UserID");
-                // Shops raushalten
-                if (LooksLikeShop(it, rawType)) continue;
+                var m = kv.Value;
+                list.Add(new DynMarker((uint)(m.Id ?? kv.Key), 8, "Patrol Helicopter", m.X ?? 0, m.Y ?? 0, null, null, 0, m.Rotation ?? 0));
+            }
 
-                if (!TryXY(it, out var x, out var y)) continue;
-
-                
-
-                // "Bottom-left-Ghost" von Nicht-Teams wegfiltern:
-                // Wenn roh Player-artig, aber steamId==0 UND Label/Name leer UND sehr nah an 0/0 -> ignorieren
-                if ((rawType == 1 || (label is null && pname is null)) && steamId == 0 &&
-                    x < 10 && y < 10) continue;
-
-                if (LooksLikeShop(it, rawType))
-                {
-                    // OPTIONAL: Falls du leere Shops in der Shop-Liste tracken willst,
-                    // kannst du hier eine Übergabe an deine Vendors-Logik machen:
-                    // TrackVendorMarker(it, x, y, label, rawType);
-                    continue;
-                }
-
-                var (kind, norm) = MapType(rawType, label ?? pname, typeNm, steamId);
-                var rotation = (float)RDbl(it, "Rotation", "Rot", "Angle");
-
-                list.Add(new DynMarker(id, norm, kind, x, y, label, pname ?? label, steamId, rotation));
+            foreach (var kv in mm.TravellingVendorMarkers)
+            {
+                var m = kv.Value;
+                list.Add(new DynMarker((uint)(m.Id ?? kv.Key), 6, "Travelling Vendor", m.X ?? 0, m.Y ?? 0, null, null, 0, m.Rotation ?? 0));
             }
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
@@ -4755,7 +4485,7 @@ rp.connect();
             return LoadFromCache<List<DynMarker>>("markers") ?? list;
         }
 
-        if (list.Count > 0) 
+        if (list.Count > 0)
         {
             _consecutiveTimeouts = 0;
             SaveToCache("markers", list);
@@ -4770,305 +4500,66 @@ rp.connect();
         public int GetHashCode(object obj) => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
     }
 
-    private static int MarkerTypeOf(object it)
-    {
-        // tries int Type first …
-        var p = it.GetType().GetProperty("Type",
-            System.Reflection.BindingFlags.Instance |
-            System.Reflection.BindingFlags.Public |
-            System.Reflection.BindingFlags.IgnoreCase);
-
-        var v = p?.GetValue(it);
-        if (v is int i) return i;
-
-        // … or string/enum-ish
-        var s = v?.ToString()?.ToLowerInvariant();
-        if (string.IsNullOrWhiteSpace(s)) return -1;
-
-        if (int.TryParse(s, out var ii)) return ii;
-        if (s.Contains("vending")) return 3;
-        if (s.Contains("player")) return 1;
-        if (s.Contains("cargo")) return 5;
-        if (s.Contains("ch47") || s.Contains("chinook")) return 4; // some builds use 4
-        if (s.Contains("patrol")) return 8;
-        if (s.Contains("crate") || s.Contains("locked")) return 6;
-        return -1;
-    }
-
+    // Real vending-machine markers via the typed RustPlusApi surface. Every entry in
+    // MapMarkers.VendingMachineMarkers is already a confirmed vending machine (the library
+    // buckets by server-reported marker type), so no type-sniffing is needed any more.
     public async Task<List<ShopMarker>> GetVendingShopsAsync(CancellationToken ct = default)
     {
         if (_api is null) return LoadFromCache<List<ShopMarker>>("shops") ?? new List<ShopMarker>();
         void L(string s) => _log?.Invoke("[shops] " + s);
 
-        // local helpers (you already have most of these in your file)
-        static object? Prop(object? o, string name)
-            => o?.GetType().GetProperty(name,
-                System.Reflection.BindingFlags.Instance |
-                System.Reflection.BindingFlags.Public |
-                System.Reflection.BindingFlags.IgnoreCase)?.GetValue(o);
-
-        static string? ReadString(object? o, params string[] names)
+        static ShopOrder ToShopOrder(RustPlusApi.Data.VendingMachineItem o) => new()
         {
-            foreach (var n in names)
-            {
-                var v = Prop(o, n);
-                if (v is string s && !string.IsNullOrWhiteSpace(s)) return s;
-            }
-            return null;
-        }
-
-        static int ReadInt(object? o, params string[] names)
-        {
-            foreach (var n in names)
-            {
-                var v = Prop(o, n);
-                if (v is int i) return i;
-                if (v is uint u) return unchecked((int)u);
-                if (v is long l) return unchecked((int)l);
-                if (int.TryParse(v?.ToString(), out var ii)) return ii;
-            }
-            return 0;
-        }
-
-        static uint ReadUInt(object? o, params string[] names)
-        {
-            foreach (var n in names)
-            {
-                var v = Prop(o, n);
-                if (v is uint u) return u;
-                if (v is int i && i >= 0) return (uint)i;
-                if (v is long l && l >= 0) return (uint)l;
-                if (uint.TryParse(v?.ToString(), out var uu)) return uu;
-            }
-            return 0u;
-        }
-
-        static double ReadDouble(object? o, params string[] names)
-        {
-            foreach (var n in names)
-            {
-                var v = Prop(o, n);
-                if (v is double d) return d;
-                if (v is float f) return f;
-                if (v is int i) return i;
-                if (v is long l) return l;
-                if (double.TryParse(v?.ToString(), out var dd)) return dd;
-            }
-            return 0.0;
-        }
-
-        static bool TryGetXY(object it, out double x, out double y)
-        {
-            var pos = Prop(it, "Position") ?? Prop(it, "Pos");
-            x = ReadDouble(pos ?? it, "X", "x", "Lon", "Longitude");
-            y = ReadDouble(pos ?? it, "Y", "y", "Lat", "Latitude");
-
-            if (x == 0 && y == 0)
-            {
-                foreach (var p in it.GetType().GetProperties())
-                {
-                    var v = p.GetValue(it);
-                    if (v == null || v is string) continue;
-                    var px = v.GetType().GetProperty("X");
-                    var py = v.GetType().GetProperty("Y");
-                    if (px != null && py != null)
-                    {
-                        x = ReadDouble(v, "X");
-                        y = ReadDouble(v, "Y");
-                        break;
-                    }
-                }
-            }
-            return !(double.IsNaN(x) || double.IsNaN(y));
-        }
-
-        // ---- parse SellOrders → ShopOrder
-        static ShopOrder ParseOrder(object o) => new()
-        {
-            ItemId = ReadInt(o, "ItemId", "ItemID", "Itemid"),
-            Quantity = ReadInt(o, "Quantity", "Amount", "Qty"),
-            CurrencyItemId = ReadInt(o, "CurrencyItemId", "CurrencyId", "CurrencyID"),
-            CurrencyAmount = ReadInt(o, "CurrencyAmount", "Price", "Cost", "CostPerItem"),
-            Stock = ReadInt(o, "Stock", "AmountInStock", "Available"),
-            IsBlueprint =
-                ReadString(o, "IsBlueprint", "Blueprint")?.Equals("true", StringComparison.OrdinalIgnoreCase) == true ||
-                ReadInt(o, "IsBlueprint", "Blueprint") != 0,
-            ItemShortName = ReadString(o, "ItemShortName", "ShortName", "ItemName", "Item", "Name"),
-            CurrencyShortName = ReadString(o, "CurrencyShortName", "CurrencyName", "Currency")
+            ItemId = o.Id,
+            Quantity = o.StackSize,
+            CurrencyItemId = o.CurrencyId,
+            CurrencyAmount = o.CostPerStack,
+            Stock = o.StackSizeAmount,
+            IsBlueprint = o.IsItemBlueprint,
         };
-
-        static bool LooksLikeOrdersLabel(string? s)
-        {
-            if (string.IsNullOrWhiteSpace(s)) return false;
-            var t = s.ToLowerInvariant();
-            return t.Contains("item#") || t.Contains("curr#") || t.Contains("→") || t.Contains(";") || t.Contains("stock");
-        }
 
         static string? CleanLabel(string? raw)
         {
             if (string.IsNullOrWhiteSpace(raw)) return null;
             var s = raw.Trim().Replace('\r', ' ').Replace('\n', ' ');
-            if (LooksLikeOrdersLabel(s)) return null;
             if (s.Length > 48) s = s[..48] + "…";
             return s;
         }
 
-        void ExtractFromCollection(object col, List<ShopMarker> outList)
-        {
-            if (col is not System.Collections.IEnumerable list) return;
-
-            foreach (var it in list)
-            {
-                if (it is null) continue;
-
-                // *** HARD FILTER: must really be a vending (type==3) ***
-                var typeCode = MarkerTypeOf(it);
-                if (typeCode != 3) continue;
-
-                // must have some orders container at least
-                var ordersObj = Prop(it, "SellOrders") ?? Prop(it, "Orders");
-                if (ordersObj is null)
-                {
-                    var vend = Prop(it, "Vending") ?? Prop(it, "Sales") ?? Prop(it, "Shop");
-                    ordersObj = Prop(vend, "SellOrders") ?? Prop(vend, "Orders");
-                    if (ordersObj is null) continue; 
-                }
-
-                // coords
-                if (!TryGetXY(it, out var x, out var y)) continue;
-
-                // id + label
-                uint id = ReadUInt(it, "Id", "ID", "EntityId", "VendingMachineId", "Identifier", "Uid", "UID");
-                string? label = CleanLabel(ReadString(it, "Name", "Label", "Alias", "Token", "Note"));
-
-                // materialize orders
-                var orders = new List<ShopOrder>();
-                if (ordersObj is System.Collections.IEnumerable en)
-                {
-                    foreach (var o in en) if (o != null) orders.Add(ParseOrder(o));
-                }
-
-                var marker = new ShopMarker(id, x, y, label) { Orders = orders };
-                outList.Add(marker);
-            }
-        }
-
         var shops = new List<ShopMarker>();
 
-        // PATH A – library (some builds throw unknown marker type)
         try
         {
-            var t = _api.GetType();
-            var m = t.GetMethod("GetMapMarkersAsync", new[] { typeof(CancellationToken) })
-                 ?? t.GetMethod("GetMapMarkersAsync", Type.EmptyTypes)
-                 ?? t.GetMethod("GetMapMarkers", Type.EmptyTypes);
-
             await AcquireTokenAsync(ct);
-            object? call = m == null ? null :
-                (m.GetParameters().Length == 1 ? m.Invoke(_api, new object[] { ct }) : m.Invoke(_api, Array.Empty<object>()));
+            var resp = await _api.GetMapMarkersAsync(ct).ConfigureAwait(false);
 
-            object? result = call;
-            if (call is Task task)
+            if (!resp.IsSuccess || resp.Data is null)
             {
-                await task.WaitAsync(TimeSpan.FromSeconds(5), ct).ConfigureAwait(false);
-                result = task.GetType().GetProperty("Result")?.GetValue(task);
-            }
-
-            var data = Prop(result, "Data") ?? result;
-            var mm = Prop(data, "MapMarkers") ?? data;
-            
-            // prefer explicit vending list if present
-            var vend = Prop(mm, "VendingMachines") ?? Prop(mm, "Vending");
-            if (vend != null) ExtractFromCollection(vend, shops);
-            else if (mm != null && (Prop(mm, "Markers") != null || Prop(mm, "Marker") != null))
-            {
-                // Legit response, but no explicit VendingMachines list - generic scan will handle it
-            }
-            else if (mm != null)
-            {
-                // Legit response, but missing expected containers - don't fallback to stale cache here
-            }
-
-            // otherwise generic scan – but still needs type==3 inside ExtractFromCollection
-            if (shops.Count == 0 && data != null)
-            {
-                foreach (var p in data.GetType().GetProperties())
-                {
-                    var v = p.GetValue(data);
-                    if (v is System.Collections.IEnumerable en && v is not string)
-                        ExtractFromCollection(v, shops);
-                }
-            }
-        }
-        catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
-        catch (Exception ex) { CheckConnectionLost(ex); /* ignore, fallback next */ }
-
-        // PATH B – raw AppRequest (enum-agnostic)
-        if (shops.Count == 0)
-        {
-            try
-            {
-                var asm = typeof(RustPlus).Assembly;
-                var reqType = asm.GetTypes().FirstOrDefault(x => x.Name.Equals("AppRequest", StringComparison.OrdinalIgnoreCase));
-                var emptyTyp = asm.GetTypes().FirstOrDefault(x => x.Name.Equals("AppEmpty", StringComparison.OrdinalIgnoreCase));
-                if (reqType != null && emptyTyp != null)
-                {
-                    var req = Activator.CreateInstance(reqType)!;
-                    reqType.GetProperty("GetMapMarkers",
-                        System.Reflection.BindingFlags.IgnoreCase |
-                        System.Reflection.BindingFlags.Instance |
-                        System.Reflection.BindingFlags.Public)
-                       ?.SetValue(req, Activator.CreateInstance(emptyTyp)!);
-
-                    var send = FindSendRequestAsync(_api.GetType(), reqType);
-                    if (send != null)
-                    {
-                        await AcquireTokenAsync(ct);
-                        var taskObj = send.Invoke(_api, BuildSendRequestArgs(send, req));
-                        object? resp = taskObj;
-                        if (taskObj is Task tsk)
-                        {
-                            await tsk.WaitAsync(TimeSpan.FromSeconds(5), ct).ConfigureAwait(false);
-                            resp = tsk.GetType().GetProperty("Result")?.GetValue(tsk);
-                        }
-
-                        if (!IsResponseValid(resp))
-                        {
-                            return shops;
-                        }
-
-                        {
-                            var r = Prop(resp, "Response") ?? resp;
-                            var mm = Prop(r, "MapMarkers") ?? r;
-
-                            var vend = Prop(mm, "VendingMachines") ?? Prop(mm, "Vending");
-                            if (vend != null) ExtractFromCollection(vend, shops);
-                            if (shops.Count == 0 && mm != null)
-                            {
-                                foreach (var p in mm.GetType().GetProperties())
-                                {
-                                    var v = p.GetValue(mm);
-                                    if (v is System.Collections.IEnumerable en && v is not string)
-                                        ExtractFromCollection(v, shops);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (OperationCanceledException) when (ct.IsCancellationRequested)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                CheckConnectionLost(ex);
-                L("Error in GetVendingShopsAsync: " + ex.Message);
+                L(resp.Error?.Message is { } err ? $"error: {err}" : "empty response");
                 return shops;
             }
+
+            foreach (var kv in resp.Data.VendingMachineMarkers)
+            {
+                var vm = kv.Value;
+                var orders = vm.VendingMachineItems?.Select(ToShopOrder).ToList() ?? new List<ShopOrder>();
+                var id = (uint)(vm.Id ?? kv.Key);
+                var marker = new ShopMarker(id, vm.X ?? 0, vm.Y ?? 0, CleanLabel(vm.Name)) { Orders = orders };
+                shops.Add(marker);
+            }
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            CheckConnectionLost(ex);
+            L("Error in GetVendingShopsAsync: " + ex.Message);
+            return shops;
         }
 
-        if (shops.Count > 0) 
+        if (shops.Count > 0)
         {
             _consecutiveTimeouts = 0;
             SaveToCache("shops", shops);
@@ -7382,7 +6873,7 @@ rp.connect();
         if (o is null) return null;
         foreach (var n in names)
         {
-            var v = Prop(o, n);
+            var v = TryGetProp(o, n);
             if (v is string s && !string.IsNullOrWhiteSpace(s)) return s;
         }
         return null;
