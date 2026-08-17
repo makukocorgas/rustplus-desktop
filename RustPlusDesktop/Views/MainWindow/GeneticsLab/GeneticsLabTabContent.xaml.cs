@@ -111,7 +111,12 @@ namespace RustPlusDesk.Views
         {
             try
             {
-                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                // AppDomain.CurrentDomain.BaseDirectory (and AppContext.BaseDirectory, its alias)
+                // points at the single-file bundle's TEMP EXTRACTION folder in a self-contained
+                // single-file publish, not the real install directory — so it never finds
+                // Features\GeneticsLab\dist, which ships as loose, ExcludeFromSingleFile content
+                // next to the actual .exe. Environment.ProcessPath always resolves to the real exe.
+                string baseDir = Path.GetDirectoryName(Environment.ProcessPath) ?? AppDomain.CurrentDomain.BaseDirectory;
                 string distFolder = Path.Combine(baseDir, "Features", "GeneticsLab", "dist");
 
                 // In debug / development mode, look in project source tree if not in bin
@@ -153,6 +158,8 @@ namespace RustPlusDesk.Views
                 _sharedEnvironment.ProcessInfosChanged += SharedEnvironment_ProcessInfosChanged;
                 RefreshWebViewProcessIds();
 
+                RustPlusDesk.Services.TrackingService.LogExternal($"[genetics-lab] distFolder={distFolder} exists={Directory.Exists(distFolder)}");
+
                 if (Directory.Exists(distFolder))
                 {
                     GeneticsWebView.CoreWebView2.SetVirtualHostNameToFolderMapping(
@@ -162,6 +169,7 @@ namespace RustPlusDesk.Views
 
                     GeneticsWebView.NavigationCompleted += GeneticsWebView_NavigationCompleted;
 
+                    RustPlusDesk.Services.TrackingService.LogExternal("[genetics-lab] Navigating to https://geneticslab.rustplus/index.html");
                     GeneticsWebView.CoreWebView2.Navigate("https://geneticslab.rustplus/index.html");
                 }
                 else
@@ -174,12 +182,15 @@ namespace RustPlusDesk.Views
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[GeneticsLab] Failed to initialize WebView2: {ex.Message}");
+                RustPlusDesk.Services.TrackingService.LogExternal($"[genetics-lab] Failed to initialize WebView2: {ex}");
                 LoadingOverlay.Visibility = Visibility.Collapsed;
             }
         }
 
         private async void GeneticsWebView_NavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
         {
+            RustPlusDesk.Services.TrackingService.LogExternal(
+                $"[genetics-lab] NavigationCompleted IsSuccess={e.IsSuccess} WebErrorStatus={e.WebErrorStatus} Uri={GeneticsWebView.CoreWebView2?.Source}");
             LoadingOverlay.Visibility = Visibility.Collapsed;
             if (_performanceModeEnabled)
             {
