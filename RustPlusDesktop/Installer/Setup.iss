@@ -49,6 +49,12 @@ Source: "..\bin\Installer\publish\*"; DestDir: "{app}"; Flags: ignoreversion
 ; 2. Die Unterordner direkt aus dem Release-Verzeichnis
 Source: "..\bin\Installer\publish\Assets\*";    DestDir: "{app}\Assets";    Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\bin\Installer\publish\runtime\*";   DestDir: "{app}\runtime";   Flags: ignoreversion recursesubdirs createallsubdirs
+; "publish\*" above is non-recursive (Inno's plain wildcard doesn't descend into
+; subfolders without recursesubdirs), so any subfolder not listed here never reaches
+; the installed app. Features\GeneticsLab\dist was silently missing from every install
+; for exactly this reason: the tab would open but the WebView2 content area stayed
+; blank because Features\GeneticsLab\dist didn't exist under {app} to navigate to.
+Source: "..\bin\Installer\publish\Features\*";  DestDir: "{app}\Features";  Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
@@ -61,6 +67,7 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}
 Type: filesandordirs; Name: "{app}\runtimes"
 Type: filesandordirs; Name: "{app}\runtime"
 Type: filesandordirs; Name: "{app}\Assets"
+Type: filesandordirs; Name: "{app}\Features"
 
 [Code]
 // Jawads Aufräum-Logik (Sehr nützlich!)
