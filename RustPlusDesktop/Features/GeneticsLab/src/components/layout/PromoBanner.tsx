@@ -17,7 +17,7 @@ const DISMISS_KEY = 'GL_PROMO_DISMISSED_V1';
 const PROMO = {
   message: 'Enjoying Genetics Lab? It is free & open-source.',
   cta: 'Support development',
-  href: 'https://github.com/JawadYzbk/rust-genetics-lab'
+  href: 'https://github.com/makukocorgas/rustplus-desktop'
 };
 
 const isPremium = (): boolean =>

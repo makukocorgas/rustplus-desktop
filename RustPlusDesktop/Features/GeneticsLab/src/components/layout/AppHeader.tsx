@@ -193,7 +193,7 @@ export const AppHeader: React.FC = () => {
             <IconButton
               size="small"
               component="a"
-              href="https://github.com/JawadYzbk/rust-genetics-lab"
+              href="https://github.com/makukocorgas/rustplus-desktop"
               target="_blank"
               rel="noopener noreferrer"
               sx={{

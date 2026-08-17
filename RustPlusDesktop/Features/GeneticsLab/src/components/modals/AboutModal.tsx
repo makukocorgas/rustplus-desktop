@@ -95,7 +95,7 @@ export const AboutModal: React.FC = () => {
         <Button
           variant="outlined"
           component="a"
-          href="https://github.com/JawadYzbk/rust-genetics-lab"
+          href="https://github.com/makukocorgas/rustplus-desktop"
           target="_blank"
           rel="noopener noreferrer"
           startIcon={<GitHubIcon />}
