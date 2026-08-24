@@ -136,9 +136,33 @@ internal readonly HashSet<string> _camBusy = new(StringComparer.OrdinalIgnoreCas
     private MiniMapWindow? _miniMap;
     private VisualBrush? _miniMapBrush;
     // z.B. Click-Handler deines „Mini-Map“-Buttons:
-    private void BtnToggleMiniMap_Click(object sender, RoutedEventArgs e)
+    public void EnsureMiniMapOpen()
     {
-        if (_isMap3DActive) CloseMap3DView();
+        if (_miniMap == null || !_miniMap.IsVisible)
+        {
+            BtnToggleMiniMap_Click(null, null);
+        }
+    }
+
+    private async void BtnToggleMiniMap_Click(object? sender, RoutedEventArgs? e)
+    {
+        if (_vm.Selected?.IsFullConnected != true)
+        {
+            var prompt = new Wpf.Ui.Controls.MessageBox
+            {
+                Title = Properties.Resources.GetString("Tutorials.Step.minimap.intro.Title") ?? "Serververbindung erforderlich",
+                Content = Properties.Resources.GetString("Tutorials.Step.minimap.intro.Description") ?? "Bitte verbinde dich zuerst mit einem Server, um die Mini-Map zu nutzen.",
+                CloseButtonText = "OK",
+                ShowTitle = true,
+                Owner = this,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+            await prompt.ShowDialogAsync();
+            return;
+        }
+
+        if (_isMap3DActive)
+            CloseMap3DView();
 
         if (_miniMap == null || !_miniMap.IsVisible)
 
