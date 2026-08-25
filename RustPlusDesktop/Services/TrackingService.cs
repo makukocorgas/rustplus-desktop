@@ -87,8 +87,8 @@ public class TrackingSettings
     public bool AutoLoadShops { get; set; } = true;
     public bool HideConsole { get; set; } = true;
     public string BattleMetricsApiKey { get; set; } = "";
-    // Opt-in: use the in-process native FCM listener instead of the bundled Node fcm-listen.
-    public bool UseNativeFcmListener { get; set; } = false;
+    // Default on: use the in-process native FCM listener instead of the bundled Node fcm-listen.
+    public bool UseNativeFcmListener { get; set; } = true;
     public double SidebarWidth { get; set; } = 420;
     public bool SidebarPinned { get; set; } = true;
     public double WindowWidth { get; set; } = 1280;
