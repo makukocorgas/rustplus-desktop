@@ -98,15 +98,25 @@ public partial class MainWindow
     {
         try
         {
+            if (!RustPlusDesk.Services.Cloud.CloudAuth.IsAuthenticated)
+            {
+                _playerWipeTracker.ResetCapabilities();
+                _ = Dispatcher.BeginInvoke(() => PlayerWipeTrackerControl?.Refresh());
+                AppendLog("[Player Wipe Tracker] Not signed in to the cloud backend, so premium tracker features cannot be unlocked. Sign in from the Cloud account window.");
+                return;
+            }
+
             var client = new PlayerWipeTrackerCloudClient();
             using var response = await client.GetBootstrapAsync().ConfigureAwait(false);
             if (response is null)
             {
-                AppendLog("[Player Wipe Tracker] Capability sync failed: the cloud backend rejected the request or you're not signed in. Premium features stay locked until the next successful sync.");
+                _ = Dispatcher.BeginInvoke(() => PlayerWipeTrackerControl?.Refresh());
+                AppendLog("[Player Wipe Tracker] Capability sync failed: the cloud backend rejected the request. Premium features stay locked until the next successful sync.");
                 return;
             }
 
             var caps = _playerWipeTracker.UpdateCapabilities(response.RootElement);
+            _ = Dispatcher.BeginInvoke(() => PlayerWipeTrackerControl?.Refresh());
             AppendLog($"[Player Wipe Tracker] Plan '{caps.PlanCode}' · tracker {(caps.IsTrackerAvailable ? "on" : "off")}, team {(caps.CanTrackTeam ? "on" : "off")}, advanced views {(caps.CanUseAdvancedViews ? "on" : "off")}, cloud sync {(caps.CanUseCloudSync ? "on" : "off")}.");
         }
         catch (Exception ex)

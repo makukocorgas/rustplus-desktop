@@ -773,6 +773,9 @@ public partial class MainWindow : WpfUi.FluentWindow
 
         this.Closing += MainWindow_Closing;
         _ = EnsureWebView2Async();
+        Services.Auth.SupabaseAuthManager.AuthenticationChanged += SupabaseAuthManager_AuthenticationChanged;
+        Services.Cloud.CloudAuthManager.AuthenticationChanged += SupabaseAuthManager_AuthenticationChanged;
+        ContentRendered += MainWindow_ContentRendered;
         try { ClearAllToggleBusy(); } catch { }
         try { ResetAllBusyStates(); } catch { }
         this.Closed += MainWindow_Closed;
@@ -1310,6 +1313,9 @@ public partial class MainWindow : WpfUi.FluentWindow
 
     private void MainWindow_Closed(object? sender, EventArgs e)
     {
+        Services.Auth.SupabaseAuthManager.AuthenticationChanged -= SupabaseAuthManager_AuthenticationChanged;
+        Services.Cloud.CloudAuthManager.AuthenticationChanged -= SupabaseAuthManager_AuthenticationChanged;
+
         // Holen Sie alle laufenden "node"-Prozesse
         var nodes = System.Diagnostics.Process.GetProcessesByName("node");
 
@@ -1362,6 +1368,26 @@ public partial class MainWindow : WpfUi.FluentWindow
         }
         catch (Exception ex)
         { }
+    }
+
+    private void MainWindow_ContentRendered(object? sender, EventArgs e)
+    {
+        ContentRendered -= MainWindow_ContentRendered;
+    }
+
+    private void SupabaseAuthManager_AuthenticationChanged()
+    {
+        void RefreshAccountUi()
+        {
+            UpdateRustMapsUi();
+            UpdateCloudSyncUI();
+            _ = RefreshPlayerWipeTrackerCapabilitiesAsync();
+        }
+
+        if (Dispatcher.CheckAccess())
+            RefreshAccountUi();
+        else
+            _ = Dispatcher.BeginInvoke((Action)RefreshAccountUi);
     }
 
     // --- Chat Persistence & Switching ---
@@ -7316,7 +7342,12 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
     private void UpdateAppTitle()
     {
-        string title = $"RUST+ DESKTOP v{_updateService.VersionRaw}";
+        bool signedIn = Services.Auth.SupabaseAuthManager.IsDiscordAuthenticated ||
+                        Services.Auth.SupabaseAuthManager.IsEmailAuthenticated;
+        string plan = signedIn
+            ? Services.Auth.SupabaseAuthManager.IsPremium ? " - Premium" : " - Free"
+            : string.Empty;
+        string title = $"RUST+ DESKTOP{plan} v{_updateService.VersionRaw}";
         if (AppTitleBar != null) AppTitleBar.Title = title;
         this.Title = title;
     }
