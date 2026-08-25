@@ -6377,4 +6377,7 @@ Rust+ Desktop registers your local app with FCM so it can receive those same Rus
   <data name="ConsoleHelperLoadFailed" xml:space="preserve">
     <value>Could not load the command list. See the log for details.</value>
   </data>
+  <data name="ConsoleHelperSearchItem" xml:space="preserve">
+    <value>Search item…</value>
+  </data>
 </root>
