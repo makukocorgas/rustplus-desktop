@@ -6380,4 +6380,10 @@ Rust+ Desktop registers your local app with FCM so it can receive those same Rus
   <data name="ConsoleHelperSearchItem" xml:space="preserve">
     <value>Search item…</value>
   </data>
+  <data name="ConsoleHelperKeepOnTop" xml:space="preserve">
+    <value>Always on top — click to release</value>
+  </data>
+  <data name="ConsoleHelperNotOnTop" xml:space="preserve">
+    <value>Normal window — click to keep on top</value>
+  </data>
 </root>
