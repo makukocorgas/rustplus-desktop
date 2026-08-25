@@ -142,7 +142,7 @@ public partial class MainWindow
 
     private void SaveCurrentPlayerWipeMap()
     {
-        if (_playerWipeTracker.HasCurrentWipeMap || ImgMap.Source is not BitmapSource bitmap ||
+        if (ImgMap.Source is not BitmapSource bitmap ||
             _worldSizeS <= 0 || _worldRectPx.Width <= 0 || _worldRectPx.Height <= 0)
             return;
 

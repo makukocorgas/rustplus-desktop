@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,9 +12,9 @@ using RustPlusDesk.Services.Auth;
 namespace RustPlusDesk.Services.PlayerWipeTracker;
 
 /// <summary>
-/// Talks to our own Supabase edge function (<c>player-wipe-tracker</c>) via the same
-/// <see cref="SupabaseAuthManager.CallEdgeFunctionAsync"/> path every other cloud feature uses —
-/// same auth, same anon key, same backend. No third-party service is involved.
+/// Talks to our own Supabase edge functions (<c>player-wipe-tracker</c>, <c>server-wipe-maps</c>)
+/// via the same <see cref="SupabaseAuthManager.CallEdgeFunctionAsync"/> path every other cloud
+/// feature uses — same auth, same anon key, same backend. No third-party service is involved.
 /// </summary>
 public sealed class PlayerWipeTrackerCloudClient
 {
@@ -157,6 +158,101 @@ public sealed class PlayerWipeTrackerCloudClient
     private static JsonElement UnwrapData(JsonDocument document)
         => document.RootElement.TryGetProperty("data", out var data) ? data : document.RootElement;
 
+    private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(30) };
+
+    /// <summary>
+    /// Uploads via the <c>server-wipe-maps</c> edge function directly (multipart), since
+    /// <see cref="SupabaseAuthManager.CallEdgeFunctionAsync"/> only carries JSON payloads.
+    /// Same auth/URL scheme as every other Supabase call in the app.
+    /// </summary>
+    public async Task<int> UploadWipeMapAsync(
+        string serverKey,
+        string wipeKey,
+        byte[] mapPngBytes,
+        TrackerWipeMap mapMeta,
+        DateTime? wipeStartedAtUtc = null,
+        CancellationToken cancellationToken = default)
+    {
+        using var content = new MultipartFormDataContent();
+        content.Add(new StringContent(serverKey), "server_key");
+        content.Add(new StringContent(wipeKey), "wipe_key");
+        content.Add(new StringContent(mapMeta.WorldSize.ToString(CultureInfo.InvariantCulture)), "world_size");
+        content.Add(new StringContent(mapMeta.WorldRectX.ToString(CultureInfo.InvariantCulture)), "world_rect_x");
+        content.Add(new StringContent(mapMeta.WorldRectY.ToString(CultureInfo.InvariantCulture)), "world_rect_y");
+        content.Add(new StringContent(mapMeta.WorldRectWidth.ToString(CultureInfo.InvariantCulture)), "world_rect_width");
+        content.Add(new StringContent(mapMeta.WorldRectHeight.ToString(CultureInfo.InvariantCulture)), "world_rect_height");
+        if (wipeStartedAtUtc.HasValue)
+            content.Add(new StringContent(wipeStartedAtUtc.Value.ToString("o", CultureInfo.InvariantCulture)), "wipe_started_at");
+
+        if (mapPngBytes != null && mapPngBytes.Length > 0)
+        {
+            var imageContent = new ByteArrayContent(mapPngBytes);
+            imageContent.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+            content.Add(imageContent, "map_image", "map.png");
+        }
+
+        var url = $"{RustPlusDesk.Services.Data.DataManager.SUPABASE_URL.TrimEnd('/')}/functions/v1/server-wipe-maps";
+        using var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = content };
+        request.Headers.Add("apikey", RustPlusDesk.Services.Data.DataManager.SUPABASE_ANON_KEY);
+        request.Headers.Add("X-Client-Version", Helpers.VersionHelper.GetClientVersion());
+        var token = SupabaseAuthManager.Client?.Auth?.CurrentSession?.AccessToken;
+        if (!string.IsNullOrWhiteSpace(token))
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var response = await Http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+        return (int)response.StatusCode;
+    }
+
+    public async Task<TrackerWipeMap?> DownloadWipeMapAsync(string serverKey, string wipeKey, CancellationToken cancellationToken = default)
+    {
+        using var document = await SendJsonAsync(
+            HttpMethod.Get,
+            $"server-wipe-maps/{Uri.EscapeDataString(serverKey)}/{Uri.EscapeDataString(wipeKey)}",
+            null).ConfigureAwait(false);
+        if (document is null)
+            return null;
+
+        var data = UnwrapData(document);
+        if (data.ValueKind != JsonValueKind.Object)
+            return null;
+
+        var worldSize = Integer(data, "world_size");
+        var rx = Double(data, "world_rect_x");
+        var ry = Double(data, "world_rect_y");
+        var rw = Double(data, "world_rect_width");
+        var rh = Double(data, "world_rect_height");
+
+        byte[]? pngBytes = null;
+        try
+        {
+            var url = $"{RustPlusDesk.Services.Data.DataManager.SUPABASE_URL.TrimEnd('/')}/functions/v1/server-wipe-maps/{Uri.EscapeDataString(serverKey)}/{Uri.EscapeDataString(wipeKey)}/image";
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.Add("apikey", RustPlusDesk.Services.Data.DataManager.SUPABASE_ANON_KEY);
+            request.Headers.Add("X-Client-Version", Helpers.VersionHelper.GetClientVersion());
+            var token = SupabaseAuthManager.Client?.Auth?.CurrentSession?.AccessToken;
+            if (!string.IsNullOrWhiteSpace(token))
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            using var response = await Http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken).ConfigureAwait(false);
+            if (response.IsSuccessStatusCode)
+            {
+                pngBytes = await response.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+        catch
+        {
+            // Ignore map image download errors
+        }
+
+        return new TrackerWipeMap(
+            pngBytes ?? Array.Empty<byte>(),
+            worldSize,
+            rx,
+            ry,
+            rw,
+            rh);
+    }
+
     private static CloudArchiveSummary? ParseArchive(JsonElement item)
     {
         var id = String(item, "id");
@@ -173,9 +269,21 @@ public sealed class PlayerWipeTrackerCloudClient
             {
                 var steamId = String(player, "steam_id");
                 if (!string.IsNullOrWhiteSpace(steamId))
-                    players.Add(new CloudArchivePlayer(steamId, Integer(player, "day_count")));
+                {
+                    players.Add(new CloudArchivePlayer(
+                        steamId,
+                        Integer(player, "day_count"),
+                        String(player, "player_name"),
+                        Boolean(player, "is_linked"),
+                        String(player, "user_id"),
+                        String(player, "display_name"),
+                        String(player, "avatar_url")));
+                }
             }
         }
+
+        var hasMap = Boolean(item, "has_map");
+        var mapUrl = String(item, "map_url");
 
         return new CloudArchiveSummary(
             id,
@@ -187,13 +295,25 @@ public sealed class PlayerWipeTrackerCloudClient
             Date(item, "last_observed_at"),
             NullableInteger(item, "player_count"),
             Long(item, "stored_bytes"),
-            players);
+            players,
+            hasMap,
+            mapUrl);
     }
 
     private static string? String(JsonElement item, string property)
         => item.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
             ? value.GetString()
             : null;
+
+    private static bool Boolean(JsonElement item, string property)
+        => item.TryGetProperty(property, out var value) && (value.ValueKind == JsonValueKind.True || (value.ValueKind == JsonValueKind.False ? false : false));
+
+    private static double Double(JsonElement item, string property)
+    {
+        if (!item.TryGetProperty(property, out var value) || value.ValueKind != JsonValueKind.Number || !value.TryGetDouble(out var result))
+            return 0;
+        return result;
+    }
 
     private static DateTime? Date(JsonElement item, string property)
         => DateTimeOffset.TryParse(String(item, property), CultureInfo.InvariantCulture,
