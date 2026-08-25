@@ -160,51 +160,11 @@ public sealed class PlayerWipeTrackerCloudClient
 
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(30) };
 
-    /// <summary>
-    /// Uploads via the <c>server-wipe-maps</c> edge function directly (multipart), since
-    /// <see cref="SupabaseAuthManager.CallEdgeFunctionAsync"/> only carries JSON payloads.
-    /// Same auth/URL scheme as every other Supabase call in the app.
-    /// </summary>
-    public async Task<int> UploadWipeMapAsync(
-        string serverKey,
-        string wipeKey,
-        byte[] mapPngBytes,
-        TrackerWipeMap mapMeta,
-        DateTime? wipeStartedAtUtc = null,
-        CancellationToken cancellationToken = default)
-    {
-        using var content = new MultipartFormDataContent();
-        content.Add(new StringContent(serverKey), "server_key");
-        content.Add(new StringContent(wipeKey), "wipe_key");
-        content.Add(new StringContent(mapMeta.WorldSize.ToString(CultureInfo.InvariantCulture)), "world_size");
-        content.Add(new StringContent(mapMeta.WorldRectX.ToString(CultureInfo.InvariantCulture)), "world_rect_x");
-        content.Add(new StringContent(mapMeta.WorldRectY.ToString(CultureInfo.InvariantCulture)), "world_rect_y");
-        content.Add(new StringContent(mapMeta.WorldRectWidth.ToString(CultureInfo.InvariantCulture)), "world_rect_width");
-        content.Add(new StringContent(mapMeta.WorldRectHeight.ToString(CultureInfo.InvariantCulture)), "world_rect_height");
-        if (wipeStartedAtUtc.HasValue)
-            content.Add(new StringContent(wipeStartedAtUtc.Value.ToString("o", CultureInfo.InvariantCulture)), "wipe_started_at");
-
-        if (mapPngBytes != null && mapPngBytes.Length > 0)
-        {
-            var imageContent = new ByteArrayContent(mapPngBytes);
-            imageContent.Headers.ContentType = new MediaTypeHeaderValue("image/png");
-            content.Add(imageContent, "map_image", "map.png");
-        }
-
-        var url = $"{RustPlusDesk.Services.Data.DataManager.SUPABASE_URL.TrimEnd('/')}/functions/v1/server-wipe-maps";
-        using var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = content };
-        request.Headers.Add("apikey", RustPlusDesk.Services.Data.DataManager.SUPABASE_ANON_KEY);
-        request.Headers.Add("X-Client-Version", Helpers.VersionHelper.GetClientVersion());
-        var token = SupabaseAuthManager.Client?.Auth?.CurrentSession?.AccessToken;
-        if (!string.IsNullOrWhiteSpace(token))
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-        using var response = await Http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
-        return (int)response.StatusCode;
-    }
-
     public async Task<TrackerWipeMap?> DownloadWipeMapAsync(string serverKey, string wipeKey, CancellationToken cancellationToken = default)
     {
+        // Reads from the decoupled /server-wipe-maps API (the old
+        // /player-wipe-tracker/maps routes were retired). Uploading lives in
+        // ServerWipeMapCloudClient; this stays here only for the archive restore.
         using var document = await SendJsonAsync(
             HttpMethod.Get,
             $"server-wipe-maps/{Uri.EscapeDataString(serverKey)}/{Uri.EscapeDataString(wipeKey)}",
@@ -221,6 +181,9 @@ public sealed class PlayerWipeTrackerCloudClient
         var ry = Double(data, "world_rect_y");
         var rw = Double(data, "world_rect_width");
         var rh = Double(data, "world_rect_height");
+        var oceanMargin = Double(data, "ocean_margin");
+        var monuments = ParseMonuments(data, "monuments");
+        monuments.AddRange(ParseMonuments(data, "extra_monuments"));
 
         byte[]? pngBytes = null;
         try
@@ -250,7 +213,30 @@ public sealed class PlayerWipeTrackerCloudClient
             rx,
             ry,
             rw,
-            rh);
+            rh,
+            oceanMargin,
+            monuments);
+    }
+
+    private static List<TrackerMonument> ParseMonuments(JsonElement data, string property)
+    {
+        var result = new List<TrackerMonument>();
+        if (!data.TryGetProperty(property, out var array) || array.ValueKind != JsonValueKind.Array)
+            return result;
+
+        foreach (var item in array.EnumerateArray())
+        {
+            if (item.ValueKind != JsonValueKind.Object)
+                continue;
+
+            var name = String(item, "name");
+            if (string.IsNullOrWhiteSpace(name))
+                continue;
+
+            result.Add(new TrackerMonument(name, Double(item, "x"), Double(item, "y"), String(item, "size")));
+        }
+
+        return result;
     }
 
     private static CloudArchiveSummary? ParseArchive(JsonElement item)
