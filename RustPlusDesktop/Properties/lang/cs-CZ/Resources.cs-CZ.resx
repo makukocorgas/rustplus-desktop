@@ -857,7 +857,7 @@ Stáhnout a nainstalovat nyní?</value>
     <value>Povolit sledování přehrávače na pozadí</value>
   </data>
   <data name="BackgroundTrackingToolTip" xml:space="preserve">
-    <value>Udržuje sledování hráčů přes BattleMetrics i když je minimalizováno.</value>
+    <value>Keeps polling the server for its player count while the app is minimized.</value>
   </data>
   <data name="HideSystemConsole" xml:space="preserve">
     <value>Skrýt systémovou konzoli (dešifrování)</value>

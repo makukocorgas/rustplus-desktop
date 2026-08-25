@@ -857,7 +857,7 @@ Download og installer nu?</value>
     <value>Aktiver Background Player Tracking</value>
   </data>
   <data name="BackgroundTrackingToolTip" xml:space="preserve">
-    <value>Holder sporing spillere via BattleMetrics selv når minimeret.</value>
+    <value>Keeps polling the server for its player count while the app is minimized.</value>
   </data>
   <data name="HideSystemConsole" xml:space="preserve">
     <value>Skjul Systemkonsol (Declutter)</value>

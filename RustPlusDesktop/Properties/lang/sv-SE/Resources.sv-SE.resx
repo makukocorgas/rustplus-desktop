@@ -857,7 +857,7 @@ Ladda ner och installera nu?</value>
     <value>Aktivera spårning av bakgrundsspelare</value>
   </data>
   <data name="BackgroundTrackingToolTip" xml:space="preserve">
-    <value>Håller spårning spelare via BattleMetrics även när minimeras.</value>
+    <value>Keeps polling the server for its player count while the app is minimized.</value>
   </data>
   <data name="HideSystemConsole" xml:space="preserve">
     <value>Dölj systemkonsolen (Declutter)</value>

@@ -899,7 +899,7 @@ Download and install now?</value>
     <value>Enable Background Player Tracking</value>
   </data>
   <data name="BackgroundTrackingToolTip" xml:space="preserve">
-    <value>Keeps tracking players via BattleMetrics even when minimized.</value>
+    <value>Keeps polling the server for its player count while the app is minimized.</value>
   </data>
   <data name="HideSystemConsole" xml:space="preserve">
     <value>Hide System Console (Declutter)</value>

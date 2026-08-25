@@ -857,7 +857,7 @@ Télécharger et installer maintenant ?</value>
     <value>Activer le suivi des joueurs en arrière-plan</value>
   </data>
   <data name="BackgroundTrackingToolTip" xml:space="preserve">
-    <value>Garde le suivi des joueurs via les métriques de bataille, même lorsqu'il est minimisé.</value>
+    <value>Continue d'interroger le serveur pour connaître le nombre de joueurs, même une fois l'application réduite.</value>
   </data>
   <data name="HideSystemConsole" xml:space="preserve">
     <value>Cacher la console système (dégraissant)</value>
