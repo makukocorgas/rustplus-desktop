@@ -249,31 +249,54 @@ public partial class ConsoleHelperOverlay : UserControl
         if (!_loggedPopupState)
         {
             _loggedPopupState = true;
-            Log($"[console-helper] suggestion popup found, open={popup.IsOpen}, " +
-                $"host={Window.GetWindow(this)?.GetType().Name ?? "none"}");
+            Log($"[console-helper] suggestion popup found, host={Window.GetWindow(this)?.GetType().Name ?? "none"}");
         }
 
-        if (!popup.IsOpen) return;
-
-        // A Popup is its own top-level window and is not topmost, so inside the always-on-top
-        // popout it opens behind the panel. Raising it costs nothing where it is unnecessary.
-        Dispatcher.BeginInvoke(new Action(() =>
-        {
-            try
-            {
-                if (popup.Child != null &&
-                    PresentationSource.FromVisual(popup.Child) is System.Windows.Interop.HwndSource src)
-                    NativeTopmost.Promote(src.Handle);
-            }
-            catch { }
-        }), System.Windows.Threading.DispatcherPriority.Loaded);
+        // Reading Popup.IsOpen here is useless: this fires on IsSuggestionListOpen, and the
+        // binding onto the popup has not propagated yet, so it still reads false. Opened is the
+        // signal that actually means the popup window exists.
+        popup.Opened -= Popup_Opened;
+        popup.Opened += Popup_Opened;
     }
 
     private bool _loggedPopupState;
+    private bool _loggedPopupOpened;
 
     private static void Log(string line)
     {
         if (Application.Current?.MainWindow is MainWindow mw) mw.AppendLog(line);
+    }
+
+    private void Popup_Opened(object? sender, EventArgs e)
+    {
+        if (sender is not System.Windows.Controls.Primitives.Popup popup) return;
+        if (popup.Child == null) return;
+
+        // The popup's HWND only exists once it has been rendered, so this has to wait a beat.
+        Dispatcher.BeginInvoke(new Action(() =>
+        {
+            try
+            {
+                var src = PresentationSource.FromVisual(popup.Child) as System.Windows.Interop.HwndSource;
+                if (src != null) NativeTopmost.Promote(src.Handle);
+
+                if (!_loggedPopupOpened)
+                {
+                    _loggedPopupOpened = true;
+                    Log($"[console-helper] suggestion popup opened, hwnd={(src?.Handle ?? IntPtr.Zero)}, " +
+                        $"size={popup.Child.RenderSize.Width:F0}x{popup.Child.RenderSize.Height:F0}, " +
+                        $"raised={(src != null)}");
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!_loggedPopupOpened)
+                {
+                    _loggedPopupOpened = true;
+                    Log($"[console-helper] could not raise the suggestion popup: {ex.Message}");
+                }
+            }
+        }), System.Windows.Threading.DispatcherPriority.Loaded);
     }
 
     private static T? FindDescendant<T>(DependencyObject root) where T : DependencyObject
