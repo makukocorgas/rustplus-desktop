@@ -190,6 +190,8 @@ public partial class ConsoleHelperOverlay : UserControl
     /// opens behind the panel and looks broken. Promoting the popup's own window fixes it, and
     /// only ever runs when the host window is actually topmost.
     /// </summary>
+    private bool _loggedPickerState;
+
     private void ItemPicker_Loaded(object sender, RoutedEventArgs e)
     {
         if (sender is not DependencyObject box) return;
@@ -199,28 +201,79 @@ public partial class ConsoleHelperOverlay : UserControl
         var popup = FindDescendant<System.Windows.Controls.Primitives.Popup>(box);
         if (popup == null) return;
 
-        popup.Opened -= Popup_Opened;
-        popup.Opened += Popup_Opened;
+        if (!_loggedPickerState)
+        {
+            _loggedPickerState = true;
+            Log($"[console-helper] item picker ready, {ItemNames.Count} items, " +
+                $"host={Window.GetWindow(this)?.GetType().Name ?? "none"}");
+        }
+
+        HookSuggestionList(box);
     }
 
-    private void Popup_Opened(object? sender, EventArgs e)
+    /// <summary>
+    /// Watches IsSuggestionListOpen instead of hunting for the popup at load time. The template
+    /// is not reliably applied when Loaded fires, so the earlier lookup could return nothing and
+    /// silently do no work. By the time the list reports itself open, the popup certainly exists.
+    /// </summary>
+    private void HookSuggestionList(WpfUi.AutoSuggestBox box)
     {
-        if (sender is not System.Windows.Controls.Primitives.Popup popup) return;
-        if (popup.Child == null) return;
+        var descriptor = System.ComponentModel.DependencyPropertyDescriptor.FromName(
+            "IsSuggestionListOpen", typeof(WpfUi.AutoSuggestBox), typeof(WpfUi.AutoSuggestBox));
 
-        // The popup's HWND only exists once it has been rendered, so this has to wait a beat.
+        if (descriptor == null)
+        {
+            Log("[console-helper] IsSuggestionListOpen not found - suggestion list left to WPF.");
+            return;
+        }
+
+        descriptor.RemoveValueChanged(box, OnSuggestionListToggled);
+        descriptor.AddValueChanged(box, OnSuggestionListToggled);
+    }
+
+    private void OnSuggestionListToggled(object? sender, EventArgs e)
+    {
+        if (sender is not WpfUi.AutoSuggestBox box) return;
+
+        var popup = FindDescendant<System.Windows.Controls.Primitives.Popup>(box);
+        if (popup == null)
+        {
+            if (!_loggedPopupState)
+            {
+                _loggedPopupState = true;
+                Log("[console-helper] suggestion popup not found in the control template.");
+            }
+            return;
+        }
+
+        if (!_loggedPopupState)
+        {
+            _loggedPopupState = true;
+            Log($"[console-helper] suggestion popup found, open={popup.IsOpen}, " +
+                $"host={Window.GetWindow(this)?.GetType().Name ?? "none"}");
+        }
+
+        if (!popup.IsOpen) return;
+
+        // A Popup is its own top-level window and is not topmost, so inside the always-on-top
+        // popout it opens behind the panel. Raising it costs nothing where it is unnecessary.
         Dispatcher.BeginInvoke(new Action(() =>
         {
             try
             {
-                if (PresentationSource.FromVisual(popup.Child) is System.Windows.Interop.HwndSource src)
+                if (popup.Child != null &&
+                    PresentationSource.FromVisual(popup.Child) is System.Windows.Interop.HwndSource src)
                     NativeTopmost.Promote(src.Handle);
             }
-            catch
-            {
-                // Worst case the list stays behind the panel, which is where it was before.
-            }
+            catch { }
         }), System.Windows.Threading.DispatcherPriority.Loaded);
+    }
+
+    private bool _loggedPopupState;
+
+    private static void Log(string line)
+    {
+        if (Application.Current?.MainWindow is MainWindow mw) mw.AppendLog(line);
     }
 
     private static T? FindDescendant<T>(DependencyObject root) where T : DependencyObject
