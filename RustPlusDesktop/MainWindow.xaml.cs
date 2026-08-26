@@ -1528,6 +1528,7 @@ public partial class MainWindow : WpfUi.FluentWindow
             SaveClanChatHistory(_lastChatProfile);
             _lastChatProfile = null; // No current server
             _cameraIds = new ObservableCollection<string>();
+            _cameraNames = new Dictionary<string, string>();
             RebuildCameraTiles();
             return;
         }
@@ -1559,7 +1560,9 @@ public partial class MainWindow : WpfUi.FluentWindow
         }
         
         srv.CameraIds ??= new ObservableCollection<string>(); // Ensure CameraIds is initialized
-        _cameraIds = srv.CameraIds;          
+        srv.CameraNames ??= new Dictionary<string, string>();
+        _cameraIds = srv.CameraIds;
+        _cameraNames = srv.CameraNames;
         RebuildCameraTiles();
         EnsureCamThumbPolling();
     }
