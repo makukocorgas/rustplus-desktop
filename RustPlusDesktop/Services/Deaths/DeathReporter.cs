@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -11,14 +12,41 @@ using RustPlusDesk.Services.Auth;
 namespace RustPlusDesk.Services.Deaths
 {
     /// <summary>
-    /// Persists a detected death to a local JSON-lines log.
+    /// Persists a detected death. Every account keeps a local JSON-lines log
+    /// (the free tier); premium accounts also push it to our own Supabase-backed
+    /// team death log (the <c>death-stats</c> edge function). Cloud failures are
+    /// swallowed — the local record is the source of truth and a later sync/backfill
+    /// can reconcile.
     /// </summary>
     public static class DeathReporter
     {
         public static async Task ReportAsync(DeathRecord death, string serverKey)
         {
             AppendLocal(death, serverKey);
-            await Task.CompletedTask;
+
+            if (!SupabaseAuthManager.IsPremium)
+                return;
+
+            try
+            {
+                await SupabaseAuthManager.CallEdgeFunctionAsync("death-stats", HttpMethod.Post, payload: new
+                {
+                    server_key = serverKey,
+                    victim_steam_id = death.SteamId.ToString(CultureInfo.InvariantCulture),
+                    victim_name = death.Name,
+                    pos_x = death.X,
+                    pos_y = death.Y,
+                    grid = death.Grid,
+                    location_type = death.LocationType,
+                    location_name = death.LocationName,
+                    died_at = ToIso(death.DeathTime),
+                    spawn_at = death.SpawnTime.HasValue ? ToIso(death.SpawnTime.Value) : null,
+                });
+            }
+            catch
+            {
+                // Best-effort: the local log already has it.
+            }
         }
 
         /// <summary>Flush the team's cloud death log for a server (called on wipe). Premium-only.</summary>
@@ -30,9 +58,9 @@ namespace RustPlusDesk.Services.Deaths
             try
             {
                 await SupabaseAuthManager.CallEdgeFunctionAsync(
-                    "sync/deaths",
+                    "death-stats",
                     HttpMethod.Delete,
-                    queryParams: new System.Collections.Generic.Dictionary<string, string> { ["server_key"] = serverKey });
+                    queryParams: new Dictionary<string, string> { ["server_key"] = serverKey });
             }
             catch
             {

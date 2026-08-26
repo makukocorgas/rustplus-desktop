@@ -139,6 +139,12 @@ namespace RustPlusDesk.Services.Data
                     File.Copy(hotkeysPath, Path.Combine(tempDir, "hotkeys.json"), true);
                 }
 
+                string mapSettingsPath = Path.Combine(DataManager.AppDir, "map_settings.json");
+                if (File.Exists(mapSettingsPath))
+                {
+                    File.Copy(mapSettingsPath, Path.Combine(tempDir, "map_settings.json"), true);
+                }
+
                 string shopAlertsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "shop_alerts.json");
                 if (File.Exists(shopAlertsPath))
                 {
@@ -259,6 +265,14 @@ namespace RustPlusDesk.Services.Data
                 {
                     Directory.CreateDirectory(DataManager.AppDir);
                     File.Copy(stagingHotkeys, Path.Combine(DataManager.AppDir, "hotkeys.json"), true);
+                }
+
+                // Restore map_settings.json
+                string stagingMapSettings = Path.Combine(tempDir, "map_settings.json");
+                if (File.Exists(stagingMapSettings))
+                {
+                    Directory.CreateDirectory(DataManager.AppDir);
+                    File.Copy(stagingMapSettings, Path.Combine(DataManager.AppDir, "map_settings.json"), true);
                 }
 
                 // 5. Restore custom_crosshairs.json

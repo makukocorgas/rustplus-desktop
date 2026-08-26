@@ -2811,12 +2811,18 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         bool craftSelected = MainTabs.SelectedItem == CraftCalculatorTab;
         bool recyclerSelected = MainTabs.SelectedItem == RecyclerCalculatorTab;
         bool geneticsSelected = MainTabs.SelectedItem == GeneticsLabTab;
+        bool wipeTrackerSelected = MainTabs.SelectedItem == PlayerWipeTrackerTab;
+        bool deathStatsSelected = MainTabs.SelectedItem == DeathStatsTab;
         RaidCalculatorPanel.Visibility = raidSelected ? Visibility.Visible : Visibility.Collapsed;
         CraftCalculatorPanel.Visibility = craftSelected ? Visibility.Visible : Visibility.Collapsed;
         GeneticsLabPanel.Visibility = geneticsSelected ? Visibility.Visible : Visibility.Collapsed;
+        PlayerWipeTrackerPanel.Visibility = wipeTrackerSelected ? Visibility.Visible : Visibility.Collapsed;
+        DeathStatsPanel.Visibility = deathStatsSelected ? Visibility.Visible : Visibility.Collapsed;
         if (raidSelected) _ = OfferNewFeatureTutorialOnceAsync("raid-calculator");
-        ServerContextPanel.Visibility = (recyclerSelected || geneticsSelected) ? Visibility.Collapsed : Visibility.Visible;
-        if (!raidSelected && !craftSelected && !recyclerSelected && !geneticsSelected)
+        if (wipeTrackerSelected) OpenPlayerWipeTrackerWorkspace();
+        if (deathStatsSelected) OpenDeathStatsWorkspace();
+        ServerContextPanel.Visibility = (recyclerSelected || geneticsSelected || wipeTrackerSelected || deathStatsSelected) ? Visibility.Collapsed : Visibility.Visible;
+        if (!raidSelected && !craftSelected && !recyclerSelected && !geneticsSelected && !wipeTrackerSelected && !deathStatsSelected)
             _lastWorkspaceTabIndex = MainTabs.SelectedIndex;
 
         if (MainTabs.SelectedItem == NotificationsTab)
@@ -2835,6 +2841,10 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     private void CraftCalculator_CloseRequested(object sender, RoutedEventArgs e) => ReturnToLastWorkspace();
 
     private void GeneticsLab_CloseRequested(object sender, RoutedEventArgs e) => ReturnToLastWorkspace();
+
+    private void PlayerWipeTracker_CloseRequested(object sender, RoutedEventArgs e) => ReturnToLastWorkspace();
+
+    private void DeathStats_CloseRequested(object sender, RoutedEventArgs e) => ReturnToLastWorkspace();
 
     private void ReturnToLastWorkspace() =>
         MainTabs.SelectedIndex = Math.Clamp(_lastWorkspaceTabIndex, 0, MainTabs.Items.Count - 1);
@@ -3327,6 +3337,11 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 await NotifyTeamFeatureAppClosingAsync();
             }
             catch { }
+            try
+            {
+                await DisposePlayerWipeTrackerAsync();
+            }
+            catch { }
             finally
             {
                 Dispatcher.Invoke(() =>
@@ -3531,9 +3546,6 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 // Persist SteamId into the FCM config file so future launches read it
                 TrackingService.PatchFcmConfigSteamId(e.SteamId64);
                 HydrateSteamUiFromStorage();
-                
-                // Immediately attempt guest registration if not logged in
-                _ = RustPlusDesk.Services.Auth.SupabaseAuthManager.TryInitializeGuestAuthAsync();
             }
 
             bool datesChanged = false;

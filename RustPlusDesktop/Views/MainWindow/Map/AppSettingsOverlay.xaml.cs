@@ -683,6 +683,8 @@ namespace RustPlusDesk.Views
 
             // Cloud Sync Setting load
             ChkCloudSync.IsChecked = TrackingService.CloudSyncEnabled;
+            ChkPlayerWipeTracker.IsChecked = TrackingService.PlayerWipeTrackerEnabled;
+            ChkPlayerWipeCloud.IsChecked = TrackingService.PlayerWipeTrackerCloudBackupEnabled;
 
             // Team marker settings
             ChkShowProfileMarkers.IsChecked  = TrackingService.MapShowSteamMarkers;
@@ -816,6 +818,9 @@ namespace RustPlusDesk.Views
             {
                 TrackingService.CloudSyncEnabled = ChkCloudSync.IsChecked == true;
             }
+
+            TrackingService.PlayerWipeTrackerEnabled = ChkPlayerWipeTracker.IsChecked == true;
+            TrackingService.PlayerWipeTrackerCloudBackupEnabled = ChkPlayerWipeCloud.IsChecked == true;
 
             TrackingService.ListenForServerEvents = ChkListenForServerEvents.IsChecked == true;
             TrackingService.TrustOwnDetections = ChkTrustOwnDetections.IsChecked == true;
@@ -1071,7 +1076,7 @@ namespace RustPlusDesk.Views
 
         private async Task LoadDiscordBotSettingsAsync()
         {
-            if (Services.Auth.SupabaseAuthManager.Client == null) return;
+            if (!Services.Cloud.CloudAuth.IsCloudAvailable || !Services.Auth.SupabaseAuthManager.IsPremium) return;
 
             try
             {

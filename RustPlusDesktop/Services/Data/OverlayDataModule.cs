@@ -65,7 +65,7 @@ namespace RustPlusDesk.Services.Data
         {
             LastUploadHadError = false;
 
-            if (Auth.SupabaseAuthManager.Client == null) { LastUploadHadError = true; return false; }
+            if (!Cloud.CloudAuth.IsCloudAvailable) { LastUploadHadError = true; return false; }
             if (!TrackingService.CloudSyncEnabled || !TrackingService.UploadConsentGiven) return false;
             if (!await Auth.SupabaseAuthManager.EnsureFreshSessionAsync()) { LastUploadHadError = true; return false; }
             if (!await Auth.SupabaseAuthManager.EnsureCloudSyncConsentAsync()) return false;
@@ -256,7 +256,7 @@ namespace RustPlusDesk.Services.Data
         /// </summary>
         public static async Task<OverlaySaveData?> FetchOverlayFromServerAsync(string serverKey, ulong steamId)
         {
-            if (Auth.SupabaseAuthManager.Client == null) return null;
+            if (!Cloud.CloudAuth.IsCloudAvailable) return null;
             if (!await Auth.SupabaseAuthManager.EnsureFreshSessionAsync()) return null;
             LastFetchHadError = false;
 
@@ -271,7 +271,17 @@ namespace RustPlusDesk.Services.Data
                     ["steam_id"] = steamId.ToString()
                 };
 
-                var body = await Auth.SupabaseAuthManager.CallEdgeFunctionAsync("overlay", HttpMethod.Get, null, queryParams);
+                // The platform's plain "overlay" GET is scoped to the caller and
+                // ignores steam_id, so fetching a teammate needs the team-authorized
+                // endpoint. Legacy (Supabase) keeps "overlay", which honoured steam_id.
+                var edgeFunction = "overlay";
+                if (Cloud.CloudBackend.UsePlatform
+                    && steamId.ToString() != Services.TrackingService.SteamId64)
+                {
+                    edgeFunction = "team-member-overlay";
+                }
+
+                var body = await Auth.SupabaseAuthManager.CallEdgeFunctionAsync(edgeFunction, HttpMethod.Get, null, queryParams);
                 using var doc = JsonDocument.Parse(body);
                 var root = doc.RootElement;
 

@@ -95,6 +95,7 @@ public class TrackingSettings
     public double? WindowTop { get; set; } = null;
     public bool WindowMaximized { get; set; } = false;
     public string SteamId64 { get; set; } = string.Empty;
+    public string LastSelectedServerKey { get; set; } = string.Empty;
     public bool AnnounceCargo { get; set; } = false;
     public bool AnnounceHeli { get; set; } = false;
     public bool AnnounceChinook { get; set; } = false;
@@ -160,6 +161,8 @@ public class TrackingSettings
     public bool TranslationConsentGiven { get; set; } = false;
     public bool UploadConsentGiven { get; set; } = false;
     public bool CloudSyncEnabled { get; set; } = false;
+    public bool PlayerWipeTrackerEnabled { get; set; } = false;
+    public bool PlayerWipeTrackerCloudBackupEnabled { get; set; } = false;
     // Key = "host:port|entityId", value = true if that device should send a chat alert when toggled via hotkey
     public Dictionary<string, bool> HotkeyTriggerChatAlertEnabled { get; set; } = new();
     public bool HotkeyTriggerChatAlertsEnabled { get; set; } = true;
@@ -1279,6 +1282,14 @@ public static class TrackingService
         set { _settings.SteamId64 = value; SaveSettings(); }
     }
 
+    // Stable identity of the server the user last had selected, so startup restores it
+    // instead of always defaulting to the first profile in the list.
+    public static string LastSelectedServerKey
+    {
+        get => _settings.LastSelectedServerKey;
+        set { _settings.LastSelectedServerKey = value; SaveDB(); }
+    }
+
     public static DateTime? FcmIssuedAt
     {
         get => _settings.FcmIssuedAt;
@@ -1431,6 +1442,18 @@ public static class TrackingService
     {
         get => _settings.CloudSyncEnabled;
         set { _settings.CloudSyncEnabled = value; SaveSettings(); }
+    }
+
+    public static bool PlayerWipeTrackerEnabled
+    {
+        get => _settings.PlayerWipeTrackerEnabled;
+        set { _settings.PlayerWipeTrackerEnabled = value; SaveDB(); }
+    }
+
+    public static bool PlayerWipeTrackerCloudBackupEnabled
+    {
+        get => _settings.PlayerWipeTrackerCloudBackupEnabled;
+        set { _settings.PlayerWipeTrackerCloudBackupEnabled = value; SaveDB(); }
     }
 
     private static string HotkeyAlertKey(string serverKey, long entityId) => $"{serverKey}|{entityId}";

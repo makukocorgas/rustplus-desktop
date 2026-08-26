@@ -31,6 +31,24 @@ public class ServerProfile : INotifyPropertyChanged
     public string PlayerToken { get; set; } = "";
     public string? BattleMetricsId { get; set; } = null;
 
+    // Stable identity used to remember the last selected server across restarts.
+    // PlayerToken is deliberately excluded so a re-pair on the same server still matches.
+    public string MatchKey => $"{Host}:{Port}|{SteamId64}";
+
+    private string? _localMapFilePath;
+    public string? LocalMapFilePath
+    {
+        get => _localMapFilePath;
+        set { _localMapFilePath = value; OnProp(); }
+    }
+
+    private string? _localMapImagePath;
+    public string? LocalMapImagePath
+    {
+        get => _localMapImagePath;
+        set { _localMapImagePath = value; OnProp(); }
+    }
+
     private bool _isConnected;
     public bool IsConnected
     {

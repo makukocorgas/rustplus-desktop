@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using RustPlusDesk.Views;
 
 namespace RustPlusDesk.Features.Tutorials;
 
@@ -113,8 +115,45 @@ public sealed class TutorialRegistry : ITutorialRegistry
 
         Def("heatmaps", 50, "Maps", false,
             Step("heatmaps.open", "Map.ServerHud", "map", TutorialPlacement.Right),
-            Step("heatmaps.selector", "Map.Heatmaps", "map", TutorialPlacement.Right),
+            Step("heatmaps.selector", "Map.Heatmaps", "map", TutorialPlacement.Right, condition: c => c.IsFullConnected),
             Step("heatmaps.meaning", placement: TutorialPlacement.Center)),
+
+        Def("mini-map", 55, "Maps", false,
+
+            Step("minimap.open", "Map.MiniMap", "map", TutorialPlacement.Bottom, condition: c => c.IsFullConnected),
+            Step("minimap.settings", placement: TutorialPlacement.Center, condition: c => c.IsFullConnected, 
+                 BeforeShowAsync: async (c, ct) => { 
+                     Application.Current.Dispatcher.Invoke(() => {
+                         Application.Current.MainWindow?.GetType().GetMethod("EnsureMiniMapOpen")?.Invoke(Application.Current.MainWindow, null);
+                     }); 
+                     await Task.Delay(150, ct); 
+                 }),
+            Step("minimap.timepop", placement: TutorialPlacement.Center, condition: c => c.IsFullConnected,
+                 BeforeShowAsync: async (c, ct) => { 
+                     Application.Current.Dispatcher.Invoke(() => {
+                         // Find MiniMapWindow from opened windows
+                         var mmw = Application.Current.Windows.Cast<Window>().FirstOrDefault(window => window.GetType().Name == "MiniMapWindow");
+                         if (mmw != null)
+                         {
+                             if (mmw.GetType().GetProperty("SettingsOverlay")?.GetValue(mmw) is UIElement overlay)
+                                 overlay.Visibility = Visibility.Visible;
+                             if (mmw.GetType().GetProperty("SettingsHoverBorder")?.GetValue(mmw) is UIElement hoverBorder)
+                                 hoverBorder.Visibility = Visibility.Collapsed;
+                         }
+                     }); 
+                     await Task.Delay(150, ct); 
+                 }),
+            Step("minimap.controls", placement: TutorialPlacement.Center, condition: c => c.IsFullConnected),
+            Step("minimap.follow", "BtnFollowPlayer", "map", TutorialPlacement.Bottom, condition: c => c.IsFullConnected)),
+
+        Def("map-3d", 60, "Maps", false,
+            Step("map3d.open", "Map.Open3D", "map", TutorialPlacement.Left, allowInteraction: true),
+            Step("map3d.account", "Settings.Cloud", "settings", TutorialPlacement.Right, allowInteraction: true),
+            Step("map3d.viewport", page: "map", webTarget: "threeD.viewport", condition: c => c.HasMap),
+            Step("map3d.toolbar", page: "map", webTarget: "threeD.toolbar", condition: c => c.HasMap),
+            Step("map3d.build", page: "map", webTarget: "threeD.buildMode", condition: c => c.HasMap),
+            Step("map3d.performance", page: "map", webTarget: "threeD.performance", condition: c => c.HasMap),
+            Step("map3d.close", page: "map", webTarget: "threeD.close", condition: c => c.HasMap)),
 
         Def("smart-devices", 70, "Devices", true,
             Step("devices.overview", "Devices.List", "devices", TutorialPlacement.Right),

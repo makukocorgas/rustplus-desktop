@@ -132,6 +132,7 @@ public partial class MainWindow
         SetupMapScene(bmp);
         // Grid is (re)drawn by the caller once _worldSizeS/_worldRectPx have been updated
         // for this map — drawing it here would use stale values from the previous server.
+        Dispatcher.BeginInvoke(new System.Action(SaveCurrentPlayerWipeMap), System.Windows.Threading.DispatcherPriority.Background);
     }
 
     public void ApplyMapPerformanceSettings()

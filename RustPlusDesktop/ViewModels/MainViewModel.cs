@@ -416,8 +416,10 @@ public class MainViewModel : INotifyPropertyChanged
         {
             if (_selected == value) return;
             if (_selected != null) _selected.PropertyChanged -= SelectedProfile_PropertyChanged;
-            _selected = value; 
+            _selected = value;
             if (_selected != null) _selected.PropertyChanged += SelectedProfile_PropertyChanged;
+            // Remember this choice so the next startup restores it instead of the first profile.
+            if (_selected != null) TrackingService.LastSelectedServerKey = _selected.MatchKey;
             OnPropertyChanged();                   // "Selected"
             OnPropertyChanged(nameof(CurrentDevices));
             UpdateServerWipe();
@@ -642,11 +644,12 @@ public class MainViewModel : INotifyPropertyChanged
         }
 
         // WICHTIG: Vorauswahl, sonst bleibt CurrentDevices=null
+        // Restore the last selected server across restarts; fall back to the first profile.
         if (Servers.Count > 0 && Selected == null)
         {
-            var (lastHost, lastPort, _) = TrackingService.LastServer;
-            Selected = (!string.IsNullOrEmpty(lastHost)
-                ? Servers.FirstOrDefault(s => string.Equals(s.Host, lastHost, StringComparison.OrdinalIgnoreCase) && s.Port == lastPort)
+            var lastKey = TrackingService.LastSelectedServerKey;
+            Selected = (!string.IsNullOrEmpty(lastKey)
+                ? Servers.FirstOrDefault(s => s.MatchKey == lastKey)
                 : null) ?? Servers[0];
         }
     }
