@@ -5445,4 +5445,13 @@ You can find more information on the server&apos;s official website:
   <data name="ConsoleHelperNotOnTop" xml:space="preserve">
     <value>Normal window — click to keep on top</value>
   </data>
+  <data name="FcmRepairTitle" xml:space="preserve">
+    <value>Rust+ pairing needs renewing</value>
+  </data>
+  <data name="FcmRepairMessage" xml:space="preserve">
+    <value>Push notifications stopped arriving and could not be renewed automatically. Re-pair to receive pairings and alarms again.</value>
+  </data>
+  <data name="FcmRepairButton" xml:space="preserve">
+    <value>Re-pair now</value>
+  </data>
 </root>

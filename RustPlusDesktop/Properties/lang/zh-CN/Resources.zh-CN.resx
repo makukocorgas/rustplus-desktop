@@ -4889,4 +4889,13 @@
   <data name="ConsoleHelperNotOnTop" xml:space="preserve">
     <value>普通窗口 — 点击置顶</value>
   </data>
+  <data name="FcmRepairTitle" xml:space="preserve">
+    <value>Rust+ 需要重新配对</value>
+  </data>
+  <data name="FcmRepairMessage" xml:space="preserve">
+    <value>推送通知已停止送达，且无法自动更新。请重新配对以再次接收配对和警报。</value>
+  </data>
+  <data name="FcmRepairButton" xml:space="preserve">
+    <value>立即重新配对</value>
+  </data>
 </root>

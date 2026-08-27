@@ -5687,4 +5687,13 @@ Puedes encontrar más información en el sitio web oficial del servidor:
   <data name="ConsoleHelperNotOnTop" xml:space="preserve">
     <value>Ventana normal — haz clic para fijar arriba</value>
   </data>
+  <data name="FcmRepairTitle" xml:space="preserve">
+    <value>Rust+ necesita vincularse de nuevo</value>
+  </data>
+  <data name="FcmRepairMessage" xml:space="preserve">
+    <value>Las notificaciones push han dejado de llegar y no se han podido renovar automáticamente. Vuelve a vincular para recibir emparejamientos y alarmas de nuevo.</value>
+  </data>
+  <data name="FcmRepairButton" xml:space="preserve">
+    <value>Vincular de nuevo</value>
+  </data>
 </root>
