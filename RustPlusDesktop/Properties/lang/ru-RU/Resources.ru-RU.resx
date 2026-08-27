@@ -2691,7 +2691,7 @@
     <value>Расширенные Discord Настройки бота</value>
   </data>
   <data name="UiÃƒâ" xml:space="preserve">
-    <value>Ãƒâ€”</value>
+    <value>×</value>
   </data>
   <data name="UiAgricultureFood" xml:space="preserve">
     <value>Сельское хозяйство и продовольствие</value>
@@ -3024,10 +3024,10 @@
     <value>Повторяющаяся цель</value>
   </data>
   <data name="UiÐŸ" xml:space="preserve">
-    <value>ðŸ’¤</value>
+    <value>💤</value>
   </data>
   <data name="UiÐŸ2" xml:space="preserve">
-    <value>ðŸ“·</value>
+    <value>📷</value>
   </data>
   <data name="UiEGNAME2" xml:space="preserve">
     <value>например ИМЯ2</value>
@@ -3960,7 +3960,7 @@
     <value>Данные 3D-карты</value>
   </data>
   <data name="CodeUiÃÂÂ" xml:space="preserve">
-    <value>Ã¢â‚¬Â¦</value>
+    <value>…</value>
   </data>
   <data name="CodeUiAccessRevoked" xml:space="preserve">
     <value>Доступ отозван</value>

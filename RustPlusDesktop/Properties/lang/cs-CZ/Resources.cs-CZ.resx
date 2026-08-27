@@ -1993,7 +1993,7 @@ Jste si jisti, že chcete pokračovat?</value>
     <value>Pokročilé Discord Nastavení robota</value>
   </data>
   <data name="UiÃƒâ" xml:space="preserve">
-    <value>Ãƒâ€“</value>
+    <value>Ö</value>
   </data>
   <data name="UiAgricultureFood" xml:space="preserve">
     <value>Zemědělství a potraviny</value>
@@ -2326,10 +2326,10 @@ Jste si jisti, že chcete pokračovat?</value>
     <value>Duplicitní cíl</value>
   </data>
   <data name="UiÐŸ" xml:space="preserve">
-    <value>ðŸ’¤</value>
+    <value>💤</value>
   </data>
   <data name="UiÐŸ2" xml:space="preserve">
-    <value>ðŸ“·</value>
+    <value>📷</value>
   </data>
   <data name="UiEGNAME2" xml:space="preserve">
     <value>např. JMÉNO2</value>

@@ -1993,7 +1993,7 @@ Ladda ner och installera nu?</value>
     <value>Avancerade Discord Botinställningar</value>
   </data>
   <data name="UiÃƒâ" xml:space="preserve">
-    <value>Ãƒâ€”</value>
+    <value>×</value>
   </data>
   <data name="UiAgricultureFood" xml:space="preserve">
     <value>Jordbruk &amp; Livsmedel</value>
@@ -2326,10 +2326,10 @@ Ladda ner och installera nu?</value>
     <value>Duplicera mål</value>
   </data>
   <data name="UiÐŸ" xml:space="preserve">
-    <value>ðŸ’¤</value>
+    <value>💤</value>
   </data>
   <data name="UiÐŸ2" xml:space="preserve">
-    <value>ðŸ“·</value>
+    <value>📷</value>
   </data>
   <data name="UiEGNAME2" xml:space="preserve">
     <value>t.ex. NAMN2</value>
@@ -3262,7 +3262,7 @@ Ladda ner och installera nu?</value>
     <value>3D kartdata</value>
   </data>
   <data name="CodeUiÃÂÂ" xml:space="preserve">
-    <value>Ã¢â‚¬Â¦</value>
+    <value>…</value>
   </data>
   <data name="CodeUiAccessRevoked" xml:space="preserve">
     <value>Åtkomst återkallad</value>

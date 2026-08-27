@@ -1993,7 +1993,7 @@ Bạn có chắc chắn muốn tiếp tục không?</value>
     <value>Cài đặt Bot nâng cao Discord</value>
   </data>
   <data name="UiÃƒâ" xml:space="preserve">
-    <value>Ãâ€”</value>
+    <value>×</value>
   </data>
   <data name="UiAgricultureFood" xml:space="preserve">
     <value>Nông nghiệp &amp; Thực phẩm</value>
@@ -2326,10 +2326,10 @@ Bạn có chắc chắn muốn tiếp tục không?</value>
     <value>Mục tiêu trùng lặp</value>
   </data>
   <data name="UiÐŸ" xml:space="preserve">
-    <value>ðŸ’¤</value>
+    <value>💤</value>
   </data>
   <data name="UiÐŸ2" xml:space="preserve">
-    <value>ðŸ“·</value>
+    <value>📷</value>
   </data>
   <data name="UiEGNAME2" xml:space="preserve">
     <value>ví dụ: TÊN2</value>
@@ -3262,7 +3262,7 @@ Bạn có chắc chắn muốn tiếp tục không?</value>
     <value>Dữ liệu bản đồ 3D</value>
   </data>
   <data name="CodeUiÃÂÂ" xml:space="preserve">
-    <value>Ã ¢ â&apos; Â¦</value>
+    <value>…</value>
   </data>
   <data name="CodeUiAccessRevoked" xml:space="preserve">
     <value>Quyền truy cập đã bị thu hồi</value>

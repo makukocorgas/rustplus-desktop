@@ -2873,7 +2873,7 @@ Bist du sicher, dass du fortfahren möchtest?</value>
     <value>Erweiterte Discord Bot-Einstellungen</value>
   </data>
   <data name="UiÃƒâ" xml:space="preserve">
-    <value>Ãƒâ€“</value>
+    <value>Ö</value>
   </data>
   <data name="UiAgricultureFood" xml:space="preserve">
     <value>Landwirtschaft und Ernährung</value>
@@ -3206,10 +3206,10 @@ Bist du sicher, dass du fortfahren möchtest?</value>
     <value>Doppeltes Ziel</value>
   </data>
   <data name="UiÐŸ" xml:space="preserve">
-    <value>ðŸ’¤</value>
+    <value>💤</value>
   </data>
   <data name="UiÐŸ2" xml:space="preserve">
-    <value>ðŸ“·</value>
+    <value>📷</value>
   </data>
   <data name="UiEGNAME2" xml:space="preserve">
     <value>z.B. NAME2</value>
@@ -4142,7 +4142,7 @@ Bist du sicher, dass du fortfahren möchtest?</value>
     <value>3D-Kartendaten</value>
   </data>
   <data name="CodeUiÃÂÂ" xml:space="preserve">
-    <value>Ã¢â‚¬Â¦</value>
+    <value>…</value>
   </data>
   <data name="CodeUiAccessRevoked" xml:space="preserve">
     <value>Zugriff widerrufen</value>

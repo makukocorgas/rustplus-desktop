@@ -1286,7 +1286,7 @@ Last ned og installer nå?</value>
     <value> Kø: {0} spillere.</value>
   </data>
   <data name="ChatCmdTimeResponse" xml:space="preserve">
-    <value>NÃ¥vÃ¦rende i spilltid: {0}</value>
+    <value>Nåværende i spilltid: {0}</value>
   </data>
   <data name="ChatCmdPromoteResponse" xml:space="preserve">
     <value>{0} ble forfremmet til leder.</value>
@@ -1993,7 +1993,7 @@ Er du sikker på at du vil fortsette?</value>
     <value>Avanserte Discord Bot-innstillinger</value>
   </data>
   <data name="UiÃƒâ" xml:space="preserve">
-    <value>Ãƒâ€”</value>
+    <value>×</value>
   </data>
   <data name="UiAgricultureFood" xml:space="preserve">
     <value>Landbruk og mat</value>
@@ -2326,10 +2326,10 @@ Er du sikker på at du vil fortsette?</value>
     <value>Duplisert mål</value>
   </data>
   <data name="UiÐŸ" xml:space="preserve">
-    <value>ðŸ’¤</value>
+    <value>💤</value>
   </data>
   <data name="UiÐŸ2" xml:space="preserve">
-    <value>ðŸ“·</value>
+    <value>📷</value>
   </data>
   <data name="UiEGNAME2" xml:space="preserve">
     <value>f.eks. NAVN2</value>
@@ -3262,7 +3262,7 @@ Er du sikker på at du vil fortsette?</value>
     <value>3D kartdata</value>
   </data>
   <data name="CodeUiÃÂÂ" xml:space="preserve">
-    <value>Ã¢â‚¬Â¦</value>
+    <value>…</value>
   </data>
   <data name="CodeUiAccessRevoked" xml:space="preserve">
     <value>Tilgang tilbakekalt</value>

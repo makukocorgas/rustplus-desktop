@@ -1993,7 +1993,7 @@ Siete sicuri di voler continuare?</value>
     <value>Impostazioni avanzate del bot Discord.</value>
   </data>
   <data name="UiÃƒâ" xml:space="preserve">
-    <value>Ãƒâ€”</value>
+    <value>×</value>
   </data>
   <data name="UiAgricultureFood" xml:space="preserve">
     <value>Agricoltura e alimentazione</value>
@@ -2326,10 +2326,10 @@ Siete sicuri di voler continuare?</value>
     <value>Obiettivo duplicato</value>
   </data>
   <data name="UiÐŸ" xml:space="preserve">
-    <value>ðŸ’¤</value>
+    <value>💤</value>
   </data>
   <data name="UiÐŸ2" xml:space="preserve">
-    <value>ðŸ“·</value>
+    <value>📷</value>
   </data>
   <data name="UiEGNAME2" xml:space="preserve">
     <value>ad es. NOME2</value>
@@ -3262,7 +3262,7 @@ Siete sicuri di voler continuare?</value>
     <value>3D Map Data</value>
   </data>
   <data name="CodeUiÃÂÂ" xml:space="preserve">
-    <value>Ã¢â‚¬Â¦</value>
+    <value>…</value>
   </data>
   <data name="CodeUiAccessRevoked" xml:space="preserve">
     <value>Access Revoked</value>

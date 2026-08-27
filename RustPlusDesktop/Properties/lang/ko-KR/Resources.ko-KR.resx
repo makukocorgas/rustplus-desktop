@@ -3277,7 +3277,7 @@
     <value>3D 지도 데이터</value>
   </data>
   <data name="CodeUiÃÂÂ" xml:space="preserve">
-    <value>Ã¢â&apos;¬Â¦</value>
+    <value>…</value>
   </data>
   <data name="CodeUiAccessRevoked" xml:space="preserve">
     <value>액세스가 취소되었습니다.</value>

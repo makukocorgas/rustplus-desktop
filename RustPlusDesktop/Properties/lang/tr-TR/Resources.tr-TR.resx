@@ -2326,7 +2326,7 @@ Devam etmek istediğinizden emin misiniz?</value>
     <value>Yinelenen hedef</value>
   </data>
   <data name="UiÐŸ" xml:space="preserve">
-    <value>ðŸ’¤</value>
+    <value>💤</value>
   </data>
   <data name="UiÐŸ2" xml:space="preserve">
     <value>ğŸ“·</value>
@@ -3262,7 +3262,7 @@ Devam etmek istediğinizden emin misiniz?</value>
     <value>3D Harita Verileri</value>
   </data>
   <data name="CodeUiÃÂÂ" xml:space="preserve">
-    <value>â€¦</value>
+    <value>…</value>
   </data>
   <data name="CodeUiAccessRevoked" xml:space="preserve">
     <value>Erişim İptal Edildi</value>

@@ -2580,7 +2580,7 @@ Necesitarás emparejar de nuevo el próximo comienzo.</value>
     <value>Configuración avanzada del bot Discord</value>
   </data>
   <data name="UiÃƒâ" xml:space="preserve">
-    <value>Ãƒâ€”</value>
+    <value>×</value>
   </data>
   <data name="UiAgricultureFood" xml:space="preserve">
     <value>Agricultura y Alimentación</value>
@@ -2913,10 +2913,10 @@ Necesitarás emparejar de nuevo el próximo comienzo.</value>
     <value>Objetivo duplicado</value>
   </data>
   <data name="UiÐŸ" xml:space="preserve">
-    <value>ðŸ’¤</value>
+    <value>💤</value>
   </data>
   <data name="UiÐŸ2" xml:space="preserve">
-    <value>ðŸ“·</value>
+    <value>📷</value>
   </data>
   <data name="UiEGNAME2" xml:space="preserve">
     <value>por ej. NOMBRE2</value>
@@ -3849,7 +3849,7 @@ Necesitarás emparejar de nuevo el próximo comienzo.</value>
     <value>Datos de mapas 3D</value>
   </data>
   <data name="CodeUiÃÂÂ" xml:space="preserve">
-    <value>Ã¢â‚¬Â¦</value>
+    <value>…</value>
   </data>
   <data name="CodeUiAccessRevoked" xml:space="preserve">
     <value>Acceso revocado</value>

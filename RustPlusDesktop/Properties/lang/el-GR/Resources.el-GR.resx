@@ -1993,7 +1993,7 @@ Open Releases page?</value>
     <value>Προηγμένες Discord Ρυθμίσεις Bot</value>
   </data>
   <data name="UiÃƒâ" xml:space="preserve">
-    <value>Ãƒâ€»</value>
+    <value>×</value>
   </data>
   <data name="UiAgricultureFood" xml:space="preserve">
     <value>Γεωργία &amp; Τρόφιμα</value>
@@ -2326,10 +2326,10 @@ Open Releases page?</value>
     <value>Διπλότυπος στόχος</value>
   </data>
   <data name="UiÐŸ" xml:space="preserve">
-    <value>ðŸ’¤</value>
+    <value>💤</value>
   </data>
   <data name="UiÐŸ2" xml:space="preserve">
-    <value>ðŸ“·</value>
+    <value>📷</value>
   </data>
   <data name="UiEGNAME2" xml:space="preserve">
     <value>π.χ. NAME2</value>

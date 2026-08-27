@@ -1993,7 +1993,7 @@ Tem certeza de que deseja continuar?</value>
     <value>Configurações avançadas do bot Discord</value>
   </data>
   <data name="UiÃƒâ" xml:space="preserve">
-    <value>Ãƒ—</value>
+    <value>×</value>
   </data>
   <data name="UiAgricultureFood" xml:space="preserve">
     <value>Agricultura e Alimentação</value>
@@ -2329,7 +2329,7 @@ Tem certeza de que deseja continuar?</value>
     <value>ðŸ&apos;¤</value>
   </data>
   <data name="UiÐŸ2" xml:space="preserve">
-    <value>ðŸ“·</value>
+    <value>📷</value>
   </data>
   <data name="UiEGNAME2" xml:space="preserve">
     <value>por exemplo NOME2</value>
