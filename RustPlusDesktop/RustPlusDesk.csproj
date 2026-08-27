@@ -190,6 +190,7 @@
 	  <None Remove="Assets\Data\rust_items.json" />
 
 	  <None Remove="Assets\TitleScreen-rust-plus-desktop.png" />
+	  <None Remove="Assets\Images\splash-screen.png" />
 	</ItemGroup>
 	<ItemGroup>
 	  <Resource Include="Assets\icons\animat-Icons\chinook_animate.png" />
