@@ -895,7 +895,6 @@ namespace RustPlusDesk.Views
       
         private void BtnDelete3DMapData_Click(object sender, RoutedEventArgs e)
         {
-            var owner = ParentWindow ?? Window.GetWindow(this);
             var result = MessageBox.Show(
                 T("CodeUiDeleteAllCached3DMapDataConfirm", "Delete all cached 3D map data for every server? This removes parsed map files and generated viewer JSON, but keeps app assets and icons."),
                 T("CodeUiDelete3DMapDataTitle", "Delete 3D Map Data"),
@@ -907,7 +906,12 @@ namespace RustPlusDesk.Views
             var deleted = Map3DLocalBuildService.DeleteAllCachedMapData();
             ParentWindow?.ResetBuildingBlockedZonesAfterCacheDelete();
             ParentWindow?.AppendLog($"[3D Map] Deleted cached 3D map data ({deleted.DeletedFiles} files, {deleted.DeletedDirectories} folders). Generated data will be rebuilt when needed.");
-            MessageBox.Show(owner, T("CodeUiCached3DMapDataDeletedItWillBeRebuiltWhenYouOpenA3DMapAgain", "Cached 3D map data deleted. It will be rebuilt when you open a 3D map again."), T("CodeUi3DMapData", "3D Map Data"), MessageBoxButton.OK, MessageBoxImage.Information);
+            ParentWindow?.ShowInfoSnackbar(RustPlusDesk.Properties.Resources.GetString("CodeUi3DMapData"), RustPlusDesk.Properties.Resources.GetString("CodeUiCached3DMapDataDeletedItWillBeRebuiltWhenYouOpenA3DMapAgain"), WpfUi.ControlAppearance.Success);
+        }
+
+        private void BtnManuallyParseMap_Click(object sender, RoutedEventArgs e)
+        {
+            ParentWindow?.ManuallyImportMapFile();
         }
         private void BtnBackupData_Click(object sender, RoutedEventArgs e)
         {
@@ -931,7 +935,7 @@ namespace RustPlusDesk.Views
                     {
                         RustPlusDesk.Services.Data.BackupDataModule.CreateBackup(sfd.FileName, dialog.Password);
                         ParentWindow.AppendLog(string.Format(Properties.Resources.BackupSuccessLog, sfd.FileName));
-                        MessageBox.Show(Properties.Resources.BackupSuccessMessage, Properties.Resources.BackupSuccessTitle, MessageBoxButton.OK, MessageBoxImage.Information);
+                        ParentWindow?.ShowInfoSnackbar(Properties.Resources.BackupSuccessTitle, Properties.Resources.BackupSuccessMessage, WpfUi.ControlAppearance.Success);
                     }
                     catch (Exception ex)
                     {
@@ -983,7 +987,7 @@ namespace RustPlusDesk.Views
                 {
                     RustPlusDesk.Services.Data.BackupDataModule.RestoreBackup(ofd.FileName, password);
                     ParentWindow.ReloadApplicationData();
-                    MessageBox.Show(Properties.Resources.RestoreSuccessMessage, Properties.Resources.RestoreSuccessTitle, MessageBoxButton.OK, MessageBoxImage.Information);
+                    ParentWindow?.ShowInfoSnackbar(Properties.Resources.RestoreSuccessTitle, Properties.Resources.RestoreSuccessMessage, WpfUi.ControlAppearance.Success);
                 }
                 catch (System.Security.Cryptography.CryptographicException)
                 {
