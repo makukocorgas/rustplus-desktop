@@ -4952,4 +4952,7 @@
   <data name="LfgCloudConnect" xml:space="preserve">
     <value>设置云功能</value>
   </data>
+  <data name="LfgAcceptOffBlocked" xml:space="preserve">
+    <value>当你出现在列表中时，别人需要有办法联系到你。</value>
+  </data>
 </root>

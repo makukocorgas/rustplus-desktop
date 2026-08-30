@@ -6464,4 +6464,7 @@ Rust+ Desktop registers your local app with FCM so it can receive those same Rus
   <data name="LfgCloudConnect" xml:space="preserve">
     <value>Set up Cloud</value>
   </data>
+  <data name="LfgAcceptOffBlocked" xml:space="preserve">
+    <value>While you are listed, people need some way to reach you.</value>
+  </data>
 </root>
