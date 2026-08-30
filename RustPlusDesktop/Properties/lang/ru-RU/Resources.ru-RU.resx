@@ -5936,4 +5936,13 @@
   <data name="LfgReportUser" xml:space="preserve">
     <value>Пожаловаться на игрока</value>
   </data>
+  <data name="LfgComposeTitle" xml:space="preserve">
+    <value>Написать: {0}</value>
+  </data>
+  <data name="LfgComposePlaceholder" xml:space="preserve">
+    <value>Поздоровайтесь и скажите, что ищете…</value>
+  </data>
+  <data name="LfgComposeHint" xml:space="preserve">
+    <value>Первые сообщения короткие намеренно. Если вам ответят, дальше — обычный разговор.</value>
+  </data>
 </root>

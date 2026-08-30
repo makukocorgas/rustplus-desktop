@@ -5027,4 +5027,13 @@
   <data name="LfgReportUser" xml:space="preserve">
     <value>举报该玩家</value>
   </data>
+  <data name="LfgComposeTitle" xml:space="preserve">
+    <value>写给 {0}</value>
+  </data>
+  <data name="LfgComposePlaceholder" xml:space="preserve">
+    <value>打个招呼，说说你在找什么…</value>
+  </data>
+  <data name="LfgComposeHint" xml:space="preserve">
+    <value>首条消息刻意简短。对方回复后，接下来就是正常聊天。</value>
+  </data>
 </root>
