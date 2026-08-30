@@ -254,12 +254,6 @@
                                   Checked="OnSettingChanged" Unchecked="OnSettingChanged"
                                   ToolTip="{DynamicResource StreamerModeToolTip}"/>
 
-                        <CheckBox x:Name="ChkBackgroundTracking"
-                                  Content="{DynamicResource BackgroundTracking}"
-                                  Margin="0,0,0,10"
-                                  Style="{StaticResource DotCheckBox}"
-                                  Checked="OnSettingChanged" Unchecked="OnSettingChanged"
-                                  ToolTip="{DynamicResource BackgroundTrackingToolTip}"/>
 
                         <ui:ToggleSwitch x:Name="ChkHideConsole" Content="{DynamicResource HideSystemConsole}" Margin="0,0,0,10" Checked="OnSettingChanged" Unchecked="OnSettingChanged" ToolTip="{DynamicResource HideConsoleToolTip}" />
                         <ui:ToggleSwitch x:Name="ChkCloudSync" Content="{DynamicResource CloudSync}" Margin="0,0,0,10" Checked="OnSettingChanged" Unchecked="OnSettingChanged" ToolTip="{DynamicResource CloudSyncDesc}" />

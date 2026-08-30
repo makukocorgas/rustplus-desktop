@@ -5864,4 +5864,10 @@
   <data name="LfgAcceptOffBlocked" xml:space="preserve">
     <value>Пока вы в списке, с вами должно быть можно связаться.</value>
   </data>
+  <data name="SocialRailName" xml:space="preserve">
+    <value>Сообщество</value>
+  </data>
+  <data name="SocialRailHelp" xml:space="preserve">
+    <value>Общий чат и поиск команды</value>
+  </data>
 </root>
