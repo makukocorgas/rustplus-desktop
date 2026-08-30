@@ -432,26 +432,6 @@ public partial class MainWindow : WpfUi.FluentWindow
         _pendingUploadAction = null;
     }
 
-    private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
-    {
-        if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
-        {
-            if (e.Key == Key.T)
-            {
-                e.Handled = true;
-                BtnToggleChat_Click(BtnChatToggle, new RoutedEventArgs());
-                return;
-            }
-
-            if (e.Key == Key.S)
-            {
-                e.Handled = true;
-                BtnShopSearch_Click(BtnShopToggle, new RoutedEventArgs());
-                return;
-            }
-        }
-    }
-
     public MainWindow()
     {
         // Nur freiwillig zum Diagnostizieren:
@@ -808,7 +788,6 @@ public partial class MainWindow : WpfUi.FluentWindow
         TxtSteamId.Text = string.IsNullOrEmpty(_vm.SteamId64) ? Properties.Resources.NotLoggedIn : _vm.SteamId64;
 
         this.Closing += MainWindow_Closing;
-        _ = EnsureWebView2Async();
         Services.Auth.SupabaseAuthManager.AuthenticationChanged += SupabaseAuthManager_AuthenticationChanged;
         Services.Cloud.CloudAuthManager.AuthenticationChanged += SupabaseAuthManager_AuthenticationChanged;
         ContentRendered += MainWindow_ContentRendered;
@@ -883,6 +862,60 @@ public partial class MainWindow : WpfUi.FluentWindow
                 UpdateLanguageFlag();
             }));
         };
+    }
+
+    private async void MainWindow_ContentRendered(object? sender, EventArgs e)
+    {
+        ContentRendered -= MainWindow_ContentRendered;
+
+        // Let WPF present the first usable frame before initializing the embedded
+        // browser and parsing catalogs that are not required to construct the shell.
+        await Dispatcher.Yield(DispatcherPriority.ContextIdle);
+        _ = EnsureWebView2Async();
+
+        // Whether the Community entry belongs in the rail at all. Asked once on start and again
+        // whenever the account changes; a stored token means the auth event has already fired by
+        // the time this window exists.
+        _ = RefreshSocialAvailabilityAsync();
+
+        await Dispatcher.InvokeAsync(() =>
+        {
+            AppendLog("[items-new] loading deferred item catalog");
+            EnsureNewItemDbLoaded();
+            AppendLog($"[items-new] source={sNewDbSource} items={sItemsById.Count} byShort={sItemsByShort.Count}");
+            StartIconAutoDownload();
+        }, DispatcherPriority.ApplicationIdle);
+
+        _ = Task.Run(async () =>
+        {
+            if (!await TryUpdateItemDbAsync().ConfigureAwait(false)) return;
+            await Dispatcher.InvokeAsync(() =>
+            {
+                EnsureNewItemDbLoaded(force: true);
+                AppendLog($"[items-update] Updated from web! New count: {sItemsById.Count}");
+                StartIconAutoDownload();
+            }, DispatcherPriority.ApplicationIdle);
+        });
+    }
+
+    private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+        {
+            if (e.Key == Key.T)
+            {
+                e.Handled = true;
+                BtnToggleChat_Click(BtnChatToggle, new RoutedEventArgs());
+                return;
+            }
+
+            if (e.Key == Key.S)
+            {
+                e.Handled = true;
+                BtnShopSearch_Click(BtnShopToggle, new RoutedEventArgs());
+                return;
+            }
+        }
     }
 
     private void OnTrackingNotification(string msg, string serverName)
@@ -1406,11 +1439,6 @@ public partial class MainWindow : WpfUi.FluentWindow
         { }
     }
 
-    private void MainWindow_ContentRendered(object? sender, EventArgs e)
-    {
-        ContentRendered -= MainWindow_ContentRendered;
-    }
-
     private void SupabaseAuthManager_AuthenticationChanged()
     {
         void RefreshAccountUi()
@@ -1418,6 +1446,7 @@ public partial class MainWindow : WpfUi.FluentWindow
             UpdateRustMapsUi();
             UpdateCloudSyncUI();
             _ = RefreshPlayerWipeTrackerCapabilitiesAsync();
+            _ = RefreshSocialAvailabilityAsync();
         }
 
         if (Dispatcher.CheckAccess())
