@@ -6569,4 +6569,10 @@ Rust+ Desktop registers your local app with FCM so it can receive those same Rus
   <data name="ChatRules" xml:space="preserve">
     <value>Everyone here can see your name. Nobody can see which server you play on.</value>
   </data>
+  <data name="SocialHubTitle" xml:space="preserve">
+    <value>Community Hub</value>
+  </data>
+  <data name="SocialHubSubtitle" xml:space="preserve">
+    <value>Talk to everyone, or find people to play with.</value>
+  </data>
 </root>
