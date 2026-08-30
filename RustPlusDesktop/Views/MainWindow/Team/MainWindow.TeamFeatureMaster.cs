@@ -36,7 +36,7 @@ public partial class MainWindow
     private bool? _lastWantsCommands;
 
     private static string TeamFeatureText(string key, string fallback)
-        => Properties.Resources.ResourceManager.GetString(key) ?? fallback;
+        => RustPlusDesk.Helpers.Loc.TextOrNull(key) ?? fallback;
 
     private bool ChatFeaturesBlockedByMaster => _chatFeaturesBlockedByMaster;
 
@@ -376,7 +376,7 @@ public partial class MainWindow
         _ = DiscordBotListenerService.Instance.UpdateSubscriptionStateAsync(_isChatFeatureMaster, teamSteamIds);
 
         var currentMasterId = hasActiveMaster ? state!.MasterSteamId : null;
-        if (_isChatFeatureMaster && (!previousIsMaster || _lastKnownTeamFeatureMasterId != currentMasterId))
+        if (_isChatFeatureMaster && TeamMembers.Count > 1 && (!previousIsMaster || _lastKnownTeamFeatureMasterId != currentMasterId))
         {
             var offerKey = $"{teamKey}:{state!.ElectedAt?.ToUniversalTime():O}";
             ShowChatMasterOffer(offerKey);

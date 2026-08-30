@@ -7863,6 +7863,23 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         adminWin.Show();
     }
 
+    private async void BtnFcmInfo_Click(object sender, RoutedEventArgs e)
+    {
+        string title = RustPlusDesk.Helpers.Loc.TextOrNull("FcmInfoTitle") ?? "What is FCM?";
+        string message = RustPlusDesk.Helpers.Loc.TextOrNull("FcmInfoMessage") ??
+                         "FCM stands for Firebase Cloud Messaging. Rust+ uses it to send push notifications for paired servers, devices, alarms, team chat, and other live events.\n\nRust+ Desktop registers your local app with FCM so it can receive those same Rust+ notifications in the background. The pairing credentials are saved locally on this PC and can be deleted by resetting the pairing config.";
+
+        var msgBox = new WpfUi.MessageBox
+        {
+            Title = title,
+            Content = message,
+            CloseButtonText = RustPlusDesk.Helpers.Loc.TextOrNull("GenericClose") ?? "Close"
+        };
+        msgBox.Owner = this;
+        msgBox.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+        await msgBox.ShowDialogAsync();
+    }
+
     private void BtnHotkeys_Click(object sender, RoutedEventArgs e)
     {
         DeactivateHotkeys();
