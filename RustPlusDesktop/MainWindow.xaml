@@ -8142,6 +8142,11 @@
                                         <Ellipse Width="16" Height="16" Stroke="White" StrokeThickness="2" Fill="Transparent" />
                                     </Button>
 
+                                    <!--  Route — 7  -->
+                                    <Button x:Name="ToolRouteButton" Tag="7" Width="32" Height="32" Margin="2,0" Click="ToolRouteButton_Click" ToolTip="Route — draw a path, direction arrows follow it (7)">
+                                        <Path Stroke="White" StrokeThickness="2" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M4,18 L9,9 L14,15 L20,5" />
+                                    </Button>
+
                                     <!--  Text — 8  -->
                                     <Button x:Name="ToolTextButton" Tag="8" Width="32" Height="32" Margin="2,0" Click="ToolTextButton_Click" ToolTip="{DynamicResource PlaceTextToolTip}">
                                         <Image Width="19" Height="19" Source="pack://application:,,,/Assets/icons/text.png" RenderOptions.BitmapScalingMode="HighQuality" />
@@ -8159,6 +8164,17 @@
 
                                     <Rectangle Width="1" Height="20" Margin="6,0" Fill="#40FFFFFF" VerticalAlignment="Center" />
 
+                                    <!--  Layers  -->
+                                    <Button
+                                        x:Name="BtnToggleLayers"
+                                        Width="32"
+                                        Height="32"
+                                        Margin="2,0"
+                                        Click="BtnToggleLayers_Click"
+                                        ToolTip="Layers — see &amp; edit everything on the map">
+                                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE81E;" FontSize="16" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Button>
+
                                     <!--  LÃƒÂ¶schen  -->
                                     <Button
                                         x:Name="ToolTrashButton"
@@ -8169,6 +8185,23 @@
                                         ToolTip="{DynamicResource DeleteOverlayToolTip}">
                                         <Image Width="19" Height="19" Source="pack://application:,,,/Assets/icons/trash.png" RenderOptions.BitmapScalingMode="HighQuality" />
                                     </Button>
+
+                                    <!--  Inline confirm for Clear (replaces the modal dialog)  -->
+                                    <Popup x:Name="ClearConfirmPopup" PlacementTarget="{Binding ElementName=ToolTrashButton}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade" HorizontalOffset="-90" VerticalOffset="6">
+                                        <Border Width="230" Padding="14,12" Background="#F51B1E24" BorderBrush="#3AFFFFFF" BorderThickness="1" CornerRadius="9">
+                                            <Border.Effect>
+                                                <DropShadowEffect BlurRadius="16" ShadowDepth="3" Direction="270" Opacity="0.5" Color="Black" />
+                                            </Border.Effect>
+                                            <StackPanel>
+                                                <TextBlock FontSize="12.5" FontWeight="SemiBold" Foreground="White" Text="Clear all your drawings?" />
+                                                <TextBlock Margin="0,4,0,0" FontSize="11" Foreground="#A8A8A8" TextWrapping="Wrap" Text="Removes every marker, label and drawing you made. This can't be undone." />
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+                                                    <Button Padding="12,4" Margin="0,0,6,0" Cursor="Hand" Content="Cancel" Click="ClearConfirmCancel_Click" />
+                                                    <Button Padding="12,4" Cursor="Hand" Background="#C0392B" Foreground="White" BorderThickness="0" Content="Clear" Click="ClearConfirmYes_Click" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </Popup>
 
                                     <Button
                                         x:Name="ToolUploadButton"
@@ -8204,16 +8237,16 @@
                                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE711;" FontSize="14" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     </Button>
 
-                                    <ui:Button
+                                    <Button
                                         x:Name="BtnAdminPanel"
-                                        Appearance="Primary"
                                         Width="32"
                                         Height="32"
                                         Margin="2,0"
-                                        Icon="{ui:SymbolIcon Symbol=Shield24, Filled=True}"
                                         Visibility="Collapsed"
                                         Click="BtnAdminPanel_Click"
-                                        ToolTip="{DynamicResource UiAdminPanel}" />
+                                        ToolTip="{DynamicResource UiAdminPanel}">
+                                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEA18;" FontSize="15" Foreground="#60CDFF" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Button>
                                 </StackPanel>
 
                                 <!-- Active-tool identity: ties the context bar together and teaches the shortcut -->
@@ -8407,6 +8440,105 @@
                                     </StackPanel>
                                 </Grid>
                             </StackPanel>
+                        </Border>
+
+                        <!--  Layers panel: everything on the map, grouped and editable  -->
+                        <Border
+                            x:Name="LayersPanel"
+                            Grid.Row="1"
+                            Width="248"
+                            MaxHeight="440"
+                            Margin="8"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Panel.ZIndex="9000"
+                            Background="#EC1E1E1E"
+                            BorderBrush="#33FFFFFF"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Visibility="Collapsed">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Grid Margin="12,9,8,7">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE81E;" FontSize="14" Foreground="#60CDFF" VerticalAlignment="Center" />
+                                        <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Foreground="White" Text="Layers" />
+                                    </StackPanel>
+                                    <Button HorizontalAlignment="Right" Width="22" Height="22" Padding="0" Background="Transparent" BorderThickness="0" Cursor="Hand" Click="CloseLayersPanel_Click" ToolTip="Close">
+                                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE711;" FontSize="12" Foreground="#B0B0B0" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Button>
+                                </Grid>
+                                <!--  Group / ungroup checked layers (tick the boxes, then Group)  -->
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10,0,10,7">
+                                    <Button Padding="8,3" Margin="0,0,6,0" Cursor="Hand" Click="GroupCheckedLayers_Click" ToolTip="Group the ticked layers into one">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8B7;" FontSize="12" Foreground="#60CDFF" VerticalAlignment="Center" />
+                                            <TextBlock Margin="5,0,0,0" FontSize="10.5" Foreground="White" Text="Group" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Padding="8,3" Cursor="Hand" Click="UngroupCheckedLayers_Click" ToolTip="Ungroup the ticked group(s)">
+                                        <TextBlock FontSize="10.5" Foreground="#C0C0C0" Text="Ungroup" />
+                                    </Button>
+                                </StackPanel>
+                                <Grid Grid.Row="2">
+                                    <TextBlock x:Name="LayersEmptyHint" Margin="16,12" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                                               Foreground="#8A8A8A" FontSize="11.5" Text="Nothing drawn yet. Add markers, text or drawings and they'll show up here." />
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="6,0,6,8">
+                                        <ItemsControl x:Name="LayersList">
+                                            <ItemsControl.GroupStyle>
+                                                <GroupStyle>
+                                                    <GroupStyle.HeaderTemplate>
+                                                        <DataTemplate>
+                                                            <Grid Margin="4,8,2,3">
+                                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                                    <TextBlock FontSize="10.5" FontWeight="SemiBold" Foreground="#60CDFF" Text="{Binding Name}" />
+                                                                    <TextBlock Margin="6,0,0,0" FontSize="10.5" Foreground="#707070" Text="{Binding ItemCount, StringFormat=({0})}" />
+                                                                </StackPanel>
+                                                                <Button HorizontalAlignment="Right" Width="20" Height="20" Padding="0" Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                                                        Click="LayerGroupToggle_Click" ToolTip="Show / hide this group">
+                                                                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7B3;" FontSize="12" Foreground="#909090" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                </Button>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </GroupStyle.HeaderTemplate>
+                                                </GroupStyle>
+                                            </ItemsControl.GroupStyle>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Button Click="LayerRow_Click" HorizontalContentAlignment="Stretch" Cursor="Hand" Margin="0,1" Padding="4,4" BorderThickness="0" Background="#0FFFFFFF">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto" />
+                                                                <ColumnDefinition Width="22" />
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <CheckBox VerticalAlignment="Center" Margin="0,0,4,0" IsChecked="{Binding IsSelectedInPanel, Mode=TwoWay}" ToolTip="Tick to group" />
+                                                            <Image Grid.Column="1" Width="18" Height="18" VerticalAlignment="Center" Source="{Binding Preview}" Visibility="{Binding HasPreview, Converter={StaticResource BoolToVisibility}}" />
+                                                            <Border Grid.Column="1" Width="12" Height="12" CornerRadius="6" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{Binding Swatch}"
+                                                                    Visibility="{Binding HasNoPreview, Converter={StaticResource BoolToVisibility}}" />
+                                                            <TextBlock Grid.Column="2" Margin="8,0" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimary}" Text="{Binding Label}" TextTrimming="CharacterEllipsis" />
+                                                            <StackPanel Grid.Column="3" Orientation="Horizontal">
+                                                                <Button Width="24" Height="24" Padding="0" Background="Transparent" BorderThickness="0" Cursor="Hand" Click="LayerEditText_Click" ToolTip="Edit text"
+                                                                        Visibility="{Binding IsText, Converter={StaticResource BoolToVisibility}}">
+                                                                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE70F;" FontSize="12" Foreground="#B0B0B0" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                </Button>
+                                                                <Button Width="24" Height="24" Padding="0" Background="Transparent" BorderThickness="0" Cursor="Hand" Click="LayerDelete_Click" ToolTip="Delete">
+                                                                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE74D;" FontSize="12" Foreground="#E08585" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                </Button>
+                                                            </StackPanel>
+                                                        </Grid>
+                                                    </Button>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Grid>
                         </Border>
 
                         <Border
