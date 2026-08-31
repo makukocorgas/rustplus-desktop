@@ -6578,6 +6578,9 @@ Rust+ Desktop registers your local app with FCM so it can receive those same Rus
   <data name="ChatEmpty" xml:space="preserve">
     <value>Nothing has been said yet. Go ahead.</value>
   </data>
+  <data name="ChatSlowModeIndicator" xml:space="preserve">
+    <value>Slow Mode: {0}s</value>
+  </data>
   <data name="ChatSilencedTimeout" xml:space="preserve">
     <value>You cannot post until {0}. Reason: {1}</value>
   </data>

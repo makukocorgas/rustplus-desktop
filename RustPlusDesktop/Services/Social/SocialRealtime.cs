@@ -21,6 +21,38 @@ public static class SocialRealtime
     /// <summary>The public room gained a line (or its sanction changed). Carries nothing: the reader re-reads.</summary>
     public static event Action? ChatChanged;
 
+    /// <summary>
+    /// A single new line, for a subscriber that would rather append one than re-read the room.
+    ///
+    /// Declared for parity with the push-based original, but never raised here: the batched
+    /// catch-up that <see cref="ChatChanged"/> triggers already fetches and appends every new
+    /// line by id, and a subscriber wired to both dedupes by id on its own — so firing this too
+    /// would only cost a second parse of the same message.
+    /// </summary>
+    public static event Action<Models.ChatLine>? ChatMessageReceived;
+
+    /// <summary>
+    /// A line was removed from the room by a moderator.
+    ///
+    /// Declared but not yet raised: nothing in the client can delete a line yet, so there is
+    /// nothing for a poll to detect. Wiring this up is for whenever that moderation action lands.
+    /// </summary>
+    public static event Action<string>? ChatMessageDeleted;
+
+    /// <summary>The room's slow-mode cooldown changed. Polled alongside the room itself.</summary>
+    public static event Action<Models.ChatSlowModeEvent>? SlowModeUpdated;
+
+    /// <summary>
+    /// A sanction was issued against or lifted from the account reading right now.
+    ///
+    /// Declared for parity, but not raised: the room read that already drives
+    /// <see cref="ChatChanged"/> carries the caller's own sanction state on every tick, and the
+    /// panel applies it from there. What this event adds beyond that is the public "so-and-so was
+    /// silenced" transparency line, which needs knowing who acted and why — left for when
+    /// moderator tooling exists to say so.
+    /// </summary>
+    public static event Action<Models.SystemSanctionEvent>? SanctionEventReceived;
+
     /// <summary>A message landed in a thread. The argument is the conversation it belongs to.</summary>
     public static event Action<string>? MessageArrived;
 
@@ -32,6 +64,7 @@ public static class SocialRealtime
 
     private static CancellationTokenSource? _cts;
     private static string? _lastChatSeenAt;
+    private static int _lastSlowModeSeconds = -1;
     private static readonly Dictionary<string, string?> _lastMessageAtByThread = new();
     private static readonly HashSet<string> _knownPendingThreads = new();
 
@@ -66,6 +99,7 @@ public static class SocialRealtime
         cts?.Dispose();
 
         _lastChatSeenAt = null;
+        _lastSlowModeSeconds = -1;
         _lastMessageAtByThread.Clear();
         _knownPendingThreads.Clear();
     }
@@ -87,7 +121,8 @@ public static class SocialRealtime
 
     private static async Task PollOnceAsync()
     {
-        // The public room: a cheap "since" read is enough to know whether it moved.
+        // The public room: a cheap "since" read is enough to know whether it moved, and it also
+        // carries the room's current slow-mode value along for free.
         var snapshot = await SocialApi.GetChatAsync(_lastChatSeenAt).ConfigureAwait(false);
         if (snapshot.Ok)
         {
@@ -95,6 +130,13 @@ public static class SocialRealtime
             {
                 _lastChatSeenAt = snapshot.Lines[^1].SentAtIso ?? _lastChatSeenAt;
                 Raise(() => ChatChanged?.Invoke());
+            }
+
+            if (snapshot.SlowModeSeconds != _lastSlowModeSeconds)
+            {
+                _lastSlowModeSeconds = snapshot.SlowModeSeconds;
+                var slowMode = new Models.ChatSlowModeEvent { Seconds = snapshot.SlowModeSeconds };
+                Raise(() => SlowModeUpdated?.Invoke(slowMode));
             }
         }
 
