@@ -6737,4 +6737,7 @@ Rust+ Desktop registers your local app with FCM so it can receive those same Rus
   <data name="ProfileVacClean" xml:space="preserve">
     <value>Clean (0 bans on record)</value>
   </data>
+  <data name="ChatScrollToBottom" xml:space="preserve">
+    <value>Jump to latest</value>
+  </data>
 </root>
