@@ -56,6 +56,9 @@ public static class SocialRealtime
     /// <summary>A message landed in a thread. The argument is the conversation it belongs to.</summary>
     public static event Action<string>? MessageArrived;
 
+    /// <summary>Somebody would like to be on your friends list.</summary>
+    public static event Action? FriendRequestArrived;
+
     /// <summary>Somebody wants to open a thread and is waiting to be let in.</summary>
     public static event Action? RequestArrived;
 
@@ -67,6 +70,7 @@ public static class SocialRealtime
     private static int _lastSlowModeSeconds = -1;
     private static readonly Dictionary<string, string?> _lastMessageAtByThread = new();
     private static readonly HashSet<string> _knownPendingThreads = new();
+    private static readonly HashSet<string> _knownIncomingFriendRequests = new();
 
     /// <summary>
     /// Starts polling, once. Safe to call on every panel open — the second call and the two
@@ -102,6 +106,7 @@ public static class SocialRealtime
         _lastSlowModeSeconds = -1;
         _lastMessageAtByThread.Clear();
         _knownPendingThreads.Clear();
+        _knownIncomingFriendRequests.Clear();
     }
 
     private static async Task PollLoopAsync(CancellationToken ct)
@@ -161,6 +166,23 @@ public static class SocialRealtime
             {
                 Raise(() => RequestArrived?.Invoke());
             }
+        }
+
+        // Friend requests: the same "a new pending row appeared" trick, on the incoming side only
+        // - an outgoing request the other side has not answered yet is not something to nudge for.
+        var friends = await SocialApi.GetFriendsAsync().ConfigureAwait(false);
+        if (friends.Ok)
+        {
+            var seenNow = new HashSet<string>();
+            foreach (var request in friends.Incoming)
+            {
+                seenNow.Add(request.Id);
+                if (_knownIncomingFriendRequests.Add(request.Id))
+                    Raise(() => FriendRequestArrived?.Invoke());
+            }
+
+            // Answered elsewhere (another device, or expired) - stop watching for it here too.
+            _knownIncomingFriendRequests.IntersectWith(seenNow);
         }
     }
 
