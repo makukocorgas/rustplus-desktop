@@ -564,6 +564,7 @@ public static class SocialApi
         var slowMode = 0;
         var ok = false;
         var supporterRoom = false;
+        var maxLength = 128;
 
         try
         {
@@ -654,6 +655,11 @@ public static class SocialApi
                 {
                     slowMode = smsVal;
                 }
+
+                if (meta.TryGetProperty("max_length", out var ml) && ml.TryGetInt32(out var mlVal))
+                {
+                    maxLength = mlVal;
+                }
             }
 
             ok = true;
@@ -663,7 +669,7 @@ public static class SocialApi
             // Deliberately quiet.
         }
 
-        return new Models.ChatSnapshot(lines, sanction, slowMode, ok, supporterRoom);
+        return new Models.ChatSnapshot(lines, sanction, slowMode, ok, supporterRoom, maxLength);
     }
 
     /// <summary>
