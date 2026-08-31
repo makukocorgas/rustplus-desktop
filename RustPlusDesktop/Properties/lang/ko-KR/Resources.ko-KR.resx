@@ -5004,4 +5004,7 @@
   <data name="ProfileVacClean" xml:space="preserve">
     <value>양호함 (제재 0건)</value>
   </data>
+  <data name="LfgPendingWaitingHint" xml:space="preserve">
+    <value>{0} 님의 수락을 기다리는 중...</value>
+  </data>
 </root>
