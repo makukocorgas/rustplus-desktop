@@ -3966,4 +3966,646 @@ Du kan finde mere information på serverens officielle hjemmeside:
   <data name="ChatCmdCraftNoRecipe" xml:space="preserve">
     <value>{0} har ingen håndværksopskrift.</value>
   </data>
+  <data name="Tutorials.map-3d.Description" xml:space="preserve">
+    <value>Udforsk den lokale 3D viewport, værktøjslinje, footprint builder, ydeevnevisning og lukkehandling.</value>
+  </data>
+  <data name="Tutorials.smart-devices.Title" xml:space="preserve">
+    <value>Smartenheder</value>
+  </data>
+  <data name="Tutorials.smart-devices.Description" xml:space="preserve">
+    <value>Find, filtrer, opdater, organiser og forstå sikkert parrede smartenheder.</value>
+  </data>
+  <data name="Tutorials.team-tracking.Title" xml:space="preserve">
+    <value>Hold- og spillersporing</value>
+  </data>
+  <data name="Tutorials.team-tracking.Description" xml:space="preserve">
+    <value>Gennemgå holdkammerater, markører, følg adfærd og krav til deling.</value>
+  </data>
+  <data name="Tutorials.chat-commands.Title" xml:space="preserve">
+    <value>Teamchat og kommandoer</value>
+  </data>
+  <data name="Tutorials.chat-commands.Description" xml:space="preserve">
+    <value>Læs teamchat, komponer beskeder og konfigurer kommandoer uden at sende noget.</value>
+  </data>
+  <data name="Tutorials.discord.Title" xml:space="preserve">
+    <value>Discord Integration</value>
+  </data>
+  <data name="Tutorials.discord.Description" xml:space="preserve">
+    <value>Find Discord indgangspunkter, konfiguration, tilladelser og privatlivsgrænser.</value>
+  </data>
+  <data name="Tutorials.automation.Title" xml:space="preserve">
+    <value>Logik og automationsmotor</value>
+  </data>
+  <data name="Tutorials.automation.Description" xml:space="preserve">
+    <value>Forstå regler, triggere, betingelser, handlinger, runtime-tilstand og sikker test.</value>
+  </data>
+  <data name="Tutorials.notifications.Title" xml:space="preserve">
+    <value>Meddelelser og advarsler</value>
+  </data>
+  <data name="Tutorials.notifications.Description" xml:space="preserve">
+    <value>Filtrer, søg, gennemgå, markér og ryd applikationsmeddelelser.</value>
+  </data>
+  <data name="Tutorials.cameras.Title" xml:space="preserve">
+    <value>Kameraer og overvågning</value>
+  </data>
+  <data name="Tutorials.cameras.Description" xml:space="preserve">
+    <value>Tilføj og gennemgå parrede kameraer, mens kamera-id'erne holdes private.</value>
+  </data>
+  <data name="Tutorials.raid-calculator.Title" xml:space="preserve">
+    <value>Raid Lommeregner</value>
+  </data>
+  <data name="Tutorials.raid-calculator.Description" xml:space="preserve">
+    <value>Byg en raidplan, sammenlign metoder, og gennemgå materialetotaler.</value>
+  </data>
+  <data name="Tutorials.recycler-calculator.Title" xml:space="preserve">
+    <value>Recycler Lommeregner</value>
+  </data>
+  <data name="Tutorials.recycler-calculator.Description" xml:space="preserve">
+    <value>Tilføj varer, og sammenlign udbyttet af vilde og sikre zone-genbrugere.</value>
+  </data>
+  <data name="Tutorials.settings.Title" xml:space="preserve">
+    <value>Indstillinger</value>
+  </data>
+  <data name="Tutorials.settings.Description" xml:space="preserve">
+    <value>Find sprog, kortydeevne, tilsluttede tjenester og vedligeholdelseskontroller.</value>
+  </data>
+  <data name="Tutorials.updates-diagnostics.Title" xml:space="preserve">
+    <value>Opdateringer og diagnostik</value>
+  </data>
+  <data name="Tutorials.updates-diagnostics.Description" xml:space="preserve">
+    <value>Tjek programopdateringer og find diagnoseloggen uden at starte en opdatering.</value>
+  </data>
+  <data name="Tutorials.Step.basics.navigation.Title" xml:space="preserve">
+    <value>Hovednavigation</value>
+  </data>
+  <data name="Tutorials.Step.basics.navigation.Description" xml:space="preserve">
+    <value>Brug denne sidebjælke til at flytte mellem enheder, holdsporing, kameraer, spillere, notifikationer og lommeregnere.</value>
+  </data>
+  <data name="Tutorials.Step.basics.collapse.Title" xml:space="preserve">
+    <value>Navigationsudvidelse</value>
+  </data>
+  <data name="Tutorials.Step.basics.collapse.Description" xml:space="preserve">
+    <value>Fastgør eller skjul sidebjælken for at bytte etiketter for mere kortarbejdsområde.</value>
+  </data>
+  <data name="Tutorials.Step.basics.server.Title" xml:space="preserve">
+    <value>Nuværende server</value>
+  </data>
+  <data name="Tutorials.Step.basics.server.Description" xml:space="preserve">
+    <value>Dette område identificerer den valgte Rust-server og dens kontokontekst.</value>
+  </data>
+  <data name="Tutorials.Step.basics.connection.Title" xml:space="preserve">
+    <value>Forbindelsesstatus</value>
+  </data>
+  <data name="Tutorials.Step.basics.connection.Description" xml:space="preserve">
+    <value>Serverkort viser, om en server er afbrudt, blødt forbundet eller fuldt tilsluttet.</value>
+  </data>
+  <data name="Tutorials.Step.basics.notifications.Title" xml:space="preserve">
+    <value>Meddelelser</value>
+  </data>
+  <data name="Tutorials.Step.basics.notifications.Description" xml:space="preserve">
+    <value>Forbindelsesproblemer, alarmer, dødsfald og automatiseringsresultater er samlet her.</value>
+  </data>
+  <data name="Tutorials.Step.basics.tutorials.Title" xml:space="preserve">
+    <value>Tutorial Center</value>
+  </data>
+  <data name="Tutorials.Step.basics.tutorials.Description" xml:space="preserve">
+    <value>Gentag, fortsæt, genstart eller opdag opdaterede lektioner her.</value>
+  </data>
+  <data name="Tutorials.Step.account.profile.Title" xml:space="preserve">
+    <value>Kontokontekst</value>
+  </data>
+  <data name="Tutorials.Step.account.profile.Description" xml:space="preserve">
+    <value>Cloud-adgang er adskilt fra Rust+-parring. Lokale funktioner forbliver tilgængelige uden skysynkronisering.</value>
+  </data>
+  <data name="Tutorials.Step.account.cloud.Title" xml:space="preserve">
+    <value>Cloud-konto</value>
+  </data>
+  <data name="Tutorials.Step.account.cloud.Description" xml:space="preserve">
+    <value>Log ind her for understøttet synkronisering; tutorials viser aldrig private kontodata.</value>
+  </data>
+  <data name="Tutorials.Step.account.premium.Title" xml:space="preserve">
+    <value>Supporterstatus</value>
+  </data>
+  <data name="Tutorials.Step.account.premium.Description" xml:space="preserve">
+    <value>Supporteradgang låser gated funktioner op. Lokal tutorial fremskridt kræver intet abonnement.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.overview.Title" xml:space="preserve">
+    <value>Par Rust+</value>
+  </data>
+  <data name="Tutorials.Step.pairing.overview.Description" xml:space="preserve">
+    <value>Parring linker denne app til Rust Companion, før live serverfunktioner kan fungere.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.start.Title" xml:space="preserve">
+    <value>Begynd parring</value>
+  </data>
+  <data name="Tutorials.Step.pairing.start.Description" xml:space="preserve">
+    <value>Begynd at lytte, og brug derefter Rusts in-game Rust+ parringsflow. Legitimationsoplysninger registreres aldrig.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.list.Title" xml:space="preserve">
+    <value>Parrede servere</value>
+  </data>
+  <data name="Tutorials.Step.pairing.list.Description" xml:space="preserve">
+    <value>Vælg en lokalt konfigureret server, før du forbinder eller ændrer serverspecifikke indstillinger.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.soft.Title" xml:space="preserve">
+    <value>Soft Connect</value>
+  </data>
+  <data name="Tutorials.Step.pairing.soft.Description" xml:space="preserve">
+    <value>Connect belastninger begrænset kommunikation uden at initialisere alle live-funktioner.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.full.Title" xml:space="preserve">
+    <value>Fuld forbindelse</value>
+  </data>
+  <data name="Tutorials.Step.pairing.full.Description" xml:space="preserve">
+    <value>Fuld forbindelse initialiserer kortdata, enheder, teamdata og Rust+-abonnementer.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.disconnect.Title" xml:space="preserve">
+    <value>Afbryd forbindelsen</value>
+  </data>
+  <data name="Tutorials.Step.pairing.disconnect.Description" xml:space="preserve">
+    <value>Afbrydelse stopper direkte kommunikation. Denne lektion påberåber sig aldrig handlingen.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.reset.Title" xml:space="preserve">
+    <value>Nulstil parring</value>
+  </data>
+  <data name="Tutorials.Step.pairing.reset.Description" xml:space="preserve">
+    <value>Gendannelseskommandoer er i kontekstmenuen Par. Nulstilling fjerner lokal parringskonfiguration.</value>
+  </data>
+  <data name="Tutorials.Step.map.canvas.Title" xml:space="preserve">
+    <value>Kortlærred</value>
+  </data>
+  <data name="Tutorials.Step.map.canvas.Description" xml:space="preserve">
+    <value>Panorer ved at trække, zoom med hjulet og interager med markører på det aktuelle Rust-kort.</value>
+  </data>
+  <data name="Tutorials.Step.map.toolbar.Title" xml:space="preserve">
+    <value>Kortværktøjslinje</value>
+  </data>
+  <data name="Tutorials.Step.map.toolbar.Description" xml:space="preserve">
+    <value>Værktøjslinjen styrer lag, chat, overlejringer, timere og 2D eller 3D tilstande.</value>
+  </data>
+  <data name="Tutorials.Step.map.fit.Title" xml:space="preserve">
+    <value>Nulstil visning</value>
+  </data>
+  <data name="Tutorials.Step.map.fit.Description" xml:space="preserve">
+    <value>Tilpas kortet tilbage i arbejdsområdet efter panorering eller zoom.</value>
+  </data>
+  <data name="Tutorials.Step.map.layers.Title" xml:space="preserve">
+    <value>Kortlag</value>
+  </data>
+  <data name="Tutorials.Step.map.layers.Description" xml:space="preserve">
+    <value>Vælg gitter, afspiller, monument, butik og avancerede visuelle muligheder her.</value>
+  </data>
+  <data name="Tutorials.Step.map.heatmaps.Title" xml:space="preserve">
+    <value>Heatmaps</value>
+  </data>
+  <data name="Tutorials.Step.map.heatmaps.Description" xml:space="preserve">
+    <value>Åbne ekstraherede tæthedsoverlejringer. De viser sandsynlige gydezoner, ikke levende enheder.</value>
+  </data>
+  <data name="Tutorials.Step.map.open3d.Title" xml:space="preserve">
+    <value>Åbn 3D kort</value>
+  </data>
+  <data name="Tutorials.Step.map.open3d.Description" xml:space="preserve">
+    <value>Generer eller åbn det aktuelle korts lokale 3D-repræsentation.</value>
+  </data>
+  <data name="Tutorials.Step.map.drawing.Title" xml:space="preserve">
+    <value>Tegneværktøjer</value>
+  </data>
+  <data name="Tutorials.Step.map.drawing.Description" xml:space="preserve">
+    <value>Tegn ikke-destruktive planlægningsnotater over kortet og forlad tegnetilstand, når du er færdig.</value>
+  </data>
+  <data name="Tutorials.Step.heatmaps.open.Title" xml:space="preserve">
+    <value>Åbn Heatmaps</value>
+  </data>
+  <data name="Tutorials.Step.heatmaps.open.Description" xml:space="preserve">
+    <value>Gennemse tilgængelige tæthedslag for det aktuelle parsede kort.</value>
+  </data>
+  <data name="Tutorials.Step.heatmaps.selector.Title" xml:space="preserve">
+    <value>Varmekortvælger</value>
+  </data>
+  <data name="Tutorials.Step.heatmaps.selector.Description" xml:space="preserve">
+    <value>Vælg én udtrukket kategori, eller ryd den aktive overlejring.</value>
+  </data>
+  <data name="Tutorials.Step.heatmaps.meaning.Title" xml:space="preserve">
+    <value>Sådan fungerer Heatmaps</value>
+  </data>
+  <data name="Tutorials.Step.heatmaps.meaning.Description" xml:space="preserve">
+    <value>Heatmaps opsummerer sandsynlige gydeområder; de garanterer ikke en levende enhed på et sted.</value>
+  </data>
+  <data name="Tutorials.Step.map3d.open.Title" xml:space="preserve">
+    <value>Generer eller åbn 3D</value>
+  </data>
+  <data name="Tutorials.Step.map3d.open.Description" xml:space="preserve">
+    <value>Appen analyserer kortdata lokalt og genbruger sin cache, når det er muligt.</value>
+  </data>
+  <data name="Tutorials.Step.map3d.viewport.Title" xml:space="preserve">
+    <value>3D Viewport</value>
+  </data>
+  <data name="Tutorials.Step.map3d.viewport.Description" xml:space="preserve">
+    <value>Orbit, panorer og zoom omkring en interaktiv repræsentation af det valgte kort.</value>
+  </data>
+  <data name="Tutorials.Step.map3d.toolbar.Title" xml:space="preserve">
+    <value>3D Værktøjslinje</value>
+  </data>
+  <data name="Tutorials.Step.map3d.toolbar.Description" xml:space="preserve">
+    <value>Kontroller lag, live-markører, fuldskærm, indstillinger og footprint-værktøjer.</value>
+  </data>
+  <data name="Tutorials.Step.map3d.build.Title" xml:space="preserve">
+    <value>Base Footprint Builder</value>
+  </data>
+  <data name="Tutorials.Step.map3d.build.Description" xml:space="preserve">
+    <value>Byggetilstand placerer kun planlægningsfundamenter; det ændrer ikke Rust serveren.</value>
+  </data>
+  <data name="Tutorials.Step.map3d.performance.Title" xml:space="preserve">
+    <value>Performance Indicator</value>
+  </data>
+  <data name="Tutorials.Step.map3d.performance.Description" xml:space="preserve">
+    <value>FPS og adaptiv opløsning balancere detaljer med jævn interaktion.</value>
+  </data>
+  <data name="Tutorials.Step.map3d.close.Title" xml:space="preserve">
+    <value>Luk 3D View</value>
+  </data>
+  <data name="Tutorials.Step.map3d.close.Description" xml:space="preserve">
+    <value>Vend tilbage til 2D og frigiv de tunge indlejrede 3D-ressourcer.</value>
+  </data>
+  <data name="Tutorials.Step.devices.overview.Title" xml:space="preserve">
+    <value>Enhedsliste</value>
+  </data>
+  <data name="Tutorials.Step.devices.overview.Description" xml:space="preserve">
+    <value>Parrede kontakter, alarmer og lagermonitorer vises her i grupper.</value>
+  </data>
+  <data name="Tutorials.Step.devices.search.Title" xml:space="preserve">
+    <value>Enhedssøgning</value>
+  </data>
+  <data name="Tutorials.Step.devices.search.Description" xml:space="preserve">
+    <value>Filtrer enheder efter navn eller kommando uden at ændre deres tilstand.</value>
+  </data>
+  <data name="Tutorials.Step.devices.filter.Title" xml:space="preserve">
+    <value>Enhedstypefilter</value>
+  </data>
+  <data name="Tutorials.Step.devices.filter.Description" xml:space="preserve">
+    <value>Begræns listen til kontakter, alarmer, lagermonitorer eller alle enheder.</value>
+  </data>
+  <data name="Tutorials.Step.devices.refresh.Title" xml:space="preserve">
+    <value>Opdater stater</value>
+  </data>
+  <data name="Tutorials.Step.devices.refresh.Description" xml:space="preserve">
+    <value>Anmod om ny skrivebeskyttet tilstand; tilgængelighed afhænger af forbindelsen.</value>
+  </data>
+  <data name="Tutorials.Step.devices.actions.Title" xml:space="preserve">
+    <value>Enhedsværktøjer</value>
+  </data>
+  <data name="Tutorials.Step.devices.actions.Description" xml:space="preserve">
+    <value>Import, skysynkronisering, automatisering, genvejstaster, opdatering og oprydning er samlet her.</value>
+  </data>
+  <data name="Tutorials.Step.devices.first.Title" xml:space="preserve">
+    <value>Enhedskort</value>
+  </data>
+  <data name="Tutorials.Step.devices.first.Description" xml:space="preserve">
+    <value>Et kort viser identitet, forbindelsestilstand, kommandoer og enhedsspecifikke kontroller.</value>
+  </data>
+  <data name="Tutorials.Step.devices.safety.Title" xml:space="preserve">
+    <value>Enhedssikkerhed</value>
+  </data>
+  <data name="Tutorials.Step.devices.safety.Description" xml:space="preserve">
+    <value>Tutorials skifter aldrig en switch, sletter en enhed eller kører en genvejstast.</value>
+  </data>
+  <data name="Tutorials.Step.team.list.Title" xml:space="preserve">
+    <value>Holdliste</value>
+  </data>
+  <data name="Tutorials.Step.team.list.Description" xml:space="preserve">
+    <value>Indlæste holdkammerater, onlinetilstand, avatarer og konteksthandlinger vises her.</value>
+  </data>
+  <data name="Tutorials.Step.team.markers.Title" xml:space="preserve">
+    <value>Holdmarkører</value>
+  </data>
+  <data name="Tutorials.Step.team.markers.Description" xml:space="preserve">
+    <value>Vælg, hvilke teammate-markørstile, der er synlige på kortet.</value>
+  </data>
+  <data name="Tutorials.Step.team.follow.Title" xml:space="preserve">
+    <value>Følg spiller</value>
+  </data>
+  <data name="Tutorials.Step.team.follow.Description" xml:space="preserve">
+    <value>Følgende centerkortopdateringer på en holdkammerat og kræver aktuelle holddata.</value>
+  </data>
+  <data name="Tutorials.Step.team.sharing.Title" xml:space="preserve">
+    <value>Teamdeling</value>
+  </data>
+  <data name="Tutorials.Step.team.sharing.Description" xml:space="preserve">
+    <value>Deling af basis og skærmbilleder kan kræve en konto og uploadsamtykke.</value>
+  </data>
+  <data name="Tutorials.Step.chat.history.Title" xml:space="preserve">
+    <value>Chathistorie</value>
+  </data>
+  <data name="Tutorials.Step.chat.history.Description" xml:space="preserve">
+    <value>Seneste Rust-teammeddelelser vises her, når forbindelsen giver chatdata.</value>
+  </data>
+  <data name="Tutorials.Step.chat.input.Title" xml:space="preserve">
+    <value>Besked input</value>
+  </data>
+  <data name="Tutorials.Step.chat.input.Description" xml:space="preserve">
+    <value>Skriv en teammeddelelse her. Selvstudiet indsætter eller sender aldrig en.</value>
+  </data>
+  <data name="Tutorials.Step.chat.send.Title" xml:space="preserve">
+    <value>Send besked</value>
+  </data>
+  <data name="Tutorials.Step.chat.send.Description" xml:space="preserve">
+    <value>Sender indlæg til Rust teamchat. Denne kontrol er kun fremhævet.</value>
+  </data>
+  <data name="Tutorials.Step.chat.commands.Title" xml:space="preserve">
+    <value>Kommandoindstillinger</value>
+  </data>
+  <data name="Tutorials.Step.chat.commands.Description" xml:space="preserve">
+    <value>Konfigurer præfikser, enhedsbindinger, forsinkelser og kommandotilgængelighed.</value>
+  </data>
+  <data name="Tutorials.Step.discord.entry.Title" xml:space="preserve">
+    <value>Discord Fællesskab</value>
+  </data>
+  <data name="Tutorials.Step.discord.entry.Description" xml:space="preserve">
+    <value>Denne genvej åbner fællesskabet; integrationsindstillinger er separate.</value>
+  </data>
+  <data name="Tutorials.Step.discord.settings.Title" xml:space="preserve">
+    <value>Discord Indstillinger</value>
+  </data>
+  <data name="Tutorials.Step.discord.settings.Description" xml:space="preserve">
+    <value>Konfigurer bot, guild, kanaler, kommandoer og tilladelser uden log-id'er.</value>
+  </data>
+  <data name="Tutorials.Step.discord.privacy.Title" xml:space="preserve">
+    <value>Discord Sikkerhed</value>
+  </data>
+  <data name="Tutorials.Step.discord.privacy.Description" xml:space="preserve">
+    <value>Tutorials sender aldrig meddelelser eller logger guild, kanal eller bruger-id'er.</value>
+  </data>
+  <data name="Tutorials.Step.automation.open.Title" xml:space="preserve">
+    <value>Open Logic Engine</value>
+  </data>
+  <data name="Tutorials.Step.automation.open.Description" xml:space="preserve">
+    <value>Åbn den valgte servers regeleditor.</value>
+  </data>
+  <data name="Tutorials.Step.automation.list.Title" xml:space="preserve">
+    <value>Regelliste</value>
+  </data>
+  <data name="Tutorials.Step.automation.list.Description" xml:space="preserve">
+    <value>Regler og deres trigger, betingelse, forsinkelse og handlingstrin vises her.</value>
+  </data>
+  <data name="Tutorials.Step.automation.enabled.Title" xml:space="preserve">
+    <value>Motortilstand</value>
+  </data>
+  <data name="Tutorials.Step.automation.enabled.Description" xml:space="preserve">
+    <value>Aktiver eller sæt regeludførelse på pause. Selvstudiet ændrer aldrig denne kontakt.</value>
+  </data>
+  <data name="Tutorials.Step.automation.workflow.Title" xml:space="preserve">
+    <value>Regelarbejdsgang</value>
+  </data>
+  <data name="Tutorials.Step.automation.workflow.Description" xml:space="preserve">
+    <value>En trigger starter en regel; betingelser gate senere handlinger; trin køres i rækkefølge.</value>
+  </data>
+  <data name="Tutorials.Step.automation.safety.Title" xml:space="preserve">
+    <value>Automationssikkerhed</value>
+  </data>
+  <data name="Tutorials.Step.automation.safety.Description" xml:space="preserve">
+    <value>Selvstudier bevarer ikke regler, skifter enheder, sender chat eller udfører automatisering.</value>
+  </data>
+  <data name="Tutorials.Step.notifications.center.Title" xml:space="preserve">
+    <value>Underretningscenter</value>
+  </data>
+  <data name="Tutorials.Step.notifications.center.Description" xml:space="preserve">
+    <value>Gennemgå advarsler uden at stole på forbigående skrivebordsmeddelelser.</value>
+  </data>
+  <data name="Tutorials.Step.notifications.filters.Title" xml:space="preserve">
+    <value>Meddelelsesfiltre</value>
+  </data>
+  <data name="Tutorials.Step.notifications.filters.Description" xml:space="preserve">
+    <value>Skift mellem alle meddelelser, alarmer og dødsfald.</value>
+  </data>
+  <data name="Tutorials.Step.notifications.search.Title" xml:space="preserve">
+    <value>Søgemeddelelser</value>
+  </data>
+  <data name="Tutorials.Step.notifications.search.Description" xml:space="preserve">
+    <value>Find meddelelser efter vist indhold eller serverkontekst.</value>
+  </data>
+  <data name="Tutorials.Step.notifications.actions.Title" xml:space="preserve">
+    <value>Massehandlinger</value>
+  </data>
+  <data name="Tutorials.Step.notifications.actions.Description" xml:space="preserve">
+    <value>Marker alt læst eller ryd historik; tutorials udfører aldrig disse handlinger.</value>
+  </data>
+  <data name="Tutorials.Step.cameras.list.Title" xml:space="preserve">
+    <value>Kameraliste</value>
+  </data>
+  <data name="Tutorials.Step.cameras.list.Description" xml:space="preserve">
+    <value>Konfigurerede forhåndsvisninger vises, når en valgt server og kamera er tilgængelige.</value>
+  </data>
+  <data name="Tutorials.Step.cameras.add.Title" xml:space="preserve">
+    <value>Tilføj kamera</value>
+  </data>
+  <data name="Tutorials.Step.cameras.add.Description" xml:space="preserve">
+    <value>Tilføj et kamera ved hjælp af dets Rust identifikator; tutorials fanger aldrig kamerakoder.</value>
+  </data>
+  <data name="Tutorials.Step.cameras.privacy.Title" xml:space="preserve">
+    <value>Kamerabeskyttelse</value>
+  </data>
+  <data name="Tutorials.Step.cameras.privacy.Description" xml:space="preserve">
+    <value>Kamera-id'er og rammer er udelukket fra selvstudiediagnostik.</value>
+  </data>
+  <data name="Tutorials.Step.raid.search.Title" xml:space="preserve">
+    <value>Søgemål</value>
+  </data>
+  <data name="Tutorials.Step.raid.search.Description" xml:space="preserve">
+    <value>Find en væg, en dør, en deployerbar eller et andet mål i det medfølgende datasæt.</value>
+  </data>
+  <data name="Tutorials.Step.raid.plan.Title" xml:space="preserve">
+    <value>Raidplan</value>
+  </data>
+  <data name="Tutorials.Step.raid.plan.Description" xml:space="preserve">
+    <value>Gennemgå mål, sundhed, mængder, metoder og beregnede omkostninger.</value>
+  </data>
+  <data name="Tutorials.Step.raid.methods.Title" xml:space="preserve">
+    <value>Sammenlign metoder</value>
+  </data>
+  <data name="Tutorials.Step.raid.methods.Description" xml:space="preserve">
+    <value>Vælg tilladte sprængstoffer eller værktøjer og sammenlign alternativer.</value>
+  </data>
+  <data name="Tutorials.Step.raid.clear.Title" xml:space="preserve">
+    <value>Klar plan</value>
+  </data>
+  <data name="Tutorials.Step.raid.clear.Description" xml:space="preserve">
+    <value>Ryd fjerner planen; selvstudiet fremhæver det uden at ændre indgange.</value>
+  </data>
+  <data name="Tutorials.Step.recycler.search.Title" xml:space="preserve">
+    <value>Søg varer</value>
+  </data>
+  <data name="Tutorials.Step.recycler.search.Description" xml:space="preserve">
+    <value>Find en genanvendelig genstand, og føj den til lommeregneren.</value>
+  </data>
+  <data name="Tutorials.Step.recycler.category.Title" xml:space="preserve">
+    <value>Varekategori</value>
+  </data>
+  <data name="Tutorials.Step.recycler.category.Description" xml:space="preserve">
+    <value>Indsnævring af varekataloget efter kategori.</value>
+  </data>
+  <data name="Tutorials.Step.recycler.inputs.Title" xml:space="preserve">
+    <value>Input elementer</value>
+  </data>
+  <data name="Tutorials.Step.recycler.inputs.Description" xml:space="preserve">
+    <value>Juster mængder eller fjern indtastninger; tutorials ændrer ikke lommeregnerens tilstand.</value>
+  </data>
+  <data name="Tutorials.Step.recycler.results.Title" xml:space="preserve">
+    <value>Genbrugerresultater</value>
+  </data>
+  <data name="Tutorials.Step.recycler.results.Description" xml:space="preserve">
+    <value>Sammenlign udbytte og tider for genbrugere af vilde og sikre zoner.</value>
+  </data>
+  <data name="Tutorials.Step.settings.open.Title" xml:space="preserve">
+    <value>Åbn Indstillinger</value>
+  </data>
+  <data name="Tutorials.Step.settings.open.Description" xml:space="preserve">
+    <value>Applikationsadfærd, integrationer, ydeevne, backup og vedligeholdelse live her.</value>
+  </data>
+  <data name="Tutorials.Step.settings.language.Title" xml:space="preserve">
+    <value>Sprog</value>
+  </data>
+  <data name="Tutorials.Step.settings.language.Description" xml:space="preserve">
+    <value>Vælg UI-sproget. Selvstudietekst bruger det samme ressourcesystem.</value>
+  </data>
+  <data name="Tutorials.Step.settings.map.Title" xml:space="preserve">
+    <value>Map Performance</value>
+  </data>
+  <data name="Tutorials.Step.settings.map.Description" xml:space="preserve">
+    <value>Juster billedskalering, GPU-cache, gengivelsesskala og kanttilstand.</value>
+  </data>
+  <data name="Tutorials.Step.settings.maintenance.Title" xml:space="preserve">
+    <value>Vedligeholdelse</value>
+  </data>
+  <data name="Tutorials.Step.settings.maintenance.Description" xml:space="preserve">
+    <value>Sikkerhedskopiering, nulstilling, tømning og cachekontrol kan være ødelæggende og bliver aldrig påberåbt.</value>
+  </data>
+  <data name="Tutorials.Step.updates.check.Title" xml:space="preserve">
+    <value>Tjek for opdateringer</value>
+  </data>
+  <data name="Tutorials.Step.updates.check.Description" xml:space="preserve">
+    <value>Anmod om tilgængelighed af opdatering uden at downloade eller installere.</value>
+  </data>
+  <data name="Tutorials.Step.updates.status.Title" xml:space="preserve">
+    <value>Opdateringsstatus</value>
+  </data>
+  <data name="Tutorials.Step.updates.status.Description" xml:space="preserve">
+    <value>Versions- og downloadfremskridt vises i dette titellinjeområde.</value>
+  </data>
+  <data name="Tutorials.Step.updates.logs.Title" xml:space="preserve">
+    <value>Diagnostisk log</value>
+  </data>
+  <data name="Tutorials.Step.updates.logs.Description" xml:space="preserve">
+    <value>Filtrer lokal diagnostik, før du kun deler ikke-følsomme detaljer.</value>
+  </data>
+  <data name="Tutorials.shops-vending.Title" xml:space="preserve">
+    <value>Butikker og salgsautomater</value>
+  </data>
+  <data name="Tutorials.shops-vending.Description" xml:space="preserve">
+    <value>Søg efter salgstilbud, sammenlign handler, og forstå opdateringstidspunktet.</value>
+  </data>
+  <data name="Tutorials.events-monitoring.Title" xml:space="preserve">
+    <value>Hændelser og serverovervågning</value>
+  </data>
+  <data name="Tutorials.events-monitoring.Description" xml:space="preserve">
+    <value>Læs live-begivenhedsindikatorer og opret lokale timere.</value>
+  </data>
+  <data name="Tutorials.bases-screenshots.Title" xml:space="preserve">
+    <value>Baser og skærmbilleder</value>
+  </data>
+  <data name="Tutorials.bases-screenshots.Description" xml:space="preserve">
+    <value>Opret kortbasemarkører og administrer deres noter og skærmbilleder sikkert.</value>
+  </data>
+  <data name="Tutorials.device-automation.Title" xml:space="preserve">
+    <value>Enhedsautomatisering</value>
+  </data>
+  <data name="Tutorials.device-automation.Description" xml:space="preserve">
+    <value>Konfigurer simpel enhedstilstandsautomatisering separat fra den logiske motor.</value>
+  </data>
+  <data name="Tutorials.Step.shops.open.Title" xml:space="preserve">
+    <value>Åbn butikssøgning</value>
+  </data>
+  <data name="Tutorials.Step.shops.open.Description" xml:space="preserve">
+    <value>Åbn kortets salgssøgepanel uden at ændre det aktuelle kort.</value>
+  </data>
+  <data name="Tutorials.Step.shops.panel.Title" xml:space="preserve">
+    <value>Butikssøgning</value>
+  </data>
+  <data name="Tutorials.Step.shops.panel.Description" xml:space="preserve">
+    <value>Søg efter varer, gennemgå købs- og salgsmængder, og åbn resultater på kortet.</value>
+  </data>
+  <data name="Tutorials.Step.shops.refresh.Title" xml:space="preserve">
+    <value>Opdater timing</value>
+  </data>
+  <data name="Tutorials.Step.shops.refresh.Description" xml:space="preserve">
+    <value>Butikstilbud afhænger af serverforbindelse og kan være forældede mellem Rust+ opdateringer.</value>
+  </data>
+  <data name="Tutorials.Step.events.dock.Title" xml:space="preserve">
+    <value>Live Event Dock</value>
+  </data>
+  <data name="Tutorials.Step.events.dock.Description" xml:space="preserve">
+    <value>Fragt, helikopter, Chinook, leverandør og andre aktive hændelsesindikatorer vises her, når de er tilgængelige.</value>
+  </data>
+  <data name="Tutorials.Step.events.timer.Title" xml:space="preserve">
+    <value>Brugerdefineret timer</value>
+  </data>
+  <data name="Tutorials.Step.events.timer.Description" xml:space="preserve">
+    <value>Opret en lokal påmindelse uden at ændre servertilstand.</value>
+  </data>
+  <data name="Tutorials.Step.events.stale.Title" xml:space="preserve">
+    <value>Begivenhedsfriskhed</value>
+  </data>
+  <data name="Tutorials.Step.events.stale.Description" xml:space="preserve">
+    <value>Hændelsesdata afhænger af den valgte forbindelse og kan forsvinde, når den bliver forældet.</value>
+  </data>
+  <data name="Tutorials.Step.bases.map.Title" xml:space="preserve">
+    <value>Basismarkører</value>
+  </data>
+  <data name="Tutorials.Step.bases.map.Description" xml:space="preserve">
+    <value>Basismarkører placeres og åbnes på 2D-kortet.</value>
+  </data>
+  <data name="Tutorials.Step.bases.context.Title" xml:space="preserve">
+    <value>Grundnoter og skærmbilleder</value>
+  </data>
+  <data name="Tutorials.Step.bases.context.Description" xml:space="preserve">
+    <value>Brug kortkonteksthandlinger til at navngive en base og vedhæfte skærmbilleder; cloud-deling kræver samtykke.</value>
+  </data>
+  <data name="Tutorials.Step.bases.safety.Title" xml:space="preserve">
+    <value>Slet sikkerhed</value>
+  </data>
+  <data name="Tutorials.Step.bases.safety.Description" xml:space="preserve">
+    <value>Sletning af en base eller et skærmbillede udføres aldrig af en tutorial og kræver altid dit input.</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.open.Title" xml:space="preserve">
+    <value>Åbn Device Automation</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.open.Description" xml:space="preserve">
+    <value>Åbn letvægts automatisering af enhedstilstand for den valgte server.</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.actions.Title" xml:space="preserve">
+    <value>Automatiseringshandlinger</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.actions.Description" xml:space="preserve">
+    <value>Sæt udførelse på pause, eller tilføj en automatisering; tutorials ændrer aldrig motortilstand eller opretter data.</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.rules.Title" xml:space="preserve">
+    <value>Automationsregler</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.rules.Description" xml:space="preserve">
+    <value>Gennemgå kildeenheder, målhandlinger, timing og aktiveret tilstand for hver regel.</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.safety.Title" xml:space="preserve">
+    <value>Enhedssikkerhed</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.safety.Description" xml:space="preserve">
+    <value>Ingen tutorial udfører en regel eller skifter til en rigtig smartenhed.</value>
+  </data>
+  <data name="ProfileRustHours" xml:space="preserve">
+    <value>Rust Hours</value>
+  </data>
+  <data name="ProfileVacStatus" xml:space="preserve">
+    <value>VAC Status</value>
+  </data>
+  <data name="ProfileVacClean" xml:space="preserve">
+    <value>Clean (0 bans on record)</value>
+  </data>
 </root>

@@ -6722,4 +6722,13 @@ Rust+ Desktop registers your local app with FCM so it can receive those same Rus
   <data name="BlocksSince" xml:space="preserve">
     <value>Blocked</value>
   </data>
+  <data name="ProfileRustHours" xml:space="preserve">
+    <value>Rust Hours</value>
+  </data>
+  <data name="ProfileVacStatus" xml:space="preserve">
+    <value>VAC Status</value>
+  </data>
+  <data name="ProfileVacClean" xml:space="preserve">
+    <value>Clean (0 bans on record)</value>
+  </data>
 </root>

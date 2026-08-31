@@ -3966,4 +3966,646 @@ Podeu trobar més informació al lloc web oficial del servidor:
   <data name="ChatCmdCraftNoRecipe" xml:space="preserve">
     <value>{0} no té recepta de fabricació.</value>
   </data>
+  <data name="Tutorials.map-3d.Description" xml:space="preserve">
+    <value>Exploreu la finestra local 3D, la barra d'eines, el creador d'empremtes, la visualització del rendiment i l'acció de tancament.</value>
+  </data>
+  <data name="Tutorials.smart-devices.Title" xml:space="preserve">
+    <value>Dispositius intel·ligents</value>
+  </data>
+  <data name="Tutorials.smart-devices.Description" xml:space="preserve">
+    <value>cerqueu, filtreu, actualitzeu, organitzeu i comprengueu de manera segura els dispositius intel·ligents emparellats.</value>
+  </data>
+  <data name="Tutorials.team-tracking.Title" xml:space="preserve">
+    <value>Seguiment d'equips i jugadors</value>
+  </data>
+  <data name="Tutorials.team-tracking.Description" xml:space="preserve">
+    <value>revisa els companys d'equip, els marcadors, segueix el comportament i els requisits per compartir.</value>
+  </data>
+  <data name="Tutorials.chat-commands.Title" xml:space="preserve">
+    <value>Xat d'equip i ordres</value>
+  </data>
+  <data name="Tutorials.chat-commands.Description" xml:space="preserve">
+    <value>llegiu el xat d'equip, redacteu missatges i configureu ordres sense enviar res.</value>
+  </data>
+  <data name="Tutorials.discord.Title" xml:space="preserve">
+    <value>Discord Integració</value>
+  </data>
+  <data name="Tutorials.discord.Description" xml:space="preserve">
+    <value>Trobeu Discord punts d'entrada, configuració, permisos i límits de privadesa.</value>
+  </data>
+  <data name="Tutorials.automation.Title" xml:space="preserve">
+    <value>Motor lògic i d'automatització</value>
+  </data>
+  <data name="Tutorials.automation.Description" xml:space="preserve">
+    <value>entendre les regles, activadors, condicions, accions, estat d'execució i proves segures.</value>
+  </data>
+  <data name="Tutorials.notifications.Title" xml:space="preserve">
+    <value>Notificacions i alertes</value>
+  </data>
+  <data name="Tutorials.notifications.Description" xml:space="preserve">
+    <value>filtra, cerca, revisa, marca i esborra les notificacions d'aplicacions.</value>
+  </data>
+  <data name="Tutorials.cameras.Title" xml:space="preserve">
+    <value>Càmeres i monitoratge</value>
+  </data>
+  <data name="Tutorials.cameras.Description" xml:space="preserve">
+    <value>afegiu i reviseu les càmeres aparellades mentre mantingueu privats els identificadors de la càmera.</value>
+  </data>
+  <data name="Tutorials.raid-calculator.Title" xml:space="preserve">
+    <value>Calculadora de raid</value>
+  </data>
+  <data name="Tutorials.raid-calculator.Description" xml:space="preserve">
+    <value>creeu un pla de raid, compareu mètodes i reviseu els totals del material.</value>
+  </data>
+  <data name="Tutorials.recycler-calculator.Title" xml:space="preserve">
+    <value>Calculadora de reciclatge</value>
+  </data>
+  <data name="Tutorials.recycler-calculator.Description" xml:space="preserve">
+    <value>afegiu articles i compareu els rendiments dels recicladors salvatges i de la zona segura.</value>
+  </data>
+  <data name="Tutorials.settings.Title" xml:space="preserve">
+    <value>Configuració</value>
+  </data>
+  <data name="Tutorials.settings.Description" xml:space="preserve">
+    <value>cerca l'idioma, el rendiment del mapa, els serveis connectats i els controls de manteniment.</value>
+  </data>
+  <data name="Tutorials.updates-diagnostics.Title" xml:space="preserve">
+    <value>Actualitzacions i diagnòstics</value>
+  </data>
+  <data name="Tutorials.updates-diagnostics.Description" xml:space="preserve">
+    <value>comproveu les actualitzacions de l'aplicació i localitzeu el registre de diagnòstic sense iniciar una actualització.</value>
+  </data>
+  <data name="Tutorials.Step.basics.navigation.Title" xml:space="preserve">
+    <value>Navegació principal</value>
+  </data>
+  <data name="Tutorials.Step.basics.navigation.Description" xml:space="preserve">
+    <value>utilitzeu aquesta barra lateral per moure's entre dispositius, seguiment d'equips, càmeres, jugadors, notificacions i calculadores.</value>
+  </data>
+  <data name="Tutorials.Step.basics.collapse.Title" xml:space="preserve">
+    <value>Expansió de navegació</value>
+  </data>
+  <data name="Tutorials.Step.basics.collapse.Description" xml:space="preserve">
+    <value>Fixeu o replega la barra lateral per canviar les etiquetes per més espai de treball del mapa.</value>
+  </data>
+  <data name="Tutorials.Step.basics.server.Title" xml:space="preserve">
+    <value>Servidor actual</value>
+  </data>
+  <data name="Tutorials.Step.basics.server.Description" xml:space="preserve">
+    <value>aquesta àrea identifica el servidor Rust seleccionat i el context del seu compte.</value>
+  </data>
+  <data name="Tutorials.Step.basics.connection.Title" xml:space="preserve">
+    <value>Estat de la connexió</value>
+  </data>
+  <data name="Tutorials.Step.basics.connection.Description" xml:space="preserve">
+    <value>Les targetes de servidor mostren si un servidor està desconnectat, connectat de manera programada o completament connectat.</value>
+  </data>
+  <data name="Tutorials.Step.basics.notifications.Title" xml:space="preserve">
+    <value>Notificacions</value>
+  </data>
+  <data name="Tutorials.Step.basics.notifications.Description" xml:space="preserve">
+    <value>aquí es recullen problemes de connexió, alarmes, morts i resultats d'automatització.</value>
+  </data>
+  <data name="Tutorials.Step.basics.tutorials.Title" xml:space="preserve">
+    <value>Centre de tutories</value>
+  </data>
+  <data name="Tutorials.Step.basics.tutorials.Description" xml:space="preserve">
+    <value>reprodueix, continua, reinicia o descobreix lliçons actualitzades aquí.</value>
+  </data>
+  <data name="Tutorials.Step.account.profile.Title" xml:space="preserve">
+    <value>Context del compte</value>
+  </data>
+  <data name="Tutorials.Step.account.profile.Description" xml:space="preserve">
+    <value>l'accés al núvol és independent de l'aparellament Rust+. Les funcions locals continuen disponibles sense la sincronització al núvol.</value>
+  </data>
+  <data name="Tutorials.Step.account.cloud.Title" xml:space="preserve">
+    <value>Compte al núvol</value>
+  </data>
+  <data name="Tutorials.Step.account.cloud.Description" xml:space="preserve">
+    <value>inicieu la sessió aquí per obtenir la sincronització compatible; els tutorials no mostren mai les dades del compte privat.</value>
+  </data>
+  <data name="Tutorials.Step.account.premium.Title" xml:space="preserve">
+    <value>Estat del suport</value>
+  </data>
+  <data name="Tutorials.Step.account.premium.Description" xml:space="preserve">
+    <value>l'accés dels seguidors desbloqueja funcions tancades. El progrés del tutorial local no requereix cap subscripció.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.overview.Title" xml:space="preserve">
+    <value>Parella Rust+</value>
+  </data>
+  <data name="Tutorials.Step.pairing.overview.Description" xml:space="preserve">
+    <value>l'aparellament enllaça aquesta aplicació amb Rust Companion abans que les funcions del servidor en directe puguin funcionar.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.start.Title" xml:space="preserve">
+    <value>Començar l'aparellament</value>
+  </data>
+  <data name="Tutorials.Step.pairing.start.Description" xml:space="preserve">
+    <value>comença a escoltar i, després, utilitza el flux d'aparellament Rust+ dins del joc de Rust. Les credencials mai es registren.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.list.Title" xml:space="preserve">
+    <value>Servidors emparellats</value>
+  </data>
+  <data name="Tutorials.Step.pairing.list.Description" xml:space="preserve">
+    <value>seleccioneu un servidor configurat localment abans de connectar-vos o canviar la configuració específica del servidor.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.soft.Title" xml:space="preserve">
+    <value>Soft Connect</value>
+  </data>
+  <data name="Tutorials.Step.pairing.soft.Description" xml:space="preserve">
+    <value>Connectar carrega una comunicació limitada sense inicialitzar totes les funcions en directe.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.full.Title" xml:space="preserve">
+    <value>connexió completa</value>
+  </data>
+  <data name="Tutorials.Step.pairing.full.Description" xml:space="preserve">
+    <value>la connexió completa inicialitza les dades del mapa, els dispositius, les dades de l'equip i les subscripcions a Rust+.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.disconnect.Title" xml:space="preserve">
+    <value>Desconnectar</value>
+  </data>
+  <data name="Tutorials.Step.pairing.disconnect.Description" xml:space="preserve">
+    <value>La desconnexió atura la comunicació en directe. Aquesta lliçó mai invoca l'acció.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.reset.Title" xml:space="preserve">
+    <value>Restableix l'aparellament</value>
+  </data>
+  <data name="Tutorials.Step.pairing.reset.Description" xml:space="preserve">
+    <value>les ordres de recuperació es troben al menú contextual Parella. El restabliment elimina la configuració d'aparellament local.</value>
+  </data>
+  <data name="Tutorials.Step.map.canvas.Title" xml:space="preserve">
+    <value>llenç del mapa</value>
+  </data>
+  <data name="Tutorials.Step.map.canvas.Description" xml:space="preserve">
+    <value>Panorama arrossegant, amplia amb la roda i interactua amb els marcadors del mapa Rust actual.</value>
+  </data>
+  <data name="Tutorials.Step.map.toolbar.Title" xml:space="preserve">
+    <value>Barra d'eines de mapes</value>
+  </data>
+  <data name="Tutorials.Step.map.toolbar.Description" xml:space="preserve">
+    <value>la barra d'eines controla les capes, el xat, les superposicions, els temporitzadors i els modes 2D o 3D.</value>
+  </data>
+  <data name="Tutorials.Step.map.fit.Title" xml:space="preserve">
+    <value>Restableix la vista</value>
+  </data>
+  <data name="Tutorials.Step.map.fit.Description" xml:space="preserve">
+    <value>Torneu a ajustar el mapa a l'espai de treball després de fer una panoràmica o fer zoom.</value>
+  </data>
+  <data name="Tutorials.Step.map.layers.Title" xml:space="preserve">
+    <value>Capes de mapa</value>
+  </data>
+  <data name="Tutorials.Step.map.layers.Description" xml:space="preserve">
+    <value>trieu aquí les opcions visuals avançades de quadrícula, reproductor, monument, botiga i avançades.</value>
+  </data>
+  <data name="Tutorials.Step.map.heatmaps.Title" xml:space="preserve">
+    <value>Mapes de calor</value>
+  </data>
+  <data name="Tutorials.Step.map.heatmaps.Description" xml:space="preserve">
+    <value>Obriu les superposicions de densitat extretes. Mostren zones de generació probable, no entitats vives.</value>
+  </data>
+  <data name="Tutorials.Step.map.open3d.Title" xml:space="preserve">
+    <value>Obre el mapa 3D</value>
+  </data>
+  <data name="Tutorials.Step.map.open3d.Description" xml:space="preserve">
+    <value>genera o obre la representació local 3D del mapa actual.</value>
+  </data>
+  <data name="Tutorials.Step.map.drawing.Title" xml:space="preserve">
+    <value>Eines de dibuix</value>
+  </data>
+  <data name="Tutorials.Step.map.drawing.Description" xml:space="preserve">
+    <value>dibuixeu notes de planificació no destructives sobre el mapa i deixeu el mode de dibuix quan acabeu.</value>
+  </data>
+  <data name="Tutorials.Step.heatmaps.open.Title" xml:space="preserve">
+    <value>mapes de calor oberts</value>
+  </data>
+  <data name="Tutorials.Step.heatmaps.open.Description" xml:space="preserve">
+    <value>navega per les capes de densitat disponibles per al mapa analitzat actual.</value>
+  </data>
+  <data name="Tutorials.Step.heatmaps.selector.Title" xml:space="preserve">
+    <value>Selector de mapa de calor</value>
+  </data>
+  <data name="Tutorials.Step.heatmaps.selector.Description" xml:space="preserve">
+    <value>seleccioneu una categoria extreta o esborra la superposició activa.</value>
+  </data>
+  <data name="Tutorials.Step.heatmaps.meaning.Title" xml:space="preserve">
+    <value>Com funcionen els mapes de calor</value>
+  </data>
+  <data name="Tutorials.Step.heatmaps.meaning.Description" xml:space="preserve">
+    <value>els mapes de calor resumeixen les àrees de generació probables; no garanteixen una entitat viva en una ubicació.</value>
+  </data>
+  <data name="Tutorials.Step.map3d.open.Title" xml:space="preserve">
+    <value>genera o obre 3D</value>
+  </data>
+  <data name="Tutorials.Step.map3d.open.Description" xml:space="preserve">
+    <value>l'aplicació analitza les dades del mapa localment i reutilitza la seva memòria cau quan és possible.</value>
+  </data>
+  <data name="Tutorials.Step.map3d.viewport.Title" xml:space="preserve">
+    <value>3D Viewport</value>
+  </data>
+  <data name="Tutorials.Step.map3d.viewport.Description" xml:space="preserve">
+    <value>òrbita, panoràmica i zoom al voltant d'una representació interactiva del mapa seleccionat.</value>
+  </data>
+  <data name="Tutorials.Step.map3d.toolbar.Title" xml:space="preserve">
+    <value>3D Barra d'eines</value>
+  </data>
+  <data name="Tutorials.Step.map3d.toolbar.Description" xml:space="preserve">
+    <value>Capes de control, marcadors en directe, pantalla completa, configuració i eines d'empremta.</value>
+  </data>
+  <data name="Tutorials.Step.map3d.build.Title" xml:space="preserve">
+    <value>Creador d'empremtes base</value>
+  </data>
+  <data name="Tutorials.Step.map3d.build.Description" xml:space="preserve">
+    <value>el mode de construcció només col·loca fonaments de planificació; no modifica el servidor Rust.</value>
+  </data>
+  <data name="Tutorials.Step.map3d.performance.Title" xml:space="preserve">
+    <value>Indicador de rendiment</value>
+  </data>
+  <data name="Tutorials.Step.map3d.performance.Description" xml:space="preserve">
+    <value>FPS i detall d'equilibri de resolució adaptativa amb una interacció suau.</value>
+  </data>
+  <data name="Tutorials.Step.map3d.close.Title" xml:space="preserve">
+    <value>Tanca la vista 3D</value>
+  </data>
+  <data name="Tutorials.Step.map3d.close.Description" xml:space="preserve">
+    <value>torneu a 2D i allibereu els recursos pesats 3D incrustats.</value>
+  </data>
+  <data name="Tutorials.Step.devices.overview.Title" xml:space="preserve">
+    <value>Llista de dispositius</value>
+  </data>
+  <data name="Tutorials.Step.devices.overview.Description" xml:space="preserve">
+    <value>els interruptors, les alarmes i els monitors d'emmagatzematge aparellats apareixen aquí en grups.</value>
+  </data>
+  <data name="Tutorials.Step.devices.search.Title" xml:space="preserve">
+    <value>Cerca de dispositius</value>
+  </data>
+  <data name="Tutorials.Step.devices.search.Description" xml:space="preserve">
+    <value>filtra els dispositius per nom o comanda sense canviar-ne l'estat.</value>
+  </data>
+  <data name="Tutorials.Step.devices.filter.Title" xml:space="preserve">
+    <value>filtre de tipus de dispositiu</value>
+  </data>
+  <data name="Tutorials.Step.devices.filter.Description" xml:space="preserve">
+    <value>Limiteu la llista a interruptors, alarmes, monitors d'emmagatzematge o tots els dispositius.</value>
+  </data>
+  <data name="Tutorials.Step.devices.refresh.Title" xml:space="preserve">
+    <value>estats d'actualització</value>
+  </data>
+  <data name="Tutorials.Step.devices.refresh.Description" xml:space="preserve">
+    <value>sol·licitar un nou estat de només lectura; la disponibilitat depèn de la connexió.</value>
+  </data>
+  <data name="Tutorials.Step.devices.actions.Title" xml:space="preserve">
+    <value>Eines del dispositiu</value>
+  </data>
+  <data name="Tutorials.Step.devices.actions.Description" xml:space="preserve">
+    <value>aquí es recullen la importació, la sincronització al núvol, l'automatització, les tecles d'accés ràpid, l'actualització i la neteja.</value>
+  </data>
+  <data name="Tutorials.Step.devices.first.Title" xml:space="preserve">
+    <value>Targeta de dispositiu</value>
+  </data>
+  <data name="Tutorials.Step.devices.first.Description" xml:space="preserve">
+    <value>una targeta mostra la identitat, l'estat de connexió, les ordres i els controls específics del dispositiu.</value>
+  </data>
+  <data name="Tutorials.Step.devices.safety.Title" xml:space="preserve">
+    <value>Seguretat del dispositiu</value>
+  </data>
+  <data name="Tutorials.Step.devices.safety.Description" xml:space="preserve">
+    <value>els tutorials no activen mai cap interruptor, suprimeixen un dispositiu ni executen una tecla d'accés ràpid.</value>
+  </data>
+  <data name="Tutorials.Step.team.list.Title" xml:space="preserve">
+    <value>Llista d'equips</value>
+  </data>
+  <data name="Tutorials.Step.team.list.Description" xml:space="preserve">
+    <value>aquí apareixen els companys d'equip carregats, l'estat en línia, els avatars i les accions de context.</value>
+  </data>
+  <data name="Tutorials.Step.team.markers.Title" xml:space="preserve">
+    <value>Marcadors d'equip</value>
+  </data>
+  <data name="Tutorials.Step.team.markers.Description" xml:space="preserve">
+    <value>trieu quins estils de marcador de companys d'equip són visibles al mapa.</value>
+  </data>
+  <data name="Tutorials.Step.team.follow.Title" xml:space="preserve">
+    <value>Segueix el jugador</value>
+  </data>
+  <data name="Tutorials.Step.team.follow.Description" xml:space="preserve">
+    <value>Seguir les actualitzacions de mapes de centres sobre un company d'equip i requereix dades actuals de l'equip.</value>
+  </data>
+  <data name="Tutorials.Step.team.sharing.Title" xml:space="preserve">
+    <value>Compartició d'equips</value>
+  </data>
+  <data name="Tutorials.Step.team.sharing.Description" xml:space="preserve">
+    <value>l'ús compartit de la base i la captura de pantalla pot requerir un compte i el consentiment de càrrega.</value>
+  </data>
+  <data name="Tutorials.Step.chat.history.Title" xml:space="preserve">
+    <value>Historial de xat</value>
+  </data>
+  <data name="Tutorials.Step.chat.history.Description" xml:space="preserve">
+    <value>Els missatges recents de l'equip Rust apareixen aquí quan la connexió proporciona dades de xat.</value>
+  </data>
+  <data name="Tutorials.Step.chat.input.Title" xml:space="preserve">
+    <value>Entrada de missatge</value>
+  </data>
+  <data name="Tutorials.Step.chat.input.Description" xml:space="preserve">
+    <value>redacteu un missatge d'equip aquí. El tutorial mai insereix ni envia cap.</value>
+  </data>
+  <data name="Tutorials.Step.chat.send.Title" xml:space="preserve">
+    <value>Enviar missatge</value>
+  </data>
+  <data name="Tutorials.Step.chat.send.Description" xml:space="preserve">
+    <value>enviant publicacions al xat de l'equip Rust. Aquest control només està ressaltat.</value>
+  </data>
+  <data name="Tutorials.Step.chat.commands.Title" xml:space="preserve">
+    <value>Configuració d'ordres</value>
+  </data>
+  <data name="Tutorials.Step.chat.commands.Description" xml:space="preserve">
+    <value>configureu els prefixos, els enllaços de dispositius, els retards i la disponibilitat d'ordres.</value>
+  </data>
+  <data name="Tutorials.Step.discord.entry.Title" xml:space="preserve">
+    <value>Comunitat Discord</value>
+  </data>
+  <data name="Tutorials.Step.discord.entry.Description" xml:space="preserve">
+    <value>aquesta drecera obre la comunitat; els paràmetres d'integració són separats.</value>
+  </data>
+  <data name="Tutorials.Step.discord.settings.Title" xml:space="preserve">
+    <value>Discord Configuració</value>
+  </data>
+  <data name="Tutorials.Step.discord.settings.Description" xml:space="preserve">
+    <value>Configura bot, gremi, canals, ordres i permisos sense identificadors de registre.</value>
+  </data>
+  <data name="Tutorials.Step.discord.privacy.Title" xml:space="preserve">
+    <value>Discord Seguretat</value>
+  </data>
+  <data name="Tutorials.Step.discord.privacy.Description" xml:space="preserve">
+    <value>Els tutorials mai publiquen missatges ni registren els identificadors de gremis, canal o usuaris.</value>
+  </data>
+  <data name="Tutorials.Step.automation.open.Title" xml:space="preserve">
+    <value>Motor lògic obert</value>
+  </data>
+  <data name="Tutorials.Step.automation.open.Description" xml:space="preserve">
+    <value>Obriu l'editor de regles del servidor seleccionat.</value>
+  </data>
+  <data name="Tutorials.Step.automation.list.Title" xml:space="preserve">
+    <value>Llista de regles</value>
+  </data>
+  <data name="Tutorials.Step.automation.list.Description" xml:space="preserve">
+    <value>les regles i els passos d'activació, condició, retard i acció apareixen aquí.</value>
+  </data>
+  <data name="Tutorials.Step.automation.enabled.Title" xml:space="preserve">
+    <value>Estat del motor</value>
+  </data>
+  <data name="Tutorials.Step.automation.enabled.Description" xml:space="preserve">
+    <value>activa o posa en pausa l'execució de la regla. El tutorial mai canvia aquest interruptor.</value>
+  </data>
+  <data name="Tutorials.Step.automation.workflow.Title" xml:space="preserve">
+    <value>flux de treball de regles</value>
+  </data>
+  <data name="Tutorials.Step.automation.workflow.Description" xml:space="preserve">
+    <value>un activador inicia una regla; les condicions porten accions posteriors; els passos s'executen en ordre.</value>
+  </data>
+  <data name="Tutorials.Step.automation.safety.Title" xml:space="preserve">
+    <value>Seguretat de l'automatització</value>
+  </data>
+  <data name="Tutorials.Step.automation.safety.Description" xml:space="preserve">
+    <value>els tutorials no persisteixen les regles, no canvien els dispositius, no envien xat ni executen l'automatització.</value>
+  </data>
+  <data name="Tutorials.Step.notifications.center.Title" xml:space="preserve">
+    <value>Centre de notificacions</value>
+  </data>
+  <data name="Tutorials.Step.notifications.center.Description" xml:space="preserve">
+    <value>reviseu les alertes sense dependre de les notificacions transitòries d'escriptori.</value>
+  </data>
+  <data name="Tutorials.Step.notifications.filters.Title" xml:space="preserve">
+    <value>Filtres de notificació</value>
+  </data>
+  <data name="Tutorials.Step.notifications.filters.Description" xml:space="preserve">
+    <value>Canvia entre totes les notificacions, alarmes i morts.</value>
+  </data>
+  <data name="Tutorials.Step.notifications.search.Title" xml:space="preserve">
+    <value>Notificacions de cerca</value>
+  </data>
+  <data name="Tutorials.Step.notifications.search.Description" xml:space="preserve">
+    <value>cerqueu notificacions per contingut mostrat o context del servidor.</value>
+  </data>
+  <data name="Tutorials.Step.notifications.actions.Title" xml:space="preserve">
+    <value>Accions massives</value>
+  </data>
+  <data name="Tutorials.Step.notifications.actions.Description" xml:space="preserve">
+    <value>Marca tot llegit o esborra l'historial; els tutorials mai realitzen aquestes accions.</value>
+  </data>
+  <data name="Tutorials.Step.cameras.list.Title" xml:space="preserve">
+    <value>Llista de càmeres</value>
+  </data>
+  <data name="Tutorials.Step.cameras.list.Description" xml:space="preserve">
+    <value>Les visualitzacions prèvies configurades apareixen quan un servidor i una càmera seleccionats estan disponibles.</value>
+  </data>
+  <data name="Tutorials.Step.cameras.add.Title" xml:space="preserve">
+    <value>Afegeix una càmera</value>
+  </data>
+  <data name="Tutorials.Step.cameras.add.Description" xml:space="preserve">
+    <value>afegiu una càmera utilitzant el seu identificador Rust; els tutorials mai capturen codis de càmera.</value>
+  </data>
+  <data name="Tutorials.Step.cameras.privacy.Title" xml:space="preserve">
+    <value>Privadesa de la càmera</value>
+  </data>
+  <data name="Tutorials.Step.cameras.privacy.Description" xml:space="preserve">
+    <value>els identificadors i els marcs de la càmera estan exclosos dels diagnòstics del tutorial.</value>
+  </data>
+  <data name="Tutorials.Step.raid.search.Title" xml:space="preserve">
+    <value>Objectius de cerca</value>
+  </data>
+  <data name="Tutorials.Step.raid.search.Description" xml:space="preserve">
+    <value>cerqueu un mur, una porta, un desplegable o un altre objectiu al conjunt de dades agrupat.</value>
+  </data>
+  <data name="Tutorials.Step.raid.plan.Title" xml:space="preserve">
+    <value>Pla Raid</value>
+  </data>
+  <data name="Tutorials.Step.raid.plan.Description" xml:space="preserve">
+    <value>revisa els objectius, la salut, les quantitats, els mètodes i els costos calculats.</value>
+  </data>
+  <data name="Tutorials.Step.raid.methods.Title" xml:space="preserve">
+    <value>Comparar mètodes</value>
+  </data>
+  <data name="Tutorials.Step.raid.methods.Description" xml:space="preserve">
+    <value>Seleccioneu explosius o eines permesos i compareu alternatives.</value>
+  </data>
+  <data name="Tutorials.Step.raid.clear.Title" xml:space="preserve">
+    <value>Pla clar</value>
+  </data>
+  <data name="Tutorials.Step.raid.clear.Description" xml:space="preserve">
+    <value>Clear elimina el pla; el tutorial el destaca sense canviar les entrades.</value>
+  </data>
+  <data name="Tutorials.Step.recycler.search.Title" xml:space="preserve">
+    <value>Cerca elements</value>
+  </data>
+  <data name="Tutorials.Step.recycler.search.Description" xml:space="preserve">
+    <value>Trobeu un article reciclable i afegiu-lo a la calculadora.</value>
+  </data>
+  <data name="Tutorials.Step.recycler.category.Title" xml:space="preserve">
+    <value>Categoria d'element</value>
+  </data>
+  <data name="Tutorials.Step.recycler.category.Description" xml:space="preserve">
+    <value>restringeix el catàleg d'articles per categoria.</value>
+  </data>
+  <data name="Tutorials.Step.recycler.inputs.Title" xml:space="preserve">
+    <value>Elements d'entrada</value>
+  </data>
+  <data name="Tutorials.Step.recycler.inputs.Description" xml:space="preserve">
+    <value>ajustar quantitats o eliminar entrades; els tutorials no alteren l'estat de la calculadora.</value>
+  </data>
+  <data name="Tutorials.Step.recycler.results.Title" xml:space="preserve">
+    <value>Resultats del reciclador</value>
+  </data>
+  <data name="Tutorials.Step.recycler.results.Description" xml:space="preserve">
+    <value>compareu els rendiments i els temps dels recicladors salvatges i de la zona segura.</value>
+  </data>
+  <data name="Tutorials.Step.settings.open.Title" xml:space="preserve">
+    <value>Obriu la configuració</value>
+  </data>
+  <data name="Tutorials.Step.settings.open.Description" xml:space="preserve">
+    <value>Comportament de l'aplicació, integracions, rendiment, còpia de seguretat i manteniment en directe aquí.</value>
+  </data>
+  <data name="Tutorials.Step.settings.language.Title" xml:space="preserve">
+    <value>Llengua</value>
+  </data>
+  <data name="Tutorials.Step.settings.language.Description" xml:space="preserve">
+    <value>trieu l'idioma de la IU. El text del tutorial utilitza el mateix sistema de recursos.</value>
+  </data>
+  <data name="Tutorials.Step.settings.map.Title" xml:space="preserve">
+    <value>Rendiment del mapa</value>
+  </data>
+  <data name="Tutorials.Step.settings.map.Description" xml:space="preserve">
+    <value>Ajusta l'escala de la imatge, la memòria cau de la GPU, l'escala de renderització i el mode de vora.</value>
+  </data>
+  <data name="Tutorials.Step.settings.maintenance.Title" xml:space="preserve">
+    <value>Manteniment</value>
+  </data>
+  <data name="Tutorials.Step.settings.maintenance.Description" xml:space="preserve">
+    <value>Els controls de còpia de seguretat, restabliment, purga i memòria cau poden ser destructius i no s'invoquen mai.</value>
+  </data>
+  <data name="Tutorials.Step.updates.check.Title" xml:space="preserve">
+    <value>Comproveu si hi ha actualitzacions</value>
+  </data>
+  <data name="Tutorials.Step.updates.check.Description" xml:space="preserve">
+    <value>sol·liciteu la disponibilitat d'actualització sense descarregar ni instal·lar.</value>
+  </data>
+  <data name="Tutorials.Step.updates.status.Title" xml:space="preserve">
+    <value>Estat d'actualització</value>
+  </data>
+  <data name="Tutorials.Step.updates.status.Description" xml:space="preserve">
+    <value>la versió i el progrés de la baixada apareixen en aquesta àrea de la barra de títol.</value>
+  </data>
+  <data name="Tutorials.Step.updates.logs.Title" xml:space="preserve">
+    <value>Registre de diagnòstic</value>
+  </data>
+  <data name="Tutorials.Step.updates.logs.Description" xml:space="preserve">
+    <value>filtreu els diagnòstics locals abans de compartir només els detalls no sensibles.</value>
+  </data>
+  <data name="Tutorials.shops-vending.Title" xml:space="preserve">
+    <value>Botigues i Vending</value>
+  </data>
+  <data name="Tutorials.shops-vending.Description" xml:space="preserve">
+    <value>cerqueu ofertes de vendes expenedores, compareu les operacions i entengueu el temps d'actualització.</value>
+  </data>
+  <data name="Tutorials.events-monitoring.Title" xml:space="preserve">
+    <value>Monitorització d'esdeveniments i servidors</value>
+  </data>
+  <data name="Tutorials.events-monitoring.Description" xml:space="preserve">
+    <value>llegiu els indicadors d'esdeveniments en directe i creeu temporitzadors locals.</value>
+  </data>
+  <data name="Tutorials.bases-screenshots.Title" xml:space="preserve">
+    <value>Bases i captures de pantalla</value>
+  </data>
+  <data name="Tutorials.bases-screenshots.Description" xml:space="preserve">
+    <value>creeu marcadors de base de mapes i gestioneu les seves notes i captures de pantalla de manera segura.</value>
+  </data>
+  <data name="Tutorials.device-automation.Title" xml:space="preserve">
+    <value>Automatització de dispositius</value>
+  </data>
+  <data name="Tutorials.device-automation.Description" xml:space="preserve">
+    <value>configureu l'automatització simple de l'estat del dispositiu per separat del motor lògic.</value>
+  </data>
+  <data name="Tutorials.Step.shops.open.Title" xml:space="preserve">
+    <value>cerca de botiga oberta</value>
+  </data>
+  <data name="Tutorials.Step.shops.open.Description" xml:space="preserve">
+    <value>Obriu el tauler de cerca de vendes expenedores del mapa sense canviar el mapa actual.</value>
+  </data>
+  <data name="Tutorials.Step.shops.panel.Title" xml:space="preserve">
+    <value>Cerca de botigues</value>
+  </data>
+  <data name="Tutorials.Step.shops.panel.Description" xml:space="preserve">
+    <value>cerqueu articles, reviseu les quantitats de compra i venda i obriu els resultats al mapa.</value>
+  </data>
+  <data name="Tutorials.Step.shops.refresh.Title" xml:space="preserve">
+    <value>Actualització del temps</value>
+  </data>
+  <data name="Tutorials.Step.shops.refresh.Description" xml:space="preserve">
+    <value>les ofertes de la botiga depenen de la connectivitat del servidor i poden quedar obsoletes entre les actualitzacions de Rust+.</value>
+  </data>
+  <data name="Tutorials.Step.events.dock.Title" xml:space="preserve">
+    <value>Dock d'esdeveniments en directe</value>
+  </data>
+  <data name="Tutorials.Step.events.dock.Description" xml:space="preserve">
+    <value>Els indicadors de càrrega, helicòpter, Chinook, venedor i altres esdeveniments actius apareixen aquí quan estan disponibles.</value>
+  </data>
+  <data name="Tutorials.Step.events.timer.Title" xml:space="preserve">
+    <value>Temporitzador personalitzat</value>
+  </data>
+  <data name="Tutorials.Step.events.timer.Description" xml:space="preserve">
+    <value>creeu un recordatori local sense canviar l'estat del servidor.</value>
+  </data>
+  <data name="Tutorials.Step.events.stale.Title" xml:space="preserve">
+    <value>Actualitat de l'esdeveniment</value>
+  </data>
+  <data name="Tutorials.Step.events.stale.Description" xml:space="preserve">
+    <value>Les dades de l'esdeveniment depenen de la connexió seleccionada i poden desaparèixer quan estigui obsoleta.</value>
+  </data>
+  <data name="Tutorials.Step.bases.map.Title" xml:space="preserve">
+    <value>Marcadors de base</value>
+  </data>
+  <data name="Tutorials.Step.bases.map.Description" xml:space="preserve">
+    <value>els marcadors base es col·loquen i s'obren al mapa 2D.</value>
+  </data>
+  <data name="Tutorials.Step.bases.context.Title" xml:space="preserve">
+    <value>notes base i captures de pantalla</value>
+  </data>
+  <data name="Tutorials.Step.bases.context.Description" xml:space="preserve">
+    <value>Utilitzeu accions de context de mapa per anomenar una base i adjuntar captures de pantalla; L'ús compartit al núvol requereix consentiment.</value>
+  </data>
+  <data name="Tutorials.Step.bases.safety.Title" xml:space="preserve">
+    <value>Suprimeix la seguretat</value>
+  </data>
+  <data name="Tutorials.Step.bases.safety.Description" xml:space="preserve">
+    <value>la supressió d'una base o captura de pantalla mai es realitza mitjançant un tutorial i sempre requereix la vostra entrada.</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.open.Title" xml:space="preserve">
+    <value>Automatització del dispositiu obert</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.open.Description" xml:space="preserve">
+    <value>Obriu l'automatització lleugera de l'estat del dispositiu per al servidor seleccionat.</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.actions.Title" xml:space="preserve">
+    <value>Accions d'automatització</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.actions.Description" xml:space="preserve">
+    <value>Posa en pausa l'execució o afegeix una automatització; els tutorials mai canvien l'estat del motor ni creen dades.</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.rules.Title" xml:space="preserve">
+    <value>Regles d'automatització</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.rules.Description" xml:space="preserve">
+    <value>reviseu els dispositius d'origen, les accions de destinació, el temps i l'estat activat per a cada regla.</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.safety.Title" xml:space="preserve">
+    <value>Seguretat del dispositiu</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.safety.Description" xml:space="preserve">
+    <value>cap tutorial executa una regla ni alterna un dispositiu intel·ligent real.</value>
+  </data>
+  <data name="ProfileRustHours" xml:space="preserve">
+    <value>Rust Hours</value>
+  </data>
+  <data name="ProfileVacStatus" xml:space="preserve">
+    <value>VAC Status</value>
+  </data>
+  <data name="ProfileVacClean" xml:space="preserve">
+    <value>Clean (0 bans on record)</value>
+  </data>
 </root>

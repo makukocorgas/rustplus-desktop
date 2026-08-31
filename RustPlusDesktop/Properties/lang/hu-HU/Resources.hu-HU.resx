@@ -3966,4 +3966,646 @@ További információkat a szerver hivatalos honlapján talál:
   <data name="ChatCmdCraftNoRecipe" xml:space="preserve">
     <value>{0}-nak nincs gyártási receptje.</value>
   </data>
+  <data name="Tutorials.map-3d.Description" xml:space="preserve">
+    <value>Fedezze fel a helyi 3D nézetablakot, eszköztárat, lábnyom-építőt, teljesítménymegjelenítést és bezárási műveletet.</value>
+  </data>
+  <data name="Tutorials.smart-devices.Title" xml:space="preserve">
+    <value>Intelligens eszközök</value>
+  </data>
+  <data name="Tutorials.smart-devices.Description" xml:space="preserve">
+    <value>A párosított okoseszközök keresése, szűrése, frissítése, rendszerezése és biztonságos megértése.</value>
+  </data>
+  <data name="Tutorials.team-tracking.Title" xml:space="preserve">
+    <value>Csapat- és játékoskövetés</value>
+  </data>
+  <data name="Tutorials.team-tracking.Description" xml:space="preserve">
+    <value>Tekintse át a csapattársakat, a jelölőket, kövesse a viselkedést és a megosztási követelményeket.</value>
+  </data>
+  <data name="Tutorials.chat-commands.Title" xml:space="preserve">
+    <value>Csapatcsevegés és parancsok</value>
+  </data>
+  <data name="Tutorials.chat-commands.Description" xml:space="preserve">
+    <value>Olvassa el a csapatcsevegést, írjon üzeneteket és konfiguráljon parancsokat anélkül, hogy bármit is küldene.</value>
+  </data>
+  <data name="Tutorials.discord.Title" xml:space="preserve">
+    <value>Discord Integráció</value>
+  </data>
+  <data name="Tutorials.discord.Description" xml:space="preserve">
+    <value>Keressen Discord belépési pontot, konfigurációt, engedélyeket és adatvédelmi határokat.</value>
+  </data>
+  <data name="Tutorials.automation.Title" xml:space="preserve">
+    <value>Logikai és automatizálási motor</value>
+  </data>
+  <data name="Tutorials.automation.Description" xml:space="preserve">
+    <value>Ismerje meg a szabályokat, a triggereket, a feltételeket, a műveleteket, a futási állapotot és a biztonságos tesztelést.</value>
+  </data>
+  <data name="Tutorials.notifications.Title" xml:space="preserve">
+    <value>Értesítések és figyelmeztetések</value>
+  </data>
+  <data name="Tutorials.notifications.Description" xml:space="preserve">
+    <value>Alkalmazásértesítések szűrése, keresése, áttekintése, megjelölése és törlése.</value>
+  </data>
+  <data name="Tutorials.cameras.Title" xml:space="preserve">
+    <value>Kamerák és felügyelet</value>
+  </data>
+  <data name="Tutorials.cameras.Description" xml:space="preserve">
+    <value>Párosított kamerák hozzáadása és áttekintése, miközben a kameraazonosítók privátak maradnak.</value>
+  </data>
+  <data name="Tutorials.raid-calculator.Title" xml:space="preserve">
+    <value>Raid kalkulátor</value>
+  </data>
+  <data name="Tutorials.raid-calculator.Description" xml:space="preserve">
+    <value>Készítsen raidtervet, hasonlítsa össze a módszereket, és tekintse át az anyagösszegeket.</value>
+  </data>
+  <data name="Tutorials.recycler-calculator.Title" xml:space="preserve">
+    <value>Újrahasznosító kalkulátor</value>
+  </data>
+  <data name="Tutorials.recycler-calculator.Description" xml:space="preserve">
+    <value>Adjon hozzá elemeket, és hasonlítsa össze a vad és a biztonságos zóna újrahasznosító hozamát.</value>
+  </data>
+  <data name="Tutorials.settings.Title" xml:space="preserve">
+    <value>Beállítások</value>
+  </data>
+  <data name="Tutorials.settings.Description" xml:space="preserve">
+    <value>Nyelv, térképteljesítmény, csatlakoztatott szolgáltatások és karbantartási vezérlők keresése.</value>
+  </data>
+  <data name="Tutorials.updates-diagnostics.Title" xml:space="preserve">
+    <value>Frissítések és diagnosztika</value>
+  </data>
+  <data name="Tutorials.updates-diagnostics.Description" xml:space="preserve">
+    <value>Ellenőrizze az alkalmazásfrissítéseket, és keresse meg a diagnosztikai naplót a frissítés elindítása nélkül.</value>
+  </data>
+  <data name="Tutorials.Step.basics.navigation.Title" xml:space="preserve">
+    <value>Fő navigáció</value>
+  </data>
+  <data name="Tutorials.Step.basics.navigation.Description" xml:space="preserve">
+    <value>Ezzel az oldalsávval válthat az eszközök között, a csapatkövetés, a kamerák, a játékosok, az értesítések és a számológépek között.</value>
+  </data>
+  <data name="Tutorials.Step.basics.collapse.Title" xml:space="preserve">
+    <value>Navigációs bővítés</value>
+  </data>
+  <data name="Tutorials.Step.basics.collapse.Description" xml:space="preserve">
+    <value>Rögzítse vagy csukja össze az oldalsávot a címkék cseréjéhez, hogy több térképmunkaterületet kapjon.</value>
+  </data>
+  <data name="Tutorials.Step.basics.server.Title" xml:space="preserve">
+    <value>Jelenlegi szerver</value>
+  </data>
+  <data name="Tutorials.Step.basics.server.Description" xml:space="preserve">
+    <value>Ez a terület azonosítja a kiválasztott Rust kiszolgálót és annak fiókkörnyezetét.</value>
+  </data>
+  <data name="Tutorials.Step.basics.connection.Title" xml:space="preserve">
+    <value>Kapcsolat állapota</value>
+  </data>
+  <data name="Tutorials.Step.basics.connection.Description" xml:space="preserve">
+    <value>A kiszolgálókártyák azt mutatják, hogy a kiszolgáló le van-e kapcsolva, puha vagy teljesen csatlakoztatva van-e.</value>
+  </data>
+  <data name="Tutorials.Step.basics.notifications.Title" xml:space="preserve">
+    <value>Értesítések</value>
+  </data>
+  <data name="Tutorials.Step.basics.notifications.Description" xml:space="preserve">
+    <value>A csatlakozási problémák, a riasztások, a halálesetek és az automatizálási eredmények itt találhatók.</value>
+  </data>
+  <data name="Tutorials.Step.basics.tutorials.Title" xml:space="preserve">
+    <value>Oktatóközpont</value>
+  </data>
+  <data name="Tutorials.Step.basics.tutorials.Description" xml:space="preserve">
+    <value>Itt játszhat újra, folytassa, indítsa újra, vagy fedezze fel a frissített leckéket.</value>
+  </data>
+  <data name="Tutorials.Step.account.profile.Title" xml:space="preserve">
+    <value>Fiókkörnyezet</value>
+  </data>
+  <data name="Tutorials.Step.account.profile.Description" xml:space="preserve">
+    <value>A felhőalapú hozzáférés elkülönül a Rust+ párosítástól. A helyi funkciók felhőszinkronizálás nélkül is elérhetők maradnak.</value>
+  </data>
+  <data name="Tutorials.Step.account.cloud.Title" xml:space="preserve">
+    <value>Felhőfiók</value>
+  </data>
+  <data name="Tutorials.Step.account.cloud.Description" xml:space="preserve">
+    <value>Jelentkezzen be itt a támogatott szinkronizáláshoz; az oktatóanyagok soha nem jelenítik meg a privát fiókadatokat.</value>
+  </data>
+  <data name="Tutorials.Step.account.premium.Title" xml:space="preserve">
+    <value>Támogatói állapot</value>
+  </data>
+  <data name="Tutorials.Step.account.premium.Description" xml:space="preserve">
+    <value>A támogatói hozzáférés feloldja a zárt funkciókat. A helyi oktatóprogram előrehaladása nem igényel előfizetést.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.overview.Title" xml:space="preserve">
+    <value>Rust+ párosítás</value>
+  </data>
+  <data name="Tutorials.Step.pairing.overview.Description" xml:space="preserve">
+    <value>A párosítás összekapcsolja ezt az alkalmazást a Rust Companion programmal, mielőtt az élő szerverfunkciók működnének.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.start.Title" xml:space="preserve">
+    <value>Kezdje el a párosítást</value>
+  </data>
+  <data name="Tutorials.Step.pairing.start.Description" xml:space="preserve">
+    <value>Kezdje el hallgatni, majd használja a Rust játékon belüli Rust+ párosítási folyamatát. A hitelesítő adatokat soha nem rögzítik.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.list.Title" xml:space="preserve">
+    <value>Párosított szerverek</value>
+  </data>
+  <data name="Tutorials.Step.pairing.list.Description" xml:space="preserve">
+    <value>Válasszon ki egy helyileg konfigurált kiszolgálót a csatlakozás vagy a kiszolgálóspecifikus beállítások módosítása előtt.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.soft.Title" xml:space="preserve">
+    <value>Soft Connect</value>
+  </data>
+  <data name="Tutorials.Step.pairing.soft.Description" xml:space="preserve">
+    <value>Csatlakoztassa a korlátozott kommunikációt anélkül, hogy minden élő funkciót inicializálna.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.full.Title" xml:space="preserve">
+    <value>Teljes csatlakozás</value>
+  </data>
+  <data name="Tutorials.Step.pairing.full.Description" xml:space="preserve">
+    <value>A teljes kapcsolat inicializálja a térképadatokat, eszközöket, csapatadatokat és Rust+ előfizetéseket.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.disconnect.Title" xml:space="preserve">
+    <value>Leválasztás</value>
+  </data>
+  <data name="Tutorials.Step.pairing.disconnect.Description" xml:space="preserve">
+    <value>A leválasztás leállítja az élő kommunikációt. Ez a lecke soha nem hivatkozik a cselekvésre.</value>
+  </data>
+  <data name="Tutorials.Step.pairing.reset.Title" xml:space="preserve">
+    <value>Párosítás visszaállítása</value>
+  </data>
+  <data name="Tutorials.Step.pairing.reset.Description" xml:space="preserve">
+    <value>A helyreállítási parancsok a Pair helyi menüben találhatók. A visszaállítás eltávolítja a helyi párosítási konfigurációt.</value>
+  </data>
+  <data name="Tutorials.Step.map.canvas.Title" xml:space="preserve">
+    <value>Térképvászon</value>
+  </data>
+  <data name="Tutorials.Step.map.canvas.Description" xml:space="preserve">
+    <value>Pásztázás húzással, nagyítás a kerékkel, és interakció a jelölőkkel az aktuális Rust térképen.</value>
+  </data>
+  <data name="Tutorials.Step.map.toolbar.Title" xml:space="preserve">
+    <value>Térkép eszköztár</value>
+  </data>
+  <data name="Tutorials.Step.map.toolbar.Description" xml:space="preserve">
+    <value>Az eszköztár vezérli a rétegeket, a csevegést, a fedvényeket, az időzítőket és az 2D vagy 3D módokat.</value>
+  </data>
+  <data name="Tutorials.Step.map.fit.Title" xml:space="preserve">
+    <value>Nézet visszaállítása</value>
+  </data>
+  <data name="Tutorials.Step.map.fit.Description" xml:space="preserve">
+    <value>Pásztázás vagy nagyítás után helyezze vissza a térképet a munkaterületre.</value>
+  </data>
+  <data name="Tutorials.Step.map.layers.Title" xml:space="preserve">
+    <value>Térképrétegek</value>
+  </data>
+  <data name="Tutorials.Step.map.layers.Description" xml:space="preserve">
+    <value>Itt választhat rácsot, lejátszót, emlékművet, üzletet és speciális vizuális lehetőségeket.</value>
+  </data>
+  <data name="Tutorials.Step.map.heatmaps.Title" xml:space="preserve">
+    <value>Hőtérképek</value>
+  </data>
+  <data name="Tutorials.Step.map.heatmaps.Description" xml:space="preserve">
+    <value>Nyissa ki a kivont sűrűségű fedvényeket. Valószínű spawn zónákat mutatnak, nem élő entitásokat.</value>
+  </data>
+  <data name="Tutorials.Step.map.open3d.Title" xml:space="preserve">
+    <value>Nyissa meg a 3D térképet</value>
+  </data>
+  <data name="Tutorials.Step.map.open3d.Description" xml:space="preserve">
+    <value>Az aktuális térkép helyi 3D reprezentációjának létrehozása vagy megnyitása.</value>
+  </data>
+  <data name="Tutorials.Step.map.drawing.Title" xml:space="preserve">
+    <value>Rajzeszközök</value>
+  </data>
+  <data name="Tutorials.Step.map.drawing.Description" xml:space="preserve">
+    <value>Rajzoljon roncsolásmentes tervezési megjegyzéseket a térképre, és lépjen ki a rajz módból, ha végzett.</value>
+  </data>
+  <data name="Tutorials.Step.heatmaps.open.Title" xml:space="preserve">
+    <value>Hőtérképek megnyitása</value>
+  </data>
+  <data name="Tutorials.Step.heatmaps.open.Description" xml:space="preserve">
+    <value>Böngésszen az aktuális elemzett térkép elérhető sűrűségi rétegei között.</value>
+  </data>
+  <data name="Tutorials.Step.heatmaps.selector.Title" xml:space="preserve">
+    <value>Hőtérkép-választó</value>
+  </data>
+  <data name="Tutorials.Step.heatmaps.selector.Description" xml:space="preserve">
+    <value>Válasszon ki egy kibontott kategóriát, vagy törölje az aktív fedvényt.</value>
+  </data>
+  <data name="Tutorials.Step.heatmaps.meaning.Title" xml:space="preserve">
+    <value>Hogyan működnek a hőtérképek</value>
+  </data>
+  <data name="Tutorials.Step.heatmaps.meaning.Description" xml:space="preserve">
+    <value>A hőtérképek összefoglalják a valószínű ívási területeket; nem garantálják az élő entitást egy helyen.</value>
+  </data>
+  <data name="Tutorials.Step.map3d.open.Title" xml:space="preserve">
+    <value>3D létrehozása vagy megnyitása</value>
+  </data>
+  <data name="Tutorials.Step.map3d.open.Description" xml:space="preserve">
+    <value>Az alkalmazás helyben elemzi a térképadatokat, és lehetőség szerint újrafelhasználja a gyorsítótárát.</value>
+  </data>
+  <data name="Tutorials.Step.map3d.viewport.Title" xml:space="preserve">
+    <value>3D Nézetablaka</value>
+  </data>
+  <data name="Tutorials.Step.map3d.viewport.Description" xml:space="preserve">
+    <value>Keringés, pásztázás és nagyítás a kiválasztott térkép interaktív ábrázolásában.</value>
+  </data>
+  <data name="Tutorials.Step.map3d.toolbar.Title" xml:space="preserve">
+    <value>3D Eszköztár</value>
+  </data>
+  <data name="Tutorials.Step.map3d.toolbar.Description" xml:space="preserve">
+    <value>Fóliák, élő jelölők, teljes képernyő, beállítások és lábnyom-eszközök vezérlése.</value>
+  </data>
+  <data name="Tutorials.Step.map3d.build.Title" xml:space="preserve">
+    <value>Base Footprint Builder</value>
+  </data>
+  <data name="Tutorials.Step.map3d.build.Description" xml:space="preserve">
+    <value>Az építési mód csak a tervezési alapokat helyezi el; nem módosítja az Rust szervert.</value>
+  </data>
+  <data name="Tutorials.Step.map3d.performance.Title" xml:space="preserve">
+    <value>Teljesítményjelző</value>
+  </data>
+  <data name="Tutorials.Step.map3d.performance.Description" xml:space="preserve">
+    <value>FPS és adaptív felbontás-egyensúly részletgazdagság zökkenőmentes interakcióval.</value>
+  </data>
+  <data name="Tutorials.Step.map3d.close.Title" xml:space="preserve">
+    <value>3D Nézet bezárása</value>
+  </data>
+  <data name="Tutorials.Step.map3d.close.Description" xml:space="preserve">
+    <value>Térjen vissza a 2D oldalra, és engedje fel a súlyos beágyazott 3D erőforrásokat.</value>
+  </data>
+  <data name="Tutorials.Step.devices.overview.Title" xml:space="preserve">
+    <value>Eszközlista</value>
+  </data>
+  <data name="Tutorials.Step.devices.overview.Description" xml:space="preserve">
+    <value>A párosított kapcsolók, riasztások és tárolófigyelők itt csoportokban jelennek meg.</value>
+  </data>
+  <data name="Tutorials.Step.devices.search.Title" xml:space="preserve">
+    <value>Eszközkeresés</value>
+  </data>
+  <data name="Tutorials.Step.devices.search.Description" xml:space="preserve">
+    <value>Eszközök szűrése név vagy parancs alapján állapotuk megváltoztatása nélkül.</value>
+  </data>
+  <data name="Tutorials.Step.devices.filter.Title" xml:space="preserve">
+    <value>Eszköztípus-szűrő</value>
+  </data>
+  <data name="Tutorials.Step.devices.filter.Description" xml:space="preserve">
+    <value>A lista korlátozása kapcsolókra, riasztásokra, tárolófigyelőkre vagy az összes eszközre.</value>
+  </data>
+  <data name="Tutorials.Step.devices.refresh.Title" xml:space="preserve">
+    <value>Állapotok frissítése</value>
+  </data>
+  <data name="Tutorials.Step.devices.refresh.Description" xml:space="preserve">
+    <value>Friss, csak olvasható állapot kérése; elérhetősége a kapcsolattól függ.</value>
+  </data>
+  <data name="Tutorials.Step.devices.actions.Title" xml:space="preserve">
+    <value>Eszközeszközök</value>
+  </data>
+  <data name="Tutorials.Step.devices.actions.Description" xml:space="preserve">
+    <value>Itt gyűjtjük össze az importálást, a felhőszinkronizálást, az automatizálást, a gyorsbillentyűket, a frissítést és a tisztítást.</value>
+  </data>
+  <data name="Tutorials.Step.devices.first.Title" xml:space="preserve">
+    <value>Eszközkártya</value>
+  </data>
+  <data name="Tutorials.Step.devices.first.Description" xml:space="preserve">
+    <value>A kártya azonosítja az azonosítót, a kapcsolat állapotát, a parancsokat és az eszközspecifikus vezérlőket.</value>
+  </data>
+  <data name="Tutorials.Step.devices.safety.Title" xml:space="preserve">
+    <value>Eszközbiztonság</value>
+  </data>
+  <data name="Tutorials.Step.devices.safety.Description" xml:space="preserve">
+    <value>Az oktatóanyagok soha nem kapcsolnak kapcsolót, nem törölnek eszközt, és nem futtatnak gyorsbillentyűket.</value>
+  </data>
+  <data name="Tutorials.Step.team.list.Title" xml:space="preserve">
+    <value>Csapatlista</value>
+  </data>
+  <data name="Tutorials.Step.team.list.Description" xml:space="preserve">
+    <value>Itt jelennek meg a betöltött csapattársak, az online állapotok, az avatarok és a környezeti műveletek.</value>
+  </data>
+  <data name="Tutorials.Step.team.markers.Title" xml:space="preserve">
+    <value>Csapatjelzők</value>
+  </data>
+  <data name="Tutorials.Step.team.markers.Description" xml:space="preserve">
+    <value>Válassza ki, hogy mely csapattárs-jelölőstílusok jelenjenek meg a térképen.</value>
+  </data>
+  <data name="Tutorials.Step.team.follow.Title" xml:space="preserve">
+    <value>Kövesd a játékost</value>
+  </data>
+  <data name="Tutorials.Step.team.follow.Description" xml:space="preserve">
+    <value>A következő lépések a csapattársak frissítéseit központosítják, és aktuális csapatadatokat igényelnek.</value>
+  </data>
+  <data name="Tutorials.Step.team.sharing.Title" xml:space="preserve">
+    <value>Csapatmegosztás</value>
+  </data>
+  <data name="Tutorials.Step.team.sharing.Description" xml:space="preserve">
+    <value>Az alap- és képernyőkép-megosztáshoz fiókra és feltöltési hozzájárulásra lehet szükség.</value>
+  </data>
+  <data name="Tutorials.Step.chat.history.Title" xml:space="preserve">
+    <value>Csevegés előzményei</value>
+  </data>
+  <data name="Tutorials.Step.chat.history.Description" xml:space="preserve">
+    <value>A legutóbbi Rust csapatüzenetek itt jelennek meg, ha a kapcsolat csevegési adatokat biztosít.</value>
+  </data>
+  <data name="Tutorials.Step.chat.input.Title" xml:space="preserve">
+    <value>Üzenetbevitel</value>
+  </data>
+  <data name="Tutorials.Step.chat.input.Description" xml:space="preserve">
+    <value>Írjon itt egy csapatüzenetet. Az oktatóanyag soha nem illeszt be vagy küld egyet.</value>
+  </data>
+  <data name="Tutorials.Step.chat.send.Title" xml:space="preserve">
+    <value>Üzenet küldése</value>
+  </data>
+  <data name="Tutorials.Step.chat.send.Description" xml:space="preserve">
+    <value>Bejegyzések küldése a Rust csapatcsevegésbe. Ez a vezérlő csak kiemelve van.</value>
+  </data>
+  <data name="Tutorials.Step.chat.commands.Title" xml:space="preserve">
+    <value>Parancsbeállítások</value>
+  </data>
+  <data name="Tutorials.Step.chat.commands.Description" xml:space="preserve">
+    <value>Konfigurálja az előtagokat, az eszköz-összerendeléseket, a késleltetéseket és a parancsok elérhetőségét.</value>
+  </data>
+  <data name="Tutorials.Step.discord.entry.Title" xml:space="preserve">
+    <value>Discord közösség</value>
+  </data>
+  <data name="Tutorials.Step.discord.entry.Description" xml:space="preserve">
+    <value>Ez a parancsikon megnyitja a közösséget; az integrációs beállítások különállóak.</value>
+  </data>
+  <data name="Tutorials.Step.discord.settings.Title" xml:space="preserve">
+    <value>Discord Beállítások</value>
+  </data>
+  <data name="Tutorials.Step.discord.settings.Description" xml:space="preserve">
+    <value>Konfigurálja a robotot, a guildet, a csatornákat, a parancsokat és az engedélyeket azonosítók naplózása nélkül.</value>
+  </data>
+  <data name="Tutorials.Step.discord.privacy.Title" xml:space="preserve">
+    <value>Discord Biztonság</value>
+  </data>
+  <data name="Tutorials.Step.discord.privacy.Description" xml:space="preserve">
+    <value>Az oktatóanyagok soha nem tesznek közzé üzeneteket, illetve nem naplóznak céh-, csatorna- vagy felhasználói azonosítókat.</value>
+  </data>
+  <data name="Tutorials.Step.automation.open.Title" xml:space="preserve">
+    <value>Nyissa meg a logikai motort</value>
+  </data>
+  <data name="Tutorials.Step.automation.open.Description" xml:space="preserve">
+    <value>Nyissa meg a kiválasztott szerver szabályszerkesztőjét.</value>
+  </data>
+  <data name="Tutorials.Step.automation.list.Title" xml:space="preserve">
+    <value>Szabálylista</value>
+  </data>
+  <data name="Tutorials.Step.automation.list.Description" xml:space="preserve">
+    <value>Itt jelennek meg a szabályok, valamint azok kiváltó, feltétele, késleltetése és műveleti lépései.</value>
+  </data>
+  <data name="Tutorials.Step.automation.enabled.Title" xml:space="preserve">
+    <value>A motor állapota</value>
+  </data>
+  <data name="Tutorials.Step.automation.enabled.Description" xml:space="preserve">
+    <value>Szabályvégrehajtás engedélyezése vagy szüneteltetése. Az oktatóanyag soha nem változtatja meg ezt a kapcsolót.</value>
+  </data>
+  <data name="Tutorials.Step.automation.workflow.Title" xml:space="preserve">
+    <value>Szabály munkafolyamat</value>
+  </data>
+  <data name="Tutorials.Step.automation.workflow.Description" xml:space="preserve">
+    <value>A trigger elindít egy szabályt; feltételek kapu későbbi cselekvések; a lépések sorrendben futnak.</value>
+  </data>
+  <data name="Tutorials.Step.automation.safety.Title" xml:space="preserve">
+    <value>Automatizálási biztonság</value>
+  </data>
+  <data name="Tutorials.Step.automation.safety.Description" xml:space="preserve">
+    <value>Az oktatóanyagok nem tartanak fenn szabályokat, nem váltanak át eszközöket, nem küldenek csevegést, és nem hajtanak végre automatizálást.</value>
+  </data>
+  <data name="Tutorials.Step.notifications.center.Title" xml:space="preserve">
+    <value>Értesítési központ</value>
+  </data>
+  <data name="Tutorials.Step.notifications.center.Description" xml:space="preserve">
+    <value>Tekintse át a riasztásokat anélkül, hogy az átmeneti asztali értesítésekre hagyatkozna.</value>
+  </data>
+  <data name="Tutorials.Step.notifications.filters.Title" xml:space="preserve">
+    <value>Értesítési szűrők</value>
+  </data>
+  <data name="Tutorials.Step.notifications.filters.Description" xml:space="preserve">
+    <value>Váltás az összes értesítés, riasztás és haláleset között.</value>
+  </data>
+  <data name="Tutorials.Step.notifications.search.Title" xml:space="preserve">
+    <value>Keresési értesítések</value>
+  </data>
+  <data name="Tutorials.Step.notifications.search.Description" xml:space="preserve">
+    <value>Értesítések keresése megjelenített tartalom vagy kiszolgálókontextus szerint.</value>
+  </data>
+  <data name="Tutorials.Step.notifications.actions.Title" xml:space="preserve">
+    <value>Tömeges műveletek</value>
+  </data>
+  <data name="Tutorials.Step.notifications.actions.Description" xml:space="preserve">
+    <value>Az összes olvasott előzmény megjelölése vagy törlése; az oktatóprogramok soha nem hajtják végre ezeket a műveleteket.</value>
+  </data>
+  <data name="Tutorials.Step.cameras.list.Title" xml:space="preserve">
+    <value>Kameralista</value>
+  </data>
+  <data name="Tutorials.Step.cameras.list.Description" xml:space="preserve">
+    <value>A konfigurált előnézetek akkor jelennek meg, ha elérhető a kiválasztott szerver és kamera.</value>
+  </data>
+  <data name="Tutorials.Step.cameras.add.Title" xml:space="preserve">
+    <value>Kamera hozzáadása</value>
+  </data>
+  <data name="Tutorials.Step.cameras.add.Description" xml:space="preserve">
+    <value>Adjon hozzá egy kamerát a Rust azonosítójával; az oktatóanyagok soha nem rögzítik a kamerakódokat.</value>
+  </data>
+  <data name="Tutorials.Step.cameras.privacy.Title" xml:space="preserve">
+    <value>A fényképezőgép adatainak védelme</value>
+  </data>
+  <data name="Tutorials.Step.cameras.privacy.Description" xml:space="preserve">
+    <value>A kameraazonosítók és -keretek nem szerepelnek az oktatói diagnosztikában.</value>
+  </data>
+  <data name="Tutorials.Step.raid.search.Title" xml:space="preserve">
+    <value>Keresési célok</value>
+  </data>
+  <data name="Tutorials.Step.raid.search.Description" xml:space="preserve">
+    <value>Keressen egy falat, ajtót, telepíthető vagy más célt a kötegelt adatkészletben.</value>
+  </data>
+  <data name="Tutorials.Step.raid.plan.Title" xml:space="preserve">
+    <value>Raidterv</value>
+  </data>
+  <data name="Tutorials.Step.raid.plan.Description" xml:space="preserve">
+    <value>Tekintse át a célokat, az állapotot, a mennyiségeket, a módszereket és a számított költségeket.</value>
+  </data>
+  <data name="Tutorials.Step.raid.methods.Title" xml:space="preserve">
+    <value>Módszerek összehasonlítása</value>
+  </data>
+  <data name="Tutorials.Step.raid.methods.Description" xml:space="preserve">
+    <value>Válassza ki az engedélyezett robbanóanyagokat vagy eszközöket, és hasonlítsa össze az alternatívákat.</value>
+  </data>
+  <data name="Tutorials.Step.raid.clear.Title" xml:space="preserve">
+    <value>Egyértelmű terv</value>
+  </data>
+  <data name="Tutorials.Step.raid.clear.Description" xml:space="preserve">
+    <value>Clear eltávolítja a tervet; az oktatóanyag kiemeli a bejegyzések módosítása nélkül.</value>
+  </data>
+  <data name="Tutorials.Step.recycler.search.Title" xml:space="preserve">
+    <value>Elemek keresése</value>
+  </data>
+  <data name="Tutorials.Step.recycler.search.Description" xml:space="preserve">
+    <value>Keressen egy újrahasznosítható terméket, és adja hozzá a számológéphez.</value>
+  </data>
+  <data name="Tutorials.Step.recycler.category.Title" xml:space="preserve">
+    <value>Tételkategória</value>
+  </data>
+  <data name="Tutorials.Step.recycler.category.Description" xml:space="preserve">
+    <value>Szűkítse a tételkatalógust kategóriák szerint.</value>
+  </data>
+  <data name="Tutorials.Step.recycler.inputs.Title" xml:space="preserve">
+    <value>Beviteli elemek</value>
+  </data>
+  <data name="Tutorials.Step.recycler.inputs.Description" xml:space="preserve">
+    <value>Mennyiségek beállítása vagy bejegyzések eltávolítása; Az oktatóanyagok nem változtatják meg a számológép állapotát.</value>
+  </data>
+  <data name="Tutorials.Step.recycler.results.Title" xml:space="preserve">
+    <value>Újrahasznosító eredmények</value>
+  </data>
+  <data name="Tutorials.Step.recycler.results.Description" xml:space="preserve">
+    <value>Hasonlítsa össze a vadon élő és biztonságos zónák újrahasznosítóinak hozamát és idejét.</value>
+  </data>
+  <data name="Tutorials.Step.settings.open.Title" xml:space="preserve">
+    <value>Nyissa meg a Beállításokat</value>
+  </data>
+  <data name="Tutorials.Step.settings.open.Description" xml:space="preserve">
+    <value>Az alkalmazások viselkedése, integrációi, teljesítménye, biztonsági mentése és karbantartása itt él.</value>
+  </data>
+  <data name="Tutorials.Step.settings.language.Title" xml:space="preserve">
+    <value>Nyelv</value>
+  </data>
+  <data name="Tutorials.Step.settings.language.Description" xml:space="preserve">
+    <value>Válassza ki a felhasználói felület nyelvét. Az oktatóanyag ugyanazt az erőforrásrendszert használja.</value>
+  </data>
+  <data name="Tutorials.Step.settings.map.Title" xml:space="preserve">
+    <value>Térképteljesítmény</value>
+  </data>
+  <data name="Tutorials.Step.settings.map.Description" xml:space="preserve">
+    <value>Hangolja be a képméretezést, a GPU-gyorsítótárat, a renderelési léptéket és az élmódot.</value>
+  </data>
+  <data name="Tutorials.Step.settings.maintenance.Title" xml:space="preserve">
+    <value>Karbantartás</value>
+  </data>
+  <data name="Tutorials.Step.settings.maintenance.Description" xml:space="preserve">
+    <value>A biztonsági mentés, az alaphelyzetbe állítás, a törlés és a gyorsítótár vezérlői destruktívak lehetnek, és soha nem kerülnek meghívásra.</value>
+  </data>
+  <data name="Tutorials.Step.updates.check.Title" xml:space="preserve">
+    <value>Frissítések keresése</value>
+  </data>
+  <data name="Tutorials.Step.updates.check.Description" xml:space="preserve">
+    <value>Kérje a frissítés elérhetőségét letöltés vagy telepítés nélkül.</value>
+  </data>
+  <data name="Tutorials.Step.updates.status.Title" xml:space="preserve">
+    <value>Frissítési állapot</value>
+  </data>
+  <data name="Tutorials.Step.updates.status.Description" xml:space="preserve">
+    <value>A verzió és a letöltés folyamata megjelenik ezen a címsorban.</value>
+  </data>
+  <data name="Tutorials.Step.updates.logs.Title" xml:space="preserve">
+    <value>Diagnosztikai napló</value>
+  </data>
+  <data name="Tutorials.Step.updates.logs.Description" xml:space="preserve">
+    <value>Szűrje ki a helyi diagnosztikát, mielőtt csak nem érzékeny részleteket osztana meg.</value>
+  </data>
+  <data name="Tutorials.shops-vending.Title" xml:space="preserve">
+    <value>Boltok és árusítók</value>
+  </data>
+  <data name="Tutorials.shops-vending.Description" xml:space="preserve">
+    <value>Keressen árusító ajánlatokat, hasonlítsa össze a kereskedéseket, és ismerje meg a frissítési időzítést.</value>
+  </data>
+  <data name="Tutorials.events-monitoring.Title" xml:space="preserve">
+    <value>Események és szerverfigyelés</value>
+  </data>
+  <data name="Tutorials.events-monitoring.Description" xml:space="preserve">
+    <value>Olvassa el az élő eseményjelzőket, és hozzon létre helyi időzítőket.</value>
+  </data>
+  <data name="Tutorials.bases-screenshots.Title" xml:space="preserve">
+    <value>Alapok és képernyőképek</value>
+  </data>
+  <data name="Tutorials.bases-screenshots.Description" xml:space="preserve">
+    <value>Készítsen térképalapjelzőket, és biztonságosan kezelje a jegyzeteiket és képernyőképeiket.</value>
+  </data>
+  <data name="Tutorials.device-automation.Title" xml:space="preserve">
+    <value>Eszközautomatizálás</value>
+  </data>
+  <data name="Tutorials.device-automation.Description" xml:space="preserve">
+    <value>Konfigurálja az egyszerű eszközállapot-automatizálást a logikai motortól elkülönítve.</value>
+  </data>
+  <data name="Tutorials.Step.shops.open.Title" xml:space="preserve">
+    <value>Nyissa meg a boltkeresőt</value>
+  </data>
+  <data name="Tutorials.Step.shops.open.Description" xml:space="preserve">
+    <value>Nyissa meg a térkép árusító keresőpaneljét az aktuális térkép módosítása nélkül.</value>
+  </data>
+  <data name="Tutorials.Step.shops.panel.Title" xml:space="preserve">
+    <value>Bolti keresés</value>
+  </data>
+  <data name="Tutorials.Step.shops.panel.Description" xml:space="preserve">
+    <value>Keressen tételeket, tekintse át a vételi és eladási mennyiségeket, és nyissa meg a találatokat a térképen.</value>
+  </data>
+  <data name="Tutorials.Step.shops.refresh.Title" xml:space="preserve">
+    <value>Frissítési időzítés</value>
+  </data>
+  <data name="Tutorials.Step.shops.refresh.Description" xml:space="preserve">
+    <value>A bolti ajánlatok a szerverkapcsolattól függenek, és Rust+ frissítés között elavulhatnak.</value>
+  </data>
+  <data name="Tutorials.Step.events.dock.Title" xml:space="preserve">
+    <value>Élő esemény dokkoló</value>
+  </data>
+  <data name="Tutorials.Step.events.dock.Description" xml:space="preserve">
+    <value>Rakomány, helikopter, Chinook, szállító és egyéb aktív eseményjelzők jelennek meg itt, ha rendelkezésre állnak.</value>
+  </data>
+  <data name="Tutorials.Step.events.timer.Title" xml:space="preserve">
+    <value>Egyéni időzítő</value>
+  </data>
+  <data name="Tutorials.Step.events.timer.Description" xml:space="preserve">
+    <value>Helyi emlékeztető létrehozása a szerver állapotának megváltoztatása nélkül.</value>
+  </data>
+  <data name="Tutorials.Step.events.stale.Title" xml:space="preserve">
+    <value>Esemény frissessége</value>
+  </data>
+  <data name="Tutorials.Step.events.stale.Description" xml:space="preserve">
+    <value>Az eseményadatok a kiválasztott kapcsolattól függenek, és eltűnhetnek, ha elavulttá válnak.</value>
+  </data>
+  <data name="Tutorials.Step.bases.map.Title" xml:space="preserve">
+    <value>Alapjelölők</value>
+  </data>
+  <data name="Tutorials.Step.bases.map.Description" xml:space="preserve">
+    <value>Az alapjelölőket a rendszer elhelyezi és megnyitja a 2D térképen.</value>
+  </data>
+  <data name="Tutorials.Step.bases.context.Title" xml:space="preserve">
+    <value>Alapjegyzetek és képernyőképek</value>
+  </data>
+  <data name="Tutorials.Step.bases.context.Description" xml:space="preserve">
+    <value>Használjon térképkörnyezeti műveleteket egy alap elnevezéséhez és képernyőképek csatolásához; A felhőalapú megosztáshoz hozzájárulás szükséges.</value>
+  </data>
+  <data name="Tutorials.Step.bases.safety.Title" xml:space="preserve">
+    <value>Biztonság törlése</value>
+  </data>
+  <data name="Tutorials.Step.bases.safety.Description" xml:space="preserve">
+    <value>Az alap vagy képernyőkép törlését soha nem végzi el az oktatóprogram, és mindig az Ön hozzájárulása szükséges.</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.open.Title" xml:space="preserve">
+    <value>Open Device Automation</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.open.Description" xml:space="preserve">
+    <value>Nyissa meg a könnyű eszközállapot-automatizálást a kiválasztott kiszolgálóhoz.</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.actions.Title" xml:space="preserve">
+    <value>Automatizálási műveletek</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.actions.Description" xml:space="preserve">
+    <value>A végrehajtás szüneteltetése vagy automatizálás hozzáadása; az oktatóanyagok soha nem változtatják meg a motor állapotát és nem hoznak létre adatokat.</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.rules.Title" xml:space="preserve">
+    <value>Automatizálási szabályok</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.rules.Description" xml:space="preserve">
+    <value>Tekintse át az egyes szabályok forráseszközeit, célműveleteit, időzítését és engedélyezett állapotát.</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.safety.Title" xml:space="preserve">
+    <value>Eszközbiztonság</value>
+  </data>
+  <data name="Tutorials.Step.deviceautomation.safety.Description" xml:space="preserve">
+    <value>Egyetlen oktatóprogram sem hajt végre szabályt, és nem kapcsol át valódi okoseszközt.</value>
+  </data>
+  <data name="ProfileRustHours" xml:space="preserve">
+    <value>Rust Hours</value>
+  </data>
+  <data name="ProfileVacStatus" xml:space="preserve">
+    <value>VAC Status</value>
+  </data>
+  <data name="ProfileVacClean" xml:space="preserve">
+    <value>Clean (0 bans on record)</value>
+  </data>
 </root>
