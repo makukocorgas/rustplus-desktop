@@ -581,6 +581,7 @@ public partial class MainWindow
             AppendLog($"Connection initialization complete. Server: {connectedProfile.Name}");
 
             _ = StartServerEventTrackingAsync();
+            _ = Services.Social.SocialApi.UpdateActiveListingServerAsync(connectedProfile.Name);
 
 
 

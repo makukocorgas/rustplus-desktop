@@ -1420,7 +1420,13 @@ public static class TrackingService
     public static string SelectedLanguage
     {
         get => _settings.SelectedLanguage;
-        set { _settings.SelectedLanguage = value; SaveSettings(); }
+        set
+        {
+            if (string.Equals(_settings.SelectedLanguage, value, StringComparison.Ordinal)) return;
+            _settings.SelectedLanguage = value;
+            SaveSettings();
+            _ = Social.SocialApi.UpdateActiveListingLanguageAsync(value);
+        }
     }
 
     public static bool AnnounceSpawnsMaster
