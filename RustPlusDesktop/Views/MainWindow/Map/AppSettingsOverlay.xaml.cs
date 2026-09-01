@@ -694,6 +694,10 @@ namespace RustPlusDesk.Views
 
             // Always load Discord bot settings (no premium check needed)
             _ = LoadDiscordBotSettingsAsync();
+
+            // Home Assistant token management runs on our own Supabase functions, not the
+            // Laravel platform this panel originally required - so it loads unconditionally too.
+            _ = LoadHomeAssistantSettingsAsync();
         }
 
         private void CmbLanguage_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1295,6 +1299,142 @@ namespace RustPlusDesk.Views
                 e.Handled = true;
             }
             catch { }
+        }
+
+        // --- Home Assistant integration ---
+
+        /// <summary>Public base URL of the Supabase edge function that serves the switch endpoints.</summary>
+        private const string HaWorkerBaseUrl = "https://iposrabchlvpfpdymgmj.supabase.co/functions/v1/home-assistant";
+
+        /// <summary>
+        /// Supabase's gateway requires this on every request regardless of the function's own
+        /// auth, and it identifies the project rather than the user — safe to ship in a
+        /// configuration snippet the same way the desktop client itself carries it.
+        /// </summary>
+        private const string HaApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlwb3NyYWJjaGx2cGZwZHltZ21qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNDc0MzcsImV4cCI6MjA5NzgyMzQzN30.XbumfrRPCooBh_f1ZxpbpNB1NhSNWMxHGzuO-rpEarA";
+
+        private async Task LoadHomeAssistantSettingsAsync()
+        {
+            try
+            {
+                var token = await Services.Cloud.CloudHomeAssistantAdapter.GetTokenAsync();
+                ApplyHaToken(token);
+            }
+            catch
+            {
+                // No token yet, or the endpoint is unreachable — leave the panel in its empty state.
+                ApplyHaToken(null);
+            }
+        }
+
+        /// <summary>Reflect a token (or its absence) into the token box, copy button, and snippet.</summary>
+        private void ApplyHaToken(string? token)
+        {
+            var hasToken = !string.IsNullOrEmpty(token);
+
+            TxtHaToken.Text = hasToken ? token : string.Empty;
+            BtnCopyHaToken.IsEnabled = hasToken;
+            BtnGenerateHaToken.Content = hasToken ? "Regenerate Token" : "Generate Token";
+            TxtHaSnippet.Text = BuildHaSnippet(token);
+        }
+
+        private static string BuildHaSnippet(string? token)
+        {
+            var bearer = string.IsNullOrEmpty(token) ? "<YOUR_TOKEN>" : token;
+
+            return
+                "# Add to Home Assistant configuration.yaml\n" +
+                "switch:\n" +
+                "  - platform: rest\n" +
+                "    name: Rust Smart Switch\n" +
+                $"    resource: {HaWorkerBaseUrl}/switch/ENTITYID\n" +
+                "    headers:\n" +
+                $"      Authorization: \"Bearer {bearer}\"\n" +
+                $"      apikey: \"{HaApiKey}\"\n" +
+                "    body_on: '{\"on\": true}'\n" +
+                "    body_off: '{\"on\": false}'\n" +
+                "    is_on_template: \"{{ value_json.on }}\"";
+        }
+
+        private async void BtnGenerateHaToken_Click(object sender, RoutedEventArgs e)
+        {
+            if (!Services.Cloud.CloudAuth.IsAuthenticated)
+            {
+                MessageBox.Show(RustPlusDesk.Properties.Resources.GetString("CodeUiPleaseConnectYourCloudAccountFirst"), RustPlusDesk.Properties.Resources.GetString("ErrorPrefix"), MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            BtnGenerateHaToken.IsEnabled = false;
+            try
+            {
+                var token = await Services.Cloud.CloudHomeAssistantAdapter.RegenerateTokenAsync();
+                ApplyHaToken(token);
+                ParentWindow?.ShowInfoSnackbar("Success", "Home Assistant token generated. Copy it into your configuration.yaml.", WpfUi.ControlAppearance.Success);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to generate Home Assistant token: {ex.Message}", Properties.Resources.GetString("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                BtnGenerateHaToken.IsEnabled = true;
+            }
+        }
+
+        private void BtnCopyHaToken_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(TxtHaToken.Text)) return;
+            try
+            {
+                Clipboard.SetText(TxtHaToken.Text);
+                ParentWindow?.ShowInfoSnackbar("Copied", "Token copied to clipboard.", WpfUi.ControlAppearance.Success);
+            }
+            catch { /* clipboard can transiently fail; nothing actionable */ }
+        }
+
+        private void BtnCopyHaSnippet_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(TxtHaSnippet.Text)) return;
+            try
+            {
+                Clipboard.SetText(TxtHaSnippet.Text);
+                ParentWindow?.ShowInfoSnackbar("Copied", "Configuration snippet copied to clipboard.", WpfUi.ControlAppearance.Success);
+            }
+            catch { /* clipboard can transiently fail; nothing actionable */ }
+        }
+
+        private async void BtnRevokeHa_Click(object sender, RoutedEventArgs e)
+        {
+            if (!Services.Cloud.CloudAuth.IsAuthenticated) return;
+
+            BtnRevokeHa.IsEnabled = false;
+            try
+            {
+                await Services.Cloud.CloudHomeAssistantAdapter.RevokeAsync();
+                ApplyHaToken(null);
+                ParentWindow?.ShowInfoSnackbar("Success", "Home Assistant token revoked.", WpfUi.ControlAppearance.Success);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to revoke Home Assistant token: {ex.Message}", Properties.Resources.GetString("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                BtnRevokeHa.IsEnabled = true;
+            }
+        }
+
+        private void BtnHomeAssistantHelp_Click(object sender, RoutedEventArgs e)
+        {
+            var msg = "How to use the Home Assistant integration:\n\n" +
+                      "1. Click 'Generate Token' to create your API token.\n" +
+                      "2. Copy the token (or the whole example snippet).\n" +
+                      "3. In Home Assistant, open configuration.yaml and add a REST switch per device.\n" +
+                      "4. Replace ENTITYID with the numeric Entity ID shown next to the switch in your device list.\n" +
+                      "5. Restart Home Assistant. The switch appears and can be toggled while the desktop app is connected to the server that switch belongs to; its state is read back from what the app last observed.\n\n" +
+                      "Keep your token secret — anyone with it can control your linked switches. Use 'Revoke Token' to invalidate it.";
+
+            MessageBox.Show(msg, "Home Assistant Setup", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void TxtCustomMapUrl_TextChanged(object sender, TextChangedEventArgs e)

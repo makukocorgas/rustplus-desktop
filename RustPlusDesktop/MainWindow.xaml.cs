@@ -888,6 +888,11 @@ public partial class MainWindow : WpfUi.FluentWindow
         // the time this window exists.
         _ = RefreshSocialAvailabilityAsync();
 
+        // Home Assistant commands wait on the same kind of poll, and start the same way: once,
+        // at launch, so a switch flipped before the settings panel has ever been opened still
+        // reaches the Rust server.
+        Services.Cloud.HomeAssistantRelay.EnsureStarted();
+
         await Dispatcher.InvokeAsync(() =>
         {
             AppendLog("[items-new] loading deferred item catalog");

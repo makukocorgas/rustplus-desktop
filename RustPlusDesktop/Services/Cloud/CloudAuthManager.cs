@@ -196,6 +196,7 @@ namespace RustPlusDesk.Services.Cloud
             // forget they were subscribed - otherwise signing back in finds them still "on" and
             // never asks for them again.
             Social.SocialRealtime.Stop();
+            HomeAssistantRelay.Stop();
 
             CloudServerInfo.Reset();
             CurrentToken = null;
