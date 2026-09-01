@@ -651,6 +651,96 @@ public partial class MainWindow : WpfUi.FluentWindow
             UpdateCloudSyncUI();
         }));
 
+        // Version-change bookkeeping and the what's-new notice.
+        //
+        // MigrationNoticeWindow and the ≤5.5.0 upgrade path upstream ships alongside this no
+        // longer apply here: our fork's version range starts well past that, so that branch could
+        // never fire for a real user and the window it references does not exist in this tree
+        // (it was dropped from our baseline before this batch started). Every existing user's
+        // LastSeenVersion is empty on this first run regardless — this treats them like a fresh
+        // install (no popup) and simply starts tracking, exactly as intended.
+        var appVersion = VersionHelper.GetClientVersion();
+
+        bool IsVersionLessThanOrEqual(string versionStr, string targetStr)
+        {
+            string cleanVer = versionStr.Split('-')[0];
+            string cleanTarget = targetStr.Split('-')[0];
+            if (System.Version.TryParse(cleanVer, out var v1) && System.Version.TryParse(cleanTarget, out var v2))
+            {
+                return v1 <= v2;
+            }
+            return false;
+        }
+
+        // Read before any branch below rewrites it. Whether this user is arriving from an older
+        // build is knowable exactly once — on the first start after the upgrade — and the
+        // what's-new notice further down needs the answer after that rewrite has happened.
+        string versionBeforeThisStart = TrackingService.LastSeenVersion;
+
+        if (string.IsNullOrEmpty(TrackingService.LastSeenVersion))
+        {
+            // First run under version tracking: record it, but there is nothing to announce.
+            TrackingService.LastSeenVersion = appVersion;
+
+            if (TrackingService.SelectedLanguage == "en")
+            {
+                TrackingService.SelectedLanguage = "";
+                if (Application.Current is App app)
+                {
+                    app.SetLanguage();
+                }
+            }
+        }
+        else if (TrackingService.LastSeenVersion != appVersion)
+        {
+            if (TrackingService.SelectedLanguage == "en")
+            {
+                TrackingService.SelectedLanguage = "";
+                if (Application.Current is App app)
+                {
+                    app.SetLanguage();
+                }
+            }
+
+            // Upgrade from a previous version: show success notification
+            TrackingService.LastSeenVersion = appVersion;
+
+            Dispatcher.InvokeAsync(() =>
+            {
+                ShowInfoSnackbar(Properties.Resources.GetString("UpdateSuccessfulTitle"), string.Format(Properties.Resources.GetString("FormatUpdateSuccessful"), appVersion), WpfUi.ControlAppearance.Success);
+            }, System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
+        // Everyone arriving from 9.0.4 or earlier gets the what's-new notice once. A fresh install
+        // starts on the current version and has nothing to catch up on, so it is left alone.
+        //
+        // The flag is latched here rather than re-derived on every start: LastSeenVersion has
+        // already been rewritten above, so by the next start this user looks like any other. It
+        // stays set — and the notice keeps appearing — until the "don't show again" box is ticked,
+        // which is the behaviour the previous version notice had.
+        // The version has to have actually moved. Without that test a build still numbered 9.0.4
+        // would re-latch on every single start — including the one right after the box was
+        // ticked — and the notice could never be dismissed.
+        if (!string.IsNullOrEmpty(versionBeforeThisStart)
+            && versionBeforeThisStart != appVersion
+            && IsVersionLessThanOrEqual(versionBeforeThisStart, "9.0.4"))
+        {
+            TrackingService.PendingWhatsNewNotice = true;
+        }
+
+        if (TrackingService.PendingWhatsNewNotice)
+        {
+            Dispatcher.InvokeAsync(() =>
+            {
+                var whatsNew = new Views.Windows.WhatsNewWindow { Owner = this };
+                whatsNew.ShowDialog();
+                if (whatsNew.DontShowAgain)
+                {
+                    TrackingService.PendingWhatsNewNotice = false;
+                }
+            }, System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
         // Initial tracking status update and hook global events
         TrackingService.OnOnlinePlayersUpdated -= OnOnlinePlayersUpdated;
         TrackingService.OnOnlinePlayersUpdated += OnOnlinePlayersUpdated;
