@@ -158,7 +158,7 @@ public sealed class PlayerWipeTrackerCloudClient
     private static JsonElement UnwrapData(JsonDocument document)
         => document.RootElement.TryGetProperty("data", out var data) ? data : document.RootElement;
 
-    private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(30) };
+    private static readonly HttpClient Http = new(new TrafficTrackingHttpMessageHandler("Player Wipe Cloud")) { Timeout = TimeSpan.FromSeconds(30) };
 
     public async Task<TrackerWipeMap?> DownloadWipeMapAsync(string serverKey, string wipeKey, CancellationToken cancellationToken = default)
     {

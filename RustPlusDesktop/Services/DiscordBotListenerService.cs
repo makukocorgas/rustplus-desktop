@@ -683,7 +683,7 @@ public class DiscordBotListenerService
         await SendNotificationToOwnersAsync("raid", message, new List<string> { ownerSteamId });
     }
 
-    private static readonly HttpClient _notifyHttpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
+    private static readonly HttpClient _notifyHttpClient = new HttpClient(new TrafficTrackingHttpMessageHandler("Discord Bot")) { Timeout = TimeSpan.FromSeconds(15) };
 
     private static async Task SendNotificationToOwnersAsync(
         string notificationType,

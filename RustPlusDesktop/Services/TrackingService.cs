@@ -250,7 +250,7 @@ public class RosterPlayer
 
 public static class TrackingService
 {
-    private static readonly HttpClient _http = new();
+    private static readonly HttpClient _http = new(new TrafficTrackingHttpMessageHandler());
     private static readonly string _dbPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), 
         "RustPlusDesk", "tracked_players.json");

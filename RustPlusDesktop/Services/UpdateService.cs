@@ -53,7 +53,7 @@ namespace RustPlusDesk.Services
         {
             try
             {
-                using var http = new HttpClient();
+                using var http = new HttpClient(new TrafficTrackingHttpMessageHandler("Updates"));
                 http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("RustPlusDesk", VersionForCompare.ToString()));
                 http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
                 http.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2022-11-28");
@@ -105,7 +105,7 @@ namespace RustPlusDesk.Services
             var target = Path.Combine(Path.GetTempPath(), InstallerAssetName);
             try
             {
-                using var http = new HttpClient
+                using var http = new HttpClient(new TrafficTrackingHttpMessageHandler("Updates"))
                 {
                     // No wall-clock limit. The default is 100 seconds and it covers the whole
                     // transfer, not just the connect — so a 500 MB installer needed roughly
