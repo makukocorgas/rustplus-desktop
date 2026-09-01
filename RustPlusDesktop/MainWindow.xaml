@@ -337,6 +337,54 @@
                 </ui:TitleBar.Icon>
                 <ui:TitleBar.Header>
                     <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                    <ui:Button
+                        x:Name="BtnDiscord"
+                        tutorials:Tutorial.TargetId="Navigation.Discord"
+                        Width="36"
+                        Height="36"
+                        Margin="2,6"
+                        Padding="0"
+                        Appearance="Transparent"
+                        Click="BtnDiscord_Click"
+                        ToolTip="{DynamicResource JoinDiscord}">
+                        <Image
+                            Width="16"
+                            Height="16"
+                            RenderOptions.BitmapScalingMode="HighQuality"
+                            Source="pack://application:,,,/Assets/icons/discord.png" />
+                    </ui:Button>
+                    <ui:Button
+                        x:Name="BtnCloudPortal"
+                        Width="36"
+                        Height="36"
+                        Margin="2,6"
+                        Padding="0"
+                        Appearance="Transparent"
+                        Click="BtnCloudPortal_Click"
+                        ToolTip="{DynamicResource OpenCloudPortal}">
+                        <Image
+                            Width="16"
+                            Height="16"
+                            RenderOptions.BitmapScalingMode="HighQuality"
+                            Source="pack://application:,,,/Assets/icons/r+desktop-icon.png" />
+                    </ui:Button>
+                    <ui:Button
+                        x:Name="BtnTrafficMonitor"
+                        Height="36"
+                        Margin="2,6"
+                        Padding="6,0"
+                        Appearance="Transparent"
+                        Click="BtnTrafficMonitor_Click"
+                        ToolTip="Network Traffic &amp; Bandwidth Monitor">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <ui:SymbolIcon Symbol="DataUsage24" Foreground="{DynamicResource Accent}" FontSize="15" Margin="0,0,5,0" />
+                            <TextBlock x:Name="TxtTrafficBadge"
+                                       FontSize="11"
+                                       Foreground="#CCCCCC"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding Source={x:Static services:NetworkTrafficMonitor.Instance}, Path=BandwidthSummaryBadge}" />
+                        </StackPanel>
+                    </ui:Button>
                     <Border
                         Height="36"
                         Margin="8,0"

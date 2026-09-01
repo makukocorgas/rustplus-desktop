@@ -7286,6 +7286,56 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         }
     }
 
+    private void BtnDiscord_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo("https://discord.gg/v4X584wye4") { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            AppendLog("❌ Could not open Discord link: " + ex.Message);
+        }
+    }
+
+    private void BtnCloudPortal_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo("https://rustplusdesktop.cloud/dashboard") { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            AppendLog("Could not open the Cloud Portal: " + ex.Message);
+        }
+    }
+
+    private Views.Windows.TrafficMonitorWindow? _trafficMonitorWindow;
+
+    private void BtnTrafficMonitor_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (_trafficMonitorWindow != null && _trafficMonitorWindow.IsLoaded)
+            {
+                if (_trafficMonitorWindow.WindowState == WindowState.Minimized)
+                    _trafficMonitorWindow.WindowState = WindowState.Normal;
+                _trafficMonitorWindow.Activate();
+                _trafficMonitorWindow.Focus();
+                return;
+            }
+
+            _trafficMonitorWindow = new Views.Windows.TrafficMonitorWindow();
+            _trafficMonitorWindow.Closed += (_, _) => _trafficMonitorWindow = null;
+            _trafficMonitorWindow.Show();
+        }
+        catch (Exception ex)
+        {
+            AppendLog("❌ Could not open Traffic Monitor window: " + ex.Message);
+            MessageBox.Show($"Could not open Traffic Monitor window:\n{ex}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
     private void BtnSettings_Click(object sender, RoutedEventArgs e)
     {
         if (AppSettingsPanel.Visibility == Visibility.Visible)
