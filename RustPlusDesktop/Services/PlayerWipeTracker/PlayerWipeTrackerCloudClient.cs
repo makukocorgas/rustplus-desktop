@@ -44,14 +44,14 @@ public sealed class PlayerWipeTrackerCloudClient
     /// response rather than from the batch it sent means a partially merged batch — anything the
     /// server chose to reject or deduplicate — leaves the cursor where the server actually is.
     /// </summary>
-    public async Task<(int Status, DateTime? LastObservedUtc)> AppendDayAsync(
+    public async Task<(int Status, DateTime? LastObservedUtc, string? Reason)> AppendDayAsync(
         CloudDayAppendRequest request,
         CancellationToken cancellationToken = default)
     {
         var (status, body) = await SupabaseAuthManager.TryCallEdgeFunctionAsync(
             "player-wipe-tracker/days/append", HttpMethod.Post, request).ConfigureAwait(false);
         if (status is < 200 or >= 300)
-            return (status, null);
+            return (status, null, ReadRefusal(body));
 
         try
         {
@@ -62,7 +62,7 @@ public sealed class PlayerWipeTrackerCloudClient
                 && DateTime.TryParse(last.GetString(), CultureInfo.InvariantCulture,
                     DateTimeStyles.RoundtripKind, out var parsed))
             {
-                return (status, parsed.ToUniversalTime());
+                return (status, parsed.ToUniversalTime(), null);
             }
         }
         catch
@@ -71,7 +71,39 @@ public sealed class PlayerWipeTrackerCloudClient
             // cursor put costs one repeated batch, and the server merges by timestamp.
         }
 
-        return (status, null);
+        return (status, null, null);
+    }
+
+    /// <summary>
+    /// Why the server said no, in a form worth showing someone.
+    ///
+    /// A refusal here is usually a plan limit — the wipe archive count, the retention window —
+    /// and the reason travels in the body as <c>capability</c>. Discarding it left the client
+    /// silently not backing anything up with nothing anywhere saying why.
+    /// </summary>
+    private static string? ReadRefusal(string body)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(body))
+                return null;
+
+            using var document = JsonDocument.Parse(body);
+            var root = document.RootElement;
+            if (root.ValueKind != JsonValueKind.Object)
+                return null;
+
+            if (root.TryGetProperty("capability", out var capability) && capability.ValueKind == JsonValueKind.String)
+                return $"plan limit reached: {capability.GetString()}";
+            if (root.TryGetProperty("message", out var message) && message.ValueKind == JsonValueKind.String)
+                return message.GetString();
+        }
+        catch
+        {
+            // The status code alone still gets logged.
+        }
+
+        return null;
     }
 
     public async Task<JsonDocument?> GetWipesAsync(CancellationToken cancellationToken = default)
