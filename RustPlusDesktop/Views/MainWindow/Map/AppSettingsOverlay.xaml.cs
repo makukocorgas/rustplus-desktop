@@ -698,6 +698,7 @@ namespace RustPlusDesk.Views
             // Home Assistant token management runs on our own Supabase functions, not the
             // Laravel platform this panel originally required - so it loads unconditionally too.
             _ = LoadHomeAssistantSettingsAsync();
+            _ = InitFeatureFlagsAsync();
         }
 
         private void CmbLanguage_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1435,6 +1436,50 @@ namespace RustPlusDesk.Views
                       "Keep your token secret — anyone with it can control your linked switches. Use 'Revoke Token' to invalidate it.";
 
             MessageBox.Show(msg, "Home Assistant Setup", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        // --- Global feature flags (admin on/off + status note) ---
+
+        private async Task InitFeatureFlagsAsync()
+        {
+            await Services.Cloud.CloudFeatureFlags.RefreshAsync();
+            ApplyFeatureFlags();
+        }
+
+        /// <summary>
+        /// Reflect the admin feature flags into each integration panel: show the
+        /// status note (or a default "disabled" message) and enable/disable the
+        /// panel's controls when a feature is turned off globally.
+        /// </summary>
+        private void ApplyFeatureFlags()
+        {
+            ApplyFeatureFlag("home_assistant", TxtHaStatusNote,
+                BtnGenerateHaToken, BtnCopyHaToken, BtnCopyHaSnippet, BtnRevokeHa);
+        }
+
+        private static void ApplyFeatureFlag(string key, System.Windows.Controls.TextBlock note, params System.Windows.UIElement[] controls)
+        {
+            var enabled = Services.Cloud.CloudFeatureFlags.IsEnabled(key);
+            var statusNote = Services.Cloud.CloudFeatureFlags.Note(key);
+
+            // The banner is shown only when the feature is disabled — it uses the
+            // admin status note if one is set, otherwise a default message.
+            if (!enabled)
+            {
+                note.Text = string.IsNullOrWhiteSpace(statusNote)
+                    ? "This integration is currently disabled by the administrator."
+                    : statusNote;
+                note.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                note.Visibility = Visibility.Collapsed;
+            }
+
+            foreach (var control in controls)
+            {
+                control.IsEnabled = enabled;
+            }
         }
 
         private void TxtCustomMapUrl_TextChanged(object sender, TextChangedEventArgs e)
