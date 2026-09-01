@@ -44,26 +44,54 @@ public sealed class PlayerWipeTrackerCloudClient
     /// response rather than from the batch it sent means a partially merged batch — anything the
     /// server chose to reject or deduplicate — leaves the cursor where the server actually is.
     /// </summary>
-    public async Task<(int Status, DateTime? LastObservedUtc, string? Reason)> AppendDayAsync(
+    public async Task<CloudAppendResult> AppendDayAsync(
         CloudDayAppendRequest request,
         CancellationToken cancellationToken = default)
     {
         var (status, body) = await SupabaseAuthManager.TryCallEdgeFunctionAsync(
             "player-wipe-tracker/days/append", HttpMethod.Post, request).ConfigureAwait(false);
         if (status is < 200 or >= 300)
-            return (status, null, ReadRefusal(body));
+        {
+            return new CloudAppendResult(status, null, ReadRefusal(body), Array.Empty<CloudPrunedArchive>());
+        }
 
         try
         {
             using var document = JsonDocument.Parse(body);
-            if (document.RootElement.TryGetProperty("data", out var data)
-                && data.TryGetProperty("last_observed_at", out var last)
+            if (!document.RootElement.TryGetProperty("data", out var data))
+                return new CloudAppendResult(status, null, null, Array.Empty<CloudPrunedArchive>());
+
+            DateTime? acknowledged = null;
+            if (data.TryGetProperty("last_observed_at", out var last)
                 && last.ValueKind == JsonValueKind.String
                 && DateTime.TryParse(last.GetString(), CultureInfo.InvariantCulture,
                     DateTimeStyles.RoundtripKind, out var parsed))
             {
-                return (status, parsed.ToUniversalTime(), null);
+                acknowledged = parsed.ToUniversalTime();
             }
+
+            var pruned = new List<CloudPrunedArchive>();
+            if (data.TryGetProperty("pruned", out var prunedElement) && prunedElement.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var item in prunedElement.EnumerateArray())
+                {
+                    if (item.ValueKind != JsonValueKind.Object)
+                        continue;
+
+                    DateTime? started = null;
+                    if (item.TryGetProperty("wipe_started_at", out var startedElement)
+                        && startedElement.ValueKind == JsonValueKind.String
+                        && DateTime.TryParse(startedElement.GetString(), CultureInfo.InvariantCulture,
+                            DateTimeStyles.RoundtripKind, out var startedValue))
+                    {
+                        started = startedValue.ToUniversalTime();
+                    }
+
+                    pruned.Add(new CloudPrunedArchive(String(item, "server_name"), started));
+                }
+            }
+
+            return new CloudAppendResult(status, acknowledged, null, pruned);
         }
         catch
         {
@@ -71,7 +99,7 @@ public sealed class PlayerWipeTrackerCloudClient
             // cursor put costs one repeated batch, and the server merges by timestamp.
         }
 
-        return (status, null, null);
+        return new CloudAppendResult(status, null, null, Array.Empty<CloudPrunedArchive>());
     }
 
     /// <summary>

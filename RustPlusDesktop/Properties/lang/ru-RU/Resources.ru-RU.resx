@@ -6342,4 +6342,13 @@
   <data name="UpdateWhatsNewPatchNotesBtn" xml:space="preserve">
     <value>Полный список изменений</value>
   </data>
+  <data name="WipePrunedTitle" xml:space="preserve">
+    <value>Самая старая копия вайпа удалена</value>
+  </data>
+  <data name="WipePrunedMessage" xml:space="preserve">
+    <value>Ваш план хранит ограниченное число копий вайпов. Чтобы освободить место для нового вайпа, самая старая была удалена: {0}</value>
+  </data>
+  <data name="WipePrunedUnknownServer" xml:space="preserve">
+    <value>Неизвестный сервер</value>
+  </data>
 </root>
