@@ -554,6 +554,12 @@ public partial class MainWindow : WpfUi.FluentWindow
                 });
             }
         });
+
+        var latestCrashReport = Services.CrashReporter.GetLatestCrashOrFreezeReport();
+        if (!string.IsNullOrEmpty(latestCrashReport))
+        {
+            AppendLog($"⚠️ Recent diagnostic report found: {System.IO.Path.GetFileName(latestCrashReport)} (in CrashLogs folder).");
+        }
         // GridLayer.RenderTransform = MapTransform;
         // Overlay.RenderTransform   = MapTransform;
         // bei Host-Resize: nur Markerpositionen neu berechnen
@@ -4375,6 +4381,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
 
     public void AppendLog(string line)
     {
+        Services.CrashReporter.AddRecentLog(line);
         Dispatcher.Invoke(() =>
         {
             string timestamp = DateTime.Now.ToString("HH:mm:ss.fff");

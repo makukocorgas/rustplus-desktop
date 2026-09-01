@@ -38,6 +38,7 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        CrashReporter.Initialize(Dispatcher);
         base.OnStartup(e);
         _ = StartupWithSplashAsync(e.Args);
     }
