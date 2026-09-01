@@ -1425,7 +1425,7 @@ namespace RustPlusDesk.Views
             }
         }
 
-        private void BtnHomeAssistantHelp_Click(object sender, RoutedEventArgs e)
+        private async void BtnHomeAssistantHelp_Click(object sender, RoutedEventArgs e)
         {
             var msg = "How to use the Home Assistant integration:\n\n" +
                       "1. Click 'Generate Token' to create your API token.\n" +
@@ -1435,7 +1435,13 @@ namespace RustPlusDesk.Views
                       "5. Restart Home Assistant. The switch appears and can be toggled while the desktop app is connected to the server that switch belongs to; its state is read back from what the app last observed.\n\n" +
                       "Keep your token secret — anyone with it can control your linked switches. Use 'Revoke Token' to invalidate it.";
 
-            MessageBox.Show(msg, "Home Assistant Setup", MessageBoxButton.OK, MessageBoxImage.Information);
+            var box = new WpfUi.MessageBox
+            {
+                Title = "Home Assistant Setup",
+                Content = msg,
+                PrimaryButtonText = Properties.Resources.OK,
+            };
+            await box.ShowDialogAsync();
         }
 
         // --- Global feature flags (admin on/off + status note) ---
