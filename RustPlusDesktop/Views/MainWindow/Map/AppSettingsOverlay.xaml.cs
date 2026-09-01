@@ -1453,8 +1453,11 @@ namespace RustPlusDesk.Views
         /// </summary>
         private void ApplyFeatureFlags()
         {
+            // Note: the HA copy buttons are intentionally excluded — their enabled
+            // state is owned by token-presence logic (ApplyHaToken), and copying an
+            // existing token/snippet is harmless even when the feature is off.
             ApplyFeatureFlag("home_assistant", TxtHaStatusNote,
-                BtnGenerateHaToken, BtnCopyHaToken, BtnCopyHaSnippet, BtnRevokeHa);
+                BtnGenerateHaToken, BtnRevokeHa);
         }
 
         private static void ApplyFeatureFlag(string key, System.Windows.Controls.TextBlock note, params System.Windows.UIElement[] controls)
@@ -1476,9 +1479,13 @@ namespace RustPlusDesk.Views
                 note.Visibility = Visibility.Collapsed;
             }
 
+            // Disable interaction and dim the controls — WPF-UI's default disabled
+            // styling is too subtle on the dark theme to read as "off", so the
+            // explicit opacity makes the disabled state obvious.
             foreach (var control in controls)
             {
                 control.IsEnabled = enabled;
+                control.Opacity = enabled ? 1.0 : 0.4;
             }
         }
 
