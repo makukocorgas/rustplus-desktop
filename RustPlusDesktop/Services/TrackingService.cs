@@ -87,6 +87,7 @@ public class TrackingSettings
     public bool AutoLoadShops { get; set; } = true;
     public bool HideConsole { get; set; } = true;
     public string BattleMetricsApiKey { get; set; } = "";
+    public bool ReduceUiEffects { get; set; } = false;
     public bool TrafficMonitorEnabled { get; set; } = true;
     // Default on: use the in-process native FCM listener instead of the bundled Node fcm-listen.
     public bool UseNativeFcmListener { get; set; } = true;
@@ -1268,6 +1269,12 @@ public static class TrackingService
     {
         get => _settings.HideConsole;
         set { _settings.HideConsole = value; SaveSettings(); }
+    }
+
+    public static bool ReduceUiEffects
+    {
+        get => _settings.ReduceUiEffects;
+        set { _settings.ReduceUiEffects = value; SaveDB(); }
     }
 
     public static bool TrafficMonitorEnabled
