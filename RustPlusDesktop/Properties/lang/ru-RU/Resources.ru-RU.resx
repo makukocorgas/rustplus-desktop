@@ -6447,4 +6447,10 @@
   <data name="ChatTranslateConsentAccept" xml:space="preserve">
     <value>Перевести</value>
   </data>
+  <data name="AutomaticUpdates" xml:space="preserve">
+    <value>Автоматические обновления</value>
+  </data>
+  <data name="AutomaticUpdatesToolTip" xml:space="preserve">
+    <value>Автоматически проверять обновления при запуске и загружать быстрые дельта-патчи в фоновом режиме.</value>
+  </data>
 </root>

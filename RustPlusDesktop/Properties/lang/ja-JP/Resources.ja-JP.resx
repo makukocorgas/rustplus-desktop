@@ -4809,4 +4809,10 @@
   <data name="ChatTranslateConsentAccept" xml:space="preserve">
     <value>翻訳</value>
   </data>
+  <data name="AutomaticUpdates" xml:space="preserve">
+    <value>自動更新</value>
+  </data>
+  <data name="AutomaticUpdatesToolTip" xml:space="preserve">
+    <value>起動時に自動で更新を確認し、高速な差分パッチをバックグラウンドでダウンロードします。</value>
+  </data>
 </root>
