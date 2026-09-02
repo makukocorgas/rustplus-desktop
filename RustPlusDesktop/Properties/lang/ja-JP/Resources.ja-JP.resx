@@ -4791,4 +4791,16 @@
   <data name="ChatNameColor_orange" xml:space="preserve">
     <value>オレンジ</value>
   </data>
+  <data name="ChatReply" xml:space="preserve">
+    <value>返信</value>
+  </data>
+  <data name="ChatReplyCancel" xml:space="preserve">
+    <value>返信をやめる</value>
+  </data>
+  <data name="ChatReplyDeleted" xml:space="preserve">
+    <value>メッセージは削除されました</value>
+  </data>
+  <data name="ChatReplyOriginalGone" xml:space="preserve">
+    <value>元のメッセージは表示中の履歴にはもうありません。</value>
+  </data>
 </root>
