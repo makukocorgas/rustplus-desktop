@@ -6382,7 +6382,7 @@
     <value>Перевод сообщения</value>
   </data>
   <data name="ChatTranslateUnchanged" xml:space="preserve">
-    <value>Переводить нечего — сообщение уже на вашем языке, либо служба перевода недоступна.</value>
+    <value>Это сообщение уже на вашем языке.</value>
   </data>
   <data name="ChatTranslateConsentTitle" xml:space="preserve">
     <value>Перевод сообщения</value>
@@ -6440,5 +6440,11 @@
   </data>
   <data name="ChatReplyOriginalGone" xml:space="preserve">
     <value>Исходного сообщения больше нет в видимой истории.</value>
+  </data>
+  <data name="ChatTranslateFailed" xml:space="preserve">
+    <value>Служба перевода недоступна. Попробуйте ещё раз через минуту.</value>
+  </data>
+  <data name="ChatTranslateConsentAccept" xml:space="preserve">
+    <value>Перевести</value>
   </data>
 </root>

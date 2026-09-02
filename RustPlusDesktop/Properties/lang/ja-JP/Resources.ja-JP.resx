@@ -4744,7 +4744,7 @@
     <value>メッセージを翻訳</value>
   </data>
   <data name="ChatTranslateUnchanged" xml:space="preserve">
-    <value>翻訳するものがありません。メッセージはすでにあなたの言語であるか、翻訳サービスに接続できませんでした。</value>
+    <value>このメッセージはすでにあなたの言語です。</value>
   </data>
   <data name="ChatTranslateConsentTitle" xml:space="preserve">
     <value>メッセージを翻訳</value>
@@ -4802,5 +4802,11 @@
   </data>
   <data name="ChatReplyOriginalGone" xml:space="preserve">
     <value>元のメッセージは表示中の履歴にはもうありません。</value>
+  </data>
+  <data name="ChatTranslateFailed" xml:space="preserve">
+    <value>翻訳サービスに接続できませんでした。少し待ってからもう一度お試しください。</value>
+  </data>
+  <data name="ChatTranslateConsentAccept" xml:space="preserve">
+    <value>翻訳</value>
   </data>
 </root>
