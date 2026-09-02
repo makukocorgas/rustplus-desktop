@@ -159,8 +159,11 @@ namespace RustPlusDesk.Services
             }
         }
 
-        public void StartInstaller(string installerPath)
+        public void StartInstaller(string installerPath, bool restart = true)
         {
+            if (string.IsNullOrEmpty(installerPath) || !File.Exists(installerPath))
+                return;
+
             var psi = new ProcessStartInfo
             {
                 FileName = installerPath,

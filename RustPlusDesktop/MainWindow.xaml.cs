@@ -1548,7 +1548,9 @@ public partial class MainWindow : WpfUi.FluentWindow
             // Launch pending update installer if available
             if (!string.IsNullOrEmpty(_updateService.PendingInstallerPath))
             {
-                _updateService.StartInstaller(_updateService.PendingInstallerPath);
+                var pendingPath = _updateService.PendingInstallerPath;
+                _updateService.PendingInstallerPath = null;
+                _updateService.StartInstaller(pendingPath, restart: false);
             }
         }
         catch (Exception ex)
@@ -6655,6 +6657,7 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     // --- Konfiguration ---
     private async Task AutoCheckUpdatesAsync()
     {
+        if (!TrackingService.AutoUpdateEnabled) return;
         if (_vm.IsDownloadingUpdate || !string.IsNullOrEmpty(_updateService.PendingInstallerPath)) return;
         try
         {
@@ -7641,7 +7644,22 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         {
             _vm.UpdateStatusText = "Update ready — installs on close";
             _vm.IsUpdateStatusExpanded = true;
-            ShowInfoSnackbar("Update", "Update already downloaded. It will be installed when you close the app.", WpfUi.ControlAppearance.Info);
+            var res = System.Windows.MessageBox.Show(
+                "An update has already been downloaded and is ready to install.\n\nRestart now to apply it?\n(Selecting 'No' will install it automatically when you close the app).",
+                RustPlusDesk.Properties.Resources.GetString("CodeUiUpdate"),
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (res == MessageBoxResult.Yes)
+            {
+                AppendLog("Applying update...");
+                _vm.UpdateStatusText = RustPlusDesk.Properties.Resources.GetString("CodeUiApplyingUpdate");
+                try { if (_pairing?.IsRunning == true) await Task.Run(async () => await _pairing.StopAsync()); } catch { }
+                var path = _updateService.PendingInstallerPath;
+                _updateService.PendingInstallerPath = null;
+                _updateService.StartInstaller(path, restart: true);
+                System.Windows.Application.Current.Shutdown();
+            }
             return;
         }
 
@@ -7732,11 +7750,11 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
                 return;
             }
 
-            _vm.UpdateStatusText = "Applying update...";
-            AppendLog("Starting installer...");
-            _updateService.StartInstaller(path);
+            AppendLog("Applying update...");
+            _vm.UpdateStatusText = RustPlusDesk.Properties.Resources.GetString("CodeUiApplyingUpdate");
             try { if (_pairing?.IsRunning == true) await Task.Run(async () => await _pairing.StopAsync()); } catch { }
-            await Task.Delay(500);
+            _updateService.PendingInstallerPath = null;
+            _updateService.StartInstaller(path, restart: true);
             System.Windows.Application.Current.Shutdown();
         }
         catch (Exception ex)
