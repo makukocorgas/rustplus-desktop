@@ -20,7 +20,7 @@ namespace RustPlusDesk.Services.PlayerWipeTracker;
 /// </summary>
 public sealed class ServerWipeMapCloudClient
 {
-    private static readonly HttpClient Http = new(new TrafficTrackingHttpMessageHandler("Player Wipe Cloud")) { Timeout = TimeSpan.FromSeconds(20) };
+    private static readonly HttpClient Http = new(new TrafficTrackingHttpMessageHandler("Cloud API")) { Timeout = TimeSpan.FromSeconds(20) };
     private readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web);
 
     /// <summary>Current server state for a wipe, so callers can skip needless uploads.</summary>
