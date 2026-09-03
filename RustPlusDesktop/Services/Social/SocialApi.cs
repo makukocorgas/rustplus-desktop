@@ -1,4 +1,4 @@
-using RustPlusDesk.Services.Cloud;
+using RustPlusDesk.Services.Auth;
 using System;
 using System.Net.Http;
 using System.Text.Json;
@@ -33,7 +33,7 @@ public static class SocialApi
     {
         try
         {
-            var body = await CloudApiClient.CallApiAsync("social/settings", HttpMethod.Get)
+            var body = await SupabaseAuthManager.CallEdgeFunctionAsync("social/settings", HttpMethod.Get)
                 .ConfigureAwait(false);
 
             using var doc = JsonDocument.Parse(body);
@@ -63,7 +63,7 @@ public static class SocialApi
     {
         try
         {
-            var (status, body) = await CloudApiClient.TryCallApiAsync("social/lfg/me", HttpMethod.Get)
+            var (status, body) = await SupabaseAuthManager.TryCallEdgeFunctionAsync("social/lfg/me", HttpMethod.Get)
                 .ConfigureAwait(false);
 
             // 404 is the ordinary answer for "not advertising", not a failure.
@@ -112,7 +112,7 @@ public static class SocialApi
     {
         try
         {
-            var (status, _) = await CloudApiClient.TryCallApiAsync(route, method, payload: payload)
+            var (status, _) = await SupabaseAuthManager.TryCallEdgeFunctionAsync(route, method, payload: payload)
                 .ConfigureAwait(false);
 
             return status is >= 200 and < 300;
