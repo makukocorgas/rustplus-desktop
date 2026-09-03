@@ -58,7 +58,7 @@ public partial class MainWindow
     /// </summary>
     public async Task RefreshSocialAvailabilityAsync()
     {
-        if (!Services.Cloud.CloudAuthManager.IsAuthenticated)
+        if (!Services.Cloud.CloudAuth.IsAuthenticated)
         {
             SetSocialRailVisible(true);
             return;
