@@ -1872,6 +1872,62 @@ namespace RustPlusDesk.Services.Auth
             return body;
         }
 
+        /// <summary>
+        /// Same wire call as <see cref="CallEdgeFunctionAsync"/>, but returns the status code
+        /// instead of throwing on a non-2xx response. For callers that need to tell a real error
+        /// apart from an ordinary "nothing here" (404), the way <c>CloudApiClient.TryCallApiAsync</c>
+        /// does for the platform path.
+        /// </summary>
+        public static async Task<(int Status, string Body)> TryCallEdgeFunctionAsync(
+            string functionName,
+            HttpMethod method,
+            object? payload = null,
+            System.Collections.Generic.Dictionary<string, string>? queryParams = null)
+        {
+            if (Cloud.CloudBackend.UsePlatform)
+                return await Cloud.CloudApiClient.TryCallApiAsync(functionName, method, payload: payload).ConfigureAwait(false);
+
+            if (Client == null) return (0, "{\"error\":\"Supabase client not initialized.\"}");
+            if (IsUpgradeRequiredSnackbarShown) return (0, "{\"error\":\"upgrade_required\"}");
+
+            var url = $"{DataManager.SUPABASE_URL.TrimEnd('/')}/functions/v1/{functionName}";
+            if (queryParams != null && queryParams.Count > 0)
+            {
+                var queryStr = string.Join("&", queryParams.Select(q => $"{Uri.EscapeDataString(q.Key)}={Uri.EscapeDataString(q.Value)}"));
+                url += "?" + queryStr;
+            }
+
+            var req = new HttpRequestMessage(method, url);
+            req.Headers.Add("apikey", DataManager.SUPABASE_ANON_KEY);
+            req.Headers.Add("X-Client-Version", Helpers.VersionHelper.GetClientVersion());
+
+            if (Client.Auth?.CurrentSession != null)
+                req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", Client.Auth.CurrentSession.AccessToken);
+
+            if (payload != null)
+            {
+                var json = JsonSerializer.Serialize(payload);
+                req.Content = new StringContent(json, Encoding.UTF8, "application/json");
+            }
+
+            var resp = await Http.SendAsync(req).ConfigureAwait(false);
+            var body = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                try
+                {
+                    using var doc = JsonDocument.Parse(body);
+                    var root = doc.RootElement;
+                    if (root.TryGetProperty("error", out var errEl) && errEl.GetString() == "upgrade_required")
+                        CacheUpgradeRequirement(root);
+                }
+                catch { /* Ignore JSON parse errors */ }
+            }
+
+            return ((int)resp.StatusCode, body);
+        }
+
         internal static bool HandleUpgradeRequiredResponse(string body)
         {
             try
