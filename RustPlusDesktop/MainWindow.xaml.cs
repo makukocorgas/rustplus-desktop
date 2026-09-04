@@ -7410,30 +7410,6 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         }
     }
 
-    private void BtnDiscord_Click(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            Process.Start(new ProcessStartInfo("https://discord.gg/v4X584wye4") { UseShellExecute = true });
-        }
-        catch (Exception ex)
-        {
-            AppendLog("❌ Could not open Discord link: " + ex.Message);
-        }
-    }
-
-    private void BtnCloudPortal_Click(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            Process.Start(new ProcessStartInfo("https://rustplusdesktop.cloud/dashboard") { UseShellExecute = true });
-        }
-        catch (Exception ex)
-        {
-            AppendLog("Could not open the Cloud Portal: " + ex.Message);
-        }
-    }
-
     private Views.Windows.TrafficMonitorWindow? _trafficMonitorWindow;
 
     private void BtnTrafficMonitor_Click(object sender, RoutedEventArgs e)
