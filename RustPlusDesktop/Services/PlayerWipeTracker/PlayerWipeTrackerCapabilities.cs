@@ -87,7 +87,12 @@ public sealed class PlayerWipeTrackerCapabilityService
     public PlayerWipeTrackerCapabilities Effective(DateTime nowUtc)
     {
         // Unauthenticated sessions have no cloud identity or premium entitlement.
-        if (string.IsNullOrWhiteSpace(RustPlusDesk.Services.Cloud.CloudAuthManager.CurrentToken))
+        //
+        // CloudAuth dispatches to whichever backend is actually active (the platform's
+        // CloudAuthManager, or our own SupabaseAuthManager) — CloudAuthManager.CurrentToken
+        // alone is always empty outside platform mode, which silently forced every
+        // Supabase-backed account down to the free tier regardless of its real entitlements.
+        if (!RustPlusDesk.Services.Cloud.CloudAuth.IsAuthenticated)
             return PlayerWipeTrackerCapabilities.Free();
 
         if (_lastSuccessful.PlanCode.Equals("free", StringComparison.OrdinalIgnoreCase))
