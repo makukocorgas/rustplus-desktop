@@ -19,8 +19,12 @@ public sealed record TicketSummary(
     bool HasUnread,
     DateTimeOffset? LastActivityAt);
 
-/// <summary>A file hung off a ticket or one of its replies.</summary>
-public sealed record TicketAttachment(string Id, string Name, long Size, string Mime);
+/// <summary>
+/// A file hung off a ticket or one of its replies. Url is a short-lived signed link straight to
+/// Supabase Storage - handed out already-resolved so a thumbnail or download never has to make a
+/// second authenticated round trip through the edge function to ask where the bytes live.
+/// </summary>
+public sealed record TicketAttachment(string Id, string Name, long Size, string Mime, string? Url);
 
 /// <summary>One line in a ticket's thread.</summary>
 public sealed record TicketMessage(
@@ -178,6 +182,50 @@ public static class SupportApi
         return await SupabaseAuthManager.PostMultipartEdgeFunctionAsync($"support/tickets/{ticketId}/messages", content).ConfigureAwait(false);
     }
 
+    private static readonly HttpClient AttachmentHttp = new();
+
+    /// <summary>
+    /// The raw bytes of an attachment - for a thumbnail, or to stage before opening. Fetched
+    /// straight off the signed URL the ticket/message already carried; no separate auth needed,
+    /// the signature in the URL is the credential.
+    /// </summary>
+    public static async Task<byte[]?> GetAttachmentBytesAsync(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return null;
+
+        try
+        {
+            using var response = await AttachmentHttp.GetAsync(url).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            return await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Downloads an attachment to a temp file and returns its path, so it can be opened in whatever
+    /// the OS uses for that type. Null if it could not be fetched.
+    /// </summary>
+    public static async Task<string?> SaveAttachmentToTempAsync(string? url, string fileName)
+    {
+        var bytes = await GetAttachmentBytesAsync(url).ConfigureAwait(false);
+        if (bytes == null)
+            return null;
+
+        var safe = string.Join("_", (fileName ?? "attachment").Split(Path.GetInvalidFileNameChars()));
+        var dir = Path.Combine(Path.GetTempPath(), "rpd-tickets");
+        Directory.CreateDirectory(dir);
+        var path = Path.Combine(dir, safe);
+        await File.WriteAllBytesAsync(path, bytes).ConfigureAwait(false);
+        return path;
+    }
+
     /// <summary>Clears this account's unread flag on a ticket.</summary>
     public static async Task MarkTicketReadAsync(string ticketId)
     {
@@ -301,7 +349,8 @@ public static class SupportApi
             Str(a, "id") ?? "",
             Str(a, "name") ?? "file",
             a.TryGetProperty("size", out var sz) && sz.TryGetInt64(out var n) ? n : 0,
-            Str(a, "mime") ?? "application/octet-stream")).ToList();
+            Str(a, "mime") ?? "application/octet-stream",
+            Str(a, "url"))).ToList();
     }
 
     private static NotificationItem ParseNotification(JsonElement e) => new(
