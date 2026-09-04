@@ -211,6 +211,25 @@ public static class SupportApi
     private static string CacheDir => Path.Combine(Path.GetTempPath(), "rpd-tickets", "cache");
 
     /// <summary>
+    /// Seeds the attachment cache from a file the client itself uploaded, so its thumbnail comes
+    /// straight off disk and is never fetched back from the server. Keyed by the server's media id,
+    /// so it also serves future sessions.
+    /// </summary>
+    public static void SeedAttachmentCache(string mediaId, string fileName, string localPath)
+    {
+        try
+        {
+            if (!File.Exists(localPath)) return;
+            Directory.CreateDirectory(CacheDir);
+            var safe = string.Join("_", ($"{mediaId}_{fileName}").Split(Path.GetInvalidFileNameChars()));
+            var dest = Path.Combine(CacheDir, safe);
+            if (!File.Exists(dest) || new FileInfo(dest).Length == 0)
+                File.Copy(localPath, dest, overwrite: true);
+        }
+        catch { /* best-effort: falls back to a server fetch */ }
+    }
+
+    /// <summary>
     /// Attachment bytes, saved locally on first fetch and served from that cache afterwards - so a
     /// thumbnail draws instantly on the next open and survives a dropped connection. Falls back to a
     /// plain fetch if the cache cannot be written.
@@ -243,9 +262,10 @@ public static class SupportApi
     /// Downloads an attachment to a temp file and returns its path, so it can be opened in whatever
     /// the OS uses for that type. Null if it could not be fetched.
     /// </summary>
-    public static async Task<string?> SaveAttachmentToTempAsync(string? url, string fileName)
+    public static async Task<string?> SaveAttachmentToTempAsync(string mediaId, string? url, string fileName)
     {
-        var bytes = await GetAttachmentBytesAsync(url).ConfigureAwait(false);
+        // Cached path first, so opening a file the client uploaded never round-trips to the server.
+        var bytes = await GetAttachmentCachedAsync(mediaId, url, fileName).ConfigureAwait(false);
         if (bytes == null)
             return null;
 
