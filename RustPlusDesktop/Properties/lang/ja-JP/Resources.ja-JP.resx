@@ -4815,4 +4815,7 @@
   <data name="AutomaticUpdatesToolTip" xml:space="preserve">
     <value>起動時に自動で更新を確認し、高速な差分パッチをバックグラウンドでダウンロードします。</value>
   </data>
+  <data name="ChatRefusedProfanity" xml:space="preserve">
+    <value>言葉づかいに注意してください — 警告 {0} / {1}。次は一時的な発言停止になります。</value>
+  </data>
 </root>
