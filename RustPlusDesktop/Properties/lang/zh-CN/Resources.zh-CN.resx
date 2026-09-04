@@ -4619,9 +4619,6 @@
   <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
     <value>没有符合搜索条件的可制作物品。</value>
   </data>
-  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
-    <value>在左侧选择一个物品以查看完整制作树。</value>
-  </data>
   <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
     <value>⚠ 数值尚未在正式游戏中验证</value>
   </data>

@@ -4500,9 +4500,6 @@ You can find more information on the server&apos;s official website:
   <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
     <value>No craftable items match your search.</value>
   </data>
-  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
-    <value>Pick an item on the left to see its full crafting tree.</value>
-  </data>
   <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
     <value>⚠ Numbers not yet verified against the live game</value>
   </data>

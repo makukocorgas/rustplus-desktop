@@ -4601,9 +4601,6 @@
   <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
     <value>لا توجد عناصر قابلة للتصنيع مطابقة لبحثك.</value>
   </data>
-  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
-    <value>اختر عنصرًا من اليسار لرؤية شجرة التصنيع الكاملة الخاصة به.</value>
-  </data>
   <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
     <value>⚠ أرقام لم يتم التحقق منها بعد في اللعبة المباشرة</value>
   </data>

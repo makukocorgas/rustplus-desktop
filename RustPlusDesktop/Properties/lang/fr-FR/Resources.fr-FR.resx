@@ -4613,9 +4613,6 @@ Vous pouvez trouver plus d&apos;informations sur le site officiel du serveur :
   <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
     <value>Aucun objet fabricable ne correspond à votre recherche.</value>
   </data>
-  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
-    <value>Choisissez un objet à gauche pour voir son arbre de fabrication complet.</value>
-  </data>
   <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
     <value>⚠ Chiffres non encore vérifiés sur le jeu en direct</value>
   </data>

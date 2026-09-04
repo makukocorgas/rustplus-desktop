@@ -4696,9 +4696,6 @@ Weitere Informationen finden Sie auf der offiziellen Website des Servers:
   <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
     <value>Keine herstellbaren Gegenstände entsprechen deiner Suche.</value>
   </data>
-  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
-    <value>Wähle links einen Gegenstand, um den vollständigen Crafting-Baum zu sehen.</value>
-  </data>
   <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
     <value>⚠ Werte noch nicht am Live-Spiel überprüft</value>
   </data>

@@ -4792,9 +4792,6 @@ You can find more information on the server&apos;s official website:
   <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
     <value>No craftable items match your search.</value>
   </data>
-  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
-    <value>Pick an item on the left to see its full crafting tree.</value>
-  </data>
   <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
     <value>⚠ Numbers not yet verified against the live game</value>
   </data>
@@ -5911,21 +5908,6 @@ Rust+ Desktop registers your local app with FCM so it can receive those same Rus
   </data>
   <data name="FcmInfoToolTip" xml:space="preserve">
     <value>What is FCM?</value>
-  </data>
-  <data name="PurgeOrphanedCloudData" xml:space="preserve">
-    <value>Purge Orphaned Cloud Data</value>
-  </data>
-  <data name="PurgeOrphanedCloudDataConfirmMessage" xml:space="preserve">
-    <value>Are you sure you want to scan Supabase and permanently delete all cloud devices, map overlays, and base markers belonging to servers no longer in your server list?</value>
-  </data>
-  <data name="PurgeOrphanedCloudDataConfirmTitle" xml:space="preserve">
-    <value>Purge Orphaned Cloud Data</value>
-  </data>
-  <data name="PurgeOrphanedCloudDataSuccessMessage" xml:space="preserve">
-    <value>Successfully purged orphaned cloud data:&#10;- Map Overlays: {0}&#10;- Base Markers: {1}&#10;- Smart Devices: {2}&#10;- Server Registrations: {3}</value>
-  </data>
-  <data name="PurgeOrphanedCloudDataTooltip" xml:space="preserve">
-    <value>Scans Supabase database and removes devices, overlays, and markers from deleted servers.</value>
   </data>
   <data name="Tutorials.Step.account.cloud.Description" xml:space="preserve">
     <value>Sign in here for supported synchronization; tutorials never display private account data.</value>

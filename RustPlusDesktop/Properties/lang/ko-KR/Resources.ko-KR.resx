@@ -4920,21 +4920,6 @@
   <data name="OilRigCrateStatus" xml:space="preserve">
     <value>석유 시추 보급 상자 상태</value>
   </data>
-  <data name="PurgeOrphanedCloudData" xml:space="preserve">
-    <value>연결이 끊긴 클라우드 데이터 삭제</value>
-  </data>
-  <data name="PurgeOrphanedCloudDataConfirmMessage" xml:space="preserve">
-    <value>정말로 Supabase를 검사하여 현재 서버 목록에 없는 서버에 속한 모든 클라우드 장치, 지도 오버레이 및 기지 마커를 영구적으로 삭제하시겠습니까?</value>
-  </data>
-  <data name="PurgeOrphanedCloudDataConfirmTitle" xml:space="preserve">
-    <value>연결이 끊긴 클라우드 데이터 삭제</value>
-  </data>
-  <data name="PurgeOrphanedCloudDataSuccessMessage" xml:space="preserve">
-    <value>연결이 끊긴 클라우드 데이터를 성공적으로 삭제했습니다:&amp;#10;- 지도 오버레이: {0}&amp;#10;- 기지 마커: {1}&amp;#10;- 스마트 장치: {2}&amp;#10;- 서버 등록: {3}</value>
-  </data>
-  <data name="PurgeOrphanedCloudDataTooltip" xml:space="preserve">
-    <value>Supabase 데이터베이스를 검사하여 삭제된 서버의 장치, 오버레이 및 마커를 제거합니다.</value>
-  </data>
   <data name="ServerEventsSection" xml:space="preserve">
     <value>서버 이벤트</value>
   </data>

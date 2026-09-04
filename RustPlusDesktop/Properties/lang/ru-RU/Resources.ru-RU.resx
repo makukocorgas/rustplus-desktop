@@ -4514,9 +4514,6 @@
   <data name="CraftCalculatorNoSearchResults" xml:space="preserve">
     <value>Нет предметов, соответствующих поиску.</value>
   </data>
-  <data name="CraftCalculatorEmptySelectionHint" xml:space="preserve">
-    <value>Выберите предмет слева, чтобы увидеть полное дерево крафта.</value>
-  </data>
   <data name="CraftCalculatorUnverifiedWarning" xml:space="preserve">
     <value>⚠ Цифры ещё не проверены в живой игре</value>
   </data>
