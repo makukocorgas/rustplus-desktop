@@ -62,12 +62,16 @@ public static class SocialRealtime
     /// <summary>Somebody wants to open a thread and is waiting to be let in.</summary>
     public static event Action? RequestArrived;
 
+    /// <summary>A notification landed in this account's inbox — a ticket reply, an announcement.</summary>
+    public static event Action? NotificationArrived;
+
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(6);
     private static readonly object Gate = new();
 
     private static CancellationTokenSource? _cts;
     private static string? _lastChatSeenAt;
     private static int _lastSlowModeSeconds = -1;
+    private static int _lastNotificationUnreadCount = -1;
     private static readonly Dictionary<string, string?> _lastMessageAtByThread = new();
     private static readonly HashSet<string> _knownPendingThreads = new();
     private static readonly HashSet<string> _knownIncomingFriendRequests = new();
@@ -104,6 +108,7 @@ public static class SocialRealtime
 
         _lastChatSeenAt = null;
         _lastSlowModeSeconds = -1;
+        _lastNotificationUnreadCount = -1;
         _lastMessageAtByThread.Clear();
         _knownPendingThreads.Clear();
         _knownIncomingFriendRequests.Clear();
@@ -183,6 +188,18 @@ public static class SocialRealtime
 
             // Answered elsewhere (another device, or expired) - stop watching for it here too.
             _knownIncomingFriendRequests.IntersectWith(seenNow);
+        }
+
+        // The notification centre: a bare count is enough to know something arrived. The panel
+        // re-reads the list itself once it is told to, the same "nudge, not delivery" shape as
+        // every other event here.
+        var unread = await Support.SupportApi.GetUnreadCountAsync().ConfigureAwait(false);
+        if (unread != _lastNotificationUnreadCount)
+        {
+            var increased = unread > _lastNotificationUnreadCount && _lastNotificationUnreadCount >= 0;
+            _lastNotificationUnreadCount = unread;
+            if (increased)
+                Raise(() => NotificationArrived?.Invoke());
         }
     }
 

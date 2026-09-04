@@ -1885,6 +1885,30 @@ namespace RustPlusDesk.Services.Auth
         }
 
         /// <summary>
+        /// Same wire call as <see cref="CallEdgeFunctionAsync"/>, but for multipart content (a
+        /// ticket's screenshots and logs) instead of a JSON payload. Returns whether it went
+        /// through rather than throwing, matching the platform's upload helper — a failed
+        /// attachment upload is worth retrying, not worth crashing the compose flow over.
+        /// </summary>
+        public static async Task<bool> PostMultipartEdgeFunctionAsync(string functionName, MultipartFormDataContent content)
+        {
+            if (Client == null || IsUpgradeRequiredSnackbarShown)
+                return false;
+
+            var url = $"{DataManager.SUPABASE_URL.TrimEnd('/')}/functions/v1/{functionName}";
+            var req = new HttpRequestMessage(HttpMethod.Post, url);
+            req.Headers.Add("apikey", DataManager.SUPABASE_ANON_KEY);
+            req.Headers.Add("X-Client-Version", Helpers.VersionHelper.GetClientVersion());
+            if (Client.Auth?.CurrentSession != null)
+                req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", Client.Auth.CurrentSession.AccessToken);
+            req.Content = content;
+
+            var resp = await Http.SendAsync(req).ConfigureAwait(false);
+            AppendLog($"[Cloud/Debug] API Response: POST /functions/v1/{functionName} -> {(int)resp.StatusCode} {resp.StatusCode}");
+            return resp.IsSuccessStatusCode;
+        }
+
+        /// <summary>
         /// Same wire call as <see cref="CallEdgeFunctionAsync"/>, but returns the status code
         /// instead of throwing on a non-2xx response. For callers that need to tell a real error
         /// apart from an ordinary "nothing here" (404), the way <c>CloudApiClient.TryCallApiAsync</c>
