@@ -56,6 +56,7 @@ public sealed record NotificationItem(
     string Title,
     string Body,
     string? Url,
+    string? CtaLabel,
     bool Read,
     DateTimeOffset? CreatedAt);
 
@@ -333,6 +334,20 @@ public static class SupportApi
         catch { }
     }
 
+    /// <summary>Hides one notification for this account, keeping it in the database.</summary>
+    public static async Task DismissNotificationAsync(string id)
+    {
+        try { await SupabaseAuthManager.CallEdgeFunctionAsync($"support/notifications/{id}/dismiss", HttpMethod.Post).ConfigureAwait(false); }
+        catch { }
+    }
+
+    /// <summary>Clears everything currently in the inbox; only newer notifications show afterwards.</summary>
+    public static async Task ClearAllNotificationsAsync()
+    {
+        try { await SupabaseAuthManager.CallEdgeFunctionAsync("support/notifications/clear-all", HttpMethod.Post).ConfigureAwait(false); }
+        catch { }
+    }
+
     // ── Parsing ─────────────────────────────────────────────────────────────
 
     private static void AddFiles(MultipartFormDataContent content, IReadOnlyList<string>? filePaths)
@@ -411,6 +426,7 @@ public static class SupportApi
         Str(e, "title") ?? "",
         Str(e, "body") ?? "",
         Str(e, "url"),
+        Str(e, "cta_label"),
         e.TryGetProperty("read_at", out var r) && r.ValueKind == JsonValueKind.String,
         Date(e, "created_at"));
 
