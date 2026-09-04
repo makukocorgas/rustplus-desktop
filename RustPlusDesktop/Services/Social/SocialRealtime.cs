@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -63,7 +64,7 @@ public static class SocialRealtime
     public static event Action? RequestArrived;
 
     /// <summary>A notification landed in this account's inbox — a ticket reply, an announcement.</summary>
-    public static event Action? NotificationArrived;
+    public static event Action<NotificationInfo>? NotificationArrived;
 
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(6);
     private static readonly object Gate = new();
@@ -190,18 +191,27 @@ public static class SocialRealtime
             _knownIncomingFriendRequests.IntersectWith(seenNow);
         }
 
-        // The notification centre: a bare count is enough to know something arrived. The panel
-        // re-reads the list itself once it is told to, the same "nudge, not delivery" shape as
-        // every other event here.
+        // The notification centre: a bare count is enough to know something arrived, but chiming
+        // and toasting it wants the title/body/level, so a real increase pulls the newest row too.
         var unread = await Support.SupportApi.GetUnreadCountAsync().ConfigureAwait(false);
         if (unread != _lastNotificationUnreadCount)
         {
             var increased = unread > _lastNotificationUnreadCount && _lastNotificationUnreadCount >= 0;
             _lastNotificationUnreadCount = unread;
             if (increased)
-                Raise(() => NotificationArrived?.Invoke());
+            {
+                var rows = await Support.SupportApi.GetNotificationsAsync().ConfigureAwait(false);
+                var newest = rows.Where(n => !n.Read).OrderByDescending(n => n.CreatedAt).FirstOrDefault();
+                var info = newest != null
+                    ? new NotificationInfo(newest.Title, newest.Body, newest.Level, newest.Type)
+                    : new NotificationInfo("Notification", string.Empty, "info", "notification");
+                Raise(() => NotificationArrived?.Invoke(info));
+            }
         }
     }
+
+    /// <summary>The parts of an inbox notification the client needs to chime and toast it.</summary>
+    public sealed record NotificationInfo(string Title, string Body, string Level, string Type);
 
     /// <summary>
     /// Handlers touch controls, and polling runs on a background task. Marshalling here rather
