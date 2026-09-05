@@ -629,6 +629,12 @@ namespace RustPlusDesk.Views
             ChkTrafficMonitor.IsChecked = TrackingService.TrafficMonitorEnabled;
             ChkStreamerMode.IsChecked = TrackingService.MapAbbreviateNames;
 
+#if DEBUG
+            RowDevDownloadIcons.Visibility = Visibility.Visible;
+#else
+            RowDevDownloadIcons.Visibility = Visibility.Collapsed;
+#endif
+
             // Map performance settings
             CmbMapScalingMode.SelectedIndex = Math.Clamp(TrackingService.MapBitmapScalingMode, 0, 2);
             ChkMapUseCacheMode.IsChecked = TrackingService.MapUseCacheMode;
@@ -931,6 +937,12 @@ namespace RustPlusDesk.Views
         {
             ParentWindow?.ManuallyImportMapFile();
         }
+        private void BtnDownloadItemIcons_Click(object sender, RoutedEventArgs e)
+        {
+            RustPlusDesk.Views.MainWindow.StartIconManualDownload();
+            ParentWindow?.ShowInfoSnackbar("Icon Pack", "Checking and downloading missing icons...", WpfUi.ControlAppearance.Info);
+        }
+
         private void BtnBackupData_Click(object sender, RoutedEventArgs e)
         {
             if (ParentWindow == null) return;
