@@ -95,6 +95,15 @@ public sealed class TutorialRegistry : ITutorialRegistry
             Step("basics.notifications", "Notifications.Center", "notifications", TutorialPlacement.Right),
             Step("basics.tutorials", "Tutorials.NavigationItem", "devices", TutorialPlacement.Top)),
 
+        Def("sidebar-folders", 15, "Getting Started", recommended: false, newFeature: true,
+            Step("folders.intro", "Sidebar.ToolsFolder", "devices", TutorialPlacement.Right),
+            Step("folders.manage", placement: TutorialPlacement.Center)),
+
+        Def("account-cloud", 20, "Getting Started", false,
+            Step("account.profile", "Settings.Cloud", "settings", TutorialPlacement.Right),
+            Step("account.cloud", "Settings.Cloud", "settings", TutorialPlacement.Right),
+            Step("account.premium", "Settings.Cloud", "settings", TutorialPlacement.Right)),
+
         Def("pairing-servers", 30, "Getting Started", true,
             Step("pairing.overview", "Servers.PairingService", "devices", TutorialPlacement.Right),
             Step("pairing.start", "Servers.PairingService", "devices", TutorialPlacement.Right),
