@@ -60,8 +60,20 @@ public static class SocialRealtime
     /// <summary>Somebody would like to be on your friends list.</summary>
     public static event Action? FriendRequestArrived;
 
+    /// <summary>
+    /// A friend request you sent was answered. Lets the requester's client move the row out of
+    /// "outgoing" without waiting for a manual reload.
+    /// </summary>
+    public static event Action? FriendRequestSettled;
+
     /// <summary>Somebody wants to open a thread and is waiting to be let in.</summary>
     public static event Action? RequestArrived;
+
+    /// <summary>
+    /// A thread you opened was accepted or declined. Lets the opener's client settle it out of
+    /// "pending" in real time.
+    /// </summary>
+    public static event Action? ConversationSettled;
 
     /// <summary>A notification landed in this account's inbox — a ticket reply, an announcement.</summary>
     public static event Action<NotificationInfo>? NotificationArrived;
