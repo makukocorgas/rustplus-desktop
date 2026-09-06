@@ -4947,4 +4947,7 @@
   <data name="Tutorials.Step.folders.organize.Description" xml:space="preserve">
     <value>タブをフォルダにドラッグして追加したり、外のサイドバーへドラッグして解除できます。</value>
   </data>
+  <data name="KickFromTeamConfirm" xml:space="preserve">
+    <value>{0} をチームから外しますか？</value>
+  </data>
 </root>

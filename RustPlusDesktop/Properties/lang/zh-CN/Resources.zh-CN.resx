@@ -5676,4 +5676,7 @@
   <data name="Tutorials.Step.folders.organize.Description" xml:space="preserve">
     <value>将标签页直接拖入文件夹即可收纳，拖出文件夹放回侧边栏即可随时取消分组。</value>
   </data>
+  <data name="KickFromTeamConfirm" xml:space="preserve">
+    <value>将 {0} 移出队伍？</value>
+  </data>
 </root>
