@@ -56,7 +56,7 @@
                     <ui:SymbolIcon Symbol="Settings24" Margin="0,0,8,0" Foreground="{DynamicResource Accent}" VerticalAlignment="Center" FontSize="14"/>
                     <TextBlock Text="{DynamicResource Settings}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" />
                 </StackPanel>
-                <ui:Button x:Name="BtnCloseSettings" Appearance="Transparent" Content="&#x2715;" Width="26" Height="26" Padding="0" FontSize="12" Foreground="{DynamicResource TextSubtle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="BtnCloseSettings_Click" />
+                <ui:Button x:Name="BtnCloseSettings" Appearance="Transparent" Icon="{ui:SymbolIcon Dismiss24}" Width="26" Height="26" Padding="0" Foreground="{DynamicResource TextSubtle}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="BtnCloseSettings_Click" />
             </Grid>
         </Border>
 
@@ -864,7 +864,6 @@
                         </Grid>
                         <ui:TextBlock Text="{DynamicResource SupporterDescription}" Foreground="{DynamicResource TextSubtle}" FontSize="11" FontStyle="Italic" Margin="0,0,0,12" TextWrapping="Wrap" />
 
-                        <!-- Offline Alarms Sync -->
                         <ui:CardExpander Header="Home Assistant" Margin="0,0,0,10" Foreground="{DynamicResource TextPrimary}" ContentPadding="12,8">
                             <StackPanel Margin="0,8,0,0">
                                 <Grid Margin="0,0,0,12">
@@ -894,7 +893,7 @@
                                 <ui:TextBox x:Name="TxtHaSnippet" IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" MaxHeight="180" Padding="6,4" Margin="0,0,0,8" FontFamily="Consolas" FontSize="11" />
                                 <ui:Button x:Name="BtnCopyHaSnippet" Content="Copy Snippet" Icon="{ui:SymbolIcon Symbol=Copy24}" HorizontalAlignment="Stretch" Height="32" Margin="0,0,0,16" Click="BtnCopyHaSnippet_Click" />
 
-                                <ui:Button x:Name="BtnRevokeHa" Content="Revoke Token" Icon="{ui:SymbolIcon Symbol=Delete24}" Appearance="Secondary" Foreground="#FF5555" HorizontalAlignment="Stretch" Height="36" Click="BtnRevokeHa_Click" />
+                                <ui:Button x:Name="BtnRevokeHa" Content="Revoke Token" Icon="{ui:SymbolIcon Symbol=Delete24}" Appearance="Secondary" Foreground="{DynamicResource DangerBrush}" HorizontalAlignment="Stretch" Height="36" Click="BtnRevokeHa_Click" />
                             </StackPanel>
                         </ui:CardExpander>
 
