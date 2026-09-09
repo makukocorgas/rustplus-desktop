@@ -2834,12 +2834,6 @@ private bool _overlayToolsVisible = false;
     /// Server key and player token for the connected server, which the cloud
     /// needs as evidence when moving a Steam link onto this account.
     /// </summary>
-    public (string ServerKey, string? PlayerToken) GetCloudLinkEvidence()
-    {
-        var profile = _vm?.Selected;
-        return (GetServerKey(), profile?.PlayerToken);
-    }
-
     private string GetOverlayJsonPathForPlayerServer(ulong steamId)
     {
         return DataManager.GetOverlayJsonPath(GetServerKey(), steamId);
@@ -3597,9 +3591,7 @@ private bool _overlayToolsVisible = false;
             var ids = TeamMembers.Select(tm => tm.SteamId.ToString()).ToList();
             if (ids.Count == 0) return;
 
-            var steamIds = RustPlusDesk.Services.Cloud.CloudBackend.UsePlatform
-                ? await FetchOverlayOwnersFromApiAsync(serverKey)
-                : await FetchOverlayOwnersFromSupabaseAsync(serverKey, ids);
+            var steamIds = await FetchOverlayOwnersFromSupabaseAsync(serverKey, ids);
 
             if (steamIds == null) return;
 
@@ -3618,34 +3610,6 @@ private bool _overlayToolsVisible = false;
         }
     }
 
-    /// <summary>
-    /// The API scopes this to teams the caller is actually on, so the local roster
-    /// does not need to be sent along.
-    /// </summary>
-    private static async Task<List<string>?> FetchOverlayOwnersFromApiAsync(string serverKey)
-    {
-        var body = await RustPlusDesk.Services.Cloud.CloudApiClient.CallApiAsync(
-            "sync/team-overlays",
-            System.Net.Http.HttpMethod.Get,
-            queryParams: new Dictionary<string, string> { ["server_key"] = serverKey });
-
-        using var doc = System.Text.Json.JsonDocument.Parse(body);
-        if (!doc.RootElement.TryGetProperty("data", out var data) ||
-            !data.TryGetProperty("steam_ids", out var steamIds) ||
-            steamIds.ValueKind != System.Text.Json.JsonValueKind.Array)
-        {
-            return null;
-        }
-
-        var result = new List<string>();
-        foreach (var steamId in steamIds.EnumerateArray())
-        {
-            if (steamId.ValueKind == System.Text.Json.JsonValueKind.String && steamId.GetString() is { Length: > 0 } value)
-                result.Add(value);
-        }
-
-        return result;
-    }
 
     private static async Task<List<string>?> FetchOverlayOwnersFromSupabaseAsync(string serverKey, List<string> ids)
     {

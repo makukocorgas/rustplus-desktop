@@ -705,9 +705,13 @@ namespace RustPlusDesk.Views
             // Always load Discord bot settings (no premium check needed)
             _ = LoadDiscordBotSettingsAsync();
 
-            // Home Assistant token management runs on our own Supabase functions, not the
-            // Laravel platform this panel originally required - so it loads unconditionally too.
-            _ = LoadHomeAssistantSettingsAsync();
+            // Home Assistant token management runs on our own Supabase functions, but the
+            // endpoint still requires a signed-in account - skip it while signed out instead
+            // of letting it round-trip to a 401 every time this panel loads.
+            if (Services.Cloud.CloudAuth.IsAuthenticated)
+                _ = LoadHomeAssistantSettingsAsync();
+            else
+                ApplyHaToken(null);
             _ = InitFeatureFlagsAsync();
         }
 

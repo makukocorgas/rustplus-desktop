@@ -283,17 +283,7 @@ namespace RustPlusDesk.Services.Data
                     ["steam_id"] = steamId.ToString()
                 };
 
-                // The platform's plain "overlay" GET is scoped to the caller and
-                // ignores steam_id, so fetching a teammate needs the team-authorized
-                // endpoint. Legacy (Supabase) keeps "overlay", which honoured steam_id.
-                var edgeFunction = "overlay";
-                if (Cloud.CloudBackend.UsePlatform
-                    && steamId.ToString() != Services.TrackingService.SteamId64)
-                {
-                    edgeFunction = "team-member-overlay";
-                }
-
-                var body = await Auth.SupabaseAuthManager.CallEdgeFunctionAsync(edgeFunction, HttpMethod.Get, null, queryParams);
+                var body = await Auth.SupabaseAuthManager.CallEdgeFunctionAsync("overlay", HttpMethod.Get, null, queryParams);
                 using var doc = JsonDocument.Parse(body);
                 var root = doc.RootElement;
 

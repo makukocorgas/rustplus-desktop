@@ -92,13 +92,6 @@ namespace RustPlusDesk.Services.Auth
 
         public static async Task FetchTierLimitsAsync(bool forceRefresh = false)
         {
-            if (Cloud.CloudBackend.UsePlatform)
-            {
-                if (forceRefresh || TierLimits == null || TierLimits.Count == 0)
-                    await FetchTierLimitscloudAsync();
-                return;
-            }
-
             if (Client == null) return;
             if (!forceRefresh && TierLimits != null && TierLimits.Count > 0) return;
             try
@@ -318,12 +311,7 @@ namespace RustPlusDesk.Services.Auth
                         await RustPlusDesk.Services.DiscordBotListenerService.Instance.StartDirectAsync(steamId);
                 });
 
-                // Sync Discord roles on every launch, not just after a fresh OAuth
-                // login. On the platform the cached provider list can be stale (a
-                // migrated/web-linked Discord account), so always enter the sync when
-                // authenticated — it refreshes the identity and no-ops for accounts
-                // that turn out not to be Discord-linked.
-                if ((Cloud.CloudBackend.UsePlatform && Cloud.CloudAuthManager.IsAuthenticated) || IsDiscordAuthenticated)
+                if (IsDiscordAuthenticated)
                 {
                     _ = Task.Run(async () =>
                     {
@@ -449,11 +437,6 @@ namespace RustPlusDesk.Services.Auth
         public static async Task<bool> EnsureFreshSessionAsync()
         {
             if (IsUpgradeRequiredSnackbarShown) return false;
-
-            // session tokens cannot be refreshed and carry no readable expiry, so
-            // "fresh" means "the server still accepts it".
-            if (Cloud.CloudBackend.UsePlatform)
-                return await Cloud.CloudAuthManager.EnsureValidSessionAsync();
 
             // Discord/email session refresh — an account session is required (no guest path).
             var session = Client?.Auth?.CurrentSession;
@@ -713,14 +696,6 @@ namespace RustPlusDesk.Services.Auth
             // Run for Discord OR Email auth (not anon/guest — they use handshake)
             if (!IsDiscordAuthenticated && !IsEmailAuthenticated) return false;
             if (!await EnsureFreshSessionAsync()) return false;
-            // Platform backend has no legacy Supabase Client — the profile/tier below is keyed
-            // off Client.Auth.CurrentUser, which is null under UsePlatform. Premium status comes
-            // from the plan-limits endpoint instead, so refresh those and return.
-            if (Cloud.CloudBackend.UsePlatform)
-            {
-                await FetchTierLimitsAsync(forceRefresh: true);
-                return true;
-            }
 
             string? discordId = null;
             if (Client.Auth.CurrentUser?.UserMetadata != null)
@@ -878,51 +853,6 @@ namespace RustPlusDesk.Services.Auth
 
         public static async Task SyncDiscordRolesAsync()
         {
-            // Cloud platform: the server reads the guild roles itself (bot token),
-            // maps them to a plan and reconciles the entitlement. The client only
-            // triggers it, then re-reads the profile so premium reflects the roles.
-            // No provider token is sent — the platform never trusts client roles.
-            if (Cloud.CloudBackend.UsePlatform)
-            {
-                if (!Cloud.CloudAuthManager.IsAuthenticated) return;
-
-                if (IsUpgradeRequiredSnackbarShown)
-                {
-                    AppendLog("[Cloud] Skipping Discord role sync: application update is required.");
-                    return;
-                }
-
-                // Refresh the cached identity first: a Discord link made on the web
-                // — or by the Supabase→cloud migration — may not be in the persisted
-                // provider list yet, so gating on a stale cache would skip the sync
-                // for exactly the users who need it.
-                await Cloud.CloudAuthManager.EnsureValidSessionAsync();
-
-                if (!IsDiscordAuthenticated) return;
-
-                try
-                {
-                    AppendLog("[Cloud] Syncing Discord roles via me/discord/sync-roles...");
-                    await CallEdgeFunctionAsync("discord-roles", HttpMethod.Post);
-                }
-                catch (Exception ex)
-                {
-                    // A transient failure must not wipe premium; the server also
-                    // never downgrades on error. Re-read the profile regardless.
-                    AppendLog($"[Cloud/Error] Failed to sync Discord roles: {ex.Message}");
-                }
-
-                // Re-read the reconciled plan so premium/limits reflect the new
-                // roles immediately — RefreshUserProfileAsync alone doesn't re-read
-                // me/limits (where the effective plan lives), which is why premium
-                // only applied after a restart. Then notify the UI to rebind.
-                await RefreshUserProfileAsync(forceRefresh: true);
-                await FetchTierLimitsAsync(forceRefresh: true);
-                NotifyAuthenticationChanged();
-                return;
-            }
-
-            // Legacy Supabase path (rollback mode).
             if (!IsDiscordAuthenticated) return;
             if (!await EnsureFreshSessionAsync()) return;
 
@@ -1142,9 +1072,6 @@ namespace RustPlusDesk.Services.Auth
             if (!accepted)
                 ConfirmedCloudSyncConsentIdentity = null;
 
-            if (Cloud.CloudBackend.UsePlatform)
-                return await UpdateCloudSyncConsentcloudAsync(accepted);
-
             if (!IsAuthenticated) return false;
             if (!await EnsureFreshSessionAsync()) return false;
 
@@ -1254,12 +1181,6 @@ namespace RustPlusDesk.Services.Auth
 
         public static async Task UpdatePresenceAsync(string? serverKey, string? serverName, System.Collections.Generic.IReadOnlyCollection<CloudTeamMemberDto> teamMembers)
         {
-            if (Cloud.CloudBackend.UsePlatform)
-            {
-                await UpdatePresencecloudAsync();
-                return;
-            }
-
             if (!IsAuthenticated) return;
             if (!await EnsureFreshSessionAsync()) return;
             string steamId = TrackingService.SteamId64;
@@ -1291,9 +1212,6 @@ namespace RustPlusDesk.Services.Auth
 
         public static async Task MarkAppOfflineAsync()
         {
-            // cloud presence expires via last_active_at staleness — no explicit offline call.
-            if (Cloud.CloudBackend.UsePlatform) return;
-
             if (!IsAuthenticated) return;
             if (!await EnsureFreshSessionAsync()) return;
             string steamId = TrackingService.SteamId64;
@@ -1336,12 +1254,6 @@ namespace RustPlusDesk.Services.Auth
 
         private static async Task TouchProfileAsync(string steamId, string? discordId = null)
         {
-            if (Cloud.CloudBackend.UsePlatform)
-            {
-                await TouchProfilecloudAsync(steamId);
-                return;
-            }
-
             if (Client?.Auth?.CurrentUser == null) return;
             await ProfileTouchLock.WaitAsync();
             try
@@ -1400,26 +1312,6 @@ namespace RustPlusDesk.Services.Auth
 
                 var body = await CallEdgeFunctionAsync("team-feature/heartbeat", HttpMethod.Post, payload);
                 if (string.IsNullOrWhiteSpace(body)) return null;
-
-                // cloud wraps the result: { data: { team_id, master, master_changed } }.
-                // The team id names the realtime channel, so it is handed to the realtime
-                // service before the master state is unwrapped and returned.
-                if (Cloud.CloudBackend.UsePlatform)
-                {
-                    using var envelope = JsonDocument.Parse(body);
-                    if (!envelope.RootElement.TryGetProperty("data", out var data))
-                        return null;
-
-                    if (data.TryGetProperty("team_id", out var teamIdEl) && teamIdEl.ValueKind == JsonValueKind.String)
-                        TeamSyncWebSocketService.NotifyTeamResolved(teamIdEl.GetString());
-
-                    if (!data.TryGetProperty("master", out var masterEl) || masterEl.ValueKind != JsonValueKind.Object)
-                        return null;
-
-                    return JsonSerializer.Deserialize<RustPlusDesk.Models.TeamFeatureMasterState>(
-                        masterEl.GetRawText(),
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                }
 
                 using var doc = JsonDocument.Parse(body);
                 var root = doc.RootElement;
@@ -1564,39 +1456,6 @@ namespace RustPlusDesk.Services.Auth
 
         public static async Task<(bool IsAdmin, string? ErrorMessage)> CheckIsAdminDetailedAsync()
         {
-            if (Cloud.CloudBackend.UsePlatform)
-            {
-                if (!Cloud.CloudAuthManager.IsAuthenticated) return (false, "Sign in to your cloud account first.");
-                try
-                {
-                    // cloud exposes roles rather than a boolean admin flag.
-                    var rolesBody = await Cloud.CloudApiClient.CallApiAsync("me/roles", HttpMethod.Get);
-                    using var rolesDoc = JsonDocument.Parse(rolesBody);
-                    var roles = rolesDoc.RootElement.TryGetProperty("data", out var d) ? d : rolesDoc.RootElement;
-
-                    if (roles.ValueKind == JsonValueKind.Array)
-                    {
-                        foreach (var role in roles.EnumerateArray())
-                        {
-                            var name = role.ValueKind == JsonValueKind.String
-                                ? role.GetString()
-                                : role.TryGetProperty("name", out var n) ? n.GetString() : null;
-
-                            if (string.Equals(name, "admin", StringComparison.OrdinalIgnoreCase) ||
-                                string.Equals(name, "super_admin", StringComparison.OrdinalIgnoreCase))
-                                return (true, null);
-                        }
-                    }
-
-                    return (false, null);
-                }
-                catch (Exception ex)
-                {
-                    AppendLog($"[Cloud/Error] Admin check failed: {ex.Message}");
-                    return (false, ex.Message);
-                }
-            }
-
             if (Client == null) return (false, "Supabase client not initialized.");
             if (!IsDiscordAuthenticated) return (false, "No active Supabase session (Discord login required).");
             try
@@ -1682,157 +1541,12 @@ namespace RustPlusDesk.Services.Auth
 
         private static readonly HttpClient Http = new(new TrafficTrackingHttpMessageHandler("Cloud API"));
 
-        // ── cloud platform variants (Phase 11 slice 1) ─────────────────────────
-        // Self-contained cloud writes routed to /api/v1 when the cloud platform is
-        // active. The bearer is CloudAuthManager.CurrentToken (applied by
-        // CloudApiClient). Payloads/response shapes match the cloud contract,
-        // which differs from the legacy Supabase Edge Functions.
-
-        private static async Task FetchTierLimitscloudAsync()
-        {
-            if (!Cloud.CloudAuthManager.IsAuthenticated) return;
-
-            try
-            {
-                var body = await Cloud.CloudApiClient.CallApiAsync("me/limits", HttpMethod.Get);
-                using var doc = JsonDocument.Parse(body);
-                var data = doc.RootElement.GetProperty("data");
-                var planCode = data.TryGetProperty("plan_code", out var pc) ? pc.GetString() ?? "free" : "free";
-
-                var model = new RustPlusDesk.Models.TierLimitModel { TierCode = planCode };
-                if (data.TryGetProperty("limits", out var limits) && limits.TryGetProperty("sync", out var sync))
-                {
-                    model.MaxOverlayKb = cloudLimitValue(sync, "max_overlay_kb");
-                    model.MaxBases = cloudLimitValue(sync, "max_bases");
-                    model.MaxDevices = cloudLimitValue(sync, "max_devices");
-                    model.MaxScreenshotsPerBase = cloudLimitValue(sync, "max_screenshots_per_base");
-                }
-
-                CurrentTier = planCode;
-                IsPremium = !string.Equals(planCode, "free", StringComparison.OrdinalIgnoreCase);
-                TierLimits = new System.Collections.Generic.Dictionary<string, RustPlusDesk.Models.TierLimitModel>(StringComparer.OrdinalIgnoreCase)
-                {
-                    [planCode] = model,
-                };
-                AppendLog($"[Cloud] Loaded plan limits for '{planCode}' (IsPremium: {IsPremium}).");
-            }
-            catch (Exception ex)
-            {
-                AppendLog($"[Cloud/Error] Failed to fetch plan limits: {ex.Message}. Using defaults.");
-            }
-        }
-
-        // A limit's "value" may be JSON null (an unlimited/gate-only limit).
-        // TryGetInt32 throws on a non-Number element, so guard the kind first —
-        // null becomes a null limit (treated as unlimited by the Get* helpers),
-        // and one null value no longer aborts the whole limits parse.
-        private static int? cloudLimitValue(JsonElement feature, string key) =>
-            feature.TryGetProperty(key, out var k)
-            && k.TryGetProperty("value", out var v)
-            && v.ValueKind == JsonValueKind.Number
-            && v.TryGetInt32(out var n)
-                ? n
-                : (int?)null;
-
-        private static async Task UpdatePresencecloudAsync()
-        {
-            if (!Cloud.CloudAuthManager.IsAuthenticated) return;
-
-            try
-            {
-                // cloud derives presence itself from the authenticated user and
-                // request headers, but the steam id has to be reported: the desktop
-                // token flows authenticate an account that knows nothing about Steam,
-                // and team features are keyed by steam id.
-                var steamId = TrackingService.SteamId64;
-
-                // The UI language rides along with presence rather than getting a call of its
-                // own: it is the same fact about the same session, it changes about once in an
-                // install's life, and the social board is unusable without it - a listing with
-                // no language cannot be found by anybody filtering for one.
-                await Cloud.CloudApiClient.CallApiAsync("profile/presence", HttpMethod.Post, null, new
-                {
-                    steam_id = steamId,
-                    language = Helpers.AppLanguages.Current(),
-                });
-            }
-            catch (Exception ex)
-            {
-                AppendLog($"[Cloud/Debug] Presence update failed: {ex.Message}");
-            }
-        }
-
-        private static async Task<bool> UpdateCloudSyncConsentcloudAsync(bool accepted)
-        {
-            if (!Cloud.CloudAuthManager.IsAuthenticated) return false;
-
-            try
-            {
-                await Cloud.CloudApiClient.CallApiAsync("profile/consent", HttpMethod.Post, null, new { accepted });
-                ConfirmedCloudSyncConsentIdentity = accepted ? (GetCloudSyncConsentIdentity() ?? "cloud") : null;
-                AppendLog($"[Cloud] Updated cloud-sync consent to: {accepted}");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                if (accepted)
-                    ConfirmedCloudSyncConsentIdentity = null;
-                AppendLog($"[Cloud/Error] Failed to update consent: {ex.Message}");
-                return false;
-            }
-        }
-
-        private static async Task TouchProfilecloudAsync(string steamId)
-        {
-            if (!Cloud.CloudAuthManager.IsAuthenticated) return;
-
-            await ProfileTouchLock.WaitAsync();
-            try
-            {
-                var identity = $"{Cloud.CloudAuthManager.CurrentUser?.Id}:{steamId}";
-                var minimized = CloudTrafficPolicy.IsMinimized;
-                if (identity == LastProfileTouchIdentity &&
-                    DateTime.UtcNow - LastProfileTouchUtc < CloudTrafficPolicy.ProfileTouchInterval(minimized))
-                    return;
-
-                await Cloud.CloudApiClient.CallApiAsync("profile/touch", HttpMethod.Post, null, new
-                {
-                    language = Helpers.AppLanguages.Current(),
-                });
-                LastProfileTouchIdentity = identity;
-                LastProfileTouchUtc = DateTime.UtcNow;
-            }
-            catch (Exception ex)
-            {
-                AppendLog($"[Cloud/Debug] Touch profile failed: {ex.Message}");
-            }
-            finally
-            {
-                ProfileTouchLock.Release();
-            }
-        }
-
         public static async Task<string> CallEdgeFunctionAsync(
             string functionName,
             HttpMethod method,
             object? payload = null,
             System.Collections.Generic.Dictionary<string, string>? queryParams = null)
         {
-            // cloud platform: translate the legacy edge-function name to its /api/v1
-            // route. Unported endpoints throw rather than silently falling back, so a
-            // missing port surfaces immediately instead of leaking to Supabase.
-            if (Cloud.CloudBackend.UsePlatform)
-            {
-                // Discord bot config needs shape/id translation rather than a route swap.
-                if (Cloud.CloudDiscordAdapter.Handles(functionName))
-                    return await Cloud.CloudDiscordAdapter.CallAsync(functionName, method, payload, queryParams);
-
-                var route = Cloud.CloudBackend.MapEdgeFunctionToRoute(functionName, method.Method)
-                    ?? throw new NotSupportedException($"'{functionName}' has no cloud route yet.");
-
-                return await Cloud.CloudApiClient.CallApiAsync(route, method, null, payload, queryParams);
-            }
-
             if (Client == null)
                 throw new InvalidOperationException("Supabase client not initialized.");
 
@@ -1911,8 +1625,7 @@ namespace RustPlusDesk.Services.Auth
         /// <summary>
         /// Same wire call as <see cref="CallEdgeFunctionAsync"/>, but returns the status code
         /// instead of throwing on a non-2xx response. For callers that need to tell a real error
-        /// apart from an ordinary "nothing here" (404), the way <c>CloudApiClient.TryCallApiAsync</c>
-        /// does for the platform path.
+        /// apart from an ordinary "nothing here" (404).
         /// </summary>
         public static async Task<(int Status, string Body)> TryCallEdgeFunctionAsync(
             string functionName,
@@ -1920,9 +1633,6 @@ namespace RustPlusDesk.Services.Auth
             object? payload = null,
             System.Collections.Generic.Dictionary<string, string>? queryParams = null)
         {
-            if (Cloud.CloudBackend.UsePlatform)
-                return await Cloud.CloudApiClient.TryCallApiAsync(functionName, method, payload: payload).ConfigureAwait(false);
-
             if (Client == null) return (0, "{\"error\":\"Supabase client not initialized.\"}");
             if (IsUpgradeRequiredSnackbarShown) return (0, "{\"error\":\"upgrade_required\"}");
 
@@ -2034,8 +1744,7 @@ namespace RustPlusDesk.Services.Auth
                 _cloudSuspendedForUpgrade = true;
             }
 
-            // Tear down the heavier realtime services either way. RealtimeClient self-heals
-            // (its loop keeps retrying and succeeds once the block lifts); TeamSync and the
+            // Tear down the heavier realtime services either way. TeamSync and the
             // Discord listener are resurrected by ResumeCloudAfterUpgradeCooldown when a soft
             // block lapses. On a hard block the periodic timers are stopped for the session;
             // on a soft block the keepalive timer is left running so it can drive the resume.

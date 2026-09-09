@@ -236,12 +236,6 @@ namespace RustPlusDesk.Services.Data
                         }
                         catch (Exception ex)
                         {
-                            // A conflict means the account has no Steam link.
-                            // Retrying cannot fix it, so it is reported once and
-                            // sync pauses rather than failing on every change.
-                            if (Cloud.CloudSteamLink.HandleSyncConflict(ex))
-                                return syncedCount;
-
                             AppendLog($"[Cloud/Error] Syncing devices to the cloud failed: {ex.Message}");
                         }
                     }

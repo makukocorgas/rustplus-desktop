@@ -657,9 +657,6 @@ public partial class MainWindow : WpfUi.FluentWindow
             // Auto-check for updates
             _ = Task.Run(async () => await AutoCheckUpdatesAsync());
 
-            // Say something when Alexa has quietly stopped receiving alarms.
-            _ = Task.Run(async () => await WarnIfAlexaLinkBrokenAsync());
-
             UpdatePairingGuideSnackbar();
             UpdateCloudSyncUI();
         }));
@@ -848,7 +845,6 @@ public partial class MainWindow : WpfUi.FluentWindow
 
         this.Closing += MainWindow_Closing;
         Services.Auth.SupabaseAuthManager.AuthenticationChanged += SupabaseAuthManager_AuthenticationChanged;
-        Services.Cloud.CloudAuthManager.AuthenticationChanged += SupabaseAuthManager_AuthenticationChanged;
         ContentRendered += MainWindow_ContentRendered;
         try { ClearAllToggleBusy(); } catch { }
         try { ResetAllBusyStates(); } catch { }
@@ -1460,7 +1456,6 @@ public partial class MainWindow : WpfUi.FluentWindow
     private void MainWindow_Closed(object? sender, EventArgs e)
     {
         Services.Auth.SupabaseAuthManager.AuthenticationChanged -= SupabaseAuthManager_AuthenticationChanged;
-        Services.Cloud.CloudAuthManager.AuthenticationChanged -= SupabaseAuthManager_AuthenticationChanged;
 
         // Holen Sie alle laufenden "node"-Prozesse
         var nodes = System.Diagnostics.Process.GetProcessesByName("node");
@@ -7228,45 +7223,6 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
             mw.ShowInfoSnackbar(title, message, appearance);
     }
 
-    /// <summary>
-    /// Tells the player, once per start, that Alexa is no longer receiving their alarms.
-    ///
-    /// This cannot be repaired from here and it cannot be repaired by the cloud worker
-    /// either: only a fresh grant from Amazon restores it, and only the user can give
-    /// one. So the single useful thing to do is say so plainly, and say what to do — the
-    /// alternative is a raid alarm that silently never arrives.
-    ///
-    /// The toast is pinned rather than timed. It describes something that stays broken
-    /// until acted on, and one that fades after eight seconds is one nobody reads.
-    /// </summary>
-    private async Task WarnIfAlexaLinkBrokenAsync()
-    {
-        try
-        {
-            if (!await Services.Cloud.CloudAlexaAdapter.IsLinkBrokenAsync()) return;
-
-            await Dispatcher.InvokeAsync(() =>
-            {
-                AppendLog("[alexa] The Amazon account link is no longer valid — asking the user to link again.");
-                AddToast(new Controls.ToastItem
-                {
-                    Title = Helpers.Loc.Text("AlexaLinkExpiredTitle", "Alexa link expired"),
-                    Message = Helpers.Loc.Text("AlexaLinkExpiredMessage",
-                        "Amazon no longer accepts the connection to Rust+ Desktop, so raid alarms have stopped reaching Alexa. "
-                        + "Voice control still works. Open the Alexa app, disable the Rust+ Desktop skill and link it again."),
-                    Icon = WpfUi.SymbolRegular.Warning24,
-                    AccentBrush = ToastAccentBrush(WpfUi.ControlAppearance.Caution),
-                    MaxCardWidth = 520,
-                    Timeout = TimeSpan.Zero,
-                });
-            });
-        }
-        catch
-        {
-            // Signed out, offline, or the platform is having a moment. None of those are
-            // evidence that the link is broken, and none are worth a word to the player.
-        }
-    }
 
     internal void ShowInfoSnackbar(string title, string message, WpfUi.ControlAppearance appearance, WpfUi.SymbolRegular? icon = null)
     {

@@ -42,10 +42,8 @@ public sealed record CloudEventState(
 /// location that does not exist. Consumers read this state directly instead; the map stays
 /// honest about knowing nothing.
 ///
-/// Two realtime transports sit behind the same refresh logic. Supabase uses its broadcast
-/// channel; the platform uses <see cref="RealtimeClient"/> (Pusher protocol) on a private
-/// channel. Both trigger <see cref="RefreshAsync"/> on any inbound event, so the parsing and
-/// diffing path is shared.
+/// Subscribes to a Supabase broadcast channel and triggers <see cref="RefreshAsync"/> on any
+/// inbound event.
 /// </summary>
 public sealed class CloudEventWatcher
 {
@@ -74,10 +72,6 @@ public sealed class CloudEventWatcher
     // Supabase realtime state.
     private RealtimeChannel? _channel;
     private RealtimeBroadcast<BaseBroadcast<JObject>>? _broadcast;
-
-    // Platform realtime state.
-    private string? _realtimeChannel;
-    private bool _realtimeHandlerAttached;
 
     private string? _serverKey;
     private bool _hooked;
@@ -114,27 +108,15 @@ public sealed class CloudEventWatcher
         if (!CloudAuth.IsAuthenticated) return;
         await RefreshAsync(firstFetch: true);
 
-        if (CloudBackend.UsePlatform)
-            await SubscribePlatformAsync(serverKey);
-        else
-            await SubscribeSupabaseAsync(serverKey);
+        await SubscribeSupabaseAsync(serverKey);
     }
 
-    private bool IsSubscribed()
-    {
-        if (CloudBackend.UsePlatform)
-            return _realtimeChannel != null && RealtimeClient.Shared.IsSubscribed(_realtimeChannel);
-        return _channel != null;
-    }
+    private bool IsSubscribed() => _channel != null;
 
     public void Detach()
     {
         UnhookListener();
-
-        if (CloudBackend.UsePlatform)
-            UnsubscribePlatform();
-        else
-            UnsubscribeSupabase();
+        UnsubscribeSupabase();
 
         _serverKey = null;
         lock (_gate)
@@ -429,11 +411,6 @@ public sealed class CloudEventWatcher
 
     // ---------------------------------------------------------------- HTTP helpers
 
-    /// <summary>
-    /// Routes server-events calls through the appropriate backend. On Platform mode this goes
-    /// directly to <see cref="CloudApiClient"/>; on Supabase it goes through the edge function
-    /// bridge.
-    /// </summary>
     private static async Task<string> CallServerEventsAsync(
         HttpMethod method,
         object? payload,
@@ -441,84 +418,7 @@ public sealed class CloudEventWatcher
         string? routeSuffix = null)
     {
         string function = routeSuffix != null ? $"server-events/{routeSuffix}" : "server-events";
-
-        if (CloudBackend.UsePlatform)
-        {
-            string route = CloudBackend.MapEdgeFunctionToRoute(function, method.Method)
-                           ?? function;
-            return await CloudApiClient.CallApiAsync(route, method, null, payload, queryParams);
-        }
-
         return await SupabaseAuthManager.CallEdgeFunctionAsync(function, method, payload, queryParams);
-    }
-
-    // ---------------------------------------------------------------- platform realtime (Pusher)
-
-    private async Task SubscribePlatformAsync(string serverKey)
-    {
-        if (!CloudAuth.IsAuthenticated) return;
-        await _subscribeLock.WaitAsync();
-        try
-        {
-            var channelKey = serverKey.Replace('.', '_');
-            var channel = $"private-server-events.{channelKey}";
-
-            if (_realtimeChannel == channel && RealtimeClient.Shared.IsSubscribed(channel))
-                return;
-
-            if (_realtimeChannel != null && _realtimeChannel != channel)
-            {
-                await RealtimeClient.Shared.UnsubscribeAsync(_realtimeChannel);
-                _realtimeChannel = null;
-            }
-
-            AttachRealtimeHandler();
-            _realtimeChannel = channel;
-
-            RealtimeClient.Shared.Start();
-            await RealtimeClient.Shared.SubscribeAsync(channel);
-            Log($"[cloud-events] Subscribed to {channel} (platform).");
-        }
-        catch (Exception ex)
-        {
-            Log($"[cloud-events] Could not subscribe (platform): {ex.Message}");
-            _realtimeChannel = null;
-        }
-        finally
-        {
-            _subscribeLock.Release();
-        }
-    }
-
-    private void AttachRealtimeHandler()
-    {
-        if (_realtimeHandlerAttached) return;
-        _realtimeHandlerAttached = true;
-
-        RealtimeClient.Shared.EventReceived += (channel, eventName, data) =>
-        {
-            if (_realtimeChannel != null && channel != _realtimeChannel) return;
-
-            try
-            {
-                _ = RefreshAsync();
-            }
-            catch (Exception ex)
-            {
-                Log($"[cloud-events] Platform realtime handler error: {ex.Message}");
-            }
-        };
-    }
-
-    private void UnsubscribePlatform()
-    {
-        var channel = _realtimeChannel;
-        _realtimeChannel = null;
-
-        if (channel != null)
-        {
-            try { _ = RealtimeClient.Shared.UnsubscribeAsync(channel); } catch { }
-        }
     }
 
     // ---------------------------------------------------------------- supabase realtime (broadcast)
