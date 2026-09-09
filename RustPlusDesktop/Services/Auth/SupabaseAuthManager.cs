@@ -204,6 +204,58 @@ namespace RustPlusDesk.Services.Auth
             }
         }
 
+        /// <summary>
+        /// Establishes a steam_id-only guest identity via HandshakeService's custom JWT
+        /// handshake, so entitlements keyed by Steam ID (server-side <c>getSteamIdFromJwt</c>)
+        /// resolve without a real Discord/email account.
+        /// </summary>
+        private static async Task EnsureGuestSessionAsync()
+        {
+            if (GuestRegistrationFailedPermanently) return;
+
+            if (HandshakeService.HasValidJwt)
+            {
+                IsGuestAuthenticated = await SetGuestSessionAsync(HandshakeService.GuestJwt!);
+                return;
+            }
+
+            string steamId = TrackingService.SteamId64;
+            if (string.IsNullOrEmpty(steamId) || steamId == "0")
+                return;
+
+            try
+            {
+                if (HandshakeService.HasLocalKey)
+                {
+                    var (success, error) = await HandshakeService.RefreshAsync();
+                    if (!success)
+                    {
+                        GuestRegistrationFailedPermanently = true;
+                        AppendLog($"[Supabase] Guest session refresh failed: {error}");
+                        return;
+                    }
+                }
+                else
+                {
+                    var (success, error, _) = await HandshakeService.RegisterAsync(steamId);
+                    if (!success)
+                    {
+                        GuestRegistrationFailedPermanently = true;
+                        AppendLog($"[Supabase] Guest registration failed: {error}");
+                        return;
+                    }
+                }
+
+                IsGuestAuthenticated = await SetGuestSessionAsync(HandshakeService.GuestJwt ?? "");
+                AppendLog("[Supabase] Guest session established.");
+            }
+            catch (Exception ex)
+            {
+                GuestRegistrationFailedPermanently = true;
+                AppendLog($"[Supabase] Guest session error: {ex.Message}");
+            }
+        }
+
         public static async Task InitializeAsync()
         {
             if (IsUpgradeRequiredSnackbarShown)
@@ -286,11 +338,14 @@ namespace RustPlusDesk.Services.Auth
                     await ClearCurrentSessionAsync();
                     ShowCloudAccountRequiredPromptOnce(sessionExpired: true);
                 }
-                // Cloud features require a Discord or email account — anonymous/guest
-                // access is not offered. Prompt to sign in when neither is present.
+                // No Discord/email account: fall back to a lightweight steam_id-only guest
+                // identity (HandshakeService) so cloud features tied to the Steam ID — e.g. a
+                // manually granted supporter row — still resolve without a real login.
                 else if (!IsDiscordAuthenticated && !IsEmailAuthenticated)
                 {
-                    ShowCloudAccountRequiredPromptOnce(sessionExpired: false);
+                    await EnsureGuestSessionAsync();
+                    if (!IsGuestAuthenticated)
+                        ShowCloudAccountRequiredPromptOnce(sessionExpired: false);
                 }
 
                 await RefreshUserProfileAsync();
@@ -326,8 +381,8 @@ namespace RustPlusDesk.Services.Auth
             }
         }
 
-        /// <summary>True if an authenticated account session exists (Discord OAuth or Email).</summary>
-        public static bool IsAuthenticated => IsDiscordAuthenticated || IsEmailAuthenticated;
+        /// <summary>True if an authenticated session exists — Discord OAuth, Email, or guest (steam_id only).</summary>
+        public static bool IsAuthenticated => IsDiscordAuthenticated || IsEmailAuthenticated || IsGuestAuthenticated;
 
         /// <summary>True only when Discord OAuth is connected.</summary>
         public static bool IsDiscordAuthenticated
@@ -533,6 +588,9 @@ namespace RustPlusDesk.Services.Auth
                 if (success)
                 {
                     CloudAccountPromptShownThisSession = false;
+                    GuestRegistrationFailedPermanently = false;
+                    IsGuestAuthenticated = false;
+                    HandshakeService.Clear();
                     await SyncDiscordRolesAsync();
                 }
                 return success;
@@ -559,6 +617,7 @@ namespace RustPlusDesk.Services.Auth
 
                 CloudAccountPromptShownThisSession = false;
                 GuestRegistrationFailedPermanently = false;
+                IsGuestAuthenticated = false;
                 HandshakeService.Clear();
 
                 await RefreshUserProfileAsync();
@@ -1046,7 +1105,15 @@ namespace RustPlusDesk.Services.Auth
             if (Client != null && IsAuthenticated)
             {
                 ConfirmedCloudSyncConsentIdentity = null;
-                await Client.Auth.SignOut();
+                if (IsDiscordAuthenticated || IsEmailAuthenticated)
+                    await Client.Auth.SignOut();
+
+                if (IsGuestAuthenticated)
+                {
+                    HandshakeService.Clear();
+                    IsGuestAuthenticated = false;
+                    GuestRegistrationFailedPermanently = false;
+                }
             }
         }
 
@@ -1570,6 +1637,10 @@ namespace RustPlusDesk.Services.Auth
             {
                 req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", Client.Auth.CurrentSession.AccessToken);
             }
+            else if (!string.IsNullOrEmpty(HandshakeService.GuestJwt))
+            {
+                req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", HandshakeService.GuestJwt);
+            }
 
             if (payload != null)
             {
@@ -1649,6 +1720,8 @@ namespace RustPlusDesk.Services.Auth
 
             if (Client.Auth?.CurrentSession != null)
                 req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", Client.Auth.CurrentSession.AccessToken);
+            else if (!string.IsNullOrEmpty(HandshakeService.GuestJwt))
+                req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", HandshakeService.GuestJwt);
 
             if (payload != null)
             {
