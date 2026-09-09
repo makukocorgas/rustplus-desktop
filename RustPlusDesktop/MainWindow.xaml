@@ -357,83 +357,6 @@
                                        Text="{Binding Source={x:Static services:NetworkTrafficMonitor.Instance}, Path=BandwidthSummaryBadge}" />
                         </StackPanel>
                     </ui:Button>
-                    <!--  Notification centre. A bell with an unread badge, opening a dropdown of the
-                          same inbox the dashboard and the client share. -->
-                    <Grid VerticalAlignment="Center">
-                        <ui:Button
-                            x:Name="BtnTopNotifications"
-                            Width="36"
-                            Height="36"
-                            Margin="2,6"
-                            Padding="0"
-                            Appearance="Transparent"
-                            Click="BtnTopNotifications_Click"
-                            Icon="{ui:SymbolIcon Symbol=Alert24}"
-                            ToolTip="Notifications" />
-                        <Border x:Name="TopNotifBadge" Visibility="Collapsed"
-                                IsHitTestVisible="False"
-                                HorizontalAlignment="Right" VerticalAlignment="Top"
-                                Margin="0,6,2,0" MinWidth="15" Height="15" CornerRadius="7.5"
-                                Background="{DynamicResource DangerBrush}" Padding="3,0">
-                            <TextBlock x:Name="TopNotifBadgeText" Foreground="White" FontSize="9"
-                                       FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-                        <Popup x:Name="NotificationsPopup" PlacementTarget="{Binding ElementName=BtnTopNotifications}"
-                               Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
-                            <Border Width="360" Background="#FF0C1116" BorderBrush="#26FFFFFF" BorderThickness="1" CornerRadius="8" Margin="0,4,8,8">
-                                <Border.Effect>
-                                    <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.5" Color="Black" />
-                                </Border.Effect>
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-                                    <Grid Grid.Row="0" Margin="12,10,8,8">
-                                        <TextBlock Text="Notifications" Foreground="#FFF4F6FA" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                            <ui:Button x:Name="BtnMarkAllRead" Content="Mark all read" Appearance="Transparent"
-                                                       FontSize="11" Padding="6,2" Click="BtnMarkAllRead_Click" />
-                                            <ui:Button x:Name="BtnClearNotifications" Content="Clear all" Appearance="Transparent"
-                                                       FontSize="11" Padding="6,2" Margin="4,0,0,0" Click="BtnClearNotifications_Click" />
-                                        </StackPanel>
-                                    </Grid>
-                                    <ScrollViewer Grid.Row="1" MaxHeight="420" VerticalScrollBarVisibility="Auto">
-                                        <Grid>
-                                            <ItemsControl x:Name="TopNotificationsList" Margin="8,0,8,8">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Border Background="{Binding Background}" BorderBrush="{DynamicResource WhiteA1A}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,6" Cursor="Hand"
-                                                                MouseLeftButtonUp="TopNotificationRow_Click" Tag="{Binding Id}">
-                                                            <Grid>
-                                                                <StackPanel Margin="0,0,18,0">
-                                                                    <StackPanel Orientation="Horizontal">
-                                                                        <Ellipse Width="8" Height="8" Fill="{Binding Dot}" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                                                        <TextBlock Text="{Binding Title}" Foreground="#FFF4F6FA" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                                                    </StackPanel>
-                                                                    <TextBlock Text="{Binding Body}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" TextWrapping="Wrap" Margin="16,2,0,0" />
-                                                                    <ui:Button Visibility="{Binding CtaVisibility}" Content="{Binding CtaLabel}" Appearance="Primary"
-                                                                               FontSize="11" Padding="10,3" Margin="16,6,0,0" HorizontalAlignment="Left"
-                                                                               Tag="{Binding}" Click="NotificationCta_Click" />
-                                                                    <TextBlock Text="{Binding When}" Foreground="#FF6B7280" FontSize="10" Margin="16,4,0,0" />
-                                                                </StackPanel>
-                                                                <ui:Button HorizontalAlignment="Right" VerticalAlignment="Top" Appearance="Transparent" Padding="2"
-                                                                           Tag="{Binding}" Click="NotificationDismiss_Click" ToolTip="Dismiss">
-                                                                    <ui:SymbolIcon Symbol="Dismiss24" Foreground="#FF6B7280" FontSize="12" />
-                                                                </ui:Button>
-                                                            </Grid>
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                            <TextBlock x:Name="TopNotificationsEmpty" Text="Nothing here yet." Foreground="{DynamicResource TextMutedBrush}"
-                                                       HorizontalAlignment="Center" Margin="0,24,0,24" Visibility="Collapsed" />
-                                        </Grid>
-                                    </ScrollViewer>
-                                </Grid>
-                            </Border>
-                        </Popup>
-                    </Grid>
                     <Border
                         Height="36"
                         Margin="8,0"
@@ -3154,44 +3077,6 @@
                                                 <TextBlock Grid.Column="0" Text="{DynamicResource ScaleLabel}" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="#AAA" FontSize="10" />
                                                 <Slider Grid.Column="1" x:Name="SliderPlayerIconSize" Minimum="0.5" Maximum="1.5" Value="1.0" TickFrequency="0.05" IsSnapToTickEnabled="True" ValueChanged="SliderPlayerIconSize_ValueChanged" VerticalAlignment="Center" MinWidth="30" />
                                                 <TextBlock Grid.Column="2" Text="{Binding Value, ElementName=SliderPlayerIconSize, StringFormat={}{0:P0}}" VerticalAlignment="Center" Margin="4,0,0,0" Foreground="#AAA" FontSize="10" Width="30" />
-
-                                                <!-- Looking for Group. The slider gives up the width; it has more than it needs. -->
-                                                <Button Grid.Column="3" x:Name="BtnLfg" Click="BtnLfg_Click"
-                                                        Margin="8,0,0,0" Height="24" Padding="7,0" Cursor="Hand"
-                                                        ToolTip="{DynamicResource LfgTitle}">
-                                                    <Button.Style>
-                                                        <Style TargetType="Button">
-                                                            <Setter Property="Background" Value="Transparent"/>
-                                                            <Setter Property="BorderThickness" Value="1"/>
-                                                            <Setter Property="BorderBrush" Value="#444"/>
-                                                            <Setter Property="Foreground" Value="#CCC"/>
-                                                            <Setter Property="Template">
-                                                                <Setter.Value>
-                                                                    <ControlTemplate TargetType="Button">
-                                                                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" Padding="{TemplateBinding Padding}">
-                                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                                        </Border>
-                                                                    </ControlTemplate>
-                                                                </Setter.Value>
-                                                            </Setter>
-                                                            <Style.Triggers>
-                                                                <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter Property="Background" Value="#222"/>
-                                                                    <Setter Property="BorderBrush" Value="#2A6CA6"/>
-                                                                    <Setter Property="Foreground" Value="White"/>
-                                                                </Trigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Button.Style>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <!-- Two figures: the same shape the Team tab header uses. -->
-                                                        <Path Data="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
-                                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                                              Width="13" Height="13" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,5,0" />
-                                                        <TextBlock Text="{DynamicResource LfgButton}" FontSize="10" FontWeight="Bold" VerticalAlignment="Center"
-                                                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                                                    </StackPanel>
-                                                </Button>
                                             </Grid>
                                         </Grid>
                                     </Grid>
@@ -3944,21 +3829,6 @@
                                 CloseRequested="RecyclerCalculator_CloseRequested" />
                         </TabItem>
 
-                        <!--  ===== TICKETS =====  hosted as a tab like Recycler so the left panel stays  -->
-                        <TabItem x:Name="TicketsTab" Style="{StaticResource PrettyTabItem}">
-                            <TabItem.Header>
-                                <StackPanel Orientation="Horizontal">
-                                    <ui:SymbolIcon Symbol="ChatHelp24" Margin="0,0,6,0" VerticalAlignment="Center" FontSize="14" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}" />
-                                    <TextBlock VerticalAlignment="Center" Text="Tickets" />
-                                </StackPanel>
-                            </TabItem.Header>
-                            <views:SupportOverlay
-                                x:Name="SupportPanel"
-                                HorizontalAlignment="Stretch"
-                                VerticalAlignment="Stretch"
-                                CloseRequested="SupportPanel_CloseRequested" />
-                        </TabItem>
-
                         <TabItem x:Name="ConsoleHelperTab" Style="{StaticResource PrettyTabItem}">
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal">
@@ -4291,61 +4161,6 @@
                         </ScrollViewer>
 
                         <StackPanel Grid.Row="2" Margin="0,0,0,10" HorizontalAlignment="Center">
-                            <!--
-                                Community sits apart from the tools above it: it is the one place
-                                in the app where other people can reach you, rather than another
-                                thing you operate. Hence the rule and the tinted icon - a filled
-                                background would read as "this tab is active", which it is not.
-                            -->
-                            <Border x:Name="RailSocialDivider" Height="1" Width="22" Background="#33FFFFFF" Margin="0,2,0,8" />
-                            <Grid>
-                                <ui:Button
-                                    x:Name="RailSocialButton"
-                                    Style="{StaticResource SidebarRailButton}"
-                                    AutomationProperties.Name="{DynamicResource SocialRailName}"
-                                    AutomationProperties.HelpText="{DynamicResource SocialRailHelp}"
-                                    Click="BtnSocial_Click"
-                                    ToolTip="{DynamicResource SocialRailName}"
-                                    Foreground="#FF8B7BE8"
-                                    Icon="{ui:SymbolIcon Symbol=ChatMultiple24}" />
-                                <!--
-                                    Unread messages, over the bubble. IsHitTestVisible off so the
-                                    badge cannot swallow the click it is sitting on.
-                                -->
-                                <Border x:Name="RailSocialBadge" Visibility="Collapsed"
-                                        IsHitTestVisible="False"
-                                        HorizontalAlignment="Right" VerticalAlignment="Top"
-                                        Margin="0,2,2,0" MinWidth="15" Height="15" CornerRadius="7.5"
-                                        Background="{DynamicResource DangerBrush}" Padding="3,0">
-                                    <TextBlock x:Name="RailSocialBadgeText" Foreground="White" FontSize="9"
-                                               FontWeight="Bold" HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" />
-                                </Border>
-                            </Grid>
-                            <!--  Tickets: support, appeals, bug reports. Always reachable, unlike the
-                                  map bar which only exists once connected. Carries a count of the
-                                  user's tickets with unread activity. -->
-                            <Grid>
-                                <ui:Button
-                                    x:Name="RailTicketsButton"
-                                    Style="{StaticResource SidebarRailButton}"
-                                    AutomationProperties.Name="Tickets"
-                                    AutomationProperties.HelpText="Support, appeals and bug reports"
-                                    Click="CompactSidebarTab_Click"
-                                    Tag="{Binding ElementName=TicketsTab}"
-                                    ToolTip="Tickets"
-                                    Foreground="#FFE8683C"
-                                    Icon="{ui:SymbolIcon Symbol=ChatHelp24}" />
-                                <Border x:Name="RailTicketsBadge" Visibility="Collapsed"
-                                        IsHitTestVisible="False"
-                                        HorizontalAlignment="Right" VerticalAlignment="Top"
-                                        Margin="0,2,2,0" MinWidth="15" Height="15" CornerRadius="7.5"
-                                        Background="{DynamicResource DangerBrush}" Padding="3,0">
-                                    <TextBlock x:Name="RailTicketsBadgeText" Foreground="White" FontSize="9"
-                                               FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
-                            </Grid>
-                            <Border Height="1" Width="22" Background="#33FFFFFF" Margin="0,8,0,8" />
                             <ui:Button
                                 x:Name="BtnCompactPinSidebar"
                                 tutorials:Tutorial.TargetId="Navigation.Collapse"
@@ -4665,11 +4480,6 @@
                     <!--  Device Automation Overlay  -->
                     <views:DeviceAutomationOverlay
                         x:Name="DeviceAutomationPanel"
-                        Visibility="Collapsed" />
-
-                    <!--  Looking for Group Overlay  -->
-                    <views:LfgOverlay
-                        x:Name="LfgPanel"
                         Visibility="Collapsed" />
 
                 </Grid>

@@ -674,22 +674,6 @@ public partial class MainWindow : WpfUi.FluentWindow
         // install (no popup) and simply starts tracking, exactly as intended.
         var appVersion = VersionHelper.GetClientVersion();
 
-        bool IsVersionLessThanOrEqual(string versionStr, string targetStr)
-        {
-            string cleanVer = versionStr.Split('-')[0];
-            string cleanTarget = targetStr.Split('-')[0];
-            if (System.Version.TryParse(cleanVer, out var v1) && System.Version.TryParse(cleanTarget, out var v2))
-            {
-                return v1 <= v2;
-            }
-            return false;
-        }
-
-        // Read before any branch below rewrites it. Whether this user is arriving from an older
-        // build is knowable exactly once — on the first start after the upgrade — and the
-        // what's-new notice further down needs the answer after that rewrite has happened.
-        string versionBeforeThisStart = TrackingService.LastSeenVersion;
-
         if (string.IsNullOrEmpty(TrackingService.LastSeenVersion))
         {
             // First run under version tracking: record it, but there is nothing to announce.
@@ -721,36 +705,6 @@ public partial class MainWindow : WpfUi.FluentWindow
             Dispatcher.InvokeAsync(() =>
             {
                 ShowInfoSnackbar(Properties.Resources.GetString("UpdateSuccessfulTitle"), string.Format(Properties.Resources.GetString("FormatUpdateSuccessful"), appVersion), WpfUi.ControlAppearance.Success);
-            }, System.Windows.Threading.DispatcherPriority.Loaded);
-        }
-
-        // Everyone arriving from 9.0.4 or earlier gets the what's-new notice once. A fresh install
-        // starts on the current version and has nothing to catch up on, so it is left alone.
-        //
-        // The flag is latched here rather than re-derived on every start: LastSeenVersion has
-        // already been rewritten above, so by the next start this user looks like any other. It
-        // stays set — and the notice keeps appearing — until the "don't show again" box is ticked,
-        // which is the behaviour the previous version notice had.
-        // The version has to have actually moved. Without that test a build still numbered 9.0.4
-        // would re-latch on every single start — including the one right after the box was
-        // ticked — and the notice could never be dismissed.
-        if (!string.IsNullOrEmpty(versionBeforeThisStart)
-            && versionBeforeThisStart != appVersion
-            && IsVersionLessThanOrEqual(versionBeforeThisStart, "9.0.4"))
-        {
-            TrackingService.PendingWhatsNewNotice = true;
-        }
-
-        if (TrackingService.PendingWhatsNewNotice)
-        {
-            Dispatcher.InvokeAsync(() =>
-            {
-                var whatsNew = new Views.Windows.WhatsNewWindow { Owner = this };
-                whatsNew.ShowDialog();
-                if (whatsNew.DontShowAgain)
-                {
-                    TrackingService.PendingWhatsNewNotice = false;
-                }
             }, System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
@@ -993,11 +947,6 @@ public partial class MainWindow : WpfUi.FluentWindow
         {
             System.Diagnostics.Debug.WriteLine($"[WebView2] EnsureWebView2Async error: {ex.Message}");
         }
-
-        // Whether the Community entry belongs in the rail at all. Asked once on start and again
-        // whenever the account changes; a stored token means the auth event has already fired by
-        // the time this window exists.
-        _ = RefreshSocialAvailabilityAsync();
 
         // Home Assistant commands wait on the same kind of poll, and start the same way: once,
         // at launch, so a switch flipped before the settings panel has ever been opened still
@@ -1576,7 +1525,6 @@ public partial class MainWindow : WpfUi.FluentWindow
             UpdateRustMapsUi();
             UpdateCloudSyncUI();
             _ = RefreshPlayerWipeTrackerCapabilitiesAsync();
-            _ = RefreshSocialAvailabilityAsync();
         }
 
         if (Dispatcher.CheckAccess())
@@ -3070,7 +3018,6 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         bool geneticsSelected = MainTabs.SelectedItem == GeneticsLabTab;
         bool wipeTrackerSelected = MainTabs.SelectedItem == PlayerWipeTrackerTab;
         bool deathStatsSelected = MainTabs.SelectedItem == DeathStatsTab;
-        bool ticketsSelected = MainTabs.SelectedItem == TicketsTab;
         RaidCalculatorPanel.Visibility = raidSelected ? Visibility.Visible : Visibility.Collapsed;
         CraftCalculatorPanel.Visibility = craftSelected ? Visibility.Visible : Visibility.Collapsed;
         GeneticsLabPanel.Visibility = geneticsSelected ? Visibility.Visible : Visibility.Collapsed;
@@ -3079,11 +3026,8 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         if (raidSelected) _ = OfferNewFeatureTutorialOnceAsync("raid-calculator");
         if (wipeTrackerSelected) OpenPlayerWipeTrackerWorkspace();
         if (deathStatsSelected) OpenDeathStatsWorkspace();
-        // Tickets is an inline tab like Recycler: re-read on open, and it takes the workspace over
-        // the map without touching the device/servers panel beside it.
-        if (ticketsSelected) SupportPanel.Refresh();
-        ServerContextPanel.Visibility = (recyclerSelected || geneticsSelected || wipeTrackerSelected || deathStatsSelected || ticketsSelected) ? Visibility.Collapsed : Visibility.Visible;
-        if (!raidSelected && !craftSelected && !recyclerSelected && !geneticsSelected && !wipeTrackerSelected && !deathStatsSelected && !ticketsSelected)
+        ServerContextPanel.Visibility = (recyclerSelected || geneticsSelected || wipeTrackerSelected || deathStatsSelected) ? Visibility.Collapsed : Visibility.Visible;
+        if (!raidSelected && !craftSelected && !recyclerSelected && !geneticsSelected && !wipeTrackerSelected && !deathStatsSelected)
             _lastWorkspaceTabIndex = MainTabs.SelectedIndex;
 
         if (MainTabs.SelectedItem == NotificationsTab)

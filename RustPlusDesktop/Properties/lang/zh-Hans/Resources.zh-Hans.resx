@@ -1104,24 +1104,6 @@
   <data name="BackgroundTrackingToolTip" xml:space="preserve">
     <value>即使应用最小化，也会继续直接向服务器查询在线人数。</value>
   </data>
-  <data name="LfgNoteHeading" xml:space="preserve">
-    <value>你的备注 / 简介</value>
-  </data>
-  <data name="LfgNotePlaceholder" xml:space="preserve">
-    <value>添加备注（如游戏风格、时长、清档时间）...</value>
-  </data>
-  <data name="LfgNoteSave" xml:space="preserve">
-    <value>保存</value>
-  </data>
-  <data name="LfgMyListingHeading" xml:space="preserve">
-    <value>你的当前招募（预览）</value>
-  </data>
-  <data name="LfgPreviewActiveBadge" xml:space="preserve">
-    <value>活跃</value>
-  </data>
-  <data name="LfgEmptyBlurbPlaceholder" xml:space="preserve">
-    <value>暂无备注</value>
-  </data>
   <data name="ProfileRustHours" xml:space="preserve">
     <value>Rust 游戏时间</value>
   </data>
@@ -1191,42 +1173,6 @@
   <data name="QuickCmdCommandsTip" xml:space="preserve">
     <value>列出可用指令</value>
   </data>
-  <data name="UpdateWhatsNewTitle" xml:space="preserve">
-    <value>9.2 的新功能</value>
-  </data>
-  <data name="UpdateWhatsNewSummary" xml:space="preserve">
-    <value>自 9.0 以来最重要的四项变更</value>
-  </data>
-  <data name="UpdateWhatsNewTitle1" xml:space="preserve">
-    <value>社区中心</value>
-  </data>
-  <data name="UpdateWhatsNewDesc1" xml:space="preserve">
-    <value>全局聊天与支持者聊天、可在回复前预览 Steam 资料的组队查找、好友列表、收件箱与举报功能。</value>
-  </data>
-  <data name="UpdateWhatsNewTitle2" xml:space="preserve">
-    <value>地图上的农场路线</value>
-  </data>
-  <data name="UpdateWhatsNewDesc2" xml:space="preserve">
-    <value>在地图图层旁绘制路线。每条路线显示以米为单位的长度和冲刺所需时间，并与队伍同步。</value>
-  </data>
-  <data name="UpdateWhatsNewTitle3" xml:space="preserve">
-    <value>战队聊天中的指令</value>
-  </data>
-  <data name="UpdateWhatsNewDesc3" xml:space="preserve">
-    <value>指令现在也能在战队聊天中响应，并可按战队职位授权。门密码与智能开关默认不包含，除非你主动加入。</value>
-  </data>
-  <data name="UpdateWhatsNewTitle4" xml:space="preserve">
-    <value>智能家居</value>
-  </data>
-  <data name="UpdateWhatsNewDesc4" xml:space="preserve">
-    <value>Home Assistant 可通过 REST 接口控制你的开关。Alexa 新增区域端点以改善设备发现；Google Home 已完成，正在等待认证。</value>
-  </data>
-  <data name="UpdateWhatsNewDontShowAgain" xml:space="preserve">
-    <value>不再显示</value>
-  </data>
-  <data name="UpdateWhatsNewPatchNotesBtn" xml:space="preserve">
-    <value>完整更新日志</value>
-  </data>
   <data name="WipePrunedTitle" xml:space="preserve">
     <value>已删除最旧的 wipe 备份</value>
   </data>
@@ -1257,176 +1203,11 @@
   <data name="WipeDeleteArchiveFailed" xml:space="preserve">
     <value>无法删除该 wipe 备份。</value>
   </data>
-  <data name="ChatCopyText" xml:space="preserve">
-    <value>复制文本</value>
-  </data>
-  <data name="ChatTranslateWithGoogle" xml:space="preserve">
-    <value>使用 Google 翻译</value>
-  </data>
-  <data name="ChatTranslateTitle" xml:space="preserve">
-    <value>翻译消息</value>
-  </data>
-  <data name="ChatTranslateUnchanged" xml:space="preserve">
-    <value>这条消息已经是你的语言。</value>
-  </data>
-  <data name="ChatTranslateConsentTitle" xml:space="preserve">
-    <value>翻译消息</value>
-  </data>
-  <data name="ChatTranslateConsentBody" xml:space="preserve">
-    <value>翻译会将消息文本发送至 Google 翻译。是否继续？</value>
-  </data>
-  <data name="ChatNameColorTooltip" xml:space="preserve">
-    <value>你的名字颜色</value>
-  </data>
-  <data name="ChatNameColorHeading" xml:space="preserve">
-    <value>名字颜色</value>
-  </data>
-  <data name="ChatNameColorReset" xml:space="preserve">
-    <value>使用默认颜色</value>
-  </data>
-  <data name="ChatNameColorTitle" xml:space="preserve">
-    <value>消息颜色</value>
-  </data>
-  <data name="ChatNameColorFailed" xml:space="preserve">
-    <value>无法保存该颜色。</value>
-  </data>
-  <data name="ChatNameColor_amber" xml:space="preserve">
-    <value>琥珀</value>
-  </data>
-  <data name="ChatNameColor_rose" xml:space="preserve">
-    <value>玫瑰</value>
-  </data>
-  <data name="ChatNameColor_violet" xml:space="preserve">
-    <value>紫罗兰</value>
-  </data>
-  <data name="ChatNameColor_sky" xml:space="preserve">
-    <value>天蓝</value>
-  </data>
-  <data name="ChatNameColor_emerald" xml:space="preserve">
-    <value>翡翠</value>
-  </data>
-  <data name="ChatNameColor_lime" xml:space="preserve">
-    <value>青柠</value>
-  </data>
-  <data name="ChatNameColor_cyan" xml:space="preserve">
-    <value>青色</value>
-  </data>
-  <data name="ChatNameColor_orange" xml:space="preserve">
-    <value>橙色</value>
-  </data>
-  <data name="ChatReply" xml:space="preserve">
-    <value>回复</value>
-  </data>
-  <data name="ChatReplyCancel" xml:space="preserve">
-    <value>取消回复</value>
-  </data>
-  <data name="ChatReplyDeleted" xml:space="preserve">
-    <value>消息已删除</value>
-  </data>
-  <data name="ChatReplyOriginalGone" xml:space="preserve">
-    <value>原始消息已不在可见的聊天记录中。</value>
-  </data>
-  <data name="ChatTranslateFailed" xml:space="preserve">
-    <value>无法连接翻译服务，请稍后再试。</value>
-  </data>
-  <data name="ChatTranslateConsentAccept" xml:space="preserve">
-    <value>翻译</value>
-  </data>
   <data name="AutomaticUpdates" xml:space="preserve">
     <value>自动更新</value>
   </data>
   <data name="AutomaticUpdatesToolTip" xml:space="preserve">
     <value>启动时自动检查更新，并在后台下载快速增量补丁。</value>
-  </data>
-  <data name="ChatRefusedProfanity" xml:space="preserve">
-    <value>注意用词 — 第 {0} 次警告，共 {1} 次。请保持文明，否则下次将被禁言。</value>
-  </data>
-  <data name="SupportTitle" xml:space="preserve">
-    <value>工单</value>
-  </data>
-  <data name="SupportNewTicket" xml:space="preserve">
-    <value>新建工单</value>
-  </data>
-  <data name="SupportNoTickets" xml:space="preserve">
-    <value>还没有工单。</value>
-  </data>
-  <data name="SupportCategory" xml:space="preserve">
-    <value>分类</value>
-  </data>
-  <data name="SupportSubject" xml:space="preserve">
-    <value>主题</value>
-  </data>
-  <data name="SupportDetails" xml:space="preserve">
-    <value>详情</value>
-  </data>
-  <data name="SupportRemove" xml:space="preserve">
-    <value>移除</value>
-  </data>
-  <data name="SupportAttachFiles" xml:space="preserve">
-    <value>添加附件</value>
-  </data>
-  <data name="SupportAppeal" xml:space="preserve">
-    <value>这是对我当前禁言的申诉</value>
-  </data>
-  <data name="SupportCancel" xml:space="preserve">
-    <value>取消</value>
-  </data>
-  <data name="SupportSubmit" xml:space="preserve">
-    <value>提交</value>
-  </data>
-  <data name="SupportBackToTickets" xml:space="preserve">
-    <value>返回工单列表</value>
-  </data>
-  <data name="SupportReplyPlaceholder" xml:space="preserve">
-    <value>写回复…</value>
-  </data>
-  <data name="SupportSend" xml:space="preserve">
-    <value>发送</value>
-  </data>
-  <data name="SupportTicketClosed" xml:space="preserve">
-    <value>该工单已关闭。</value>
-  </data>
-  <data name="SupportTicketResolved" xml:space="preserve">
-    <value>该工单已解决。如果仍需帮助，请新建工单。</value>
-  </data>
-  <data name="SupportNeedSubjectAndDetail" xml:space="preserve">
-    <value>需要填写主题和详情。</value>
-  </data>
-  <data name="SupportSendFailed" xml:space="preserve">
-    <value>发送失败，请稍后再试。</value>
-  </data>
-  <data name="SupportCatAppeal" xml:space="preserve">
-    <value>申诉</value>
-  </data>
-  <data name="SupportCatBug" xml:space="preserve">
-    <value>缺陷</value>
-  </data>
-  <data name="SupportCatFeature" xml:space="preserve">
-    <value>功能建议</value>
-  </data>
-  <data name="SupportCatHelp" xml:space="preserve">
-    <value>帮助</value>
-  </data>
-  <data name="SupportCatOther" xml:space="preserve">
-    <value>其他</value>
-  </data>
-  <data name="SupportStatusOpen" xml:space="preserve">
-    <value>待处理</value>
-  </data>
-  <data name="SupportStatusInProgress" xml:space="preserve">
-    <value>处理中</value>
-  </data>
-  <data name="SupportStatusAwaitingUser" xml:space="preserve">
-    <value>等待你的回复</value>
-  </data>
-  <data name="SupportStatusResolved" xml:space="preserve">
-    <value>已解决</value>
-  </data>
-  <data name="SupportStatusClosed" xml:space="preserve">
-    <value>已关闭</value>
-  </data>
-  <data name="SupportAttachmentTooLarge" xml:space="preserve">
-    <value>未添加 — {0} 超过 {1} MB。</value>
   </data>
   <data name="SidebarToolsFolder" xml:space="preserve">
     <value>工具</value>

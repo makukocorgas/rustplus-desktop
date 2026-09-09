@@ -1507,7 +1507,6 @@ public static class TrackingService
             if (string.Equals(_settings.SelectedLanguage, value, StringComparison.Ordinal)) return;
             _settings.SelectedLanguage = value;
             SaveSettings();
-            _ = Social.SocialApi.UpdateActiveListingLanguageAsync(value);
         }
     }
 
@@ -1766,11 +1765,6 @@ public static class TrackingService
     {
         get => _settings.SuppressVersion8Notice;
         set { _settings.SuppressVersion8Notice = value; SaveDB(); }
-    }
-    public static bool PendingWhatsNewNotice
-    {
-        get => _settings.PendingWhatsNewNotice;
-        set { _settings.PendingWhatsNewNotice = value; SaveDB(); }
     }
     public static int GetLearnedCargoFullLife(string host)
     {
