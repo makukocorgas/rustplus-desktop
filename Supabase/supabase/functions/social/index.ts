@@ -553,15 +553,21 @@ serve(async (req) => {
     if (recent) return json({ error: "duplicate" }, 409);
 
     // Slow mode: staff post through it freely, everyone else waits out the room's cooldown
-    // since their own last line here, regardless of what that line said.
+    // since their own last line here, regardless of what that line said. The reply carries the
+    // seconds still to wait so the client can count down instead of showing a bare refusal.
     if (!isModerator) {
       const { data: roomSettings } = await supabase.from("chat_rooms").select("slow_mode_seconds").eq("room", room).maybeSingle();
       const slowModeSeconds = roomSettings?.slow_mode_seconds ?? 0;
       if (slowModeSeconds > 0) {
         const { data: lastOwn } = await supabase.from("social_chat_messages")
-          .select("id").eq("room", room).eq("sender_steam_id", steamId)
-          .gt("created_at", new Date(Date.now() - slowModeSeconds * 1000).toISOString()).limit(1).maybeSingle();
-        if (lastOwn) return json({ error: "duplicate" }, 409);
+          .select("created_at").eq("room", room).eq("sender_steam_id", steamId)
+          .gt("created_at", new Date(Date.now() - slowModeSeconds * 1000).toISOString())
+          .order("created_at", { ascending: false }).limit(1).maybeSingle();
+        if (lastOwn) {
+          const elapsed = (Date.now() - new Date(lastOwn.created_at).getTime()) / 1000;
+          const remaining = Math.max(1, Math.ceil(slowModeSeconds - elapsed));
+          return json({ error: `slow_mode:${remaining}` }, 429);
+        }
       }
     }
 
