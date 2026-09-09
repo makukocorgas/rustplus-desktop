@@ -13,7 +13,9 @@
 // GET  support/notifications                  -> { data: NotificationItem[] }
 // GET  support/notifications/unread-count     -> { data: { unread } }
 // POST support/notifications/{id}/read
+// POST support/notifications/{id}/dismiss
 // POST support/notifications/read-all
+// POST support/notifications/clear-all
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -253,10 +255,11 @@ serve(async (req) => {
     return json({ ok: true });
   }
 
-  // GET support/notifications
+  // GET support/notifications — dismissed rows stay in the database but never come back to the
+  // client, matching the dashboard: "Clear all" and dismiss are a client-side hide, not a delete.
   if (route.length === 1 && route[0] === "notifications" && req.method === "GET") {
     const { data, error } = await supabase.from("support_notifications")
-      .select("*").eq("steam_id", steamId).order("created_at", { ascending: false }).limit(100);
+      .select("*").eq("steam_id", steamId).is("dismissed_at", null).order("created_at", { ascending: false }).limit(100);
     if (error) return json({ error: error.message }, 500);
     return json({ data });
   }
@@ -264,7 +267,7 @@ serve(async (req) => {
   // GET support/notifications/unread-count
   if (route.length === 2 && route[0] === "notifications" && route[1] === "unread-count" && req.method === "GET") {
     const { count } = await supabase.from("support_notifications")
-      .select("id", { count: "exact", head: true }).eq("steam_id", steamId).is("read_at", null);
+      .select("id", { count: "exact", head: true }).eq("steam_id", steamId).is("read_at", null).is("dismissed_at", null);
     return json({ data: { unread: count ?? 0 } });
   }
 
@@ -274,9 +277,22 @@ serve(async (req) => {
     return json({ ok: true });
   }
 
+  // POST support/notifications/clear-all — hides everything currently in the inbox; only
+  // notifications created after this moment will show up again.
+  if (route.length === 2 && route[0] === "notifications" && route[1] === "clear-all" && req.method === "POST") {
+    await supabase.from("support_notifications").update({ dismissed_at: new Date().toISOString() }).eq("steam_id", steamId).is("dismissed_at", null);
+    return json({ ok: true });
+  }
+
   // POST support/notifications/{id}/read
   if (route.length === 3 && route[0] === "notifications" && route[2] === "read" && req.method === "POST") {
     await supabase.from("support_notifications").update({ read_at: new Date().toISOString() }).eq("id", route[1]).eq("steam_id", steamId);
+    return json({ ok: true });
+  }
+
+  // POST support/notifications/{id}/dismiss — hides just this one.
+  if (route.length === 3 && route[0] === "notifications" && route[2] === "dismiss" && req.method === "POST") {
+    await supabase.from("support_notifications").update({ dismissed_at: new Date().toISOString() }).eq("id", route[1]).eq("steam_id", steamId);
     return json({ ok: true });
   }
 
