@@ -53,13 +53,7 @@ public partial class MainWindow
                     {
                         var msg = AlertTemplateService.GetAlertTemplate("AlertDeepSeaUp");
                         _ = SendTeamChatSafeAsync(msg, false, true);
-                        _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83C\uDF0A **Event:** {msg}");
-                        if (RustPlusDesk.Services.TrackingService.NotificationsToastEnabled)
-                        {
-                            var notif = new RustPlusDesk.Models.RustPlusNotification(type: "Event", title: "\uD83C\uDF0A Deep Sea", message: msg,
-                                serverIp: _vm?.Selected?.Host ?? "", serverPort: _vm?.Selected?.Port ?? 0, serverName: _vm?.Selected?.Name ?? "");
-                            RustPlusDesk.Services.NotificationCenterService.AddNotification(notif);
-                        }
+                        _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDEA2 **Event:** {msg}");
                     }
                     AppendLog($"[DEEPSEA] Spawn detected at {deepSeaShop.X:F0},{deepSeaShop.Y:F0} (Direction: {dir})");
                 }
@@ -70,7 +64,6 @@ public partial class MainWindow
                     _deepSeaMidEvent = true;
                     string dir = GetDeepSeaDirection(deepSeaShop.X, deepSeaShop.Y);
                     AppendLog($"[DEEPSEA] Active on first poll (mid-event) at {deepSeaShop.X:F0},{deepSeaShop.Y:F0} ({dir})");
-                    BackfillPersonalEventSpawnTime("deepsea_spawn", t => { _deepSeaSpawnTime = t; _deepSeaMidEvent = false; });
                 }
             }
             // The toggle button is always visible (see MainWindow.xaml) — spawn/despawn only
@@ -145,6 +138,8 @@ public partial class MainWindow
 
     private async void ChkShops_Checked(object sender, RoutedEventArgs e)
     {
+        // The layer toggle in the top bar counts as much as the map button.
+        if ((sender as System.Windows.Controls.CheckBox)?.IsChecked == true) Ach.Unlock(Ach.Shops);
         // Shops removed from the Rust+ feed — never poll for them.
         if (Services.RustApiFeatures.EventsAndShopsRemoved)
         {
@@ -173,7 +168,7 @@ public partial class MainWindow
             _shopTimer?.Stop();
             _shopTimer = null;
 
-            foreach (var kv in _shopEls) Overlay.Children.Remove(kv.Value);
+            foreach (var kv in _shopEls) RemoveFromMapLayers(kv.Value);
             _shopEls.Clear();
 
             UpdateShopPollingWarning();
@@ -212,7 +207,7 @@ public partial class MainWindow
             while (retries < 3)
             {
                 shops = await real.GetVendingShopsAsync(ct);
-
+                
                 // If we got null, it's a technical error -> retry
                 if (shops == null)
                 {
@@ -436,7 +431,7 @@ public partial class MainWindow
             AppendLog("Shops: Polling off.");
         }
 
-        foreach (var el in _shopEls.Values) Overlay.Children.Remove(el);
+        foreach (var el in _shopEls.Values) RemoveFromMapLayers(el);
         _shopEls.Clear();
     }
 
@@ -493,7 +488,7 @@ public partial class MainWindow
                 grid.MouseLeftButtonUp += ShopElement_Click;
 
                 _shopEls[clusterId] = grid;
-                Overlay.Children.Add(grid);
+                IconLayer.Children.Add(grid);
                 Panel.SetZIndex(grid, 910);
                 grid.Visibility = (_isShowingDeepSeaMap == (avgX < 0)) ? Visibility.Visible : Visibility.Collapsed;
                 el = grid;
@@ -550,7 +545,7 @@ public partial class MainWindow
         {
             if (_shopEls.TryGetValue(id, out var el))
             {
-                Overlay.Children.Remove(el);
+                RemoveFromMapLayers(el);
                 _shopEls.Remove(id);
                 if (el is FrameworkElement fe) _shopIconSet.Remove(fe);
             }
@@ -662,7 +657,7 @@ public partial class MainWindow
             }
             else
             {
-                shopContainer.Children.Add(new TextBlock { Text = RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiNoOffersAvailable") ?? "No offers available", Foreground = Brushes.Gray, FontSize = 12, FontStyle = FontStyles.Italic, Margin = new Thickness(4) });
+                shopContainer.Children.Add(new TextBlock { Text = RustPlusDesk.Properties.Resources.GetString("CodeUiNoOffersAvailable"), Foreground = Brushes.Gray, FontSize = 12, FontStyle = FontStyles.Italic, Margin = new Thickness(4) });
             }
 
             ShopDetailsContent.Children.Add(shopContainer);

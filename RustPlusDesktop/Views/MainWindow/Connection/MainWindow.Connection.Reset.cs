@@ -12,7 +12,6 @@ public partial class MainWindow
 {
     private ServerProfile? _connectedProfile;
     private DispatcherTimer? _storageTimer;
-    private bool _storageTickBusy; // optionaler Reentrancy-Schutz
     private bool _isReconnecting = false;
     private CancellationTokenSource _connectionPollingCts = new();
 
@@ -28,14 +27,6 @@ public partial class MainWindow
     private async Task HardResetAsync(bool reconnect = false)
     {
         _connectedProfile = null;
-        // Explicit disconnect: force the next connect to a server to re-sync with the
-        // cloud (in case markers were edited from elsewhere while offline).
-        _ownOverlayLoadedForServerKey = null;
-        // Don't let overlay-upload state leak across a server switch.
-        _overlayUploadInFlight = false;
-        _pendingOverlayUpload = null;
-        _overlaySyncPendingRetry = false;
-        _overlaySyncRetryBackoffTicks = 0;
         // 1) Laufende Polls/Tokens abbrechen
         CancelConnectionPolling();
         try { StopDynPolling(clearKnown: !reconnect); } catch { }
@@ -57,6 +48,8 @@ public partial class MainWindow
 
         // 3) UI-/In-Memory-State leeren
         try { TeamMembers.Clear(); } catch { }
+        try { ClanMembers.Clear(); } catch { }
+        try { _lastClanPoll = DateTime.MinValue; } catch { }
         try { _avatarCache.Clear(); } catch { }
         try { _lastPresence.Clear(); } catch { }
         try { ClearAllDeathPins(); } catch { }
@@ -78,7 +71,7 @@ public partial class MainWindow
         try
         {
             foreach (var el in _shopEls.Values)
-                Overlay.Children.Remove(el);
+                RemoveFromMapLayers(el);
             _shopEls.Clear();
         }
         catch { }
@@ -300,7 +293,7 @@ public partial class MainWindow
         try
         {
             CancelConnectionPolling();
-            try { StopDynPolling(clearKnown: false); } catch { }
+            StopDynPolling(clearKnown: false);
 
             if (_vm?.Selected != null)
             {
@@ -321,7 +314,6 @@ public partial class MainWindow
 
             int delay = 2000;
             int maxDelay = 60000;
-
             while (_isReconnecting)
             {
                 AppendLog($"[auto-reconnect] Retrying in {delay / 1000}s...");

@@ -26,16 +26,13 @@ internal static class Ach
     public const string Keycards = AchievementCatalog.Keycards;
     public const string CameraImage = AchievementCatalog.CameraImage;
     public const string Clan = AchievementCatalog.Clan;
-    public const string GlobalChat = AchievementCatalog.GlobalChat;
     public const string Shops = AchievementCatalog.Shops;
     public const string Timer = AchievementCatalog.Timer;
-    public const string AiCompanion = AchievementCatalog.AiCompanion;
     public const string Crosshair = AchievementCatalog.Crosshair;
     public const string FarmingRoute = AchievementCatalog.FarmingRoute;
     public const string OilrigCrate = AchievementCatalog.OilrigCrate;
     public const string PatchNotes = AchievementCatalog.PatchNotes;
     public const string CargoSound = AchievementCatalog.CargoSound;
-    public const string Lfg = AchievementCatalog.Lfg;
     public const string FollowMe = AchievementCatalog.FollowMe;
     public const string DeepSea = AchievementCatalog.DeepSea;
     public const string Raided = AchievementCatalog.Raided;

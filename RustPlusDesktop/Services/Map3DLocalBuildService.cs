@@ -523,7 +523,7 @@ public static class Map3DLocalBuildService
         return (success, process.ExitCode, string.IsNullOrWhiteSpace(stderr) ? null : stderr.Trim());
     }
 
-    private static MapMatchScore ScoreParsedMap(string resolvedPath, IReadOnlyList<Map3DReferenceMonument>? refs, int worldSize)
+    internal static MapMatchScore ScoreParsedMap(string resolvedPath, IReadOnlyList<Map3DReferenceMonument>? refs, int worldSize)
     {
         if (refs == null || refs.Count == 0 || worldSize <= 0 || !File.Exists(resolvedPath)) return default;
 
@@ -598,7 +598,7 @@ public static class Map3DLocalBuildService
         };
     }
 
-    private static bool IsGoodMatch(MapMatchScore score, IReadOnlyList<Map3DReferenceMonument>? refs)
+    internal static bool IsGoodMatch(MapMatchScore score, IReadOnlyList<Map3DReferenceMonument>? refs)
     {
         int available = refs?.Count(r => !string.IsNullOrWhiteSpace(r.Name)) ?? 0;
         int required = Math.Min(3, Math.Max(1, available));
@@ -716,7 +716,7 @@ public static class Map3DLocalBuildService
 
     private readonly record struct ParsedPoint(double X, double Y, string Name);
     private readonly record struct CachedMap3DManifest(string SelectedMapFile);
-    private readonly record struct MapMatchScore(int MatchedCount, double TotalDistance)
+    internal readonly record struct MapMatchScore(int MatchedCount, double TotalDistance)
     {
         public bool IsBetterThan(MapMatchScore other)
         {

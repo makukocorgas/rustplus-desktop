@@ -46,16 +46,13 @@ public static class AchievementCatalog
     public const string Keycards = "what_card_again";
     public const string CameraImage = "i_see_you";
     public const string Clan = "even_stronger";
-    public const string GlobalChat = "hello_world";
     public const string Shops = "we_wish_that_was_still_possible";
     public const string Timer = "tick_tick_tick";
-    public const string AiCompanion = "is_it_concious";
     public const string Crosshair = "always_in_sight";
     public const string FarmingRoute = "i_know_where_to_farm";
     public const string OilrigCrate = "15m_to_counter_that";
     public const string PatchNotes = "whats_new";
     public const string CargoSound = "tuut_tuut";
-    public const string Lfg = "join_me";
     public const string FollowMe = "stay_with_me";
     public const string DeepSea = "going_deep";
     public const string Raided = "getting_raided";
@@ -80,16 +77,13 @@ public static class AchievementCatalog
         new AchievementDef(Keycards,          "What card again?",           13),
         new AchievementDef(CameraImage,       "I see you",                  14),
         new AchievementDef(Clan,              "Even Stronger",              15),
-        new AchievementDef(GlobalChat,        "Hello World!",               16),
         new AchievementDef(Shops,             "We wish that was still possible", 17),
         new AchievementDef(Timer,             "Tick...Tick...Tick...",      18),
-        new AchievementDef(AiCompanion,       "Is it concious?",            19),
         new AchievementDef(Crosshair,         "Always in sight",            20),
         new AchievementDef(FarmingRoute,      "I know where to farm",       21),
         new AchievementDef(OilrigCrate,       "15m to counter that",        22),
         new AchievementDef(PatchNotes,        "What's new?",                23),
         new AchievementDef(CargoSound,        "Tuut Tuut",                  24),
-        new AchievementDef(Lfg,               "Join me!",                   25),
         new AchievementDef(FollowMe,          "Stay with me",               26),
         new AchievementDef(DeepSea,           "Going Deep!",                27),
         new AchievementDef(Raided,            "Getting Raided",             28),

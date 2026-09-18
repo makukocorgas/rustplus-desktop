@@ -4743,6 +4743,60 @@
                                                 </ui:Button>
 
                                                 <Border Margin="0,14,0,12" BorderBrush="{DynamicResource WhiteA20}" BorderThickness="0,1,0,0" />
+                                                <TextBlock Margin="0,0,0,8" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource Accent}" Text="{DynamicResource CargoShip}" />
+                                                <CheckBox
+                                                    x:Name="ChkCargoPath"
+                                                    Margin="0,0,0,8"
+                                                    Checked="ChkCargoPath_Checked"
+                                                    Content="{DynamicResource CargoShip}"
+                                                    IsChecked="False"
+                                                    Opacity="0.45"
+                                                    Style="{StaticResource DotCheckBox}"
+                                                    ToolTip="{DynamicResource UiGenerateThe3DMapToEnableNoBuildZones}"
+                                                    ToolTipService.ShowOnDisabled="True"
+                                                    Unchecked="ChkCargoPath_Checked" />
+
+                                                <Border Margin="0,14,0,12" BorderBrush="{DynamicResource WhiteA20}" BorderThickness="0,1,0,0" />
+                                                <TextBlock Margin="0,0,0,8" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource Accent}" Text="{DynamicResource UiKeycardsSection}" />
+                                                <!--  Two questions, two layers: which cards the doors here want, and
+                                                      which card you can walk away with. Most places do one, not both.  -->
+                                                <CheckBox
+                                                    x:Name="ChkCardReaders"
+                                                    Margin="0,0,0,8"
+                                                    Checked="ChkKeycards_Checked"
+                                                    Content="{DynamicResource UiCardReaders}"
+                                                    IsChecked="False"
+                                                    Opacity="0.45"
+                                                    Style="{StaticResource DotCheckBox}"
+                                                    ToolTip="{DynamicResource UiParseMapToEnableKeycards}"
+                                                    ToolTipService.ShowOnDisabled="True"
+                                                    Unchecked="ChkKeycards_Checked" />
+                                                <CheckBox
+                                                    x:Name="ChkKeycards"
+                                                    Margin="0,0,0,8"
+                                                    Checked="ChkKeycards_Checked"
+                                                    Content="{DynamicResource UiKeycards}"
+                                                    IsChecked="False"
+                                                    Opacity="0.45"
+                                                    Style="{StaticResource DotCheckBox}"
+                                                    ToolTip="{DynamicResource UiParseMapToEnableKeycards}"
+                                                    ToolTipService.ShowOnDisabled="True"
+                                                    Unchecked="ChkKeycards_Checked" />
+
+                                                <ui:Button
+                                                    x:Name="BtnParseAllMonuments"
+                                                    Margin="0,4,0,4"
+                                                    HorizontalAlignment="Stretch"
+                                                    HorizontalContentAlignment="Left"
+                                                    Click="BtnParseAllMonuments_Click"
+                                                    Visibility="Collapsed">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <ui:SymbolIcon Symbol="DocumentSearch20" Margin="0,0,7,0" />
+                                                        <TextBlock Text="{DynamicResource UiParseAllMonuments}" />
+                                                    </StackPanel>
+                                                </ui:Button>
+
+                                                <Border Margin="0,14,0,12" BorderBrush="{DynamicResource WhiteA20}" BorderThickness="0,1,0,0" />
                                                 <TextBlock Margin="0,0,0,8" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource Accent}" Text="{DynamicResource Shops}" />
                                                 <CheckBox
                                                     x:Name="ChkLayerAutoLoadShops"
@@ -6222,6 +6276,18 @@
                                                 <TextBlock Text="{DynamicResource UiSendToDiscord}" FontSize="11" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" />
                                             </StackPanel>
                                         </ui:Button>
+                                        <ui:Button
+                                            x:Name="BtnView2D"
+                                            Margin="0,2,0,0"
+                                            Padding="6,4"
+                                            Appearance="Transparent"
+                                            BorderThickness="0"
+                                            Click="BtnView2D_Click"
+                                            ToolTip="{DynamicResource UiShowThe2DMap}"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Center">
+                                            <TextBlock Text="{DynamicResource UiText2D}" FontSize="11" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" />
+                                        </ui:Button>
 <ui:Button
                                             x:Name="BtnOpen3DMap"
                                             tutorials:Tutorial.TargetId="Map.Open3D"
@@ -6230,6 +6296,8 @@
                                             Appearance="Transparent"
                                             BorderThickness="0"
                                             Click="BtnOpen3DMap_Click"
+                                            MouseEnter="BtnOpen3DMap_MouseEnter"
+                                            MouseLeave="BtnOpen3DMap_MouseLeave"
                                             ToolTip="{DynamicResource UiBuildAndOpenLocal3DMap}"
                                             HorizontalAlignment="Stretch"
                                             VerticalAlignment="Center"
@@ -6239,6 +6307,25 @@
                                                 <TextBlock x:Name="TxtOpen3DMap" Text="3D Map" FontSize="11" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" />
                                             </StackPanel>
                                         </ui:Button>
+                                        <Popup
+                                            x:Name="Map3DAuthPopup"
+                                            AllowsTransparency="True"
+                                            PopupAnimation="Fade"
+                                            IsOpen="False"
+                                            Placement="Bottom"
+                                            PlacementTarget="{Binding ElementName=BtnOpen3DMap}"
+                                            StaysOpen="True"
+                                            IsHitTestVisible="False">
+                                            <ui:Card Margin="8,0,0,0" Padding="12,10" Background="#F20E1117" BorderBrush="#55FF8C00" BorderThickness="1" MaxWidth="280" IsHitTestVisible="False">
+                                                <StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                        <ui:SymbolIcon Symbol="PersonLock20" Foreground="#FF8C00" Margin="0,0,7,0" />
+                                                        <TextBlock Text="{DynamicResource UiLoginRequired}" FontSize="13" FontWeight="SemiBold" Foreground="White" />
+                                                    </StackPanel>
+                                                    <TextBlock Text="{DynamicResource UiLogInToYourRustDeskAccountToGenerate3DMapsAndHeatmaps}" TextWrapping="Wrap" FontSize="12" Foreground="#D8FFFFFF" />
+                                                </StackPanel>
+                                            </ui:Card>
+                                        </Popup>
 
                                         <!-- Heatmap Button -->
                                         <Grid Margin="0,2,0,0">
@@ -6260,7 +6347,44 @@
                                                     <TextBlock Text="{DynamicResource UiHeatmaps}" FontSize="11" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" />
                                                 </StackPanel>
                                             </ui:Button>
+                                            <Button
+                                                x:Name="BtnToggleHeatmapGate"
+                                                Background="Transparent"
+                                                BorderBrush="Transparent"
+                                                BorderThickness="0"
+                                                Click="BtnToggleHeatmapGate_Click"
+                                                MouseEnter="BtnToggleHeatmapGate_MouseEnter"
+                                                MouseLeave="BtnToggleHeatmapGate_MouseLeave"
+                                                AutomationProperties.Name="{DynamicResource UiHeatmapsUnavailable}"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch"
+                                                Visibility="Collapsed">
+                                                <Button.Template>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border Background="Transparent" />
+                                                    </ControlTemplate>
+                                                </Button.Template>
+                                            </Button>
                                         </Grid>
+                                        <Popup
+                                            x:Name="HeatmapAvailabilityPopup"
+                                            AllowsTransparency="True"
+                                            PopupAnimation="Fade"
+                                            IsOpen="False"
+                                            Placement="Right"
+                                            PlacementTarget="{Binding ElementName=BtnToggleHeatmapGate}"
+                                            StaysOpen="True"
+                                            IsHitTestVisible="False">
+                                            <ui:Card Margin="8,0,0,0" Padding="12,10" Background="#F20E1117" BorderBrush="#55FF8C00" BorderThickness="1" MaxWidth="280" IsHitTestVisible="False">
+                                                <StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                        <ui:SymbolIcon Symbol="Info20" Foreground="#FF8C00" Margin="0,0,7,0" />
+                                                        <TextBlock Text="{DynamicResource UiHeatmapsUnavailable}" FontSize="13" FontWeight="SemiBold" Foreground="White" />
+                                                    </StackPanel>
+                                                    <TextBlock x:Name="TxtHeatmapAvailabilityMessage" Text="{DynamicResource UiLogInToYourRustDeskAccountToGenerate3DMapsAndHeatmaps}" TextWrapping="Wrap" FontSize="12" Foreground="#D8FFFFFF" />
+                                                </StackPanel>
+                                            </ui:Card>
+                                        </Popup>
                                         <Popup
                                             x:Name="HeatmapPopup"
                                             AllowsTransparency="True"
@@ -7145,7 +7269,21 @@
                         </StackPanel>
 
                         <Canvas x:Name="GridLayer" IsHitTestVisible="False" />
+                        <!--  No Build zones get their own canvas: they used to live on GridLayer, whose
+                              wrapper opacity follows the Grid toggle, so turning the grid off hid them too.  -->
+                        <Canvas x:Name="NoBuildLayer" IsHitTestVisible="False" />
+                        <Canvas x:Name="CargoPathLayer" IsHitTestVisible="False" />
+                        <!--  Keycard readers and findable cards. Its own canvas so both can be
+                              switched independently of the monument icons they sit on.  -->
+                        <Canvas x:Name="KeycardLayer" IsHitTestVisible="False" />
+                        <!--  Overlay = user drawings only. Icons and players get their own canvases so the
+                              mini-map can mirror each layer on its own: a VisualBrush can only show or hide
+                              a whole visual subtree, never a filtered selection of one canvas.  -->
                         <Canvas x:Name="Overlay" IsHitTestVisible="True" />
+                        <Canvas x:Name="IconLayer" IsHitTestVisible="True" />
+                        <Canvas x:Name="PlayerLayer" IsHitTestVisible="True" />
+                        <Canvas x:Name="DeathLayer" IsHitTestVisible="True" />
+                        <Canvas x:Name="MapUiLayer" IsHitTestVisible="True" />
 
                         <!-- Monument Navigation Panel -->
                         <Border

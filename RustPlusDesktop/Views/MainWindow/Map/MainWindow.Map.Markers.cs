@@ -58,34 +58,6 @@ public partial class MainWindow
     private int _pollFailCount = 0;
     private bool _isAutoReconnecting = false;
 
-    /// <summary>
-    /// Best-effort lookup against the personal event history (see PersonalEventSyncService) to
-    /// replace a "??:??" mid-event placeholder with the real spawn time. No-ops for anyone but
-    /// the developer's own account, and simply leaves the placeholder in place on any failure
-    /// (no bot running, no network, event not seen yet, etc).
-    /// </summary>
-    private void BackfillPersonalEventSpawnTime(string eventType, Action<DateTime> apply)
-    {
-        var host = _vm?.Selected?.Host;
-        var port = _vm?.Selected?.Port ?? 0;
-        var steamId = _vm?.Selected?.SteamId64;
-        if (string.IsNullOrEmpty(host) || string.IsNullOrEmpty(steamId)) return;
-
-        _ = Task.Run(async () =>
-        {
-            var t = await PersonalEventSyncService.GetLastEventTimeAsync(host, port, steamId, eventType);
-            if (t.HasValue)
-            {
-                apply(t.Value);
-                AppendLog($"[PersonalEvents] Backfilled {eventType} spawn time from Supabase: {t.Value:u}");
-            }
-            else
-            {
-                AppendLog($"[PersonalEvents] No backfill found for {eventType} — leaving placeholder.");
-            }
-        });
-    }
-
     private class HeliCrashSite
     {
         public uint HeliId;
@@ -104,7 +76,7 @@ public partial class MainWindow
     {
         if (Overlay == null || _worldSizeS <= 0 || _worldRectPx.Width <= 0) return;
 
-        foreach (var kv in _monEls) Overlay.Children.Remove(kv.Value);
+        foreach (var kv in _monEls) RemoveFromMapLayers(kv.Value);
         _monEls.Clear();
 
         string host = _rust?.Host ?? "unknown";
@@ -144,7 +116,7 @@ public partial class MainWindow
             var fe = MakeMonIcon(key, tt, 28);
             fe.Tag = m;
 
-            Overlay.Children.Add(fe);
+            IconLayer.Children.Add(fe);
             bool isTrain = key.Contains("train tunnel", StringComparison.OrdinalIgnoreCase);
             Panel.SetZIndex(fe, isTrain ? 700 : 900);
             _monEls[key + "@" + p.X.ToString("0") + "," + p.Y.ToString("0")] = fe;
@@ -553,7 +525,13 @@ public partial class MainWindow
             SyncAlertMenuItems(); // Refresh arrival warning enabled state now that host is known
 
             Overlay.Width = ImgMap.Width;
+            IconLayer.Width = ImgMap.Width;
+            PlayerLayer.Width = ImgMap.Width;
+            MapUiLayer.Width = ImgMap.Width;
             Overlay.Height = ImgMap.Height;
+            IconLayer.Height = ImgMap.Height;
+            PlayerLayer.Height = ImgMap.Height;
+            MapUiLayer.Height = ImgMap.Height;
             GridLayer.Width = ImgMap.Width;
             GridLayer.Height = ImgMap.Height;
 
@@ -591,7 +569,14 @@ public partial class MainWindow
             MergeCachedExtraMonumentsForCurrentMap();
             BuildMonumentOverlays();
             LoadCachedBuildingBlockedZonesForCurrentServer();
+            LoadCachedCargoPathForCurrentServer();
+            LoadCachedKeycardSitesForCurrentServer();
 
+            var activeProfile = _vm?.Selected;
+            if (activeProfile != null)
+            {
+                CheckAndExecutePendingMapCopy(activeProfile);
+            }
             var worldRectPx = ComputeWorldRectFromWorldSize(wDip2, hDip2, s, padWorld: GetCurrentMapPaddingWorld());
             AppendLog($"worldRectDip(fromS)=[{(int)worldRectPx.X},{(int)worldRectPx.Y},{(int)worldRectPx.Width}x{(int)worldRectPx.Height}] dipSize={wDip2:F0}x{hDip2:F0} S={s}");
 
@@ -634,7 +619,7 @@ public partial class MainWindow
         _dynTimer?.Stop();
         _dynTimer = null;
 
-        foreach (var kv in _dynEls) Overlay.Children.Remove(kv.Value);
+        foreach (var kv in _dynEls) RemoveFromMapLayers(kv.Value);
         _dynEls.Clear();
         _dynStates.Clear();
         if (clearKnown) _dynKnown.Clear();
@@ -726,12 +711,7 @@ public partial class MainWindow
                     var msg = AlertTemplateService.GetFormattedAlert("AlertCargoSpawned", locStr);
                     _ = SendTeamChatSafeAsync(msg, false, true);
                     _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDEA2 **Event:** {msg}");
-                    if (RustPlusDesk.Services.TrackingService.NotificationsToastEnabled)
-                    {
-                        var notif = new RustPlusDesk.Models.RustPlusNotification(type: "Event", title: "\uD83D\uDEA2 Cargo Ship", message: msg,
-                            serverIp: _vm?.Selected?.Host ?? "", serverPort: _vm?.Selected?.Port ?? 0, serverName: _vm?.Selected?.Name ?? "");
-                        RustPlusDesk.Services.NotificationCenterService.AddNotification(notif);
-                    }
+                    
                     if (state.SeenAtEdge)
                         AppendLog($"[cargo] Spawn detected at edge (dist: {distFromCenter:F0}, threshold: {half * 0.85:F0})");
                 }
@@ -786,12 +766,6 @@ public partial class MainWindow
                     if (best.Ts != default && (DateTime.UtcNow - best.Ts).TotalMinutes > 4)
                     {
                         TrackingService.SetCargoTriggerPoint(host, harbor.Name, best.X, best.Y);
-                        // Auto-enable arrival warning now that this harbor's route is known —
-                        // but only if the user has never explicitly set this toggle themselves.
-                        if (TrackingService.AnnounceSpawnsMaster && TrackingService.AutoEnableCargoArrivalIfEligible())
-                        {
-                            _ = Dispatcher.InvokeAsync(SyncAlertMenuItems);
-                        }
                     }
                 }
 
@@ -831,12 +805,6 @@ public partial class MainWindow
                 var msg = AlertTemplateService.GetFormattedAlert("AlertCargoDocked", state.HarborName ?? string.Empty, grid);
                 _ = SendTeamChatSafeAsync(msg, false, true);
                 _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDEA2 **Event Update:** {msg}");
-                if (RustPlusDesk.Services.TrackingService.NotificationsToastEnabled)
-                {
-                    var notif = new RustPlusDesk.Models.RustPlusNotification(type: "Event", title: "\uD83D\uDEA2 Cargo Docked", message: msg,
-                        serverIp: _vm?.Selected?.Host ?? "", serverPort: _vm?.Selected?.Port ?? 0, serverName: _vm?.Selected?.Name ?? "");
-                    RustPlusDesk.Services.NotificationCenterService.AddNotification(notif);
-                }
                 state.AnnouncedDock = true;
             }
         }
@@ -862,12 +830,6 @@ public partial class MainWindow
                             var msg = AlertTemplateService.GetFormattedAlert("AlertCargoExpectedDock", Beautify(h.Name!), grid);
                             _ = SendTeamChatSafeAsync(msg, false, true);
                             _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDEA2 **Event Update:** {msg}");
-                            if (RustPlusDesk.Services.TrackingService.NotificationsToastEnabled)
-                            {
-                                var notif = new RustPlusDesk.Models.RustPlusNotification(type: "Event", title: "\uD83D\uDEA2 Cargo Approaching", message: msg,
-                                    serverIp: _vm?.Selected?.Host ?? "", serverPort: _vm?.Selected?.Port ?? 0, serverName: _vm?.Selected?.Name ?? "");
-                                RustPlusDesk.Services.NotificationCenterService.AddNotification(notif);
-                            }
                             state.AnnouncedArrivalWarning = true;
                             state.ArrivalWarnedAt = DateTime.UtcNow; // Record for accuracy validation
                             break;
@@ -896,12 +858,6 @@ public partial class MainWindow
                     var msg = AlertTemplateService.GetFormattedAlert("AlertCargoDeparting", state.HarborName ?? string.Empty, grid);
                     _ = SendTeamChatSafeAsync(msg, false, true);
                     _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDEA2 **Event Update:** {msg}");
-                    if (RustPlusDesk.Services.TrackingService.NotificationsToastEnabled)
-                    {
-                        var notif = new RustPlusDesk.Models.RustPlusNotification(type: "Event", title: "\uD83D\uDEA2 Cargo Departing", message: msg,
-                            serverIp: _vm?.Selected?.Host ?? "", serverPort: _vm?.Selected?.Port ?? 0, serverName: _vm?.Selected?.Name ?? "");
-                        RustPlusDesk.Services.NotificationCenterService.AddNotification(notif);
-                    }
                     state.AnnouncedEgressWarning = true;
                 }
             }
@@ -1054,8 +1010,9 @@ public partial class MainWindow
         }
     }
 
-    private struct EventDockItem
+    internal struct EventDockItem
     {
+        public string Key;
         public string Name;
         public string Icon;
         public bool Active;
@@ -1134,7 +1091,7 @@ public partial class MainWindow
                 ? string.Format(Properties.Resources.HeliShotDownAgo, FormatAgo(ago))
                 : string.Format(Properties.Resources.HeliLeftMapAgo, FormatAgo(ago));
         }
-        activeEvents.Add(new EventDockItem { Name = Properties.Resources.HeliEventName, Icon = "pack://application:,,,/Assets/icons/animat-Icons/patrol_helicopter.png", Active = heli.Id != 0, Id = heli.Id, X = heli.X, Y = heli.Y, Trackable = true, Type = 8, TimerText = heliTimer, ToolTip = heliTip });
+        activeEvents.Add(new EventDockItem { Key = "heli", Name = Properties.Resources.HeliEventName, Icon = "pack://application:,,,/Assets/icons/animat-Icons/patrol_helicopter.png", Active = heli.Id != 0, Id = heli.Id, X = heli.X, Y = heli.Y, Trackable = true, Type = 8, TimerText = heliTimer, ToolTip = heliTip });
 
  
         // 2. Cargo Ship (Type 5)
@@ -1189,14 +1146,14 @@ public partial class MainWindow
             cargoTip = string.Format(Properties.Resources.CargoDespawnedAgo, (int)ago.TotalMinutes, ago.Seconds);
         }
 
-        activeEvents.Add(new EventDockItem { Name = Properties.Resources.CargoShip, Icon = "pack://application:,,,/Assets/icons/cargo.png", Active = cargo.Id != 0, Id = cargo.Id, X = cargo.X, Y = cargo.Y, Trackable = true, Type = 5, TimerText = cargoTimer, ToolTip = cargoTip });
+        activeEvents.Add(new EventDockItem { Key = "cargo", Name = Properties.Resources.CargoShip, Icon = "pack://application:,,,/Assets/icons/cargo.png", Active = cargo.Id != 0, Id = cargo.Id, X = cargo.X, Y = cargo.Y, Trackable = true, Type = 5, TimerText = cargoTimer, ToolTip = cargoTip });
         // The dock turning it on is the moment it was actually heard.
-        if (cargo.Id != 0) Services.Achievements.Ach.Unlock(Services.Achievements.Ach.CargoSound);
+        if (cargo.Id != 0) Ach.Unlock(Ach.CargoSound);
 
-
+ 
         // 3. Chinook (Type 4)
         var chinook = GetPersistentEvent(markers, 4);
-        activeEvents.Add(new EventDockItem { Name = Properties.Resources.Chinook, Icon = "pack://application:,,,/Assets/icons/ch47.png", Active = chinook.Id != 0, Id = chinook.Id, X = chinook.X, Y = chinook.Y, Trackable = true, Type = 4 });
+        activeEvents.Add(new EventDockItem { Key = "chinook", Name = Properties.Resources.Chinook, Icon = "pack://application:,,,/Assets/icons/ch47.png", Active = chinook.Id != 0, Id = chinook.Id, X = chinook.X, Y = chinook.Y, Trackable = true, Type = 4 });
 
         // 4. Vendor (Type 6)
         var vendor = GetPersistentEvent(markers, 6);
@@ -1224,7 +1181,7 @@ public partial class MainWindow
             vendorTimer = $"-{(int)ago.TotalMinutes}:{ago.Seconds:D2}";
             vendorTip = string.Format(Properties.Resources.VendorDespawnedAgo, FormatAgo(ago));
         }
-        activeEvents.Add(new EventDockItem { Name = Properties.Resources.Vendor, Icon = "pack://application:,,,/Assets/icons/vendor.png", Active = vendor.Id != 0, Id = vendor.Id, X = vendor.X, Y = vendor.Y, Trackable = true, Type = 6, TimerText = vendorTimer, ToolTip = vendorTip });
+        activeEvents.Add(new EventDockItem { Key = "vendor", Name = Properties.Resources.Vendor, Icon = "pack://application:,,,/Assets/icons/vendor.png", Active = vendor.Id != 0, Id = vendor.Id, X = vendor.X, Y = vendor.Y, Trackable = true, Type = 6, TimerText = vendorTimer, ToolTip = vendorTip });
  
         // 5. Deep Sea (Using native _deepSeaActive logic)
         string? dsTimer = null;
@@ -1253,13 +1210,17 @@ public partial class MainWindow
             dsTimer = $"-{(int)dsInactive.TotalMinutes}:{dsInactive.Seconds:D2}";
             dsTip = string.Format(Properties.Resources.DeepSeaEndedAgo, FormatAgo(dsInactive));
         }
-        activeEvents.Add(new EventDockItem { Name = Properties.Resources.DeepSea, Icon = "pack://application:,,,/Assets/icons/ds_event.png", Active = _deepSeaActive, Id = 0, X = 0, Y = 0, Trackable = false, Type = 0, TimerText = dsTimer, ToolTip = dsTip });
+        activeEvents.Add(new EventDockItem { Key = "deepsea", Name = Properties.Resources.DeepSea, Icon = "pack://application:,,,/Assets/icons/ds_event.png", Active = _deepSeaActive, Id = 0, X = 0, Y = 0, Trackable = false, Type = 0, TimerText = dsTimer, ToolTip = dsTip });
 
         // On a server without event markers everything above was built from data that no
         // longer arrives. Replace it wholesale rather than patching each entry: the two
         // sources have nothing in common but the item shape.
         if (Services.EventCapabilities.IsCloudSourced)
             activeEvents = BuildCloudEventDockItems();
+
+        // The mini-map's command dock reads this rather than rebuilding the list, so an event
+        // tile can never disagree with the dock on the map about what is running.
+        _lastEventDockItems = activeEvents;
 
         Dispatcher.Invoke(() =>
         {
@@ -1609,7 +1570,7 @@ public partial class MainWindow
         {
             try {
                 if (StorageService.LoadCache<bool>("v1_marker_reset_v2") == false) {
-                    foreach (var kv in _dynEls.ToList()) Overlay.Children.Remove(kv.Value);
+                    foreach (var kv in _dynEls.ToList()) RemoveFromMapLayers(kv.Value);
                     _dynEls.Clear();
                     _dynStates.Clear();
                     _dynKnown.Clear();
@@ -1634,7 +1595,7 @@ public partial class MainWindow
                     _myPlayerWasInDeepSea = inDeepSea;
                     SetShowingDeepSeaMap(inDeepSea);
                     // Only the automatic switch counts; clicking the Deep Sea button does not.
-                    if (inDeepSea) Services.Achievements.Ach.Unlock(Services.Achievements.Ach.DeepSea);
+                    if (inDeepSea) Ach.Unlock(Ach.DeepSea);
                     return;
                 }
             }
@@ -1702,14 +1663,14 @@ public partial class MainWindow
                     var site = existing;
                     _ = Dispatcher.InvokeAsync(() =>
                     {
-                        if (site.MapElement != null) Overlay.Children.Remove(site.MapElement);
+                        if (site.MapElement != null) RemoveFromMapLayers(site.MapElement);
                     });
                     _heliCrashSites.Remove(existing);
                     if (_announceSpawns && TrackingService.AnnounceHeli)
                     {
                         var msg = AlertTemplateService.GetFormattedAlert("AlertHeliCrashFalseAlarm", GetGridLabel(m.X, m.Y));
                         _ = SendTeamChatSafeAsync(msg, false, true);
-                        _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDE81 **Event Update:** {msg}");
+                        _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDEA2 **Event Update:** {msg}");
                     }
                     AppendLog($"[HeliCrash] False alarm retracted — Heli {key} reappeared at {GetGridLabel(m.X, m.Y)}");
                 }
@@ -1806,7 +1767,6 @@ public partial class MainWindow
                             {
                                 _heliMidEvent = true;
                                 _heliSpawnTime = null;
-                                BackfillPersonalEventSpawnTime("heli_spawn", t => { _heliSpawnTime = t; _heliMidEvent = false; });
                             }
                             else
                             {
@@ -1821,7 +1781,6 @@ public partial class MainWindow
                                 _vendorMidEvent = true;
                                 _vendorSpawnTime = null;
                                 _vendorDespawnTime = null;
-                                BackfillPersonalEventSpawnTime("vendor_spawn", t => { _vendorSpawnTime = t; _vendorMidEvent = false; });
                             }
                             else
                             {
@@ -1839,8 +1798,7 @@ public partial class MainWindow
                             6 => TrackingService.AnnounceVendor,
                             9 => false,   // Oil Rig handled by MonumentWatcher (sends its own triggered message)
                             150 => false, // Virtual markers for Oil Rig handled by MonumentWatcher
-                            7 => false,   // Player Tool Cupboard zones — not game events; real locked crates are remapped to type 6
-                            _ => true
+                            _ => true 
                         };
 
                         if (_announceSpawns && shouldAnnounce && _firstMarkerPollDone && !_firstPollDyn)
@@ -1849,25 +1807,11 @@ public partial class MainWindow
                             var kind = EventKindText(m.Type);
                             var msg = AlertTemplateService.GetFormattedAlert("AlertEventSpawned", kind, grid);
                             _ = SendTeamChatSafeAsync(msg, false, true);
-                            _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"{EventKindEmoji(m.Type)} **Event:** {msg}");
-
-                            // Toast notification
-                            if (RustPlusDesk.Services.TrackingService.NotificationsToastEnabled)
-                            {
-                                var notif = new RustPlusDesk.Models.RustPlusNotification(
-                                    type: "Event",
-                                    title: $"🎯 {kind}",
-                                    message: msg,
-                                    serverIp: _vm?.Selected?.Host ?? "",
-                                    serverPort: _vm?.Selected?.Port ?? 0,
-                                    serverName: _vm?.Selected?.Name ?? ""
-                                );
-                                RustPlusDesk.Services.NotificationCenterService.AddNotification(notif);
-                            }
+                            _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDEA2 **Event:** {msg}");
                         }
                     }
 
-                    Overlay.Children.Add(el);
+                    (isPlayer ? PlayerLayer : IconLayer).Children.Add(el);
                     Panel.SetZIndex(el, m.Type == 150 ? 2000 : (isPlayer ? 10000 : 920));
 
                     if (el.Tag is PlayerMarkerTag pmtNew)
@@ -2146,7 +2090,7 @@ public partial class MainWindow
                         {
                             var msg = AlertTemplateService.GetFormattedAlert("AlertHeliShotDown", crashGrid);
                             _ = SendTeamChatSafeAsync(msg, false, true);
-                            _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDE81 **Event Update:** {msg}");
+                            _ = RustPlusDesk.Services.DiscordBotListenerService.Instance.SendNotificationAsync("events", $"\uD83D\uDEA2 **Event Update:** {msg}");
                         }
                         AppendLog($"[HeliCrash] Crash detected at {crashGrid} (last real pos {cx:F0},{cy:F0})");
                     }
@@ -2163,7 +2107,7 @@ public partial class MainWindow
                     AppendLog("[Vendor] Travelling Vendor despawned or left the map area.");
                 }
 
-                Overlay.Children.Remove(oldEl);
+                RemoveFromMapLayers(oldEl);
                 _dynEls.Remove(id);
                 _dynStates.Remove(id);
                 if (_trackingEntityId == id) _trackingEntityId = null;
@@ -2260,7 +2204,7 @@ public partial class MainWindow
         Canvas.SetLeft(container, p.X - 14);
         Canvas.SetTop(container, p.Y - 14);
         Panel.SetZIndex(container, 910);
-        Overlay.Children.Add(container);
+        IconLayer.Children.Add(container);
         return container;
     }
 
@@ -2269,7 +2213,7 @@ public partial class MainWindow
         var expired = _heliCrashSites.Where(cs => (DateTime.UtcNow - cs.CrashedAt).TotalMinutes >= 10).ToList();
         foreach (var cs in expired)
         {
-            if (cs.MapElement != null) Overlay.Children.Remove(cs.MapElement);
+            if (cs.MapElement != null) RemoveFromMapLayers(cs.MapElement);
             _heliCrashSites.Remove(cs);
         }
 
@@ -2278,7 +2222,7 @@ public partial class MainWindow
             if (cs.TimerLabel != null)
             {
                 int mins = (int)(DateTime.UtcNow - cs.CrashedAt).TotalMinutes;
-                cs.TimerLabel.Text = mins == 0 ? (RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiJustNow") ?? "just now") : $"{mins}m ago";
+                cs.TimerLabel.Text = mins == 0 ? RustPlusDesk.Properties.Resources.GetString("CodeUiJustNow") : $"{mins}m ago";
             }
         }
     }

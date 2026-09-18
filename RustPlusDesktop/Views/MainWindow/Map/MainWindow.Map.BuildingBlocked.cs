@@ -29,12 +29,12 @@ public partial class MainWindow
         {
             ChkNoBuildZones.IsChecked = false;
             ChkNoBuildZones.IsEnabled = false;
-            ChkNoBuildZones.ToolTip = RustPlusDesk.Properties.Resources.ResourceManager.GetString("UiGenerateThe3DMapToEnableNoBuildZones") ?? "Generate the 3D map to enable no-build zones.";
+            ChkNoBuildZones.ToolTip = RustPlusDesk.Properties.Resources.GetString("UiGenerateThe3DMapToEnableNoBuildZones");
         }
 
         foreach (var shape in _buildingBlockedZoneEls)
         {
-            GridLayer.Children.Remove(shape);
+            NoBuildLayer.Children.Remove(shape);
         }
         _buildingBlockedZoneEls.Clear();
         RedrawGrid();
@@ -70,7 +70,7 @@ public partial class MainWindow
         {
             ChkNoBuildZones.IsEnabled = false;
             ChkNoBuildZones.IsChecked = false;
-            ChkNoBuildZones.ToolTip = RustPlusDesk.Properties.Resources.ResourceManager.GetString("UiGenerateThe3DMapToEnableNoBuildZones") ?? "Generate the 3D map to enable no-build zones.";
+            ChkNoBuildZones.ToolTip = RustPlusDesk.Properties.Resources.GetString("UiGenerateThe3DMapToEnableNoBuildZones");
         }
 
         if (string.IsNullOrWhiteSpace(folderPath))
@@ -106,9 +106,7 @@ public partial class MainWindow
         if (ChkNoBuildZones != null)
         {
             ChkNoBuildZones.IsEnabled = hasData;
-            ChkNoBuildZones.ToolTip = hasData
-                ? (RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiShowNoBuildZones") ?? "Show no-build zones")
-                : (RustPlusDesk.Properties.Resources.ResourceManager.GetString("UiGenerateThe3DMapToEnableNoBuildZones") ?? "Generate the 3D map to enable no-build zones.");
+            ChkNoBuildZones.ToolTip = hasData ? RustPlusDesk.Properties.Resources.GetString("CodeUiShowNoBuildZones") : RustPlusDesk.Properties.Resources.GetString("UiGenerateThe3DMapToEnableNoBuildZones");
             ChkNoBuildZones.IsChecked = false;
         }
         RedrawGrid();
@@ -118,7 +116,7 @@ public partial class MainWindow
     {
         foreach (var shape in _buildingBlockedZoneEls)
         {
-            GridLayer.Children.Remove(shape);
+            NoBuildLayer.Children.Remove(shape);
         }
         _buildingBlockedZoneEls.Clear();
 
@@ -148,7 +146,7 @@ public partial class MainWindow
                 poly.Points.Add(CenteredRustToImagePx(corner.X, corner.Y));
             }
             ToolTipService.SetToolTip(poly, BuildZoneTooltip(box.Owner, "No-build box"));
-            GridLayer.Children.Add(poly);
+            NoBuildLayer.Children.Add(poly);
             Panel.SetZIndex(poly, 40);
             _buildingBlockedZoneEls.Add(poly);
         }
@@ -170,7 +168,7 @@ public partial class MainWindow
             ToolTipService.SetToolTip(ellipse, BuildZoneTooltip(sphere.Owner, $"No-build radius {sphere.Radius:0}m"));
             Canvas.SetLeft(ellipse, center.X - r);
             Canvas.SetTop(ellipse, center.Y - r);
-            GridLayer.Children.Add(ellipse);
+            NoBuildLayer.Children.Add(ellipse);
             Panel.SetZIndex(ellipse, 41);
             _buildingBlockedZoneEls.Add(ellipse);
         }

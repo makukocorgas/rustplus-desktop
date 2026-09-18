@@ -47,10 +47,7 @@ public partial class MainWindow
         if (_vm.Selected == null) return;
         if (_vm.Selected.CustomTimers.Count >= 5)
         {
-            MessageBox.Show(
-                RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiMaximumOf5CustomTimersAllowed") ?? "Maximum of 5 custom timers allowed.",
-                RustPlusDesk.Properties.Resources.ResourceManager.GetString("CodeUiTimer") ?? "Timer",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(RustPlusDesk.Properties.Resources.GetString("CodeUiMaximumOf5CustomTimersAllowed"), RustPlusDesk.Properties.Resources.GetString("CodeUiTimer"), MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -92,7 +89,7 @@ public partial class MainWindow
         };
 
         _vm.Selected.CustomTimers.Add(timer);
-        Services.Achievements.Ach.Unlock(Services.Achievements.Ach.Timer);
+        Ach.Unlock(Ach.Timer);
 
         TxtTimerName.Text = "";
         TxtTimerHours.Text = "";
@@ -164,7 +161,7 @@ public partial class MainWindow
                     if (timer.EnableCountdownAudio)
                     {
                         PlayTimerAudio(true);
-                        ShowTimerSnackbar(RustPlusDesk.Properties.Resources.ResourceManager.GetString("CountdownOneMinute") ?? "1 min countdown...", timer.Name, 60);
+                        ShowTimerSnackbar(Properties.Resources.GetString("CountdownOneMinute"), timer.Name, 60);
                     }
                 }
             }
@@ -182,7 +179,7 @@ public partial class MainWindow
                     if (timer.EnableAlarmAudio)
                     {
                         PlayTimerAudio(false);
-                        ShowTimerSnackbar(RustPlusDesk.Properties.Resources.ResourceManager.GetString("TimerExpiredTitle") ?? "Timer Expired", timer.Name, 15);
+                        ShowTimerSnackbar(Properties.Resources.GetString("TimerExpiredTitle"), timer.Name, 15);
                     }
                 }
             }
@@ -443,7 +440,7 @@ public partial class MainWindow
         var dlg = new Microsoft.Win32.OpenFileDialog
         {
             Filter = "Audio Files|*.mp3;*.wav|All Files|*.*",
-            Title = RustPlusDesk.Properties.Resources.ResourceManager.GetString("SelectTimerAlarmSound") ?? "Select Timer Alarm Sound"
+            Title = Properties.Resources.GetString("SelectTimerAlarmSound")
         };
 
         if (dlg.ShowDialog() == true)
@@ -461,7 +458,7 @@ public partial class MainWindow
         var dlg = new Microsoft.Win32.OpenFileDialog
         {
             Filter = "Audio Files|*.mp3;*.wav|All Files|*.*",
-            Title = RustPlusDesk.Properties.Resources.ResourceManager.GetString("SelectTimerCountdownSound") ?? "Select Timer 1min Countdown Sound"
+            Title = Properties.Resources.GetString("SelectTimerCountdownSound")
         };
 
         if (dlg.ShowDialog() == true)

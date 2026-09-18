@@ -6,9 +6,9 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:conv="clr-namespace:RustPlusDesk.Converters"
              xmlns:services="clr-namespace:RustPlusDesk.Services"
-             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:tutorials="clr-namespace:RustPlusDesk.Features.Tutorials"
-             mc:Ignorable="d"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
              Background="{DynamicResource Surface}"
              Foreground="{DynamicResource TextPrimary}"
              d:DesignHeight="800" d:DesignWidth="600">
@@ -92,11 +92,11 @@
 
                     <StackPanel Grid.Row="1" Margin="0,0,0,8">
                         <TextBlock FontSize="12" Foreground="{DynamicResource TextPrimary}" Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <Run Text="{DynamicResource UiActiveRule}"/><Run Text=" "/>
+                            <Run Text="{DynamicResource UiActiveRule}"/>
                             <Run Text="{Binding CurrentRuleName}" FontWeight="SemiBold"/>
                         </TextBlock>
                         <TextBlock FontSize="11" Foreground="{DynamicResource TextSubtle}" Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <Run Text="{DynamicResource UiCurrentStep}"/><Run Text=" "/>
+                            <Run Text="{DynamicResource UiCurrentStep}"/>
                             <Run Text="{Binding CurrentStepNumber}" FontWeight="SemiBold"/>
                             <Run Text=" - "/>
                             <Run Text="{Binding CurrentStepType}"/>
@@ -191,9 +191,13 @@
                                         <ComboBox SelectedValue="{Binding TriggerType, Mode=TwoWay}" SelectedValuePath="Tag" Width="130" Margin="0,0,8,4">
                                             <ComboBoxItem Content="{DynamicResource SmartAlarm}" Tag="SmartAlarm"/>
                                             <ComboBoxItem Content="{DynamicResource UiSmartSwitch}" Tag="SmartSwitch"/>
-                                            <ComboBoxItem Content="{DynamicResource UiChatCommand}" Tag="ChatCommand"/>
+                                            <ComboBoxItem Content="{DynamicResource TimerCreateCmdLabel}" Tag="ChatCommand"/>
                                             <ComboBoxItem Content="{DynamicResource UiRuleTriggered}" Tag="RuleTriggered"/>
                                             <ComboBoxItem Content="{DynamicResource UiRuleCompleted}" Tag="RuleCompleted"/>
+                                            <!--  Fired by a tile on the mini-map's command dock. It carries no
+                                                  trigger detail of its own: the tile names the rule, not the
+                                                  other way round.  -->
+                                            <ComboBoxItem Content="{DynamicResource UiCommandDockTrigger}" Tag="CommandDock"/>
                                          </ComboBox>
 
                                          <!-- Trigger Details -->
@@ -265,7 +269,7 @@
                                                  </Style>
                                              </ComboBox.Style>
                                          </ComboBox>
-
+ 
                                          <!-- State / Value for Switch -->
                                          <ComboBox SelectedValue="{Binding TriggerState, Mode=TwoWay}" SelectedValuePath="Tag" Width="110" Margin="0,0,8,4" x:Name="CmbTriggerStateSwitch">
                                              <ComboBox.Style>
@@ -328,15 +332,15 @@
                                                  </Style>
                                              </StackPanel.Style>
                                              <ui:TextBox Text="{Binding LoopCount, Mode=TwoWay}" Width="60" PlaceholderText="{DynamicResource UiCount}"/>
-                                             <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource TextSubtle}"><Run Text=" "/><Run Text="{DynamicResource UiRepeats0Indefinitely}"/></TextBlock>
+                                             <TextBlock Text="{DynamicResource UiRepeats0Indefinitely}" Margin="6,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource TextSubtle}"/>
                                          </StackPanel>
                                      </WrapPanel>
-
+ 
                                      <!-- Gating Condition -->
                                      <TextBlock Text="{DynamicResource UiGatingConditionOptional}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSubtle}" Margin="0,4,0,4"/>
                                      <WrapPanel Margin="0,0,0,8" VerticalAlignment="Center">
                                          <ComboBox SelectedValue="{Binding ConditionOperator, Mode=TwoWay}" SelectedValuePath="Tag" Width="90" Margin="0,0,8,4">
-                                             <ComboBoxItem Content="{DynamicResource UiConditionNone}" Tag="NONE"/>
+                                             <ComboBoxItem Content="{DynamicResource AlertDeepSeaUpVars}" Tag="NONE"/>
                                              <ComboBoxItem Content="{DynamicResource UiAND}" Tag="AND"/>
                                              <ComboBoxItem Content="{DynamicResource UiOR}" Tag="OR"/>
                                          </ComboBox>
@@ -374,12 +378,12 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </ComboBox.Style>
-                                            <ComboBoxItem Content="{DynamicResource UiStateOn}">
+                                            <ComboBoxItem Content="{DynamicResource StateOn}">
                                                 <ComboBoxItem.Tag>
                                                     <sys:Boolean>True</sys:Boolean>
                                                 </ComboBoxItem.Tag>
                                             </ComboBoxItem>
-                                            <ComboBoxItem Content="{DynamicResource UiStateOff}">
+                                            <ComboBoxItem Content="{DynamicResource StateOff}">
                                                 <ComboBoxItem.Tag>
                                                     <sys:Boolean>False</sys:Boolean>
                                                 </ComboBoxItem.Tag>
@@ -499,7 +503,7 @@
                                                                         </Style>
                                                                     </StackPanel.Style>
                                                                     <ui:TextBox Text="{Binding WaitSeconds, Mode=TwoWay}" Width="60" PlaceholderText="{DynamicResource UiSecs}"/>
-                                                                    <TextBlock VerticalAlignment="Center" Margin="4,0,0,0" Foreground="{DynamicResource TextSubtle}"><Run Text=" "/><Run Text="{DynamicResource UiSeconds}"/></TextBlock>
+                                                                    <TextBlock Text="{DynamicResource UiSeconds}" VerticalAlignment="Center" Margin="4,0,0,0" Foreground="{DynamicResource TextSubtle}"/>
                                                                 </StackPanel>
 
                                                                 <!-- Toggle Config -->
@@ -520,9 +524,9 @@
                                                                               SelectedValue="{Binding TargetEntityId, Mode=TwoWay}"
                                                                               SelectedValuePath="EntityId" DisplayMemberPath="DisplayName"/>
                                                                     <ui:TextBox Text="{Binding TargetGroupName, Mode=TwoWay}" Width="100" Margin="0,0,4,0" PlaceholderText="{DynamicResource UiOrGroupName}"/>
-
+                                                                    
                                                                     <ComboBox SelectedValue="{Binding ToggleState, Mode=TwoWay}" SelectedValuePath="Tag" Width="100">
-                                                                        <ComboBoxItem Content="{DynamicResource UiToggleAction}" Tag="{x:Null}"/>
+                                                                        <ComboBoxItem Content="{DynamicResource Toggle}" Tag="{x:Null}"/>
                                                                         <ComboBoxItem Content="{DynamicResource UiForceON}">
                                                                             <ComboBoxItem.Tag>
                                                                                 <sys:Boolean>True</sys:Boolean>
@@ -589,15 +593,15 @@
                                                                             <WrapPanel VerticalAlignment="Center">
                                                                                 <ComboBox SelectedValue="{Binding StepType, Mode=TwoWay}" SelectedValuePath="Tag" Width="100" Margin="0,0,4,0">
                                                                                     <ComboBoxItem Content="{DynamicResource UiWait}" Tag="Wait"/>
-                                                                                    <ComboBoxItem Content="{DynamicResource UiToggleAction}" Tag="Toggle"/>
+                                                                                    <ComboBoxItem Content="{DynamicResource Toggle}" Tag="Toggle"/>
                                                                                 </ComboBox>
-
+                                                                                
                                                                                 <ui:TextBox Text="{Binding WaitSeconds, Mode=TwoWay}" Width="50" PlaceholderText="{DynamicResource UiSecs}" Visibility="Visible"/>
                                                                                 <ComboBox SelectedValue="{Binding TargetEntityId, Mode=TwoWay}" Width="120" Margin="4,0,4,0"
                                                                                           ItemsSource="{Binding DataContext.Selected.FlatDevices, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                                           SelectedValuePath="EntityId" DisplayMemberPath="DisplayName" x:Name="CmbNestedToggleDevice"/>
                                                                                 <ComboBox SelectedValue="{Binding ToggleState, Mode=TwoWay}" SelectedValuePath="Tag" Width="90">
-                                                                                    <ComboBoxItem Content="{DynamicResource UiToggleAction}" Tag="{x:Null}"/>
+                                                                                    <ComboBoxItem Content="{DynamicResource Toggle}" Tag="{x:Null}"/>
                                                                                     <ComboBoxItem Content="{DynamicResource On}">
                                                                                         <ComboBoxItem.Tag>
                                                                                             <sys:Boolean>True</sys:Boolean>

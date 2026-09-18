@@ -167,6 +167,10 @@ public partial class MainWindow
                     _lastMoveTime = DateTime.UtcNow;
                 }
             }
+            else
+            {
+                _lastMoveTime = DateTime.UtcNow;
+            }
             X = x;
             Y = y;
         }
@@ -407,6 +411,10 @@ public partial class MainWindow
         var deaths = _deathTracker.Observe(team, classifier);
         foreach (var death in deaths)
         {
+            // Our own: the dock offers to write down who did it, and needs the time the game
+            // gave for the death to file the name under.
+            if (death.SteamId == _mySteamId) _lastOwnDeathAt = death.DeathTime;
+
             try
             {
                 await RustPlusDesk.Services.Deaths.DeathReporter.ReportAsync(death, serverKey);
@@ -568,7 +576,7 @@ public partial class MainWindow
                     TeamMembers.Add(vm);
                     _hasCriticalPresenceChange = true;
                     // More than just yourself in the list.
-                    if (TeamMembers.Count > 1) Services.Achievements.Ach.Unlock(Services.Achievements.Ach.TeamMate);
+                    if (TeamMembers.Count > 1) Ach.Unlock(Ach.TeamMate);
                 }
                 else
                 {
@@ -624,7 +632,7 @@ public partial class MainWindow
             {
                 Dispatcher.Invoke(() => StopTracking());
             }
-            else if (!_vm.FollowingSteamId.HasValue && !string.IsNullOrEmpty(GetServerKey()) &&
+            else if (!_vm.FollowingSteamId.HasValue && !string.IsNullOrEmpty(GetServerKey()) && 
                      Services.TrackingService.Settings.ServerFollowingSteamId.TryGetValue(GetServerKey(), out var savedSteamId))
             {
                 var member = TeamMembers.FirstOrDefault(t => t.SteamId == savedSteamId);
@@ -650,7 +658,7 @@ public partial class MainWindow
                         if (_playerOverlayElements.TryGetValue(id, out var listToHide))
                         {
                             foreach (var fe in listToHide)
-                                Overlay.Children.Remove(fe);
+                                RemoveFromMapLayers(fe);
                             _playerOverlayElements.Remove(id);
                         }
                     }
@@ -885,20 +893,8 @@ public partial class MainWindow
 
     private void TeamItem_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
-        if (sender is not FrameworkElement fe) return;
-        if (fe.DataContext is not TeamMemberVM vm) return;
-
-        if (e.ClickCount == 2)
-        {
-            if (fe.ContextMenu != null)
-            {
-                fe.ContextMenu.PlacementTarget = fe;
-                fe.ContextMenu.IsOpen = true;
-            }
-            return;
-        }
-
-        CenterOnMember(vm);
+        if ((sender as FrameworkElement)?.DataContext is TeamMemberVM vm)
+            CenterOnMember(vm);
     }
 
     private void Team_Center_Click(object sender, RoutedEventArgs e)
@@ -917,7 +913,7 @@ public partial class MainWindow
 
     private void StartFollowing(ulong steamId, string name)
     {
-        Services.Achievements.Ach.Unlock(Services.Achievements.Ach.FollowMe);
+        Ach.Unlock(Ach.FollowMe);
         if (_vm.FollowingSteamId == steamId)
         {
             StopTracking();
@@ -926,18 +922,18 @@ public partial class MainWindow
 
         _vm.FollowingSteamId = steamId;
         _vm.FollowingPlayerName = name;
-
+        
         var member = TeamMembers.FirstOrDefault(t => t.SteamId == steamId);
         _vm.FollowingPlayerAvatar = member?.Avatar;
 
         AppendLog($"Following {name} on map.");
-
+        
         if (!string.IsNullOrEmpty(GetServerKey()))
         {
             Services.TrackingService.Settings.ServerFollowingSteamId[GetServerKey()] = steamId;
             Services.TrackingService.SaveDB();
         }
-
+        
         // Immediate center
         if (TryResolvePosFromDynMarkers(steamId, out var x, out var y))
         {

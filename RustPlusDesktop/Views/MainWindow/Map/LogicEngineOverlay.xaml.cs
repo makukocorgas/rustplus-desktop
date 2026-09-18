@@ -212,7 +212,7 @@ namespace RustPlusDesk.Views
             };
 
             _vm.Selected.LogicRules.Add(newRule);
-            Services.Achievements.Ach.Unlock(Services.Achievements.Ach.LogicRule);
+            Ach.Unlock(Ach.LogicRule);
             RefreshListBindings();
             _vm.Save();
         }
@@ -229,7 +229,7 @@ namespace RustPlusDesk.Views
 
             var newRule = new LogicRule
             {
-                Name = string.Format(Properties.Resources.ResourceManager.GetString("CodeUiRuleNumberFormat") ?? "Rule {0}", _vm.Selected.LogicRules.Count + 1),
+                Name = $"Rule {(_vm.Selected.LogicRules.Count + 1)}",
                 IsEnabled = false,
                 IsExpanded = true,
                 TriggerType = "SmartAlarm",
@@ -237,7 +237,7 @@ namespace RustPlusDesk.Views
             };
 
             _vm.Selected.LogicRules.Add(newRule);
-            Services.Achievements.Ach.Unlock(Services.Achievements.Ach.LogicRule);
+            Ach.Unlock(Ach.LogicRule);
             RefreshListBindings();
             _vm.Save();
         }

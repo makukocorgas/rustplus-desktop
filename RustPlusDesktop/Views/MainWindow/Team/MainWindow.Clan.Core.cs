@@ -39,7 +39,7 @@ namespace RustPlusDesk.Views
                 _clanName = value;
                 OnPropertyChanged(nameof(ClanName));
                 // A name arriving means a clan actually exists; empty stays empty.
-                if (!string.IsNullOrWhiteSpace(value)) Services.Achievements.Ach.Unlock(Services.Achievements.Ach.Clan);
+                if (!string.IsNullOrWhiteSpace(value)) Ach.Unlock(Ach.Clan);
             }
         }
 

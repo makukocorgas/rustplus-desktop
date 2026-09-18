@@ -52,10 +52,10 @@ public partial class MainWindow
     private readonly Dictionary<ulong, DateTime> _avatarNextTry = new();
     private static readonly TimeSpan AvatarRetryInterval = TimeSpan.FromSeconds(30);
 
-    private const double PinW = 40;
-    private const double PinH = 56;
-    private const double Circle = 24;
-    private const double CircleTop = 6;
+    private const double PinW = 26;
+    private const double PinH = 36;
+    private const double Circle = 16;
+    private const double CircleTop = 4;
 
     private const double SHOP_SIZE_EXP = 0.8;
 
@@ -370,9 +370,7 @@ public partial class MainWindow
             if (el.Tag is not PlayerMarkerTag t || !t.IsDot)
             {
                 var newEl = BuildPlayerDotMarker(sid, name, online, dead);
-                int idx = Overlay.Children.IndexOf(el);
-                if (idx >= 0) { Overlay.Children.RemoveAt(idx); Overlay.Children.Insert(idx, newEl); }
-                else Overlay.Children.Add(newEl);
+                ReplaceOnMapLayer(el, newEl, PlayerLayer);
                 _dynEls[key] = newEl; el = newEl;
                 Panel.SetZIndex(newEl, 10000);
             }
@@ -426,9 +424,7 @@ public partial class MainWindow
             if (needsRebuild)
             {
                 var newEl = BuildPlayerMarker(sid, name, online, dead);
-                int idx = Overlay.Children.IndexOf(el);
-                if (idx >= 0) { Overlay.Children.RemoveAt(idx); Overlay.Children.Insert(idx, newEl); }
-                else Overlay.Children.Add(newEl);
+                ReplaceOnMapLayer(el, newEl, PlayerLayer);
                 _dynEls[key] = newEl; el = newEl;
             }
             else if (avatar != null && !tag.IsDot && tag.AvatarCircle != null)
@@ -443,9 +439,7 @@ public partial class MainWindow
         else
         {
             var newEl = BuildPlayerMarker(sid, name, online, dead);
-            int idx = Overlay.Children.IndexOf(el);
-            if (idx >= 0) { Overlay.Children.RemoveAt(idx); Overlay.Children.Insert(idx, newEl); }
-            else Overlay.Children.Add(newEl);
+            ReplaceOnMapLayer(el, newEl, PlayerLayer);
             _dynEls[key] = newEl; el = newEl;
         }
     }
@@ -457,7 +451,7 @@ public partial class MainWindow
     /// </summary>
     private void ChkProfileMarkers_Clicked(object sender, RoutedEventArgs e)
     {
-        if (ChkProfileMarkers?.IsChecked != true) Services.Achievements.Ach.Unlock(Services.Achievements.Ach.DotMarker);
+        if (ChkProfileMarkers?.IsChecked != true) Ach.Unlock(Ach.DotMarker);
     }
 
     private void ChkProfileMarkers_Toggled(object? sender, RoutedEventArgs e)
@@ -600,7 +594,7 @@ public partial class MainWindow
                 Name = label,
                 IsDeathPin = true,
                 ScaleExp = 0.8,
-                ScaleBaseMult = 0.72,
+                ScaleBaseMult = 0.58,
                 ScaleTarget = null,
                 ScaleCenterX = PinW * 0.5,
                 ScaleCenterY = PinH
@@ -618,7 +612,7 @@ public partial class MainWindow
             Data = pinPath,
             Fill = fill,
             Stroke = Brushes.Black,
-            StrokeThickness = 2,
+            StrokeThickness = 1.5,
             Stretch = Stretch.Fill,
             Width = PinW,
             Height = PinH
@@ -629,7 +623,7 @@ public partial class MainWindow
             Width = Circle + 4,
             Height = Circle + 4,
             Stroke = Brushes.Black,
-            StrokeThickness = 2,
+            StrokeThickness = 1.5,
             Fill = Brushes.Transparent,
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
@@ -657,11 +651,11 @@ public partial class MainWindow
         ToolTipService.SetToolTip(root, label);
         
         var cm = new ContextMenu { Style = TryFindResource("DarkContextMenu") as Style };
-        var miRename = new MenuItem { Header = Properties.Resources.RenameDeathMarker ?? "Umbenennen", Tag = id };
+        var miRename = new MenuItem { Header = Properties.Resources.RenameDeathMarker ?? RustPlusDesk.Properties.Resources.GetString("CodeUiUmbenennen"), Tag = id };
         miRename.Click += RenameDeathMarker_Click;
         cm.Items.Add(miRename);
 
-        var miDelete = new MenuItem { Header = Properties.Resources.DeleteDeathMarker ?? "Löschen", Tag = id, Foreground = Brushes.Red };
+        var miDelete = new MenuItem { Header = Properties.Resources.DeleteDeathMarker ?? RustPlusDesk.Properties.Resources.GetString("CodeUiLöschen"), Tag = id, Foreground = Brushes.Red };
         miDelete.Click += DeleteDeathMarker_Click;
         cm.Items.Add(miDelete);
 
@@ -682,7 +676,7 @@ public partial class MainWindow
     private void RedrawDeathPins()
     {
         ClearAllDeathPins();
-
+        
         if (_vm?.Selected == null)
         {
             if (WipeDeathMarkersOverlay != null) WipeDeathMarkersOverlay.Visibility = Visibility.Collapsed;
@@ -700,7 +694,11 @@ public partial class MainWindow
             WipeDeathMarkersOverlay.Visibility = _showDeathMarkers && hasMarkers ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        if (!_showDeathMarkers)
+        // Same as the grid: built when either map wants them, and hidden on the main map through
+        // the wrapper rather than by not building them at all.
+        ApplyIndependentLayerVisibility();
+
+        if (!_showDeathMarkers && !MiniMapWantsDeathMarkers)
         {
             SyncLiveMarkersTo3DMap();
             return;
@@ -721,7 +719,7 @@ public partial class MainWindow
                 
                 var el = BuildDeathPin(m.Id, m.SteamId, label);
                 _deathPins[m.Id] = el;
-                Overlay.Children.Add(el);
+                DeathLayer.Children.Add(el);
                 Panel.SetZIndex(el, 9980);
                 ApplyCurrentOverlayScale(el);
                 var cx = px.X - (PinW / 2.0);
@@ -799,7 +797,7 @@ public partial class MainWindow
 
     private void ClearAllDeathPins()
     {
-        foreach (var kv in _deathPins) Overlay.Children.Remove(kv.Value);
+        foreach (var kv in _deathPins) RemoveFromMapLayers(kv.Value);
         _deathPins.Clear();
     }
 
@@ -1201,19 +1199,19 @@ public partial class MainWindow
             HorizontalAlignment = HorizontalAlignment.Center,
             Tag = new PlayerMarkerTag
             {
-                Radius = 14.0,
+                Radius = 9.0,
                 ScaleExp = 0.85,
-                ScaleBaseMult = 1.0,
+                ScaleBaseMult = 0.68,
                 ScaleTarget = null,
                 ScaleCenterX = 100.0,
-                ScaleCenterY = 14.0
+                ScaleCenterY = 9.0
             }
         };
 
         var grid = new Grid
         {
-            Width = 28,
-            Height = 28,
+            Width = 18,
+            Height = 18,
             HorizontalAlignment = HorizontalAlignment.Center
         };
 
@@ -1224,8 +1222,8 @@ public partial class MainWindow
                 var bgBrush = GetNoteColorBrush(colorIndex);
                 var pinBg = new Border
                 {
-                    Width = 28,
-                    Height = 28,
+                    Width = 18,
+                    Height = 18,
                     Background = bgBrush,
                     OpacityMask = new ImageBrush(new BitmapImage(new Uri("pack://application:,,,/Assets/icons/map-markers/assets_markers_iconmappinbg.png")))
                     {
@@ -1236,12 +1234,12 @@ public partial class MainWindow
             }
             catch { }
 
-            string fgUri = isLeader
+            string fgUri = isLeader 
                 ? "pack://application:,,,/Assets/icons/map-markers/assets_markers_iconmappinfgleader.png"
                 : "pack://application:,,,/Assets/icons/map-markers/assets_markers_iconmappinfg.png";
             try
             {
-                var fg = MakeIcon(fgUri, 28);
+                var fg = MakeIcon(fgUri, 18);
                 grid.Children.Add(fg);
             }
             catch { }
@@ -1253,8 +1251,8 @@ public partial class MainWindow
                 var bgBrush = GetNoteDarkColorBrush(colorIndex);
                 var ellipse = new Ellipse
                 {
-                    Width = 24,
-                    Height = 24,
+                    Width = 15,
+                    Height = 15,
                     Fill = bgBrush,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
@@ -1266,12 +1264,12 @@ public partial class MainWindow
             string iconUri = GetMapNoteIcon(iconType);
             try
             {
-                var icon = MakeIcon(iconUri, 28);
+                var icon = MakeIcon(iconUri, 18);
                 grid.Children.Add(icon);
             }
             catch { }
 
-            string fgUri = isLeader
+            string fgUri = isLeader 
                 ? "pack://application:,,,/Assets/icons/map-markers/assets_markers_iconmapforegroundleader.png"
                 : "pack://application:,,,/Assets/icons/map-markers/assets_markers_iconmapforeground.png";
             try
@@ -1279,8 +1277,8 @@ public partial class MainWindow
                 var fgBrush = GetNoteColorBrush(colorIndex);
                 var fg = new Border
                 {
-                    Width = 28,
-                    Height = 28,
+                    Width = 18,
+                    Height = 18,
                     Background = fgBrush,
                     OpacityMask = new ImageBrush(new BitmapImage(new Uri(fgUri)))
                     {
@@ -1300,18 +1298,18 @@ public partial class MainWindow
             {
                 var avatarGrid = new Grid
                 {
-                    Width = 14,
-                    Height = 14,
+                    Width = 10,
+                    Height = 10,
                     HorizontalAlignment = HorizontalAlignment.Right,
                     VerticalAlignment = VerticalAlignment.Bottom,
-                    Margin = new Thickness(0, 0, -3, -3)
+                    Margin = new Thickness(0, 0, -2, -2)
                 };
 
                 var bgEllipse = new Ellipse
                 {
                     Fill = Brushes.Black,
-                    Width = 14,
-                    Height = 14
+                    Width = 10,
+                    Height = 10
                 };
                 avatarGrid.Children.Add(bgEllipse);
 
@@ -1322,8 +1320,8 @@ public partial class MainWindow
 
                 var avatarEllipse = new Ellipse
                 {
-                    Width = 12,
-                    Height = 12,
+                    Width = 8,
+                    Height = 8,
                     Fill = imgBrush,
                     Stroke = Brushes.White,
                     StrokeThickness = 1,
@@ -1397,12 +1395,12 @@ public partial class MainWindow
                 var el = BuildTeamNoteMarker(note.Type, note.Icon, note.Color, note.Label, ownerSteamId, isLeader: true);
                 var key = $"leader_{i}";
                 _teamNotesEls[key] = el;
-                Overlay.Children.Add(el);
+                IconLayer.Children.Add(el);
                 Panel.SetZIndex(el, 9991);
 
                 var p = WorldToImagePx(note.X, note.Y);
                 Canvas.SetLeft(el, p.X - 100.0);
-                Canvas.SetTop(el, p.Y - 14.0);
+                Canvas.SetTop(el, p.Y - 9.0);
             }
         }
 
@@ -1417,12 +1415,12 @@ public partial class MainWindow
                 var el = BuildTeamNoteMarker(note.Type, note.Icon, note.Color, note.Label, ownerSteamId, isLeader: false);
                 var key = $"member_{i}";
                 _teamNotesEls[key] = el;
-                Overlay.Children.Add(el);
+                IconLayer.Children.Add(el);
                 Panel.SetZIndex(el, 9990);
 
                 var p = WorldToImagePx(note.X, note.Y);
                 Canvas.SetLeft(el, p.X - 100.0);
-                Canvas.SetTop(el, p.Y - 14.0);
+                Canvas.SetTop(el, p.Y - 9.0);
             }
         }
     }
@@ -1433,7 +1431,7 @@ public partial class MainWindow
         {
             foreach (var el in _teamNotesEls.Values)
             {
-                Overlay.Children.Remove(el);
+                RemoveFromMapLayers(el);
             }
         }
         _teamNotesEls.Clear();

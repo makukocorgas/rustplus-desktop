@@ -8395,7 +8395,6 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
     {
         _globalToggleBusy = false;
         _isDynPollBusy = false;
-        _storageTickBusy = false;
         _apiConsecutiveTimeouts = 0;
         System.Threading.Interlocked.Exchange(ref _teamPollBusy, 0);
         System.Threading.Interlocked.Exchange(ref _camThumbBusy, 0);
