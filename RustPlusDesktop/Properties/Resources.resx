@@ -6632,4 +6632,481 @@ Rust+ Desktop registers your local app with FCM so it can receive those same Rus
   <data name="AchievementsTitle" xml:space="preserve">
     <value>Achievements</value>
   </data>
+  <data name="ChatTranslateConsentAccept" xml:space="preserve">
+    <value>Translate</value>
+  </data>
+  <data name="ChatTranslateConsentBody" xml:space="preserve">
+    <value>Translating sends the message text to Google Translate. Continue?</value>
+  </data>
+  <data name="ChatTranslateConsentTitle" xml:space="preserve">
+    <value>Translate message</value>
+  </data>
+  <data name="CommandDockAddMapHint" xml:space="preserve">
+    <value>Brings the map back with all layers on</value>
+  </data>
+  <data name="CommandDockAddTile" xml:space="preserve">
+    <value>Add tile</value>
+  </data>
+  <data name="CommandDockAlarmActive" xml:space="preserve">
+    <value>ACTIVE</value>
+  </data>
+  <data name="CommandDockAlarmInactive" xml:space="preserve">
+    <value>INACTIVE</value>
+  </data>
+  <data name="CommandDockChatAbbreviate" xml:space="preserve">
+    <value>Shorten long names</value>
+  </data>
+  <data name="CommandDockChatHint" xml:space="preserve">
+    <value>Two cells wide, resizable in edit mode</value>
+  </data>
+  <data name="CommandDockClock12Hour" xml:space="preserve">
+    <value>12-hour clock (AM/PM)</value>
+  </data>
+  <data name="CommandDockClockAnalog" xml:space="preserve">
+    <value>Analogue clock</value>
+  </data>
+  <data name="CommandDockClockAnalogHint" xml:space="preserve">
+    <value>A dial that follows the server clock</value>
+  </data>
+  <data name="CommandDockClockDayNight" xml:space="preserve">
+    <value>Show time until day or night</value>
+  </data>
+  <data name="CommandDockClockDigital" xml:space="preserve">
+    <value>Digital clock</value>
+  </data>
+  <data name="CommandDockClockDigitalHint" xml:space="preserve">
+    <value>Server time with the day and night phase</value>
+  </data>
+  <data name="CommandDockClockRust" xml:space="preserve">
+    <value>Rust clock</value>
+  </data>
+  <data name="CommandDockClockRustHint" xml:space="preserve">
+    <value>Server time in the game&apos;s own lettering</value>
+  </data>
+  <data name="CommandDockCollapseExpand" xml:space="preserve">
+    <value>Show the dock again</value>
+  </data>
+  <data name="CommandDockCollapseHide" xml:space="preserve">
+    <value>Hide every other tile</value>
+  </data>
+  <data name="CommandDockCollapseHint" xml:space="preserve">
+    <value>One press hides every other tile where it stands; the next press brings the arrangement back unchanged.</value>
+  </data>
+  <data name="CommandDockCollapsePickerHint" xml:space="preserve">
+    <value>One cell that hides every other tile, and brings them back</value>
+  </data>
+  <data name="CommandDockCollapseTitle" xml:space="preserve">
+    <value>Collapse</value>
+  </data>
+  <data name="CommandDockCollapseWithMap" xml:space="preserve">
+    <value>Hide the mini-map too</value>
+  </data>
+  <data name="CommandDockColorAmber" xml:space="preserve">
+    <value>Amber</value>
+  </data>
+  <data name="CommandDockColorAuto" xml:space="preserve">
+    <value>Theme colour</value>
+  </data>
+  <data name="CommandDockColorBlack" xml:space="preserve">
+    <value>Black</value>
+  </data>
+  <data name="CommandDockColorCyan" xml:space="preserve">
+    <value>Cyan</value>
+  </data>
+  <data name="CommandDockColorGreen" xml:space="preserve">
+    <value>Green</value>
+  </data>
+  <data name="CommandDockColorRed" xml:space="preserve">
+    <value>Red</value>
+  </data>
+  <data name="CommandDockColorWhite" xml:space="preserve">
+    <value>White</value>
+  </data>
+  <data name="CommandDockDeathTrackAgain" xml:space="preserve">
+    <value>Read again</value>
+  </data>
+  <data name="CommandDockDeathTrackAlways" xml:space="preserve">
+    <value>Keep the tile on the dock while alive</value>
+  </data>
+  <data name="CommandDockDeathTrackHigh" xml:space="preserve">
+    <value>Height {0}% of the width</value>
+  </data>
+  <data name="CommandDockDeathTrackLeft" xml:space="preserve">
+    <value>From the left {0}%</value>
+  </data>
+  <data name="CommandDockDeathTrackNoDeath" xml:space="preserve">
+    <value>No death recorded yet to attach this to.</value>
+  </data>
+  <data name="CommandDockDeathTrackNoName" xml:space="preserve">
+    <value>No name on that death screen — nothing killed you that has one.</value>
+  </data>
+  <data name="CommandDockDeathTrackNoOcr" xml:space="preserve">
+    <value>Windows has no text recognition installed.</value>
+  </data>
+  <data name="CommandDockDeathTrackNothing" xml:space="preserve">
+    <value>Nothing readable there — check the region in this tile's settings.</value>
+  </data>
+  <data name="CommandDockDeathTrackPick" xml:space="preserve">
+    <value>Pick the area from a screenshot</value>
+  </data>
+  <data name="CommandDockDeathTrackPickerHint" xml:space="preserve">
+    <value>Appears when you die: one press reads the name off the death screen</value>
+  </data>
+  <data name="CommandDockDeathTrackRead" xml:space="preserve">
+    <value>Track death</value>
+  </data>
+  <data name="CommandDockDeathTrackReader" xml:space="preserve">
+    <value>Windows reads text in {0}.</value>
+  </data>
+  <data name="CommandDockDeathTrackReading" xml:space="preserve">
+    <value>Reading…</value>
+  </data>
+  <data name="CommandDockDeathTrackRegion" xml:space="preserve">
+    <value>Where the name is</value>
+  </data>
+  <data name="CommandDockDeathTrackResetRegion" xml:space="preserve">
+    <value>Back to the measured default</value>
+  </data>
+  <data name="CommandDockDeathTrackSuicide" xml:space="preserve">
+    <value>Suicide</value>
+  </data>
+  <data name="CommandDockDeathTrackTest" xml:space="preserve">
+    <value>Test on the screen now</value>
+  </data>
+  <data name="CommandDockDeathTrackTitle" xml:space="preserve">
+    <value>Who killed you?</value>
+  </data>
+  <data name="CommandDockDeathTrackTop" xml:space="preserve">
+    <value>From the top {0}% of the width</value>
+  </data>
+  <data name="CommandDockDeathTrackWide" xml:space="preserve">
+    <value>Width {0}%</value>
+  </data>
+  <data name="CommandDockDefaultFontSize" xml:space="preserve">
+    <value>Default text size</value>
+  </data>
+  <data name="CommandDockDefaultOpacity" xml:space="preserve">
+    <value>Default opacity</value>
+  </data>
+  <data name="CommandDockDefaultsHint" xml:space="preserve">
+    <value>What a tile looks like until its own gear is used. Tiles you have already adjusted keep their own values.</value>
+  </data>
+  <data name="CommandDockDeviceMissing" xml:space="preserve">
+    <value>not paired</value>
+  </data>
+  <data name="CommandDockDeviceShowIcon" xml:space="preserve">
+    <value>Show the device&apos;s icon</value>
+  </data>
+  <data name="CommandDockDeviceShowIconHint" xml:space="preserve">
+    <value>Off shows the device name instead — useful when several switches share an icon.</value>
+  </data>
+  <data name="CommandDockDiscordChannel" xml:space="preserve">
+    <value>Channel</value>
+  </data>
+  <data name="CommandDockDiscordChat" xml:space="preserve">
+    <value>chat</value>
+  </data>
+  <data name="CommandDockDiscordEvents" xml:space="preserve">
+    <value>events</value>
+  </data>
+  <data name="CommandDockDiscordHint" xml:space="preserve">
+    <value>Send a line or the current map view</value>
+  </data>
+  <data name="CommandDockDiscordMention" xml:space="preserve">
+    <value>Mention</value>
+  </data>
+  <data name="CommandDockDiscordMentionNone" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="CommandDockDiscordNoChannels" xml:space="preserve">
+    <value>No Discord channel is configured. Set one up under Connected Services first.</value>
+  </data>
+  <data name="CommandDockDiscordSend" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="CommandDockDiscordSendMap" xml:space="preserve">
+    <value>Send the current map view</value>
+  </data>
+  <data name="CommandDockDiscordSendsTo" xml:space="preserve">
+    <value>Sends to your {0} channel</value>
+  </data>
+  <data name="CommandDockDiscordShop" xml:space="preserve">
+    <value>shop</value>
+  </data>
+  <data name="CommandDockDiscordTtsHint" xml:space="preserve">
+    <value>Text-to-speech follows this channel&apos;s own setting under Connected Services.</value>
+  </data>
+  <data name="CommandDockEditHint" xml:space="preserve">
+    <value>Drag to move · × to remove</value>
+  </data>
+  <data name="CommandDockGrowDown" xml:space="preserve">
+    <value>Below the map</value>
+  </data>
+  <data name="CommandDockGrowRight" xml:space="preserve">
+    <value>Beside the map</value>
+  </data>
+  <data name="CommandDockGrowth" xml:space="preserve">
+    <value>New tiles go</value>
+  </data>
+  <data name="CommandDockLockHint" xml:space="preserve">
+    <value>Lock the layout</value>
+  </data>
+  <data name="CommandDockNoRules" xml:space="preserve">
+    <value>No rule uses the Command Dock trigger yet. Set a rule&apos;s trigger to Command Dock to launch it from here.</value>
+  </data>
+  <data name="CommandDockOilRigHeard" xml:space="preserve">
+    <value>Heard by other players</value>
+  </data>
+  <data name="CommandDockOilRigTrigger" xml:space="preserve">
+    <value>From your Oil Rig trigger</value>
+  </data>
+  <data name="CommandDockPickerHint" xml:space="preserve">
+    <value>Pick a tile to place it on the dock. It lands in the first free spot next to the map.</value>
+  </data>
+  <data name="CommandDockRemoveTile" xml:space="preserve">
+    <value>Remove tile</value>
+  </data>
+  <data name="CommandDockReset" xml:space="preserve">
+    <value>Reset the dock</value>
+  </data>
+  <data name="CommandDockResetConfirm" xml:space="preserve">
+    <value>Every tile, its position and its settings are removed. The mini-map itself is not affected.</value>
+  </data>
+  <data name="CommandDockResizeHint" xml:space="preserve">
+    <value>Drag to resize</value>
+  </data>
+  <data name="CommandDockRuleInactive" xml:space="preserve">
+    <value>Activate Logic Engine Mechanics or Rule</value>
+  </data>
+  <data name="CommandDockRuleMissing" xml:space="preserve">
+    <value>This rule no longer exists.</value>
+  </data>
+  <data name="CommandDockRuleReady" xml:space="preserve">
+    <value>Runs on click</value>
+  </data>
+  <data name="CommandDockRuleWrongTrigger" xml:space="preserve">
+    <value>This rule no longer uses the Command Dock trigger.</value>
+  </data>
+  <data name="CommandDockSectionChat" xml:space="preserve">
+    <value>Chat</value>
+  </data>
+  <data name="CommandDockSectionClock" xml:space="preserve">
+    <value>Clock</value>
+  </data>
+  <data name="CommandDockSectionDevices" xml:space="preserve">
+    <value>Devices</value>
+  </data>
+  <data name="CommandDockSectionEvents" xml:space="preserve">
+    <value>Events</value>
+  </data>
+  <data name="CommandDockSectionMap" xml:space="preserve">
+    <value>Map</value>
+  </data>
+  <data name="CommandDockSectionRules" xml:space="preserve">
+    <value>Logic Engine</value>
+  </data>
+  <data name="CommandDockSectionServer" xml:space="preserve">
+    <value>Server</value>
+  </data>
+  <data name="CommandDockSectionSession" xml:space="preserve">
+    <value>Session</value>
+  </data>
+  <data name="CommandDockServerInfoHint" xml:space="preserve">
+    <value>Players on now, and how that has moved this session</value>
+  </data>
+  <data name="CommandDockServerInfoTitle" xml:space="preserve">
+    <value>Server info</value>
+  </data>
+  <data name="CommandDockServerPlayers" xml:space="preserve">
+    <value>players</value>
+  </data>
+  <data name="CommandDockServerQueue" xml:space="preserve">
+    <value>{0} waiting</value>
+  </data>
+  <data name="CommandDockServerShowGraph" xml:space="preserve">
+    <value>Show the population graph</value>
+  </data>
+  <data name="CommandDockSessionAfk" xml:space="preserve">
+    <value>Idle</value>
+  </data>
+  <data name="CommandDockSessionDeaths" xml:space="preserve">
+    <value>Deaths</value>
+  </data>
+  <data name="CommandDockSessionDistance" xml:space="preserve">
+    <value>Walked</value>
+  </data>
+  <data name="CommandDockSessionHint" xml:space="preserve">
+    <value>Online time, distance, idle time and deaths</value>
+  </data>
+  <data name="CommandDockSessionOnline" xml:space="preserve">
+    <value>Online</value>
+  </data>
+  <data name="CommandDockSessionSince" xml:space="preserve">
+    <value>Session since {0}</value>
+  </data>
+  <data name="CommandDockSessionTeamDeaths" xml:space="preserve">
+    <value>Team</value>
+  </data>
+  <data name="CommandDockSessionTitle" xml:space="preserve">
+    <value>Session stats</value>
+  </data>
+  <data name="CommandDockSessionWaiting" xml:space="preserve">
+    <value>Counting starts once you are connected to a server.</value>
+  </data>
+  <data name="CommandDockSessionWipe" xml:space="preserve">
+    <value>Start a new session</value>
+  </data>
+  <data name="CommandDockSessionWipeHint" xml:space="preserve">
+    <value>Resets the figures for this server. Counting continues from zero.</value>
+  </data>
+  <data name="CommandDockSupporterOnly" xml:space="preserve">
+    <value>A supporter feature. Sign in with a supporter account to use this tile.</value>
+  </data>
+  <data name="CommandDockSupporterOnlyShort" xml:space="preserve">
+    <value>Supporter feature</value>
+  </data>
+  <data name="CommandDockSwitchOff" xml:space="preserve">
+    <value>OFF</value>
+  </data>
+  <data name="CommandDockSwitchOn" xml:space="preserve">
+    <value>ON</value>
+  </data>
+  <data name="CommandDockTemplateDefault" xml:space="preserve">
+    <value>Map only (default)</value>
+  </data>
+  <data name="CommandDockTemplateDefaultHint" xml:space="preserve">
+    <value>Removes every widget and puts the map back in its corner</value>
+  </data>
+  <data name="CommandDockTemplateDelete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="CommandDockTemplateDeleteConfirm" xml:space="preserve">
+    <value>Delete the arrangement “{0}”?</value>
+  </data>
+  <data name="CommandDockTemplateNamePlaceholder" xml:space="preserve">
+    <value>Name this arrangement</value>
+  </data>
+  <data name="CommandDockTemplateRename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="CommandDockTemplateSave" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="CommandDockTemplateSummary" xml:space="preserve">
+    <value>{0} tiles · saved {1}</value>
+  </data>
+  <data name="CommandDockTemplates" xml:space="preserve">
+    <value>Arrangements</value>
+  </data>
+  <data name="CommandDockTemplatesEmpty" xml:space="preserve">
+    <value>Nothing saved yet. Arrange the dock, give it a name and save it.</value>
+  </data>
+  <data name="CommandDockTemplatesHint" xml:space="preserve">
+    <value>Save the dock as it is now, or load one you saved earlier. Hover a name to see it outlined on the dock.</value>
+  </data>
+  <data name="CommandDockTileFontSize" xml:space="preserve">
+    <value>Text size {0}%</value>
+  </data>
+  <data name="CommandDockTileOpacity" xml:space="preserve">
+    <value>Opacity {0}%</value>
+  </data>
+  <data name="CommandDockTileResetToGlobal" xml:space="preserve">
+    <value>Back to the dock&apos;s defaults</value>
+  </data>
+  <data name="CommandDockTileSettings" xml:space="preserve">
+    <value>Tile settings</value>
+  </data>
+  <data name="CommandDockTileTextColor" xml:space="preserve">
+    <value>Text colour</value>
+  </data>
+  <data name="CommandDockTitle" xml:space="preserve">
+    <value>Command Dock</value>
+  </data>
+  <data name="CommandDockTranslateFailed" xml:space="preserve">
+    <value>Translation service unavailable — it may be rate-limited. Try again shortly.</value>
+  </data>
+  <data name="CommandDockTranslateInputHint" xml:space="preserve">
+    <value>Paste or type something, then press send</value>
+  </data>
+  <data name="CommandDockTranslateInto" xml:space="preserve">
+    <value>Translating into {0} — click to change</value>
+  </data>
+  <data name="CommandDockTranslatePickerHint" xml:space="preserve">
+    <value>Paste a line, read it back in your language — Google Translate</value>
+  </data>
+  <data name="CommandDockTranslateSend" xml:space="preserve">
+    <value>Translate with Google</value>
+  </data>
+  <data name="CommandDockTranslateTitle" xml:space="preserve">
+    <value>Translate</value>
+  </data>
+  <data name="CommandDockTranslateWorking" xml:space="preserve">
+    <value>Translating…</value>
+  </data>
+  <data name="CommandDockUnlockHint" xml:space="preserve">
+    <value>Unlock to move, resize and remove tiles</value>
+  </data>
+  <data name="DeathRegionPickerHint" xml:space="preserve">
+    <value>Drag a box around the killer's name — and the weapon beside it, if you want that too.</value>
+  </data>
+  <data name="DeathRegionPickerNoShot" xml:space="preserve">
+    <value>The screenshot could not be read.</value>
+  </data>
+  <data name="DeathRegionPickerTitle" xml:space="preserve">
+    <value>Select the killer's name</value>
+  </data>
+  <data name="DeathRegionPickerUse" xml:space="preserve">
+    <value>Use this box</value>
+  </data>
+  <data name="HeatmapParseMapConfirm" xml:space="preserve">
+    <value>Parse now</value>
+  </data>
+  <data name="HeatmapParseMapTitle" xml:space="preserve">
+    <value>Parse map file?</value>
+  </data>
+  <data name="MiniMapLayerDeaths" xml:space="preserve">
+    <value>Death markers</value>
+  </data>
+  <data name="MiniMapLayerDrawings" xml:space="preserve">
+    <value>Overlay</value>
+  </data>
+  <data name="MiniMapLayerGrid" xml:space="preserve">
+    <value>Grid</value>
+  </data>
+  <data name="MiniMapLayerHeatmap" xml:space="preserve">
+    <value>Heatmap</value>
+  </data>
+  <data name="MiniMapLayerIcons" xml:space="preserve">
+    <value>Icons</value>
+  </data>
+  <data name="MiniMapLayerPlayers" xml:space="preserve">
+    <value>Players</value>
+  </data>
+  <data name="MiniMapLayerTexture" xml:space="preserve">
+    <value>Map texture</value>
+  </data>
+  <data name="MiniMapLayers" xml:space="preserve">
+    <value>Layers</value>
+  </data>
+  <data name="UiCardReaders" xml:space="preserve">
+    <value>Card Readers</value>
+  </data>
+  <data name="UiCommandDockTrigger" xml:space="preserve">
+    <value>Command Dock</value>
+  </data>
+  <data name="UiKeycards" xml:space="preserve">
+    <value>Keycards</value>
+  </data>
+  <data name="UiKeycardsSection" xml:space="preserve">
+    <value>Keycards</value>
+  </data>
+  <data name="UiNoneOnThisMap" xml:space="preserve">
+    <value>None on this map.</value>
+  </data>
+  <data name="UiParseAllMonuments" xml:space="preserve">
+    <value>Parse all map data</value>
+  </data>
+  <data name="UiParseMapToEnableKeycards" xml:space="preserve">
+    <value>Parse the map file to enable keycard layers.</value>
+  </data>
 </root>
