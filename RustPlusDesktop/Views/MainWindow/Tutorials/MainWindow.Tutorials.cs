@@ -57,6 +57,8 @@ public partial class MainWindow : ITutorialContext, ITutorialNavigationCoordinat
         TutorialOverlay.WelcomeDismissed += async (_, _) => await DismissWelcomeAsync();
         TutorialsPagePanel.CloseRequested += (_, _) => TutorialsPagePanel.Visibility = Visibility.Collapsed;
         _tutorialService.TutorialCompleted += TutorialStateChanged;
+        // Two completed tutorials earns it; the store is the authority on how many.
+        _tutorialService.TutorialCompleted += (_, _) => _ = CheckTutorialAchievementAsync();
         _tutorialService.TutorialSkipped += TutorialStateChanged;
         _tutorialService.TutorialCancelled += TutorialStateChanged;
         _tutorialService.TutorialStarted += (_, _) => _preparedTutorialStepId = null;

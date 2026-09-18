@@ -1190,8 +1190,10 @@ public partial class MainWindow
         }
 
         activeEvents.Add(new EventDockItem { Name = Properties.Resources.CargoShip, Icon = "pack://application:,,,/Assets/icons/cargo.png", Active = cargo.Id != 0, Id = cargo.Id, X = cargo.X, Y = cargo.Y, Trackable = true, Type = 5, TimerText = cargoTimer, ToolTip = cargoTip });
+        // The dock turning it on is the moment it was actually heard.
+        if (cargo.Id != 0) Services.Achievements.Ach.Unlock(Services.Achievements.Ach.CargoSound);
 
- 
+
         // 3. Chinook (Type 4)
         var chinook = GetPersistentEvent(markers, 4);
         activeEvents.Add(new EventDockItem { Name = Properties.Resources.Chinook, Icon = "pack://application:,,,/Assets/icons/ch47.png", Active = chinook.Id != 0, Id = chinook.Id, X = chinook.X, Y = chinook.Y, Trackable = true, Type = 4 });
@@ -1631,6 +1633,8 @@ public partial class MainWindow
                 {
                     _myPlayerWasInDeepSea = inDeepSea;
                     SetShowingDeepSeaMap(inDeepSea);
+                    // Only the automatic switch counts; clicking the Deep Sea button does not.
+                    if (inDeepSea) Services.Achievements.Ach.Unlock(Services.Achievements.Ach.DeepSea);
                     return;
                 }
             }

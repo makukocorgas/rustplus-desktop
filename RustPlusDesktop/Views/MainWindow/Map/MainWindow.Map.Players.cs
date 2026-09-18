@@ -450,6 +450,16 @@ public partial class MainWindow
         }
     }
 
+    /// <summary>
+    /// Only fires when someone actually clicks the box, unlike Checked/Unchecked,
+    /// which also fire when it is set from stored settings on the way in. Unchecked
+    /// means the dot.
+    /// </summary>
+    private void ChkProfileMarkers_Clicked(object sender, RoutedEventArgs e)
+    {
+        if (ChkProfileMarkers?.IsChecked != true) Services.Achievements.Ach.Unlock(Services.Achievements.Ach.DotMarker);
+    }
+
     private void ChkProfileMarkers_Toggled(object? sender, RoutedEventArgs e)
     {
         _showProfileMarkers = ChkProfileMarkers.IsChecked == true;

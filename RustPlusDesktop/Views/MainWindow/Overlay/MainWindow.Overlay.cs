@@ -1467,6 +1467,8 @@ private bool _overlayToolsVisible = false;
     public void UpdateCloudSyncUI()
     {
         _vm.IsCloudConnected = Services.Auth.SupabaseAuthManager.IsAuthenticated; // guest, Discord ou Email
+        // The green cloud state is exactly the condition, so read it where it is set.
+        if (_vm.IsCloudConnected) Services.Achievements.Ach.Unlock(Services.Achievements.Ach.CloudSync);
         _vm.IsPremium = Services.Auth.SupabaseAuthManager.IsPremium;
 
         bool deviceLimitExceeded = IsFreeDeviceSyncLimitExceeded();

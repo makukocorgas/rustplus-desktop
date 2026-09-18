@@ -6611,4 +6611,25 @@ Rust+ Desktop registers your local app with FCM so it can receive those same Rus
   <data name="AlexaLinkExpiredMessage" xml:space="preserve">
     <value>Amazon no longer accepts the connection to Rust+ Desktop, so raid alarms have stopped reaching Alexa. Voice control still works. Open the Alexa app, disable the Rust+ Desktop skill and link it again.</value>
   </data>
+  <data name="AchievementUnlocked" xml:space="preserve">
+    <value>Achievement unlocked</value>
+  </data>
+  <data name="AchievementsAllUnlockedBody" xml:space="preserve">
+    <value>All Achievements unlocked. Well done!</value>
+  </data>
+  <data name="AchievementsAllUnlockedTitle" xml:space="preserve">
+    <value>All Achievements unlocked</value>
+  </data>
+  <data name="AchievementsHeading" xml:space="preserve">
+    <value>Rust+ Desktop App Achievements</value>
+  </data>
+  <data name="AchievementsNew" xml:space="preserve">
+    <value>NEW</value>
+  </data>
+  <data name="AchievementsProgress" xml:space="preserve">
+    <value>{0} of {1} earned</value>
+  </data>
+  <data name="AchievementsTitle" xml:space="preserve">
+    <value>Achievements</value>
+  </data>
 </root>

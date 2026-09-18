@@ -567,6 +567,8 @@ public partial class MainWindow
                     vm.PropertyChanged += TeamMember_PropertyChanged;
                     TeamMembers.Add(vm);
                     _hasCriticalPresenceChange = true;
+                    // More than just yourself in the list.
+                    if (TeamMembers.Count > 1) Services.Achievements.Ach.Unlock(Services.Achievements.Ach.TeamMate);
                 }
                 else
                 {
@@ -915,6 +917,7 @@ public partial class MainWindow
 
     private void StartFollowing(ulong steamId, string name)
     {
+        Services.Achievements.Ach.Unlock(Services.Achievements.Ach.FollowMe);
         if (_vm.FollowingSteamId == steamId)
         {
             StopTracking();

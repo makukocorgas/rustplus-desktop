@@ -524,6 +524,7 @@ namespace RustPlusDesk.Views
 
         private async Task OpenMap3DViewAsync(Map3DLocalBuildResult result)
         {
+            Services.Achievements.Ach.Unlock(Services.Achievements.Ach.Map3D);
             _currentMapFolderPath = result.FolderPath;
             GenerateAndLoadExtraMonumentsForCurrentMap(result.FolderPath);
             await GenerateBuildingBlockedZonesForCurrentMap(result.FolderPath);
@@ -1087,6 +1088,7 @@ namespace RustPlusDesk.Views
 
         private async void BtnHeatmapIcon_Click(object sender, RoutedEventArgs e)
         {
+            Services.Achievements.Ach.Unlock(Services.Achievements.Ach.Heatmap);
             if (sender is FrameworkElement btn && btn.Tag is string heatmapType)
             {
                 // Toggle behavior: clicking the active layer again clears it

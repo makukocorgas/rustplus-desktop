@@ -212,6 +212,7 @@ namespace RustPlusDesk.Views
             };
 
             _vm.Selected.LogicRules.Add(newRule);
+            Services.Achievements.Ach.Unlock(Services.Achievements.Ach.LogicRule);
             RefreshListBindings();
             _vm.Save();
         }
@@ -236,6 +237,7 @@ namespace RustPlusDesk.Views
             };
 
             _vm.Selected.LogicRules.Add(newRule);
+            Services.Achievements.Ach.Unlock(Services.Achievements.Ach.LogicRule);
             RefreshListBindings();
             _vm.Save();
         }

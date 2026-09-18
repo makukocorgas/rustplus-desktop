@@ -92,6 +92,7 @@ public partial class MainWindow
         };
 
         _vm.Selected.CustomTimers.Add(timer);
+        Services.Achievements.Ach.Unlock(Services.Achievements.Ach.Timer);
 
         TxtTimerName.Text = "";
         TxtTimerHours.Text = "";

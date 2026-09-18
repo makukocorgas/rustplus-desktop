@@ -659,6 +659,7 @@ public partial class MainWindow : WpfUi.FluentWindow
 
             UpdatePairingGuideSnackbar();
             UpdateCloudSyncUI();
+            WireAchievements();
         }));
 
         // Version-change bookkeeping and the what's-new notice.
