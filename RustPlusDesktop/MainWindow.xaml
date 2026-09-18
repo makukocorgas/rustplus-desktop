@@ -585,6 +585,7 @@
                             BorderThickness="1"
                             CornerRadius="10"
                             Visibility="Collapsed">
+                            <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
@@ -679,6 +680,64 @@
                                         ToolTip="{DynamicResource UiKeepSidebarUnfolded}" />
                                 </StackPanel>
                             </Grid>
+                            <Border Margin="0,6,0,0" Padding="0,5,0,0" BorderBrush="#18FFFFFF" BorderThickness="0,1,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid Width="28" Height="28">
+                                        <ui:SymbolIcon FontSize="16" Foreground="{DynamicResource Accent}" Symbol="Cloud24" />
+                                        <Ellipse
+                                            Width="7"
+                                            Height="7"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Bottom"
+                                            Stroke="{DynamicResource SurfaceAlt}"
+                                            StrokeThickness="1.5"
+                                            ToolTip="{Binding CloudAccountStatusText}">
+                                            <Ellipse.Style>
+                                                <Style TargetType="Ellipse">
+                                                    <Setter Property="Fill" Value="#68717D" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCloudConnected}" Value="True">
+                                                            <Setter Property="Fill" Value="#57C979" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Ellipse.Style>
+                                        </Ellipse>
+                                    </Grid>
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        Margin="6,0"
+                                        VerticalAlignment="Center">
+                                        <TextBlock
+                                            FontSize="8"
+                                            FontWeight="Bold"
+                                            Foreground="{DynamicResource Accent}"
+                                            Text="{DynamicResource CloudAccountTitle}" />
+                                        <TextBlock
+                                            FontSize="8"
+                                            Foreground="#CCFFFFFF"
+                                            Text="{Binding CloudAccountStatusText}"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <ui:Button
+                                        x:Name="BtnCloudAccount"
+                                        Grid.Column="2"
+                                        MinWidth="62"
+                                        Height="26"
+                                        Padding="8,2"
+                                        VerticalAlignment="Center"
+                                        Appearance="Secondary"
+                                        AutomationProperties.Name="{DynamicResource UiOpenCloudAccount}"
+                                        Click="BtnCloudAccount_Click"
+                                        Content="{Binding CloudAccountActionText}" />
+                                </Grid>
+                            </Border>
+                            </StackPanel>
                         </Border>
 
                         <!--  FCM Token Expiry Badge  -->

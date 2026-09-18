@@ -7468,6 +7468,17 @@ private sealed record MarkerRef(System.Windows.Shapes.Ellipse Dot, double U_DIP,
         }
     }
 
+    private void BtnCloudAccount_Click(object sender, RoutedEventArgs e)
+    {
+        if (!_vm.IsCloudConnected)
+        {
+            new Views.Windows.CloudLoginPromptWindow(this).ShowDialog();
+            return;
+        }
+
+        new Views.Windows.CloudAccountWindow(this).ShowDialog();
+    }
+
     private void BtnToggleSidebarPin_Click(object sender, RoutedEventArgs e)
     {
         _isSidebarPinnedExpanded = !_isSidebarPinnedExpanded;
